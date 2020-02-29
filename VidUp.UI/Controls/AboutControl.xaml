@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="Drexel.VidUp.UI.Controls.AboutControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Drexel.VidUp.UI.Controls"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="330">
+    <Grid Margin="16" Width="300">
+
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0">Drexels Vidup - A Youtube Video Uploader</TextBlock>
+        <TextBlock Grid.Row="1">Copyright (C) 2020  Drexel Development</TextBlock>
+        <TextBlock Grid.Row="2">Published under<LineBreak />AFFERO GENERAL PUBLIC LICENSE, see license.txt</TextBlock>
+        <TextBlock Grid.Row="3">drexel.development@gmail.com</TextBlock>
+        <TextBlock Grid.Row="4">GitHub: <Hyperlink NavigateUri="https://github.com/Drexel2k/VidUp" RequestNavigate="Hyperlink_RequestNavigate">https://github.com/Drexel2k/VidUp</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="5" Text="{Binding Version}" />
+        <TextBlock Grid.Row="6"> </TextBlock>
+        <TextBlock Grid.Row="7">Visit me: <Hyperlink NavigateUri="https://www.youtube.com/drexel2k" RequestNavigate="Hyperlink_RequestNavigate">https://www.youtube.com/drexel2k</Hyperlink></TextBlock>
+        <Button Grid.Row="8" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" IsEnabled="{Binding FormValid}" Cursor="Hand" HorizontalAlignment="Left">
+            <Button.CommandParameter>
+                <system:Boolean>True</system:Boolean>
+            </Button.CommandParameter>
+            ACCEPT
+        </Button>
+
+    </Grid>
+</UserControl>
+
+

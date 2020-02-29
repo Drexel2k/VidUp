@@ -1,0 +1,148 @@
+﻿<UserControl x:Class="Drexel.VidUp.UI.Controls.TemplateControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Drexel.VidUp.UI.Controls"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" Cursor="Hand"
+             x:Name="UCTemplate"
+             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters">
+    <Grid Height="Auto" Width="Auto" Margin="4">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Padding="0">
+            <GroupBox.Header>
+                <TextBlock Text="ONLY FOR VIDUP DISPLAY" Margin="2" />
+            </GroupBox.Header>
+
+            <Grid Height="Auto" Width="620" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Canvas Grid.Row="0" Grid.ColumnSpan="2">
+                    <Canvas.Background>
+                        <ImageBrush ImageSource="{Binding PictureFilePathForRendering, Mode=OneWay}" Stretch="Fill" />
+                    </Canvas.Background>
+                </Canvas>
+
+                <!--<CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Top" Style="{StaticResource MaterialDesignLightCheckBox}">
+                Check
+            </CheckBox>-->
+
+                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="3"  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+                    <materialDesign:PopupBox  StaysOpen="False" >
+                        <StackPanel>
+                            <Button Content="Delete" Command="{Binding DataContext.DeleteTemplateCommand, ElementName=CMainWindow}" CommandParameter="{Binding Guid}" />
+                        </StackPanel>
+                    </materialDesign:PopupBox>
+                </Button>
+
+                <StackPanel  Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <Label Content="Name: " Width="110" />
+                    <TextBox Text="{Binding Name}"  Width="400" />
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <Label Content="Project Path: " Width="110" />
+                    <Label Content="{Binding RootFolderPath, Mode=OneWay}" Width="400" Margin="0 0 10 0"  />
+                    <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" Cursor="Hand" />
+                </StackPanel>
+
+                <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <Label Content="Picture: " Width="110" />
+                    <Label Content="{Binding PictureFilePathForEditing, Mode=OneWay}" Width="400" Margin="0 0 10 0" />
+                    <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
+                </StackPanel>
+                <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
+                    <Label Content="Created: " Width="110" />
+                    <Label Content="{Binding Created, Mode=OneWay}"  Width="200" />
+                </StackPanel>
+                <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
+                    <Label Content="Last Modification: " Width="110" />
+                    <Label Content="{Binding LastModified, Mode=OneWay}"  Width="200"  />
+                </StackPanel>
+
+            </Grid>
+
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Padding="0" Margin="0,10,0,0">
+            <GroupBox.Header>
+                <TextBlock Text="YOUTUBE STANDARD" Margin="2" />
+            </GroupBox.Header>
+
+            <Grid Height="Auto" Width="620" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <Label Content="Title: " Width="110" />
+                    <TextBox Text="{Binding YtTitle}"  Width="500" />
+                </StackPanel>
+                <StackPanel  Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
+                    <Label Content="Description: " Width="110" HorizontalAlignment="Left" />
+                    <TextBox Text="{Binding YtDescription, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
+                </StackPanel>
+                <StackPanel  Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
+                    <Label Content="Tags: " Width="110" HorizontalAlignment="Left" />
+                    <TextBox Text="{Binding TagsAsString}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
+                </StackPanel>
+                <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
+                    <Label Content="Visbility: " Width="110" />
+                    <ComboBox  ItemsSource="{Binding YtVisbilities}" SelectedItem="{Binding YtVisibility}" Width="200">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!--<GroupBox Grid.Row="2" Padding="0" Margin="0,10,0,0">
+            <GroupBox.Header>
+                <TextBlock Text="YOUTUBE FURTHER OPTIONS" Margin="2" />
+            </GroupBox.Header>
+
+            <Grid Height="Auto" Width="620" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <StackPanel  Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <Label Content="Game: " Width="110" />
+                    <TextBox Text="{Binding GameTitle}" MinWidth="500" />
+                </StackPanel>
+            </Grid>
+
+        </GroupBox>-->
+    </Grid>
+</UserControl>

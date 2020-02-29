@@ -1,0 +1,98 @@
+﻿<Fluent:RibbonWindow x:Class="Drexel.VidUp.UI.MainWindow"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:Fluent="urn:fluent-ribbon"
+                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                     Title="{Binding AppTitle}" 
+                     Width="1290" 
+                     MinHeight="600"
+                     xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
+                     xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
+                     x:Name="CMainWindow"
+                     Icon="vidup.ico">
+
+<Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:UploadListViewModel}">
+            <controls:UploadListControl />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TemplateViewModel}">
+            <controls:TemplateControl />
+        </DataTemplate>
+    </Window.Resources>
+
+    <materialDesign:DialogHost Identifier="RootDialog">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Fluent:Ribbon VerticalAlignment="Center" SelectedTabIndex="{Binding TabNo, Mode=TwoWay}">
+                <!--Tabs-->
+                <Fluent:RibbonTabItem Header="Upload" >
+                    <Fluent:RibbonGroupBox Header="Actions">
+                        <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload-multiple.png"  Command="{Binding StartUploadingCommand}" />
+                        <Fluent:Button Header="Add File" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
+                        <Fluent:Button Header="Remove all uploaded" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveAllUploadedCommand}" />
+                    </Fluent:RibbonGroupBox>
+                </Fluent:RibbonTabItem>
+                <Fluent:RibbonTabItem Header="Templates" >
+                    <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="Name"/>
+                        <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="images/file-document-box-plus.png" Command="{Binding NewTemplateCommand}" />
+                    </Fluent:RibbonGroupBox>
+                </Fluent:RibbonTabItem>
+                <Fluent:RibbonTabItem Header="VidUp" >
+                    <Fluent:RibbonGroupBox Header="About">
+                        <Fluent:Button Header="About" SizeDefinition="Middle,Middle,Small" Icon="images/about.png"  Command="{Binding AboutCommand}" />
+                    </Fluent:RibbonGroupBox>
+                </Fluent:RibbonTabItem>
+                <!--<Fluent:RibbonTabItem Header="Settings">
+                    <Fluent:RibbonGroupBox Header="Youtube">
+                        <Fluent:Button Header="Account Settings" LargeIcon="images/youtube.png" />
+                    </Fluent:RibbonGroupBox>
+                </Fluent:RibbonTabItem>-->
+            </Fluent:Ribbon>
+
+            <Grid Grid.Row="1">
+                <ContentControl Content="{Binding CurrentView}" />
+            </Grid>
+            <StackPanel Grid.Row="2" Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="App Status: " />
+                    <Label Content="{Binding AppStatus, Mode=OneWay}" />
+                </StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Label Content="Current File Progress: " />
+                        <Label Content="{Binding CurrentFilePercent, Mode=OneWay}" />
+                        <Label Content="  |  " />
+                        <Label Content="Current File Time Left: " />
+                        <Label Content="{Binding CurrentFileTimeLeft, Mode=OneWay}" />
+                        <Label Content="  |  " />
+                        <Label Content="Current File MB left: " />
+                        <Label Content="{Binding CurrentFileMbLeft, Mode=OneWay}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="right">
+                        <Label Content="Total Time Left: " />
+                        <Label Content="{Binding TotalTimeLeft, Mode=OneWay}" />
+                        <Label Content="  |  " />
+                        <Label Content="Total MB Left: " />
+                        <Label Content="{Binding TotalMbLeft, Mode=OneWay}" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </materialDesign:DialogHost>
+
+</Fluent:RibbonWindow>

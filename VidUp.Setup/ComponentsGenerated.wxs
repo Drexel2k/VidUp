@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER">
+            <Component Id="cmp9110E4565D76564E9BC2F34625854902" Guid="{79C16EA2-3477-423E-9743-7FF6D8D7874D}">
+                <File Id="filAC751AB8116CEF372F8CFDA54B395D08" KeyPath="yes" Source="$(var.BasePath)\ControlzEx.dll" />
+            </Component>
+            <Component Id="cmp007711744D6697D402622D325DD5C86D" Guid="{E83D537A-AA73-46F3-873D-4DA9CADD9E99}">
+                <File Id="fil8ECBE55EF1D46615E0C3F16FEEDD4AEE" KeyPath="yes" Source="$(var.BasePath)\Fluent.dll" />
+            </Component>
+            <Component Id="cmp944C0DDD216BC6AD99A0D859E6B63073" Guid="{8EC07BD0-44E8-47C1-947B-D5CCDBE93EB9}">
+                <File Id="filB60107B5E796F6187F79960EDADB81A7" KeyPath="yes" Source="$(var.BasePath)\Google.Apis.Auth.dll" />
+            </Component>
+            <Component Id="cmpE84685EC8D091708B7839E9560833100" Guid="{D05A1899-8043-4F47-90D3-D0682C78BE34}">
+                <File Id="fil917F2946AD1B3DE08E30E94625F9BF46" KeyPath="yes" Source="$(var.BasePath)\Google.Apis.Auth.PlatformServices.dll" />
+            </Component>
+            <Component Id="cmp10A912D19ABF9913D65315302B4DFEA4" Guid="{5D1954EF-DB9B-4255-9793-B8485CF5EE53}">
+                <File Id="filF1CD23BE3A962B5CDBDEAFC6B12FD01D" KeyPath="yes" Source="$(var.BasePath)\Google.Apis.Core.dll" />
+            </Component>
+            <Component Id="cmpF9C24E1E7BCD302106AED282D4A70BD6" Guid="{E665E42E-3C6F-4C63-A014-7CDFDA1EFC68}">
+                <File Id="fil23E54273A3F31C7FFB0F74EB24C98107" KeyPath="yes" Source="$(var.BasePath)\Google.Apis.dll" />
+            </Component>
+            <Component Id="cmpAEF01A2A0A883ED90246AEC713606822" Guid="{FDF08592-BA39-46DD-BF35-F5A38A51A813}">
+                <File Id="fil2FF53CF39D5DA57F7FB26C2D7AFDE7C1" KeyPath="yes" Source="$(var.BasePath)\Google.Apis.YouTube.v3.dll" />
+            </Component>
+            <Component Id="cmpF79A41B26948F126556619AD15586E53" Guid="{08CE81A2-0DE6-4FC0-94E5-0D7D77439578}">
+                <File Id="filD65CB2C411B671E247C0C842FF9ED3FA" KeyPath="yes" Source="$(var.BasePath)\MaterialDesignColors.dll" />
+            </Component>
+            <Component Id="cmp6D59DB1C8695088F09FD7F0B07ECD487" Guid="{C8901FC6-1D2C-46C0-B3DE-7469739E36EC}">
+                <File Id="fil13620EBEA6F6420A02C733F8682CD641" KeyPath="yes" Source="$(var.BasePath)\MaterialDesignThemes.Wpf.dll" />
+            </Component>
+            <Component Id="cmp8AC833CFB7DC6722697152FE46DA157A" Guid="{800E0EBF-AEBC-474A-9931-18FA46A96318}">
+                <File Id="filD3CAD095889A5DE7EAAE25C73BC9910A" KeyPath="yes" Source="$(var.BasePath)\Microsoft.Xaml.Behaviors.dll" />
+            </Component>
+            <Component Id="cmpBC4FC00A26E7D32479D42D3411317FC5" Guid="{441D9940-9358-4AA4-8D64-795F113673F9}">
+                <File Id="fil90A8AAD9FC612906D405476D61CEA3F4" KeyPath="yes" Source="$(var.BasePath)\Newtonsoft.Json.dll" />
+            </Component>
+            <Component Id="cmpDBE1EC1456ED3E4995A8690DA42C3D4F" Guid="{670A3ADD-79BD-4FA1-909E-7BD3C2F5AB0F}">
+                <File Id="filF7766A8E456762BA6EB908CFE66C7885" KeyPath="yes" Source="$(var.BasePath)\VidUp.Business.dll" />
+            </Component>
+            <Component Id="cmpA80A6E3C38196741CC414EBAC6174AB5" Guid="{BAD55491-E47C-48D6-A8D7-5E42098A5BAA}">
+                <File Id="filFCA6EEDD5506BE349DFA388CC3501E64" KeyPath="yes" Source="$(var.BasePath)\VidUp.Business.pdb" />
+            </Component>
+            <Component Id="cmp651D3C40CBD83012247A77A2DC5856ED" Guid="{190AA3CC-4F0B-4535-BFA3-161F4C56174A}">
+                <File Id="fil4D312BE0183DBE8DAF290D085B168063" KeyPath="yes" Source="$(var.BasePath)\VidUp.deps.json" />
+            </Component>
+            <Component Id="cmp11D33C6A2646519ABAA03867ED72DF56" Guid="{FE39AF12-88DB-496F-A0D8-B1623637EAA2}">
+                <File Id="fil81C75AD3E7A67D4E3C79E2456563152E" KeyPath="yes" Source="$(var.BasePath)\VidUp.dll" />
+            </Component>
+            <Component Id="cmp02AA858F091278A080C7E7EA1259C0A2" Guid="{196329EA-83B3-4B0A-8BAF-035A7EBC9266}">
+                <File Id="fil888ED7DFA7D66C7D4ADD1E2CEF573B3B" KeyPath="yes" Source="$(var.BasePath)\VidUp.exe" />
+            </Component>
+            <Component Id="cmp621F6EC3102BB31B90C655D5CC3DA7D6" Guid="{389456D5-BEC2-4545-8C84-32A5C063C1AB}">
+                <File Id="fil87815591061D497FFFAE7BF414729C9B" KeyPath="yes" Source="$(var.BasePath)\VidUp.JSON.dll" />
+            </Component>
+            <Component Id="cmp44A787EAA7E1878A156F43F784CC702F" Guid="{57B895BB-92FA-4862-BC67-8FD4477CD763}">
+                <File Id="fil122DDF01D9E672F450A48D4EE34925C1" KeyPath="yes" Source="$(var.BasePath)\VidUp.JSON.pdb" />
+            </Component>
+            <Component Id="cmpF96746222C85896E0B4ACDB89C1657C0" Guid="{02430AF1-2F31-4DA8-A86C-2E7DBA37AB31}">
+                <File Id="fil3F007229D3AA63C2E49E0D6C0185884E" KeyPath="yes" Source="$(var.BasePath)\VidUp.pdb" />
+            </Component>
+            <Component Id="cmp1A3A73DEBC3C08AC17FDED47F93FB20F" Guid="{FB8A3DAF-EBEF-4F27-BF1F-73C8AF6F9820}">
+                <File Id="fil03587BE4902D99E6AFAC896B05449F78" KeyPath="yes" Source="$(var.BasePath)\VidUp.runtimeconfig.json" />
+            </Component>
+            <Component Id="cmp1C24B6A20220773149735469819D952D" Guid="{7BDFBCEE-F736-4126-8F98-0B71EC3BF32D}">
+                <File Id="filCBEAC5A5BC81A89EFB3C22134091A3EE" KeyPath="yes" Source="$(var.BasePath)\VidUp.YouTube.dll" />
+            </Component>
+            <Component Id="cmpA558FDDE2115EA3449EF2918CEDA2783" Guid="{1722173D-4DEE-471F-A1BD-824C5BF79BBC}">
+                <File Id="filFAD7ECB880594A4ACA9A9ACAE6F94046" KeyPath="yes" Source="$(var.BasePath)\VidUp.YouTube.pdb" />
+            </Component>
+            <Directory Id="dirC2A84271A334BEB59324A808BB68FD7E" Name="Images">
+                <Component Id="cmpE87AC32446B0B3BE200514189306B684" Guid="{023E4812-E1F6-497F-80BE-DD7129869F48}">
+                    <File Id="fil799ACFF531D2FA104C1A7FDAEEEF88D2" KeyPath="yes" Source="$(var.BasePath)\Images\about.png" />
+                </Component>
+                <Component Id="cmpBB3225EB5935E3CA8E4BA041BE71D674" Guid="{0C94804F-8099-4ABE-821A-76FB747FAD2D}">
+                    <File Id="fil7F8E840A1AD95259D8682EE301B5B8D9" KeyPath="yes" Source="$(var.BasePath)\Images\defaultupload.png" />
+                </Component>
+                <Component Id="cmpA97E81ADC896D250AE9529C7C77B3392" Guid="{AC2FE63D-3517-4F38-B382-768E86AFED14}">
+                    <File Id="fil15532408528D47163805136148ADBD12" KeyPath="yes" Source="$(var.BasePath)\Images\file-document-box-edit.png" />
+                </Component>
+                <Component Id="cmp539E61A9DA0AC8A196D31E1B3E121D7F" Guid="{B25132E7-11C7-4B8B-BB2D-A087D090A11C}">
+                    <File Id="fil0607825976D5CEC54F53701ADD8DAE30" KeyPath="yes" Source="$(var.BasePath)\Images\file-document-box-plus.png" />
+                </Component>
+                <Component Id="cmp69850FCE559A93F8C02676538E913FD3" Guid="{F95300DB-9362-435A-8AFE-48B0AF2ECB22}">
+                    <File Id="filDE92A4D5A84A93CEEE35D76025BF7462" KeyPath="yes" Source="$(var.BasePath)\Images\file-minus.png" />
+                </Component>
+                <Component Id="cmpD9E1036119C85186EACCE01395BD9D2E" Guid="{8E8A02AA-C031-44A4-9671-29E8B8F7278A}">
+                    <File Id="fil2EE318197B88D318BFA7D6F0562D399F" KeyPath="yes" Source="$(var.BasePath)\Images\file-plus.png" />
+                </Component>
+                <Component Id="cmpB81AF883FD0FA05C955034659FEDC7BE" Guid="{C65A389C-7687-4544-A53F-A52CCFFBBEA7}">
+                    <File Id="fil776889A855E7333AF0FA5E31ECB750D9" KeyPath="yes" Source="$(var.BasePath)\Images\upload-multiple.png" />
+                </Component>
+                <Component Id="cmp1931EACE26A1246B9F7EF727C09E2153" Guid="{86B27517-4D00-4393-80C6-1BC978FD56A1}">
+                    <File Id="fil3E54FA1E87BFCE14464552C10239DD9E" KeyPath="yes" Source="$(var.BasePath)\Images\vidup.ico" />
+                </Component>
+                <Component Id="cmp7DE968D842F9BD90C4ABAE435EDFF562" Guid="{8C3C1DE1-62DF-4D5C-A36D-756E1E84492C}">
+                    <File Id="fil9E871CDE3C5E41511E3B5A04ECDD3B15" KeyPath="yes" Source="$(var.BasePath)\Images\youtube.png" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="PublishedComponents">
+            <ComponentRef Id="cmp9110E4565D76564E9BC2F34625854902" />
+            <ComponentRef Id="cmp007711744D6697D402622D325DD5C86D" />
+            <ComponentRef Id="cmp944C0DDD216BC6AD99A0D859E6B63073" />
+            <ComponentRef Id="cmpE84685EC8D091708B7839E9560833100" />
+            <ComponentRef Id="cmp10A912D19ABF9913D65315302B4DFEA4" />
+            <ComponentRef Id="cmpF9C24E1E7BCD302106AED282D4A70BD6" />
+            <ComponentRef Id="cmpAEF01A2A0A883ED90246AEC713606822" />
+            <ComponentRef Id="cmpF79A41B26948F126556619AD15586E53" />
+            <ComponentRef Id="cmp6D59DB1C8695088F09FD7F0B07ECD487" />
+            <ComponentRef Id="cmp8AC833CFB7DC6722697152FE46DA157A" />
+            <ComponentRef Id="cmpBC4FC00A26E7D32479D42D3411317FC5" />
+            <ComponentRef Id="cmpDBE1EC1456ED3E4995A8690DA42C3D4F" />
+            <ComponentRef Id="cmpA80A6E3C38196741CC414EBAC6174AB5" />
+            <ComponentRef Id="cmp651D3C40CBD83012247A77A2DC5856ED" />
+            <ComponentRef Id="cmp11D33C6A2646519ABAA03867ED72DF56" />
+            <ComponentRef Id="cmp02AA858F091278A080C7E7EA1259C0A2" />
+            <ComponentRef Id="cmp621F6EC3102BB31B90C655D5CC3DA7D6" />
+            <ComponentRef Id="cmp44A787EAA7E1878A156F43F784CC702F" />
+            <ComponentRef Id="cmpF96746222C85896E0B4ACDB89C1657C0" />
+            <ComponentRef Id="cmp1A3A73DEBC3C08AC17FDED47F93FB20F" />
+            <ComponentRef Id="cmp1C24B6A20220773149735469819D952D" />
+            <ComponentRef Id="cmpA558FDDE2115EA3449EF2918CEDA2783" />
+            <ComponentRef Id="cmpE87AC32446B0B3BE200514189306B684" />
+            <ComponentRef Id="cmpBB3225EB5935E3CA8E4BA041BE71D674" />
+            <ComponentRef Id="cmpA97E81ADC896D250AE9529C7C77B3392" />
+            <ComponentRef Id="cmp539E61A9DA0AC8A196D31E1B3E121D7F" />
+            <ComponentRef Id="cmp69850FCE559A93F8C02676538E913FD3" />
+            <ComponentRef Id="cmpD9E1036119C85186EACCE01395BD9D2E" />
+            <ComponentRef Id="cmpB81AF883FD0FA05C955034659FEDC7BE" />
+            <ComponentRef Id="cmp1931EACE26A1246B9F7EF727C09E2153" />
+            <ComponentRef Id="cmp7DE968D842F9BD90C4ABAE435EDFF562" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>
