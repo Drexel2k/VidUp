@@ -75,6 +75,19 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get => this.upload.YtTitle;
         }
+
+        public string ShowFileNotExistsIcon
+        {
+            get
+            {
+                if (File.Exists(this.upload.FilePath))
+                {
+                    return "Collapsed";
+                }
+
+                return "Visible";
+            }
+        }
         public Upload Upload { get => this.upload;  }
 
         public UploadViewModel (Upload upload)

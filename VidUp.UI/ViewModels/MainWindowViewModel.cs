@@ -15,6 +15,7 @@ using Drexel.VidUp.YouTube;
 using Google.Apis.Upload;
 using Google.Apis.YouTube.v3.Data;
 using System.Reflection;
+using System.Globalization;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -224,7 +225,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return ((int)((float)(this.currentUploadBytes - this.currentUploadBytesSent) / byteMegaByteFactor)).ToString();
+                    return ((int)((float)(this.currentUploadBytes - this.currentUploadBytesSent) / byteMegaByteFactor)).ToString("#,#", CultureInfo.CurrentCulture);
                 }
 
                 return "n/a";
@@ -254,11 +255,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public int TotalMbLeft
+        public string TotalMbLeft
         {
             get
             {
-                return (int)((float)(totalBytesToUpload - currentUploadBytesSent) / byteMegaByteFactor);
+                return ((int)((float)(totalBytesToUpload - currentUploadBytesSent) / byteMegaByteFactor)).ToString("#,#", CultureInfo.CurrentCulture);
             }
         }
 
@@ -380,7 +381,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.appStatus = AppStatus.Uploading;
                 RaisePropertyChanged("AppStatus");
 
-                Upload upload = this.uploadList.GetUpload(upload => upload.UploadStatus == UplStatus.ReadyForUpload);
+                Upload upload = this.uploadList.GetUpload(upload => upload.UploadStatus == UplStatus.ReadyForUpload && File.Exists(upload.FilePath));
                 while (upload != null)
                 {
                     this.currentUploadBytes = new FileInfo(upload.FilePath).Length;
@@ -495,7 +496,10 @@ namespace Drexel.VidUp.UI.ViewModels
             foreach(Upload upload in this.uploadList.GetUploads(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
             {
                 FileInfo fileInfo = new FileInfo(upload.FilePath);
-                length += fileInfo.Length;
+                if (fileInfo.Exists)
+                {
+                    length += fileInfo.Length;
+                }
             }
 
             this.totalBytesToUpload = length;

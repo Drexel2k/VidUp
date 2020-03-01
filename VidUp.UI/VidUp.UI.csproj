@@ -75,6 +75,9 @@
     <None Update="Images\vidup.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Images\warning.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Images\youtube.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
