@@ -14,15 +14,15 @@
 
         <Grid Height="Auto" Width="620" MaxWidth="620"  >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="310"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
             </Grid.RowDefinitions>
             <Canvas Grid.Row="0" Grid.ColumnSpan="2">
                 <Canvas.Background>
@@ -60,15 +60,18 @@
 
             <StackPanel  Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Template: " Width="110" />
-                <ComboBox SelectedItem="{Binding Template, Mode=OneWay}" ItemsSource="{Binding DataContext.TemplateList, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" Tag="{Binding Guid, Mode=OneWay}" DropDownClosed="ComboBox_DropDownClosed" />
+                <!--Binding OneWay because setting is handled by event. -->
+                <ComboBox SelectedItem="{Binding Template, Mode=OneWay}" ItemsSource="{Binding DataContext.TemplateList, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
-                <Label Content="Created: " Width="110" />
-                <Label Content="{Binding Created, Mode=OneWay}"  Width="200" />
+                <CheckBox IsChecked="{Binding PublishAt}" VerticalAlignment="Top" Margin="0 3 0 0" />
+                <Label Content="Publish on: " Width="96" />
+                <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" DisplayDateStart="{Binding PublishAtFirstDate, Mode=OneWay}" Margin="0 3 0 0" />
+                <!--Binding OneWay because setting is handled by event. -->
+                <ComboBox SelectedItem="{Binding PublishAtTime, Mode=OneWay}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" DropDownClosed="ComboBoxQuarterHourSelect_DropDownClosed" IsEnabled="{Binding PublishAt}" />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                <Label Content="Last Modification: " Width="110" />
-                <Label Content="{Binding LastModified, Mode=OneWay}"  Width="200"  />
+                
             </StackPanel>
             <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Upload started: " Width="110" />
@@ -78,6 +81,7 @@
                 <Label Content="Upload Ended: " Width="110" />
                 <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="200"  />
             </StackPanel>
+
 
         </Grid>
 

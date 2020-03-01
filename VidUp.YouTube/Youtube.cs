@@ -59,6 +59,11 @@ namespace Drexel.VidUp.YouTube
             {
                  video.Status.PrivacyStatus = upload.Template.YtVisibility.ToString().ToLower(); // "unlisted", "private" or "public"
             }
+
+            if (upload.PublishAt > DateTime.MinValue)
+            {
+                video.Status.PublishAt = upload.PublishAt;
+            }
                   
             var filePath = upload.FilePath;
 

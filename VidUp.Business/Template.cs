@@ -35,6 +35,8 @@ namespace Drexel.VidUp.Business
         private string pictureFilePath;
         [JsonProperty]
         private string rootFolderPath;
+        [JsonProperty]
+        private DateTime defaultPublishAtTime;
 
         public Template()
         {
@@ -163,6 +165,17 @@ namespace Drexel.VidUp.Business
         }
 
         public List<Upload> Uploads { get => this.uploads; }
+        public DateTime DefaultPublishAtTime
+        {
+            get
+            {
+                return this.defaultPublishAtTime;
+            }
+            set
+            {
+                this.defaultPublishAtTime = new DateTime(1, 1, 1, value.Hour, value.Minute, 0);
+            }
+        }
 
         #endregion properties
         private string getPictureFilePath()

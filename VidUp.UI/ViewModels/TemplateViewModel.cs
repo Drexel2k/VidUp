@@ -15,6 +15,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private Template template;
         public event PropertyChangedEventHandler PropertyChanged;
         private MainWindowViewModel mainWindowViewModel;
+        private QuarterHourViewModels quarterHourViewModels;
         private GenericCommand openFileDialogCommand;
 
         #region properties
@@ -113,7 +114,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string GameTitle 
+        /*public string GameTitle 
         { 
             get => this.template != null ? this.template.GameTitle : null;
             set
@@ -121,7 +122,25 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.template.GameTitle = value;
                 RaisePropertyChangedAndSerializeTemplateList("GameTitle");
             }
+        }*/
+
+        public QuarterHourViewModels QuarterHourViewModels
+        {
+            get
+            {
+                return this.quarterHourViewModels;
+            }
         }
+
+        public QuarterHourViewModel DefaultPublishAtTime
+        {
+            get
+            {
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.template.DefaultPublishAtTime);
+            }
+        }
+
+
 
         public string PictureFilePathForRendering
         {
@@ -153,8 +172,14 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.mainWindowViewModel = mainWindowViewModel;
             this.openFileDialogCommand = new GenericCommand(openFileDialog);
+            this.quarterHourViewModels = new QuarterHourViewModels();
         }
 
+        public void SetDefaultPublishAtTime(DateTime publishAtTime)
+        {
+            this.template.DefaultPublishAtTime = publishAtTime;
+            this.SerializeTemplateList();
+        }
         private void RaisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues

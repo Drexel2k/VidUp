@@ -9,17 +9,31 @@ using System.Reflection;
 
 namespace Drexel.VidUp.JSON
 {
+    //todo: maybe make class not static...
     public class JsonSerialization
     {
-        private static string uploadListFilePath = string.Format("{0}\\VidUp\\uploadlist.json",
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-        private static string templateListFilePath = string.Format("{0}\\VidUp\\templatelist.json",
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-        private static string allUploadsFilePath = string.Format("{0}\\VidUp\\uploads.json",
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+
+        private static string serializationFolder;
+
+        private static string uploadListFilePath;
+        private static string templateListFilePath;
+        private static string allUploadsFilePath;
         public static UploadList UploadList;
         public static TemplateList TemplateList;
 
+        public static string SerializationFolder
+        {
+            set
+            {
+                JsonSerialization.serializationFolder = value;
+            }
+        }
+        public static void Initialize()
+        {
+            JsonSerialization.uploadListFilePath = string.Format(@"{0}\uploadlist.json", JsonSerialization.serializationFolder);
+            JsonSerialization.templateListFilePath = string.Format(@"{0}\templatelist.json", JsonSerialization.serializationFolder);
+            JsonSerialization.allUploadsFilePath = string.Format(@"{0}\uploads.json", JsonSerialization.serializationFolder);
+        }
         public static void DeserializeUploadList()
         {
             if (!File.Exists(JsonSerialization.uploadListFilePath))

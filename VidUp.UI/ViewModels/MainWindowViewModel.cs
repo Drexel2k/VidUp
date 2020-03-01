@@ -64,6 +64,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.aboutCommand = new GenericCommand(openAboutDialog);
             this.removeAllUploadedCommand = new GenericCommand(removeAllUploaded);
 
+            JsonSerialization.SerializationFolder = Settings.SerializationFolder;
+            JsonSerialization.Initialize();
             JsonSerialization.Deserialize();
             this.templateList = new TemplateList(DeSerializationRepository.Templates);
             //for serialization
@@ -88,9 +90,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void checkAppDataFolder()
         {
-            if(!Directory.Exists(string.Format("{0}\\VidUp", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments))))
+            if(!Directory.Exists(Settings.SerializationFolder))
             {
-                Directory.CreateDirectory(string.Format("{0}\\VidUp", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)));
+                Directory.CreateDirectory(Settings.SerializationFolder);
             }
         }
 

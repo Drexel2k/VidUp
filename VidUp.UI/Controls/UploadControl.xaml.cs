@@ -27,7 +27,7 @@ namespace Drexel.VidUp.UI.Controls
 
         //FU MVVM, Combox or whatever! When usercontrol view unloads, ComboBox sets selectedItem to null
         //and so template is set to null on upload even if before a template was selected
-        private void ComboBox_DropDownClosed(object sender, EventArgs e)
+        private void ComboBoxTemplateSelect_DropDownClosed(object sender, EventArgs e)
         {
             ComboBox comboBox = (ComboBox)sender;
             UploadViewModel uploadViewModel = (UploadViewModel)comboBox.DataContext;
@@ -35,8 +35,17 @@ namespace Drexel.VidUp.UI.Controls
             if (uploadViewModel.Template != selectedTemplate)
             {
                 uploadViewModel.Template = selectedTemplate;
-                ((UploadViewModel)this.DataContext).SerializeAllUploads();
-                ((UploadViewModel)this.DataContext).SerializeTemplateList();
+            }
+        }
+
+        private void ComboBoxQuarterHourSelect_DropDownClosed(object sender, EventArgs e)
+        {
+            ComboBox comboBox = (ComboBox)sender;
+            UploadViewModel uploadViewModel = (UploadViewModel)comboBox.DataContext;
+            QuarterHourViewModel selectedQuarterHour = (QuarterHourViewModel)comboBox.SelectedItem;
+            if (uploadViewModel.Upload.PublishAtTime != selectedQuarterHour.QuarterHour)
+            {
+                uploadViewModel.SetPublishAtTime(selectedQuarterHour.QuarterHour);
             }
         }
     }

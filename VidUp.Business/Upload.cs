@@ -27,6 +27,8 @@ namespace Drexel.VidUp.Business
         private Template template;
         [JsonProperty]
         private UplStatus uploadStatus;
+        [JsonProperty]
+        private DateTime publishAt;
 
         public Upload()
         {
@@ -71,6 +73,13 @@ namespace Drexel.VidUp.Business
                 this.lastModified = DateTime.Now;
             }
         }
+
+        public void SetPublishAtTime(DateTime quarterHour)
+        {
+            this.publishAt = new DateTime(this.publishAt.Year, this.publishAt.Month, this.publishAt.Day, quarterHour.Hour, quarterHour.Minute, 0);
+            this.lastModified = DateTime.Now;
+        }
+
         public UplStatus UploadStatus
         {
             get { return this.uploadStatus; }
@@ -79,6 +88,25 @@ namespace Drexel.VidUp.Business
                 this.uploadStatus = value;
                 this.lastModified = DateTime.Now;
             }
+        }
+
+        public void SetPublishAtDate(DateTime publishDate)
+        {
+            if (this.publishAt.Date == DateTime.MinValue.Date)
+            {
+                if (this.template != null)
+                {
+                    this.publishAt = new DateTime(1, 1, 1, this.template.DefaultPublishAtTime.Hour, this.template.DefaultPublishAtTime.Minute, 0);
+                }
+            }
+
+            this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, this.publishAt.Hour, this.publishAt.Minute, 0);
+            this.lastModified = DateTime.Now;
+        }
+
+        public DateTime PublishAt
+        {
+            get { return this.publishAt; }
         }
         public string PictureFilePath { get => getPicturePath(this.template); }
 
@@ -107,6 +135,14 @@ namespace Drexel.VidUp.Business
                 return title;
             }
         }
+
+        public DateTime PublishAtTime
+        { 
+            get
+            {
+                return new DateTime(1, 1, 1, this.publishAt.Hour, this.publishAt.Minute, 0);
+            }
+         }
 
         private string getPicturePath(Template template)
         {
