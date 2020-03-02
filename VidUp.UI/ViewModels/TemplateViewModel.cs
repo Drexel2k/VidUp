@@ -134,10 +134,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public QuarterHourViewModel DefaultPublishAtTime
         {
-            get
-            {
-                return this.quarterHourViewModels.GetQuarterHourViewModel(this.template.DefaultPublishAtTime);
-            }
+            get => this.template != null ? this.quarterHourViewModels.GetQuarterHourViewModel(this.template.DefaultPublishAtTime) : this.quarterHourViewModels.GetQuarterHourViewModel(new DateTime(1, 1, 1, 0, 0, 0));
         }
 
 

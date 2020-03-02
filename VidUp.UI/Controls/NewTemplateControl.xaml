@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:Drexel.VidUp.UI.Controls"
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="330">
     <Grid Margin="16" Width="300">
@@ -22,13 +23,16 @@
         <TextBlock Grid.Row="0">New Template</TextBlock>
         <TextBlock FontSize="9" Margin="0, 12, 0, 0" Grid.Row="1">VidUp Display Information:</TextBlock>
         <TextBox wpf:HintAssist.Hint="Template Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Grid.Row="2" IsManipulationEnabled="True"/>
-        <Grid  Grid.Row="3" Cursor="Hand">
+        <Grid  Grid.Row="3" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="20" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBox wpf:HintAssist.Hint="Template Picture" Text="{Binding PictureFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" />
-            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="1" Cursor="Hand">
+            <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...--> 
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For visualization of uploads in upload view." Background="Transparent" />
+            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2" Cursor="Hand">
                 Browse
             </Button>
         </Grid>
@@ -36,10 +40,13 @@
         <Grid  Grid.Row="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="20" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBox wpf:HintAssist.Hint="Root Folder" Text="{Binding RootFolderPath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" />
-            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="1">
+            <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...-->
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file added from this folder or any subfolder this template is assigne automatically." Background="Transparent" />
+            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2">
                 Browse
             </Button>
         </Grid>

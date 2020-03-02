@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Drexel.VidUp.UI.Controls"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" Cursor="Hand"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              x:Name="UCTemplate"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters">
     <Grid Height="Auto" Width="Auto" Margin="4">
@@ -124,7 +124,7 @@
                     </ComboBox>
                 </StackPanel>
                 <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Vertical">
-                    <Label Content="Default Scheduled Publish Time: " Width="250" HorizontalAlignment="Left" />
+                    <Label Content="Default Publish At Time: " Width="250" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Vertical">
                     <!--Binding OneWay because setting is handled by event. -->

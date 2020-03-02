@@ -158,7 +158,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.upload.PublishAt.Date == DateTime.MinValue)
                 {
-                    return DateTime.Now;
+                    return DateTime.Now.AddDays(1);
                 }
                 else
                 {
