@@ -29,6 +29,8 @@ namespace Drexel.VidUp.Business
         private UplStatus uploadStatus;
         [JsonProperty]
         private DateTime publishAt;
+        [JsonProperty]
+        private List<string> additionalTags;
 
         public Upload()
         {
@@ -42,6 +44,7 @@ namespace Drexel.VidUp.Business
             this.created = DateTime.Now;
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
+            this.additionalTags = new List<string>();
         }
 
         public Guid Guid { get => this.guid; }
@@ -108,6 +111,16 @@ namespace Drexel.VidUp.Business
         {
             get { return this.publishAt; }
         }
+
+        public List<string> AdditonalTags
+        {
+            get => this.additionalTags;
+            set
+            {
+                this.additionalTags = value;
+                this.lastModified = DateTime.Now;
+            }
+        }
         public string PictureFilePath { get => getPicturePath(this.template); }
 
         public string YtTitle
@@ -132,7 +145,8 @@ namespace Drexel.VidUp.Business
                     }
                 }
 
-                return title;
+                int cutOffLength = title.Length <= 100 ? title.Length : 100;
+                return title.Substring(0, cutOffLength);
             }
         }
 

@@ -182,6 +182,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string AdditionalTagsAsString
+        {
+            get => string.Join(',', this.upload.AdditonalTags);
+            set
+            {
+                this.upload.AdditonalTags = new List<string>(value.Split(','));
+                this.SerializeAllUploads();
+
+                RaisePropertyChanged("AdditionalTagsAsString");
+            }
+        }
+
         public Upload Upload { get => this.upload;  }
 
         public UploadViewModel (Upload upload)

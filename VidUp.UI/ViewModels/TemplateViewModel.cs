@@ -89,7 +89,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string TagsAsString 
         { 
-            get => this.template != null ? this.template.TagsAsString : null;
+            get => this.template != null ? string.Join(',', this.template.Tags) : null;
             set
             {
                 this.template.Tags = new List<string>(value.Split(','));

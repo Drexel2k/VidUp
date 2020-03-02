@@ -23,6 +23,7 @@
                 <RowDefinition MinHeight="30"></RowDefinition>
                 <RowDefinition MinHeight="30"></RowDefinition>
                 <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
             </Grid.RowDefinitions>
             <Canvas Grid.Row="0" Grid.ColumnSpan="2">
                 <Canvas.Background>
@@ -81,7 +82,10 @@
                 <Label Content="Upload Ended: " Width="110" />
                 <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="200"  />
             </StackPanel>
-
+            <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="2">
+                <Label Content="Additional Tags: " Width="110" HorizontalAlignment="Left" />
+                <TextBox Text="{Binding AdditionalTagsAsString}" TextWrapping="Wrap" Width="615" Height="40" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
+            </StackPanel>
 
         </Grid>
 

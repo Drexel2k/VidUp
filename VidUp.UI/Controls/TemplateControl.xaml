@@ -109,7 +109,7 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
                     <Label Content="Tags: " Width="110" HorizontalAlignment="Left" />
-                    <TextBox Text="{Binding TagsAsString}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
+                    <TextBox Text="{Binding TagsAsString}" TextWrapping="Wrap" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
                     <Label Content="Visbility: " Width="110" />

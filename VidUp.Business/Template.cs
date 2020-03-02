@@ -117,8 +117,6 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        [JsonIgnore]
-        public string TagsAsString { get => string.Join(',', this.tags); }
         public YtVisibility YtVisibility
         {
             get => ytVisibility;

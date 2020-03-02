@@ -50,8 +50,13 @@ namespace Drexel.VidUp.YouTube
             var video = new Video();
             video.Snippet = new VideoSnippet();
             video.Snippet.Title = upload.YtTitle;
-            video.Snippet.Description = upload.Template != null ? upload.Template.YtDescription : null; ;
-            video.Snippet.Tags = upload.Template != null ? upload.Template.Tags.ToArray() : null;
+            video.Snippet.Description = upload.Template != null ? upload.Template.YtDescription : null;
+
+            List<string> tags = new List<string>();
+            tags.AddRange(upload.Template != null ? upload.Template.Tags : new List<string>());
+            tags.AddRange(upload.AdditonalTags);
+            video.Snippet.Tags = tags;
+
             video.Status = new VideoStatus();
 
             video.Status.PrivacyStatus = "private";
