@@ -9,7 +9,7 @@
                      xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
                      xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
                      x:Name="CMainWindow"
-                     Icon="vidup.ico">
+                     Icon="images/vidup.ico">
 
 <Window.DataContext>
         <vm:MainWindowViewModel />
@@ -35,8 +35,11 @@
                 <Fluent:RibbonTabItem Header="Upload" >
                     <Fluent:RibbonGroupBox Header="Actions">
                         <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload-multiple.png"  Command="{Binding StartUploadingCommand}" />
-                        <Fluent:Button Header="Add File" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
+                        <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
                         <Fluent:Button Header="Remove all uploaded" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveAllUploadedCommand}" />
+                    </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Drag&amp;Drop Files">
+                        <Image Source="images/dragdrop.png" Drop="Image_Drop" AllowDrop="True" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem Header="Templates" >
@@ -58,6 +61,7 @@
             </Fluent:Ribbon>
 
             <Grid Grid.Row="1">
+                
                 <ContentControl Content="{Binding CurrentView}" />
             </Grid>
             <StackPanel Grid.Row="2" Orientation="Vertical">

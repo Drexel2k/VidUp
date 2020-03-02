@@ -35,5 +35,18 @@ namespace Drexel.VidUp.UI
             Exception e = (Exception)args.ExceptionObject;
             MessageBox.Show(e.ToString(), "PRESS CTRL+C TO COPY!");
         }
+
+        private void Image_Drop(object sender, DragEventArgs e)
+        {
+            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            List<Upload> uploads = new List<Upload>();
+            foreach (string file in files)
+            {
+                uploads.Add(new Upload(file));
+            }
+
+            mainWindowViewModel.AddUploads(uploads);
+        }
     }
 }

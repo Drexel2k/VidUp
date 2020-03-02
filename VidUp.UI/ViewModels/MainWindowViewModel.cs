@@ -57,7 +57,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.appStatus = AppStatus.Idle;
             checkAppDataFolder();
 
-            this.addUploadCommand = new GenericCommand(addUpload);
+            this.addUploadCommand = new GenericCommand(openUploadDialog);
             this.startUploadingCommand = new GenericCommand(startUploading);
             this.newTemplateCommand = new GenericCommand(openNewTemplateDialog);
             this.deleteTemplateCommand = new GenericCommand(deleteTemplate);
@@ -350,7 +350,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void addUpload(object obj)
+        private void openUploadDialog(object obj)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = true;
@@ -368,6 +368,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.uploadListViewModel.AddUploads(uploads, this.templateList);
             }
+        }
+
+        public void AddUploads(List<Upload> uploads)
+        {
+            this.uploadListViewModel.AddUploads(uploads, this.templateList);
         }
 
         private void removeAllUploaded(object obj)
