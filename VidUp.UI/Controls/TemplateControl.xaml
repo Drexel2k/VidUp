@@ -20,7 +20,7 @@
 
         <GroupBox Grid.Row="0" Padding="0">
             <GroupBox.Header>
-                <TextBlock Text="ONLY FOR VIDUP DISPLAY" Margin="2" />
+                <TextBlock Text="FOR VIDUP DISPLAY / Settings" Margin="2" />
             </GroupBox.Header>
 
             <Grid Height="Auto" Width="620" >
@@ -70,13 +70,11 @@
                     <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="For visualization of uploads in upload view." Background="Transparent" />
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" Cursor="Hand" />
                 </StackPanel>
-                <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
-                    <Label Content="Created: " Width="115" />
-                    <Label Content="{Binding Created, Mode=OneWay}"  Width="200" />
-                </StackPanel>
-                <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
-                    <Label Content="Last Modification: " Width="110" />
-                    <Label Content="{Binding LastModified, Mode=OneWay}"  Width="200"  />
+                <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <Label Content="Thumbnail Folder: " Width="115" />
+                    <Label Content="{Binding ThumbnailFolderPath, Mode=OneWay}" Width="380" Margin="0 0 10 0" />
+                    <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="VidUp will assign thumbnails automatically if the file names without extension are equal. Lookup location this folder, then in folder of video." Background="Transparent" />
+                    <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" Cursor="Hand" />
                 </StackPanel>
 
             </Grid>

@@ -44,6 +44,10 @@ namespace Drexel.VidUp.Business
                 {
                     upload.Template = template;
                 }
+                else
+                {
+                    upload.AutoSetTemplate();
+                }
             }
 
             this.uploads.AddRange(uploads);

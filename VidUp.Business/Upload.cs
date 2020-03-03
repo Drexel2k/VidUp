@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Drexel.VidUp.Business
 {
@@ -34,21 +35,6 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private List<string> additionalTags;
 
-        public Upload()
-        {
-            this.additionalTags = new List<string>();
-        }
-
-        public Upload(string filePath)
-        {
-            this.guid = Guid.NewGuid();
-            this.filePath = filePath;
-            this.created = DateTime.Now;
-            this.lastModified = this.created;
-            this.uploadStatus = UplStatus.ReadyForUpload;
-            this.additionalTags = new List<string>();
-        }
-
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
         public DateTime LastModified { get => this.lastModified; }
@@ -56,7 +42,7 @@ namespace Drexel.VidUp.Business
         public DateTime UploadEnd { get => this.uploadEnd; set => this.uploadEnd = value; }
         public string FilePath { get => this.filePath; }
         public Template Template
-        { 
+        {
             get => this.template;
             set
             {
@@ -68,23 +54,22 @@ namespace Drexel.VidUp.Business
                     }
 
                     value.Uploads.Add(this);
+
+                    //must be set before AutoSetTemplate but AutoSetTemplate
+                    //shall no be called when template is set to null
+                    this.template = value;
+                    this.AutoSetTemplate();
                 }
                 else
                 {
                     this.template.Uploads.Remove(this);
+                    this.template = value;
                 }
 
-                this.template = value;
+                
                 this.lastModified = DateTime.Now;
             }
         }
-
-        public void SetPublishAtTime(DateTime quarterHour)
-        {
-            this.publishAt = new DateTime(this.publishAt.Year, this.publishAt.Month, this.publishAt.Day, quarterHour.Hour, quarterHour.Minute, 0);
-            this.lastModified = DateTime.Now;
-        }
-
         public UplStatus UploadStatus
         {
             get { return this.uploadStatus; }
@@ -93,20 +78,6 @@ namespace Drexel.VidUp.Business
                 this.uploadStatus = value;
                 this.lastModified = DateTime.Now;
             }
-        }
-
-        public void SetPublishAtDate(DateTime publishDate)
-        {
-            if (this.publishAt.Date == DateTime.MinValue.Date)
-            {
-                if (this.template != null)
-                {
-                    this.publishAt = new DateTime(1, 1, 1, this.template.DefaultPublishAtTime.Hour, this.template.DefaultPublishAtTime.Minute, 0);
-                }
-            }
-
-            this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, this.publishAt.Hour, this.publishAt.Minute, 0);
-            this.lastModified = DateTime.Now;
         }
 
         public DateTime PublishAt
@@ -153,12 +124,12 @@ namespace Drexel.VidUp.Business
         }
 
         public DateTime PublishAtTime
-        { 
+        {
             get
             {
                 return new DateTime(1, 1, 1, this.publishAt.Hour, this.publishAt.Minute, 0);
             }
-         }
+        }
 
         public string ThumbnailPath
         {
@@ -167,6 +138,79 @@ namespace Drexel.VidUp.Business
             {
                 this.thumbnailPath = value;
                 this.lastModified = DateTime.Now;
+            }
+        }
+
+        public Upload()
+        {
+            this.additionalTags = new List<string>();
+        }
+
+        public Upload(string filePath)
+        {
+            this.guid = Guid.NewGuid();
+            this.filePath = filePath;
+            this.created = DateTime.Now;
+            this.lastModified = this.created;
+            this.uploadStatus = UplStatus.ReadyForUpload;
+            this.additionalTags = new List<string>();
+        }
+
+        public void SetPublishAtTime(DateTime quarterHour)
+        {
+            this.publishAt = new DateTime(this.publishAt.Year, this.publishAt.Month, this.publishAt.Day, quarterHour.Hour, quarterHour.Minute, 0);
+            this.lastModified = DateTime.Now;
+        }
+
+        public void SetPublishAtDate(DateTime publishDate)
+        {
+            if (this.publishAt.Date == DateTime.MinValue.Date)
+            {
+                if (this.template != null)
+                {
+                    this.publishAt = new DateTime(1, 1, 1, this.template.DefaultPublishAtTime.Hour, this.template.DefaultPublishAtTime.Minute, 0);
+                }
+            }
+
+            this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, this.publishAt.Hour, this.publishAt.Minute, 0);
+            this.lastModified = DateTime.Now;
+        }
+
+        public void AutoSetTemplate()
+        {
+            string[] extensions = { ".png", ".jpg", ".jpeg" };
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();
+
+            bool found = false;
+            if(this.template!=null && !string.IsNullOrWhiteSpace(this.template.ThumbnailFolderPath) && Directory.Exists(this.template.ThumbnailFolderPath))
+            {
+                foreach(string currentFile in Directory.GetFiles(this.template.ThumbnailFolderPath))
+                {
+                    if(fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower())
+                    {
+                        if(extensions.Contains(Path.GetExtension(currentFile).ToLower()))
+                        {
+                            this.ThumbnailPath = currentFile;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(!found)
+            {
+                foreach (string currentFile in Directory.GetFiles(Path.GetDirectoryName(this.filePath)))
+                {
+                    if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower() && Path.GetFullPath(currentFile).ToLower() != Path.GetFullPath(this.filePath).ToLower())
+                    {
+                        if (extensions.Contains(Path.GetExtension(currentFile).ToLower()))
+                        {
+                            this.ThumbnailPath = currentFile;
+                            break;
+                        }
+                    }
+                }
             }
         }
 

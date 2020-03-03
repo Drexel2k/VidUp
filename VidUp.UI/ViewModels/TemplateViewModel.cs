@@ -163,6 +163,16 @@ namespace Drexel.VidUp.UI.ViewModels
                 RaisePropertyChangedAndSerializeTemplateList("RootFolderPath");
             }
         }
+
+        public string ThumbnailFolderPath
+        {
+            get => this.template != null ? this.template.ThumbnailFolderPath : null;
+            set
+            {
+                this.template.ThumbnailFolderPath = value;
+                RaisePropertyChangedAndSerializeTemplateList("ThumbnailFolderPath");
+            }
+        }
         #endregion properties
 
         public TemplateViewModel(MainWindowViewModel mainWindowViewModel)
@@ -208,6 +218,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (result == DialogResult.OK)
                 {
                     this.RootFolderPath = folderDialog.SelectedPath;
+                }
+            }
+
+            if ((string)parameter == "thumb")
+            {
+                FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+                DialogResult result = folderDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    this.ThumbnailFolderPath = folderDialog.SelectedPath;
                 }
             }
         }

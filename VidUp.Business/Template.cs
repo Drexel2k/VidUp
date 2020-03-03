@@ -37,6 +37,8 @@ namespace Drexel.VidUp.Business
         private string rootFolderPath;
         [JsonProperty]
         private DateTime defaultPublishAtTime;
+        [JsonProperty]
+        private string thumbnailFolderPath;
 
         public Template()
         {
@@ -162,6 +164,16 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public string ThumbnailFolderPath
+        {
+            get => thumbnailFolderPath;
+            set
+            {
+                thumbnailFolderPath = value;
+                this.lastModified = DateTime.Now;
+            }
+        }
+
         public List<Upload> Uploads { get => this.uploads; }
         public DateTime DefaultPublishAtTime
         {
@@ -174,6 +186,8 @@ namespace Drexel.VidUp.Business
                 this.defaultPublishAtTime = new DateTime(1, 1, 1, value.Hour, value.Minute, 0);
             }
         }
+
+
 
         #endregion properties
         private string getPictureFilePath()

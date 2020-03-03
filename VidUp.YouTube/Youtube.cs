@@ -107,7 +107,7 @@ namespace Drexel.VidUp.YouTube
             {
                 string contentType = string.Empty;
                 FileInfo fileInfo = new FileInfo(thumbnailPath);
-                switch(fileInfo.Extension)
+                switch(fileInfo.Extension.ToLower())
                 {
                     case ".jpg":
                     case ".jpeg":
