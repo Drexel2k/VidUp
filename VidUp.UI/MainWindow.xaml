@@ -38,7 +38,7 @@
                         <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
                         <Fluent:Button Header="Remove all uploaded" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveAllUploadedCommand}" />
                     </Fluent:RibbonGroupBox>
-                    <Fluent:RibbonGroupBox Header="Drag&amp;Drop Files">
+                    <Fluent:RibbonGroupBox Header="Drag&amp;Drop Files Here">
                         <Image Source="images/dragdrop.png" Drop="Image_Drop" AllowDrop="True" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>

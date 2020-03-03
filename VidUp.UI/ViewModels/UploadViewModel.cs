@@ -94,6 +94,19 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string ShowThumbnailNotExistsIcon
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(this.upload.ThumbnailPath) || File.Exists(this.upload.ThumbnailPath))
+                {
+                    return "Collapsed";
+                }
+
+                return "Visible";
+            }
+        } 
+
         public void SetPublishAtTime(DateTime quarterHour)
         {
             this.upload.SetPublishAtTime(quarterHour);
@@ -195,6 +208,18 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         public Upload Upload { get => this.upload;  }
+        public string ThumbnailPath
+        {
+            get
+            {
+                return this.upload.ThumbnailPath;
+            }
+            set
+            {
+                this.upload.ThumbnailPath = value;
+                RaisePropertyChanged("ThumbnailPath");
+            }
+        }
 
         public UploadViewModel (Upload upload)
         {

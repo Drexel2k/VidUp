@@ -24,6 +24,8 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string filePath;
         [JsonProperty]
+        private string thumbnailPath;
+        [JsonProperty]
         private Template template;
         [JsonProperty]
         private UplStatus uploadStatus;
@@ -34,7 +36,7 @@ namespace Drexel.VidUp.Business
 
         public Upload()
         {
-
+            this.additionalTags = new List<string>();
         }
 
         public Upload(string filePath)
@@ -157,6 +159,16 @@ namespace Drexel.VidUp.Business
                 return new DateTime(1, 1, 1, this.publishAt.Hour, this.publishAt.Minute, 0);
             }
          }
+
+        public string ThumbnailPath
+        {
+            get { return this.thumbnailPath; }
+            set
+            {
+                this.thumbnailPath = value;
+                this.lastModified = DateTime.Now;
+            }
+        }
 
         private string getPicturePath(Template template)
         {

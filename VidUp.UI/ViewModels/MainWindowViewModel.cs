@@ -64,7 +64,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.aboutCommand = new GenericCommand(openAboutDialog);
             this.removeAllUploadedCommand = new GenericCommand(removeAllUploaded);
 
-            JsonSerialization.SerializationFolder = Settings.SerializationFolder;
+            JsonSerialization.SerializationFolder = string.Format("{0}{1}", Settings.SerializationFolder, Settings.UserSuffix);
             JsonSerialization.Initialize();
             JsonSerialization.Deserialize();
             this.templateList = new TemplateList(DeSerializationRepository.Templates);
@@ -90,9 +90,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void checkAppDataFolder()
         {
-            if(!Directory.Exists(Settings.SerializationFolder))
+            if(!Directory.Exists(string.Format("{0}{1}", Settings.SerializationFolder, Settings.UserSuffix)))
             {
-                Directory.CreateDirectory(Settings.SerializationFolder);
+                Directory.CreateDirectory(string.Format("{0}{1}", Settings.SerializationFolder, Settings.UserSuffix));
             }
         }
 
@@ -401,9 +401,22 @@ namespace Drexel.VidUp.UI.ViewModels
                     RaisePropertyChanged("TotalMbLeft");
                     RaisePropertyChanged("TotalTimeLeft");
 
-                    await Youtube.Upload(upload, videosInsertRequest_ProgressChanged, videosInsertRequest_ResponseReceived);
+                    string videoId = await Youtube.Upload(upload, videosInsertRequest_ProgressChanged, Settings.UserSuffix);
 
-                    this.uploadListViewModel.SetUploadStatus(upload.Guid, UplStatus.Finished);
+                    if (!string.IsNullOrWhiteSpace(videoId))
+                    {
+                        if (!string.IsNullOrWhiteSpace(videoId) && !string.IsNullOrWhiteSpace(upload.ThumbnailPath) && File.Exists(upload.ThumbnailPath))
+                        {
+                            await Youtube.AddThumbnail(videoId, upload.ThumbnailPath, Settings.UserSuffix);
+                        }
+
+                        this.uploadListViewModel.SetUploadStatus(upload.Guid, UplStatus.Finished);
+                    }
+                    else
+                    {
+                        this.uploadListViewModel.SetUploadStatus(upload.Guid, UplStatus.Failed);
+                    }
+
                     this.currentUploadBytes = 0;
                     this.currentUploadBytesSent = 0;
                     this.SumTotalBytesToUpload();
@@ -525,10 +538,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 RaisePropertyChanged("TotalMbLeft");
                 RaisePropertyChanged("TotalTimeLeft");
             }
-        }
-
-        private void videosInsertRequest_ResponseReceived(Video video)
-        {
         }
     }
 }

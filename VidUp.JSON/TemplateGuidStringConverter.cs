@@ -12,7 +12,7 @@ namespace Drexel.VidUp.JSON
     {
         public override Template ReadJson(JsonReader reader, Type objectType, Template existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            return null; ;
+            return null;
         }
 
         public override void WriteJson(JsonWriter writer, Template value, JsonSerializer serializer)

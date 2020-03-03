@@ -54,22 +54,24 @@
                 </Button>
 
                 <StackPanel  Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                    <Label Content="Name: " Width="110" />
+                    <Label Content="Name: " Width="115" />
                     <TextBox Text="{Binding Name}"  Width="400" />
                 </StackPanel>
                 <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                    <Label Content="Project Path: " Width="110" />
-                    <Label Content="{Binding RootFolderPath, Mode=OneWay}" Width="400" Margin="0 0 10 0"  />
+                    <Label Content="Project Root Folder:" Width="115" />
+                    <Label Content="{Binding RootFolderPath, Mode=OneWay}" Width="380" Margin="0 0 10 0"  />
+                    <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="To every file added from this folder or any subfolder this template is assigne automatically." Background="Transparent" />
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" Cursor="Hand" />
                 </StackPanel>
 
                 <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                    <Label Content="Picture: " Width="110" />
-                    <Label Content="{Binding PictureFilePathForEditing, Mode=OneWay}" Width="400" Margin="0 0 10 0" />
-                    <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
+                    <Label Content="Picture: " Width="115" />
+                    <Label Content="{Binding PictureFilePathForEditing, Mode=OneWay}" Width="380" Margin="0 0 10 0" />
+                    <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="For visualization of uploads in upload view." Background="Transparent" />
+                    <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" Cursor="Hand" />
                 </StackPanel>
                 <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
-                    <Label Content="Created: " Width="110" />
+                    <Label Content="Created: " Width="115" />
                     <Label Content="{Binding Created, Mode=OneWay}"  Width="200" />
                 </StackPanel>
                 <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
@@ -100,8 +102,9 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                    <Label Content="Title: " Width="110" />
-                    <TextBox Text="{Binding YtTitle}"  Width="500" />
+                    <Label Content="Title: " Width="115" />
+                    <TextBox Text="{Binding YtTitle}"  Width="480" />
+                    <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." Background="Transparent" />
                 </StackPanel>
                 <StackPanel  Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
                     <Label Content="Description: " Width="110" HorizontalAlignment="Left" />
@@ -123,13 +126,10 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </StackPanel>
-                <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Vertical">
-                    <Label Content="Default Publish At Time: " Width="250" HorizontalAlignment="Left" />
-                </StackPanel>
-                <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Vertical">
-                    <!--Binding OneWay because setting is handled by event. -->
-                    <ComboBox SelectedItem="{Binding DefaultPublishAtTime, Mode=OneWay}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" DropDownClosed="ComboBoxQuarterHourSelect_DropDownClosed" />
-                </StackPanel>
+                <Label Grid.Row="4" Grid.Column="0" Content="Default Publish At Time: " Width="250" HorizontalAlignment="Left" />
+                <!--Binding OneWay because setting is handled by event. -->
+                <ComboBox Grid.Row="4" Grid.Column="1" SelectedItem="{Binding DefaultPublishAtTime, Mode=OneWay}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" DropDownClosed="ComboBoxQuarterHourSelect_DropDownClosed" HorizontalAlignment="Left" />
+
             </Grid>
         </GroupBox>
 

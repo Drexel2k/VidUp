@@ -21,6 +21,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand pauseCommand;
         private GenericCommand resetStateCommand;
         private GenericCommand noTemplateCommand;
+        private GenericCommand openFileDialogCommand;
 
         private ObservableUploadViewModels observableUploadViewModels;
 
@@ -64,6 +65,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public GenericCommand OpenFileDialogCommand
+        {
+            get
+            {
+                return this.openFileDialogCommand;
+            }
+        }
+
         public ObservableUploadViewModels ObservableUploadViewModels
         {
             get
@@ -83,9 +92,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.resetStateCommand = new GenericCommand(resetUploadState);
             this.pauseCommand = new GenericCommand(setPausedUploadState);
             this.noTemplateCommand = new GenericCommand(setTemplateToNull);
+            this.openFileDialogCommand = new GenericCommand(openThumbnailDialog);
         }
-
-
 
         internal void AddUploads(List<Upload> uploads, TemplateList templateList)
         {
@@ -152,13 +160,35 @@ namespace Drexel.VidUp.UI.ViewModels
             UploadViewModel uploadViewModel = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter));
             if(uploadViewModel.UploadStatus ==  UplStatus.Finished)
             {
-                MessageBox.Show("Template cannot be removed if upload is finished. Please clear upload list from finsihed uploads.");
+                MessageBox.Show("Template cannot be removed if upload is finished. Please clear upload list from finished uploads.");
                 return;
             }
 
             uploadViewModel.Template = null;
             JsonSerialization.SerializeAllUploads();
             JsonSerialization.SerializeTemplateList();
+        }
+
+        private void openThumbnailDialog(object parameter)
+        {
+            UploadViewModel uploadViewModel = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter));
+            if (uploadViewModel.UploadStatus == UplStatus.Finished)
+            {
+                MessageBox.Show("Thumbnail cannot be set if upload is finished. Please clear upload list from finished uploads.");
+                return;
+            }
+
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            DialogResult result = fileDialog.ShowDialog();
+
+
+            if (result == DialogResult.OK)
+            {
+                uploadViewModel.ThumbnailPath = fileDialog.FileName;
+                JsonSerialization.SerializeAllUploads();
+            }
+
+
         }
 
         public void RemoveTemplateFromUploads(Template template)

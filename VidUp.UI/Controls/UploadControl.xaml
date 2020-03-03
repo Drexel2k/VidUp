@@ -54,15 +54,15 @@
                      <TextBlock Text="{Binding FilePath, Mode=OneWay}" TextWrapping="Wrap" MaxWidth="500" />
                 </Label>
             </StackPanel>
-            <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                <Label Content="Status: " Width="110" />
-                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="200" />
-            </StackPanel>
-
-            <StackPanel  Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                <Label Content="Template: " Width="110" />
-                <!--Binding OneWay because setting is handled by event. -->
-                <ComboBox SelectedItem="{Binding Template, Mode=OneWay}" ItemsSource="{Binding DataContext.TemplateList, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" />
+            <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                <Label Content="Thumbnail: " Width="110" />
+                <materialDesign:PackIcon Kind="Warning" ToolTip="Thumbnail does not exist!" Visibility="{Binding ShowThumbnailNotExistsIcon}" Margin="0 4 0 0"  />
+                <Label Width="410">
+                    <TextBlock Text="{Binding ThumbnailPath, Mode=OneWay}" TextWrapping="Wrap" />
+                </Label>
+                <Button Command="{Binding DataContext.OpenFileDialogCommand, ElementName=UCUploads }" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Padding="0" Width="70" Height="25"  Grid.Column="2" Cursor="Hand">
+                    Browse
+                </Button>
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
                 <CheckBox IsChecked="{Binding PublishAt}" VerticalAlignment="Top" Margin="0 3 0 0" />
@@ -72,20 +72,23 @@
                 <ComboBox SelectedItem="{Binding PublishAtTime, Mode=OneWay}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" DropDownClosed="ComboBoxQuarterHourSelect_DropDownClosed" IsEnabled="{Binding PublishAt}" />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                
+                <Label Content="Template: " Width="110" />
+                <!--Binding OneWay because setting is handled by event. -->
+                <ComboBox SelectedItem="{Binding Template, Mode=OneWay}" ItemsSource="{Binding DataContext.TemplateList, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" />
             </StackPanel>
-            <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
-                <Label Content="Upload started: " Width="110" />
-                <Label Content="{Binding UploadStart, Mode=OneWay}"  Width="200"  />
-            </StackPanel>
-            <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
-                <Label Content="Upload Ended: " Width="110" />
-                <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="200"  />
-            </StackPanel>
-            <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="2">
+            <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="2">
                 <Label Content="Additional Tags: " Width="110" HorizontalAlignment="Left" />
                 <TextBox Text="{Binding AdditionalTagsAsString}" TextWrapping="Wrap" Width="615" Height="40" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
             </StackPanel>
+            <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                <Label Content="Status: " Width="60" />
+                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="150" />
+                <Label Content="Upload started: " Width="110" />
+                <Label Content="{Binding UploadStart, Mode=OneWay}"  Width="80"  />
+                <Label Content="Upload Ended: " Width="110" />
+                <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="80"  />
+            </StackPanel>
+
 
         </Grid>
 
