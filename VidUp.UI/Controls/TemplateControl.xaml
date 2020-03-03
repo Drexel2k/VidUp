@@ -67,7 +67,7 @@
                 <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                     <Label Content="Picture: " Width="115" />
                     <Label Content="{Binding PictureFilePathForEditing, Mode=OneWay}" Width="380" Margin="0 0 10 0" />
-                    <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="For visualization of uploads in upload view." Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="For visualization of uploads in upload view. Recommended size: 620x50px." Background="Transparent" />
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" Cursor="Hand" />
                 </StackPanel>
                 <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
