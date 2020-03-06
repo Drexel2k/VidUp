@@ -1,13 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-
-  <?if $(var.Platform)=x64?>
-  <?define ProductCode ="{9D6B4E49-3847-4F05-B511-4190369C216D}"?>
-  <?else?>
-  <?define ProductCode ="{1B22425B-4C13-4CAD-841D-396AC33D459E}"?>
-  <?endif?>
   
-  <Product Id="$(var.ProductCode)" Name="VidUp $(var.BuildVersion)" Language="1033" Version="$(var.BuildVersion)" Manufacturer="Drexel Development" UpgradeCode="{41AC4E42-952A-4D5B-ABB5-8EC4153BE8AF}">
+  <Product Id="*" Name="VidUp $(var.BuildVersion)" Language="1033" Version="$(var.BuildVersion)" Manufacturer="Drexel Development" UpgradeCode="{41AC4E42-952A-4D5B-ABB5-8EC4153BE8AF}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of VidUp is already installed." />

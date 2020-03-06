@@ -8,6 +8,7 @@
                      MinHeight="600"
                      xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
                      xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
+                     xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
                      x:Name="CMainWindow"
                      Icon="images/vidup.ico">
 
@@ -49,6 +50,9 @@
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem Header="VidUp" >
+                    <Fluent:RibbonGroupBox Header="Support">
+                        <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="images/handshake48.png" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
+                    </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="About">
                         <Fluent:Button Header="About" SizeDefinition="Middle,Middle,Small" Icon="images/about.png"  Command="{Binding AboutCommand}" />
                     </Fluent:RibbonGroupBox>
@@ -68,6 +72,16 @@
                 <StackPanel Orientation="Horizontal">
                     <Label Content="App Status: " />
                     <Label Content="{Binding AppStatus, Mode=OneWay}" />
+                    <Label Content="  |  " />
+                    <Label Content="Post Upload Action: " />
+                    <ComboBox  ItemsSource="{Binding PostUploadActions}" SelectedItem="{Binding PostUploadAction}" Width="120"  Padding="0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Action performed after all uploads are finished." Background="Transparent" />
                 </StackPanel>
                 <Grid>
                     <Grid.RowDefinitions>

@@ -31,7 +31,7 @@
             </Grid.ColumnDefinitions>
             <TextBox wpf:HintAssist.Hint="Template Picture" Text="{Binding PictureFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" />
             <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...-->
-            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For visualization of uploads in upload view. Recommended size: 620x50px." Background="Transparent" />
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For visualization of uploads in upload view. Recommended size: 618x50px." Background="Transparent" />
             <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2" Cursor="Hand">
                 Browse
             </Button>

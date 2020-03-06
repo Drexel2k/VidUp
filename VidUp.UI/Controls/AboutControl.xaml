@@ -29,7 +29,7 @@
         <TextBlock Grid.Row="5" Text="{Binding Version}" />
         <TextBlock Grid.Row="6"> </TextBlock>
         <TextBlock Grid.Row="7">Visit me: <Hyperlink NavigateUri="https://www.youtube.com/drexel2k" RequestNavigate="Hyperlink_RequestNavigate">https://www.youtube.com/drexel2k</Hyperlink></TextBlock>
-        <Button Grid.Row="8" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" IsEnabled="{Binding FormValid}" Cursor="Hand" HorizontalAlignment="Left">
+        <Button Grid.Row="8" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" Cursor="Hand" HorizontalAlignment="Left">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>
             </Button.CommandParameter>

@@ -16,6 +16,8 @@ using Google.Apis.Upload;
 using Google.Apis.YouTube.v3.Data;
 using System.Reflection;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using Drexel.VidUp.UI.DllImport;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -33,8 +35,10 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand deleteTemplateCommand;
         private GenericCommand aboutCommand;
         private GenericCommand removeAllUploadedCommand;
+        private GenericCommand donateCommand;
 
         private AppStatus appStatus;
+        private PostUploadAction postUploadAction;
 
         //no upload session tracking currently, this would require also consider added or removed videos, status changes of videos
         //and to recalculate the session bytes. Therefore total time left is only calculated by the average of the current upload
@@ -52,6 +56,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateComboboxViewModel selectedTemplate;
 
         private object currentView;
+
         public MainWindowViewModel()
         {
             this.appStatus = AppStatus.Idle;
@@ -63,6 +68,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.deleteTemplateCommand = new GenericCommand(deleteTemplate);
             this.aboutCommand = new GenericCommand(openAboutDialog);
             this.removeAllUploadedCommand = new GenericCommand(removeAllUploaded);
+            this.donateCommand = new GenericCommand(openDonateDialog);
 
             JsonSerialization.SerializationFolder = string.Format("{0}{1}", Settings.SerializationFolder, Settings.UserSuffix);
             JsonSerialization.Initialize();
@@ -152,6 +158,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public GenericCommand DonateCommand
+        {
+            get
+            {
+                return this.donateCommand;
+            }
+        }
+
         public GenericCommand DeleteTemplateCommand
         {
             get
@@ -173,6 +187,24 @@ namespace Drexel.VidUp.UI.ViewModels
         public AppStatus AppStatus
         {
             get => this.appStatus;
+        }
+
+        public PostUploadAction PostUploadAction
+        {
+            get => this.postUploadAction;
+            set
+            {
+                this.postUploadAction = value;
+                RaisePropertyChanged("PostUploadAction");
+            }
+        }
+
+        public Array PostUploadActions
+        {
+            get
+            {
+                return Enum.GetValues(typeof(PostUploadAction));
+            }
         }
 
         public string AppTitle
@@ -386,8 +418,12 @@ namespace Drexel.VidUp.UI.ViewModels
             if (this.appStatus == AppStatus.Idle)
             {
                 this.appStatus = AppStatus.Uploading;
+                //prevent sleep mode
+                PowerSavingHelper.DisablePowerSaving();
                 RaisePropertyChanged("AppStatus");
 
+
+                bool oneUploadFinished = false;
                 Upload upload = this.uploadList.GetUpload(upload => upload.UploadStatus == UplStatus.ReadyForUpload && File.Exists(upload.FilePath));
                 while (upload != null)
                 {
@@ -405,6 +441,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     if (!string.IsNullOrWhiteSpace(videoId))
                     {
+                        oneUploadFinished = true;
+
                         if (!string.IsNullOrWhiteSpace(videoId) && !string.IsNullOrWhiteSpace(upload.ThumbnailPath) && File.Exists(upload.ThumbnailPath))
                         {
                             await Youtube.AddThumbnail(videoId, upload.ThumbnailPath, Settings.UserSuffix);
@@ -426,6 +464,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.appStatus = AppStatus.Idle;
+
+                PowerSavingHelper.EnablePowerSaving();
                 RaisePropertyChanged("AppStatus");
 
                 RaisePropertyChanged("CurrentFilePercent");
@@ -433,6 +473,24 @@ namespace Drexel.VidUp.UI.ViewModels
                 RaisePropertyChanged("CurrentFileMbLeft");
                 RaisePropertyChanged("TotalMbLeft");
                 RaisePropertyChanged("TotalTimeLeft");
+
+                if (oneUploadFinished)
+                {
+                    switch(this.postUploadAction)
+                    {
+                        case PostUploadAction.Shutdown:
+                            ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
+                            break;
+                        case PostUploadAction.SleepMode:
+                            Application.SetSuspendState(PowerState.Suspend, false, false);
+                            break;
+                        case PostUploadAction.Hibernate:
+                            Application.SetSuspendState(PowerState.Hibernate, false, false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }
 
@@ -471,6 +529,16 @@ namespace Drexel.VidUp.UI.ViewModels
             var view = new AboutControl
             {
                 DataContext = new AboutViewModel()
+            };
+
+            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+        }
+
+        private async void openDonateDialog(object obj)
+        {
+            var view = new DonateControl
+            {
+               // DataContext = new DonateViewModel()
             };
 
             bool result = (bool)await DialogHost.Show(view, "RootDialog");

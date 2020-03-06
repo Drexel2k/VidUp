@@ -25,7 +25,7 @@
                 <RowDefinition MinHeight="30"></RowDefinition>
                 <RowDefinition MinHeight="30"></RowDefinition>
             </Grid.RowDefinitions>
-            <Canvas Grid.Row="0" Grid.ColumnSpan="2">
+            <Canvas Grid.Row="0" Grid.ColumnSpan="2" Margin="1 0 1 0">
                 <Canvas.Background>
                     <ImageBrush ImageSource="{Binding PictureFilePath, Mode=OneWay}" Stretch="Fill" />
                 </Canvas.Background>
@@ -77,16 +77,20 @@
                 <ComboBox SelectedItem="{Binding Template, Mode=OneWay}" ItemsSource="{Binding DataContext.TemplateList, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" />
             </StackPanel>
             <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="2">
-                <Label Content="Additional Tags: " Width="110" HorizontalAlignment="Left" />
+                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Label Content="Tags: " Width="35" />
+                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'. These tags are added to the template's tags." Background="Transparent" />
+                </StackPanel>
                 <TextBox Text="{Binding AdditionalTagsAsString}" TextWrapping="Wrap" Width="615" Height="40" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
             </StackPanel>
             <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                <Label Content="Status: " Width="60" />
-                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="150" />
-                <Label Content="Upload started: " Width="110" />
-                <Label Content="{Binding UploadStart, Mode=OneWay}"  Width="80"  />
-                <Label Content="Upload Ended: " Width="110" />
-                <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="80"  />
+                <Label Content="Status: " Width="45" />
+                <materialDesign:PackIcon Kind="Warning" ToolTip="{Binding UploadErrorMessage}" Visibility="{Binding ShowUploadErrorIcon}" Margin="0 4 0 0"  />
+                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="100" Margin="0 0 65 0" />
+                <Label Content="Upload Started: " Width="90" />
+                <Label Content="{Binding UploadStart, Mode=OneWay}"  Width="100"  Margin="0 0 25 0" />
+                <Label Content="Upload Ended: " Width="85" />
+                <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="90" />
             </StackPanel>
 
 

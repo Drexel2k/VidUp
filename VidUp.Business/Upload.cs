@@ -34,12 +34,14 @@ namespace Drexel.VidUp.Business
         private DateTime publishAt;
         [JsonProperty]
         private List<string> additionalTags;
+        [JsonProperty]
+        private string uploadErrorMessage;
 
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
         public DateTime LastModified { get => this.lastModified; }
-        public DateTime UploadStart { get => this.uploadStart; set => this.uploadStart = value; }
-        public DateTime UploadEnd { get => this.uploadEnd; set => this.uploadEnd = value; }
+        public DateTime UploadStart { get => this.uploadStart; }
+        public DateTime UploadEnd { get => this.uploadEnd; }
         public string FilePath { get => this.filePath; }
         public Template Template
         {
@@ -76,6 +78,17 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.uploadStatus = value;
+
+                if (value == UplStatus.Uploading)
+                {
+                    this.uploadStart = DateTime.Now;
+                }
+
+                if (value == UplStatus.Finished)
+                {
+                    this.uploadEnd = DateTime.Now;
+                }
+
                 this.lastModified = DateTime.Now;
             }
         }
@@ -138,6 +151,18 @@ namespace Drexel.VidUp.Business
             {
                 this.thumbnailPath = value;
                 this.lastModified = DateTime.Now;
+            }
+        }
+
+        public string UploadErrorMessage
+        { 
+            get
+            {
+                return this.uploadErrorMessage;
+            }
+            set
+            {
+                this.uploadErrorMessage = value;
             }
         }
 

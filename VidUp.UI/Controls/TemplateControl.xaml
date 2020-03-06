@@ -35,7 +35,7 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
-                <Canvas Grid.Row="0" Grid.ColumnSpan="2">
+                <Canvas Grid.Row="0" Grid.ColumnSpan="2" Margin="1,0,1,0">
                     <Canvas.Background>
                         <ImageBrush ImageSource="{Binding PictureFilePathForRendering, Mode=OneWay}" Stretch="Fill" />
                     </Canvas.Background>
@@ -109,14 +109,17 @@
                     <TextBox Text="{Binding YtDescription, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel  Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
-                    <Label Content="Tags: " Width="110" HorizontalAlignment="Left" />
+                    <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Label Content="Tags: " Width="40" />
+                        <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." Background="Transparent" />
+                    </StackPanel>
                     <TextBox Text="{Binding TagsAsString}" TextWrapping="Wrap" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
                     <Label Content="Visbility: " Width="110" />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                    <ComboBox  ItemsSource="{Binding YtVisbilities}" SelectedItem="{Binding YtVisibility}" Width="100">
+                    <ComboBox  ItemsSource="{Binding YtVisibilities}" SelectedItem="{Binding YtVisibility}" Width="100">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>

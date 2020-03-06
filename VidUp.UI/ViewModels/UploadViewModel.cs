@@ -28,7 +28,11 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.UploadStatus = value;
+                this.RaisePropertyChanged("UploadErrorMessage");
+                this.RaisePropertyChanged("ShowUploadErrorIcon");
                 this.RaisePropertyChanged("UploadStatus");
+                this.RaisePropertyChanged("UploadStart");
+                this.RaisePropertyChanged("UploadEnd");
             }
         }
 
@@ -106,6 +110,27 @@ namespace Drexel.VidUp.UI.ViewModels
                 return "Visible";
             }
         } 
+
+        public string UploadErrorMessage
+        {
+            get
+            {
+                return this.upload.UploadErrorMessage;
+            }
+        }
+
+        public string ShowUploadErrorIcon
+        {
+            get
+            {
+                if (!(this.upload.UploadStatus == UplStatus.Failed))
+                {
+                    return "Collapsed";
+                }
+
+                return "Visible";
+            }
+        }
 
         public void SetPublishAtTime(DateTime quarterHour)
         {

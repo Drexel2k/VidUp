@@ -106,7 +106,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public Array YtVisbilities
+        public Array YtVisibilities
         {
             get
             {

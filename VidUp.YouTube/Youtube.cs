@@ -18,10 +18,11 @@ namespace Drexel.VidUp.YouTube
     public class Youtube
     {
         private static string uploadedVideoId;
+        private static string exceptionMessage;
+
         public static async Task<string> Upload(Upload upload, Action<IUploadProgress> videosInsertRequest_ProgressChanged, string userSuffix)
         {
             upload.UploadStatus = UplStatus.Uploading;
-            upload.UploadStart = DateTime.Now;
             Youtube.uploadedVideoId = null;
 
             UserCredential credential;
@@ -73,9 +74,17 @@ namespace Drexel.VidUp.YouTube
             {
                 var videosInsertRequest = youtubeService.Videos.Insert(video, "snippet,status", fileStream, "video/*");
                 videosInsertRequest.ProgressChanged += videosInsertRequest_ProgressChanged;
+                videosInsertRequest.ProgressChanged += Youtube.videosInsertRequest_ProgressChanged;
                 videosInsertRequest.ResponseReceived += videosInsertRequest_ResponseReceived;
 
                 await videosInsertRequest.UploadAsync();
+
+                if(Youtube.uploadedVideoId == null)
+                {
+                    upload.UploadErrorMessage = Youtube.exceptionMessage;
+
+                }
+
                 return Youtube.uploadedVideoId;
             }
         }
@@ -134,6 +143,15 @@ namespace Drexel.VidUp.YouTube
         {
 
         }
+
+        private static void videosInsertRequest_ProgressChanged(IUploadProgress progress)
+        {
+            if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+            {
+                Youtube.exceptionMessage = progress.Exception.Message;
+            }
+        }
+
 
         private static void videosInsertRequest_ResponseReceived(Video video)
         {

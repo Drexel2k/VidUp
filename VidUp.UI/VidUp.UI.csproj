@@ -30,6 +30,7 @@
     <None Remove="Images\file-document-box-plus.png" />
     <None Remove="Images\file-minus.png" />
     <None Remove="Images\file-plus.png" />
+    <None Remove="Images\handshake48.png" />
     <None Remove="Images\upload-multiple.png" />
     <None Remove="Images\vidup.ico" />
     <None Remove="vidup.ico" />
@@ -66,6 +67,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\file-plus.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\handshake48.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\upload-multiple.png">

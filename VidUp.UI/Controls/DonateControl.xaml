@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="Drexel.VidUp.UI.Controls.DonateControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Drexel.VidUp.UI.Controls"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="16" Width="300">
+
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition Height="20" />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0">VidUp is totally free of charge. You don't have any</TextBlock>
+        <TextBlock Grid.Row="1">advantage or disadvantage if you donate or not!</TextBlock>
+        <TextBlock Grid.Row="2">If you want to support this app and further</TextBlock>
+        <TextBlock Grid.Row="3">development you can donate a voluntary amount</TextBlock>
+        <TextBlock Grid.Row="4">if you want:</TextBlock>
+        <TextBlock Grid.Row="6">One time tip: <Hyperlink NavigateUri="https://paypal.me/drexel2k" RequestNavigate="Hyperlink_RequestNavigate">Paypal</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="7">Recurring donation (U.S. platform): <Hyperlink NavigateUri="https://www.patreon.com/Drexel2k" RequestNavigate="Hyperlink_RequestNavigate">Patreon</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="8">Recurring donation (German platform): <Hyperlink NavigateUri="https://steadyhq.com/en/drexel" RequestNavigate="Hyperlink_RequestNavigate">SteadHQ</Hyperlink></TextBlock>
+
+        <Button Grid.Row="9" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" Cursor="Hand" HorizontalAlignment="Left">
+            <Button.CommandParameter>
+                <system:Boolean>True</system:Boolean>
+            </Button.CommandParameter>
+            ACCEPT
+        </Button>
+
+    </Grid>
+</UserControl>
