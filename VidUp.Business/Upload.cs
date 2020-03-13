@@ -33,9 +33,16 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private DateTime publishAt;
         [JsonProperty]
-        private List<string> additionalTags;
-        [JsonProperty]
         private string uploadErrorMessage;
+
+        [JsonProperty]
+        private string title;
+        [JsonProperty]
+        private string description;
+        [JsonProperty]
+        private List<string> tags;
+        [JsonProperty]
+        private YtVisibility visibility;
 
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
@@ -60,7 +67,8 @@ namespace Drexel.VidUp.Business
                     //must be set before AutoSetTemplate but AutoSetTemplate
                     //shall no be called when template is set to null
                     this.template = value;
-                    this.AutoSetTemplate();
+                    this.CopyTemplateValues();
+                    this.autoSetThumbnail();
                 }
                 else
                 {
@@ -72,6 +80,69 @@ namespace Drexel.VidUp.Business
                 this.lastModified = DateTime.Now;
             }
         }
+
+        public void CopyTemplateValues()
+        {
+            this.CopyTitleFromTemplate();
+            this.CopyDescriptionFromTemplate();
+            this.CopyTagsFromtemplate();
+            this.CopyVisbilityFromTemplate();
+        }
+
+        public void CopyVisbilityFromTemplate()
+        {
+            if (this.template != null)
+            {
+                this.visibility = this.template.YtVisibility;
+            }
+        }
+
+       public void CopyTagsFromtemplate()
+        {
+            if (this.template != null)
+            {
+                if (this.template.Tags != null && this.template.Tags.Count > 0)
+                {
+                    this.tags.Clear();
+                    this.tags.AddRange(this.template.Tags);
+                }
+            }
+        }
+
+        public void CopyDescriptionFromTemplate()
+        {
+            if (this.template != null)
+            {
+                if (!string.IsNullOrWhiteSpace(this.template.YtDescription))
+                {
+                    this.description = this.template.YtDescription;
+                }
+            }
+        }
+
+       public void CopyTitleFromTemplate()
+        {
+            if (this.template != null)
+            {
+                if (!string.IsNullOrWhiteSpace(this.template.YtTitle))
+                {
+                    this.title = this.Template.YtTitle;
+                    Regex regex = new Regex(@"#([^#]+)#");
+                    int matchIndex = 0;
+                    foreach (Match match in regex.Matches(this.FilePath))
+                    {
+                        this.title = this.title.Replace("#" + matchIndex + "#", match.Groups[1].Value);
+
+                        matchIndex++;
+                    }
+                }
+                else
+                {
+                    this.title = string.Empty;
+                }
+            }
+        }
+
         public UplStatus UploadStatus
         {
             get { return this.uploadStatus; }
@@ -98,12 +169,12 @@ namespace Drexel.VidUp.Business
             get { return this.publishAt; }
         }
 
-        public List<string> AdditonalTags
+        public List<string> Tags
         {
-            get => this.additionalTags;
+            get => this.tags;
             set
             {
-                this.additionalTags = value;
+                this.tags = value;
                 this.lastModified = DateTime.Now;
             }
         }
@@ -113,22 +184,10 @@ namespace Drexel.VidUp.Business
         {
             get
             {
-                string title = Path.GetFileNameWithoutExtension(this.FilePath);
-
-                if (this.Template != null)
+                string title = Path.GetFileNameWithoutExtension(this.filePath);
+                if (!string.IsNullOrWhiteSpace(this.title))
                 {
-                    if (!string.IsNullOrWhiteSpace(this.Template.YtTitle))
-                    {
-                        title = this.Template.YtTitle;
-                        Regex regex = new Regex(@"#([^#]+)#");
-                        int matchIndex = 0;
-                        foreach (Match match in regex.Matches(this.FilePath))
-                        {
-                            title = title.Replace("#" + matchIndex + "#", match.Groups[1].Value);
-
-                            matchIndex++;
-                        }
-                    }
+                    title = this.title;
                 }
 
                 int cutOffLength = title.Length <= 100 ? title.Length : 100;
@@ -166,9 +225,45 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public string Title
+        {
+            get
+            {
+                return this.title;
+            }
+            set
+            {
+                this.title = value;
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                return this.description;
+            }
+            set
+            {
+                this.description = value;
+            }
+        }
+
+        public YtVisibility Visibility
+        {
+            get
+            {
+                return this.visibility;
+            }
+            set
+            {
+                this.visibility = value;
+            }
+        }
+
         public Upload()
         {
-            this.additionalTags = new List<string>();
+            this.tags = new List<string>();
         }
 
         public Upload(string filePath)
@@ -178,7 +273,9 @@ namespace Drexel.VidUp.Business
             this.created = DateTime.Now;
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
-            this.additionalTags = new List<string>();
+            this.tags = new List<string>();
+
+            this.autoSetThumbnail();
         }
 
         public void SetPublishAtTime(DateTime quarterHour)
@@ -201,7 +298,7 @@ namespace Drexel.VidUp.Business
             this.lastModified = DateTime.Now;
         }
 
-        public void AutoSetTemplate()
+        private void autoSetThumbnail()
         {
             string[] extensions = { ".png", ".jpg", ".jpeg" };
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();

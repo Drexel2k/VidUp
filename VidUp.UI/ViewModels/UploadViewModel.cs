@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -15,11 +16,59 @@ namespace Drexel.VidUp.UI.ViewModels
         private Upload upload;
         private QuarterHourViewModels quarterHourViewModels;
 
+        private GenericCommand pauseCommand;
+        private GenericCommand resetStateCommand;
+        private GenericCommand noTemplateCommand;
+        private GenericCommand openFileDialogCommand;
+        private GenericCommand resetToTemplateValueCommand;
+
+        private MainWindowViewModel mainWindowViewModel;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string Guid
         {
             get => this.upload.Guid.ToString();
+        }
+
+        public GenericCommand PauseCommand
+        {
+            get
+            {
+                return this.pauseCommand;
+            }
+        }
+
+        public GenericCommand ResetStateCommand
+        {
+            get
+            {
+                return this.resetStateCommand;
+            }
+        }
+
+        public GenericCommand NoTemplateCommand
+        {
+            get
+            {
+                return this.noTemplateCommand;
+            }
+        }
+
+        public GenericCommand OpenFileDialogCommand
+        {
+            get
+            {
+                return this.openFileDialogCommand;
+            }
+        }
+
+        public GenericCommand ResetToTemplateValueCommand
+        {
+            get
+            {
+                return this.resetToTemplateValueCommand;
+            }
         }
 
         public UplStatus UploadStatus
@@ -33,6 +82,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.RaisePropertyChanged("UploadStatus");
                 this.RaisePropertyChanged("UploadStart");
                 this.RaisePropertyChanged("UploadEnd");
+                this.RaisePropertyChanged("ControlsEnabled");
             }
         }
 
@@ -85,6 +135,75 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.YtTitle;
         }
 
+        public string Title
+        {
+            get => this.upload.Title;
+            set
+            {
+                this.upload.Title = value;
+                this.SerializeAllUploads();
+
+                RaisePropertyChanged("YtTitle");
+                RaisePropertyChanged("Title");
+            }
+        }
+
+        public string Description
+        {
+            get => this.upload.Description;
+            set
+            {
+                this.upload.Description = value;
+                this.SerializeAllUploads();
+
+                RaisePropertyChanged("Description");
+            }
+        }
+
+        public string TagsAsString
+        {
+            get => string.Join(',', this.upload.Tags);
+            set
+            {
+                this.upload.Tags = new List<string>(value.Split(','));
+                this.SerializeAllUploads();
+
+                RaisePropertyChanged("TagsAsString");
+            }
+        }
+
+        public List<string> Tags
+        {
+            get => this.upload.Tags;
+            set
+            {
+                this.upload.Tags = value;
+                this.SerializeAllUploads();
+
+                RaisePropertyChanged("TagsAsString");
+            }
+        }
+
+        public Array YtVisibilities
+        {
+            get
+            {
+                return Enum.GetValues(typeof(YtVisibility));
+            }
+        }
+
+        public YtVisibility Visibility
+        {
+            get => this.upload.Visibility;
+            set
+            {
+                this.upload.Visibility = value;
+                this.SerializeAllUploads();
+
+                RaisePropertyChanged("Visibility");
+            }
+        }
+
         public string ShowFileNotExistsIcon
         {
             get
@@ -131,6 +250,19 @@ namespace Drexel.VidUp.UI.ViewModels
                 return "Visible";
             }
         }
+        public bool ControlsEnabled
+        {
+            get
+            {
+                if (!(this.upload.UploadStatus == UplStatus.Finished))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
 
         public void SetPublishAtTime(DateTime quarterHour)
         {
@@ -220,18 +352,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string AdditionalTagsAsString
-        {
-            get => string.Join(',', this.upload.AdditonalTags);
-            set
-            {
-                this.upload.AdditonalTags = new List<string>(value.Split(','));
-                this.SerializeAllUploads();
-
-                RaisePropertyChanged("AdditionalTagsAsString");
-            }
-        }
-
         public Upload Upload { get => this.upload;  }
         public string ThumbnailPath
         {
@@ -246,10 +366,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadViewModel (Upload upload)
+        public UploadViewModel (Upload upload, MainWindowViewModel mainWindowViewModel)
         {
             this.upload = upload;
+            this.mainWindowViewModel = mainWindowViewModel;
+
             this.quarterHourViewModels = new QuarterHourViewModels();
+
+            this.resetStateCommand = new GenericCommand(resetUploadState);
+            this.pauseCommand = new GenericCommand(setPausedUploadState);
+            this.noTemplateCommand = new GenericCommand(setTemplateToNull);
+            this.openFileDialogCommand = new GenericCommand(openThumbnailDialog);
+            this.resetToTemplateValueCommand = new GenericCommand(resetToTemplateVuale);
         } 
 
         private void RaisePropertyChanged(string propertyName)
@@ -270,6 +398,84 @@ namespace Drexel.VidUp.UI.ViewModels
         public void SerializeTemplateList()
         {
             JsonSerialization.SerializeTemplateList();
+        }
+
+        private void resetUploadState(object parameter)
+        {
+            this.UploadStatus = UplStatus.ReadyForUpload;
+            JsonSerialization.SerializeAllUploads();
+            this.mainWindowViewModel.SumTotalBytesToUpload();
+        }
+
+        private void setPausedUploadState(object parameter)
+        {
+            this.UploadStatus = UplStatus.Paused;
+            JsonSerialization.SerializeAllUploads();
+
+            this.mainWindowViewModel.SumTotalBytesToUpload();
+        }
+
+        private void setTemplateToNull(object parameter)
+        {
+            if (this.UploadStatus == UplStatus.Finished)
+            {
+                MessageBox.Show("Template cannot be removed if upload is finished. Please clear upload list from finished uploads.");
+                return;
+            }
+
+            this.Template = null;
+            JsonSerialization.SerializeAllUploads();
+            JsonSerialization.SerializeTemplateList();
+        }
+
+        private void openThumbnailDialog(object parameter)
+        {
+            if (this.UploadStatus == UplStatus.Finished)
+            {
+                MessageBox.Show("Thumbnail cannot be set if upload is finished. Please clear upload list from finished uploads.");
+                return;
+            }
+
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            DialogResult result = fileDialog.ShowDialog();
+
+
+            if (result == DialogResult.OK)
+            {
+                this.ThumbnailPath = fileDialog.FileName;
+                JsonSerialization.SerializeAllUploads();
+            }
+        }
+
+        private void resetToTemplateVuale(object parameter)
+        {
+            if (this.upload.Template != null)
+            { 
+                switch (parameter)
+                {
+                    case "title":
+                        this.upload.CopyTitleFromTemplate();
+                        RaisePropertyChanged("Title");
+                        RaisePropertyChanged("YtTitle");
+                        break;
+                    case "description":
+                        this.upload.CopyDescriptionFromTemplate();
+                        RaisePropertyChanged("Description");
+                        break;
+                    case "tags":
+                        this.upload.CopyTagsFromtemplate();
+                        RaisePropertyChanged("TagsAsString");
+                        break;
+                    case "visibility":
+                        this.upload.CopyVisbilityFromTemplate();
+                        RaisePropertyChanged("Visibility");
+                        break;
+                    default:
+                        this.upload.CopyTemplateValues();
+                        RaisePropertyChanged(null);
+                        break;
+                }
+            }
         }
     }
 }

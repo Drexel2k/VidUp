@@ -28,8 +28,6 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private YtVisibility ytVisibility;
         [JsonProperty]
-        private string gameTitle;     
-        [JsonProperty]
         private List<Upload> uploads;
         [JsonProperty]
         private string pictureFilePath;
@@ -128,16 +126,6 @@ namespace Drexel.VidUp.Business
                 this.lastModified = DateTime.Now;
             }
         }
-       
-        public string GameTitle
-        {
-            get => gameTitle;
-            set
-            {
-                gameTitle = value;
-                this.lastModified = DateTime.Now;
-            }
-        }
 
         public string PictureFilePathForRendering
         {
@@ -186,8 +174,6 @@ namespace Drexel.VidUp.Business
                 this.defaultPublishAtTime = new DateTime(1, 1, 1, value.Hour, value.Minute, 0);
             }
         }
-
-
 
         #endregion properties
         private string getPictureFilePath()

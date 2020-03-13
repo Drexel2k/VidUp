@@ -48,20 +48,16 @@ namespace Drexel.VidUp.YouTube
             var video = new Video();
             video.Snippet = new VideoSnippet();
             video.Snippet.Title = upload.YtTitle;
-            video.Snippet.Description = upload.Template != null ? upload.Template.YtDescription : null;
+            video.Snippet.Description = upload.Description;
 
             List<string> tags = new List<string>();
-            tags.AddRange(upload.Template != null ? upload.Template.Tags : new List<string>());
-            tags.AddRange(upload.AdditonalTags);
+            tags.AddRange(upload.Tags != null ? upload.Tags : new List<string>());
             video.Snippet.Tags = tags;
 
             video.Status = new VideoStatus();
 
-            video.Status.PrivacyStatus = "private";
-            if (upload.Template != null)
-            {
-                video.Status.PrivacyStatus = upload.Template.YtVisibility.ToString().ToLower(); // "unlisted", "private" or "public"
-            }
+            video.Status.PrivacyStatus = upload.Visibility.ToString().ToLower(); // "unlisted", "private" or "public"
+
 
             if (upload.PublishAt > DateTime.MinValue)
             {

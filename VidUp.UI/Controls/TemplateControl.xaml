@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Drexel.VidUp.UI.Controls"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              x:Name="UCTemplate"
-             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters">
+             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters" Cursor="Hand">
     <Grid Height="Auto" Width="Auto" Margin="4">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -106,14 +106,14 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
                     <Label Content="Description: " Width="110" HorizontalAlignment="Left" />
-                    <TextBox Text="{Binding YtDescription, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
+                    <TextBox Text="{Binding YtDescription, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="200" MaxHeight ="200" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel  Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
                     <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
                         <Label Content="Tags: " Width="40" />
                         <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." Background="Transparent" />
                     </StackPanel>
-                    <TextBox Text="{Binding TagsAsString}" TextWrapping="Wrap" Width="615" MinHeight="150" MaxHeight ="150" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
+                    <TextBox Text="{Binding TagsAsString}" TextWrapping="Wrap" Width="615" MinHeight="100" MaxHeight ="100" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
                     <Label Content="Visbility: " Width="110" />

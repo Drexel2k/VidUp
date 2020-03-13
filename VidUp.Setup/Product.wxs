@@ -4,7 +4,7 @@
   <Product Id="*" Name="VidUp $(var.BuildVersion)" Language="1033" Version="$(var.BuildVersion)" Manufacturer="Drexel Development" UpgradeCode="{41AC4E42-952A-4D5B-ABB5-8EC4153BE8AF}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of VidUp is already installed." />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of VidUp is already installed." AllowSameVersionUpgrades="no" AllowDowngrades="no" />
     <MediaTemplate EmbedCab="yes" />
 
     <Icon Id="AppIcon" SourceFile="$(var.VidUp.UI.ProjectDir)vidup.ico"/>

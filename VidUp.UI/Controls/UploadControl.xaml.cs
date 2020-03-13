@@ -48,5 +48,29 @@ namespace Drexel.VidUp.UI.Controls
                 uploadViewModel.SetPublishAtTime(selectedQuarterHour.QuarterHour);
             }
         }
+
+        private void GroupBox_MouseEnter(object sender, MouseEventArgs e)
+        {
+            this.Description.MinHeight = 200;
+            this.Tags.MinHeight = 100;
+        }
+
+        private void GroupBox_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (!this.Title.IsFocused && !this.Description.IsFocused && !this.Tags.IsFocused)
+            {
+                this.Description.MinHeight = 0;
+                this.Tags.MinHeight = 0;
+            }
+        }
+
+        private void CtrlLostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!this.GroupBox.IsMouseOver)
+            {
+                this.Description.MinHeight = 0;
+                this.Tags.MinHeight = 0;
+            }
+        }
     }
 }

@@ -10,18 +10,20 @@ namespace Drexel.VidUp.UI.ViewModels
     class ObservableUploadViewModels : INotifyCollectionChanged, IEnumerable<UploadViewModel>
     {
         private List<UploadViewModel> uploadViewModels;
+        private MainWindowViewModel mainWindowViewModel;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public ObservableUploadViewModels(UploadList uploadList)
+        public ObservableUploadViewModels(UploadList uploadList, MainWindowViewModel mainWindowViewModel)
         {
             this.uploadViewModels = new List<UploadViewModel>();
+            this.mainWindowViewModel = mainWindowViewModel;
 
             if (uploadList != null)
             {
                 foreach (Upload upload in uploadList)
                 {
-                    this.uploadViewModels.Add(new UploadViewModel(upload));
+                    this.uploadViewModels.Add(new UploadViewModel(upload, this.mainWindowViewModel));
                 }
             }
         }
@@ -50,7 +52,7 @@ namespace Drexel.VidUp.UI.ViewModels
             List<UploadViewModel> newViewModels = new List<UploadViewModel>();
             foreach(Upload upload in uploads)
             {
-                newViewModels.Add(new UploadViewModel(upload));
+                newViewModels.Add(new UploadViewModel(upload, this.mainWindowViewModel));
             }
 
             this.uploadViewModels.AddRange(newViewModels);
