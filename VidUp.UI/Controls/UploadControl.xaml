@@ -72,7 +72,7 @@
                 <Label Width="410">
                     <TextBlock Text="{Binding ThumbnailPath, Mode=OneWay}" TextWrapping="Wrap" />
                 </Label>
-                <Button Command="{Binding DataContext.OpenFileDialogCommand, ElementName=UCUploads }" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Padding="0" Width="70" Height="25"  Grid.Column="2" IsEnabled="{Binding ControlsEnabled}">
+                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Padding="0" Width="70" Height="25"  Grid.Column="2" IsEnabled="{Binding ControlsEnabled}" Cursor="Hand">
                     Browse
                 </Button>
             </StackPanel>
