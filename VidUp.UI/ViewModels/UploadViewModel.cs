@@ -475,6 +475,8 @@ namespace Drexel.VidUp.UI.ViewModels
                         RaisePropertyChanged(null);
                         break;
                 }
+
+                JsonSerialization.SerializeAllUploads();
             }
         }
     }
