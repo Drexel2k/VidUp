@@ -28,12 +28,35 @@ namespace Drexel.VidUp.UI.ViewModels
         }
         public string Name
         {
-            get => this.template != null ? this.template.Name : null;
+            get
+            {
+                if (this.template != null)
+                {
+                    return this.template.IsDefault ? string.Format("{0} *", this.template.Name) : this.template.Name;
+                }
+
+                return null;
+            }
         }
 
         public TemplateComboboxViewModel(Template template)
         {
             this.template = template;
+        }
+
+        internal void RaiseNameChange()
+        {
+            this.raisePropertyChanged("Name");
+        }
+
+        private void raisePropertyChanged(string propertyName)
+        {
+            // take a copy to prevent thread issues
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (PropertyChanged != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }

@@ -64,6 +64,11 @@ namespace Drexel.VidUp.Business
 
             return null;
         }
+
+        public Template GetDefaultTemplate()
+        {
+            return this.templates.Find(template => template.IsDefault);
+        }
         #endregion IEnumerable
 
         public Template this[int index]
@@ -108,6 +113,11 @@ namespace Drexel.VidUp.Business
         public ReadOnlyCollection<Template> GetReadonlyTemplateList()
         {
             return this.templates.AsReadOnly();
+        }
+
+        public Template Find(Predicate<Template> match)
+        {
+            return this.templates.Find(match);
         }
     }
 }

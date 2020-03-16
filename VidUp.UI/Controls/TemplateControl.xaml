@@ -34,6 +34,7 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Canvas Grid.Row="0" Grid.ColumnSpan="2" Margin="1,0,1,0">
                     <Canvas.Background>
@@ -75,6 +76,11 @@
                     <Label Content="{Binding ThumbnailFolderPath, Mode=OneWay}" Width="380" Margin="0 0 10 0" />
                     <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="VidUp will assign thumbnails automatically if the file names without extension are equal. Lookup location this folder, then in folder of video." Background="Transparent" />
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" Cursor="Hand" />
+                </StackPanel>
+                <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <Label Content="Default Template: " Width="115" />
+                    <CheckBox IsChecked="{Binding IsDefault}"  Margin="0 0 10 0" />
+                    <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="When a new video is added which doesn't belong to any project's root folder, this template is set automatically." Background="Transparent" />
                 </StackPanel>
 
             </Grid>

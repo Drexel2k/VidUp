@@ -114,7 +114,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (currentView != value)
                 {
                     currentView = value;
-                    RaisePropertyChanged("CurrentView");
+                    this.raisePropertyChanged("CurrentView");
                     if(currentView is TemplateViewModel)
                     {
                         if(this.templateList.TemplateCount == 0)
@@ -158,6 +158,25 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public void SetDefaultTemplate(Template template, bool isDefault)
+        {
+            if (isDefault)
+            {
+                Template templateInternal = this.templateList.Find(templateInternal2 => templateInternal2.IsDefault);
+                if (templateInternal != null)
+                {
+                    templateInternal.IsDefault = false;
+                    this.observableTemplateViewModels.RaiseNameChange(templateInternal);
+                }
+            }
+
+            template.IsDefault = isDefault;
+            this.observableTemplateViewModels.RaiseNameChange(template);
+
+
+            JsonSerialization.SerializeTemplateList();
+        }
+
         public GenericCommand DonateCommand
         {
             get
@@ -195,7 +214,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.postUploadAction = value;
-                RaisePropertyChanged("PostUploadAction");
+                this.raisePropertyChanged("PostUploadAction");
             }
         }
 
@@ -332,7 +351,7 @@ namespace Drexel.VidUp.UI.ViewModels
                             throw new Exception("View not implemented");
                     }
 
-                    RaisePropertyChanged("TabNo");
+                    this.raisePropertyChanged("TabNo");
                 }
             }
         }
@@ -365,14 +384,14 @@ namespace Drexel.VidUp.UI.ViewModels
                         this.TemplateViewModel.Template = null;
                     }
 
-                    RaisePropertyChanged("SelectedTemplate");
+                    this.raisePropertyChanged("SelectedTemplate");
                 }
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void RaisePropertyChanged(string propertyName)
+        private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
             PropertyChangedEventHandler handler = PropertyChanged;
@@ -420,7 +439,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.appStatus = AppStatus.Uploading;
                 //prevent sleep mode
                 PowerSavingHelper.DisablePowerSaving();
-                RaisePropertyChanged("AppStatus");
+                this.raisePropertyChanged("AppStatus");
 
 
                 bool oneUploadFinished = false;
@@ -431,11 +450,11 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.currentUploadStart = DateTime.Now;
 
                     this.uploadListViewModel.SetUploadStatus(upload.Guid, UplStatus.Uploading);
-                    RaisePropertyChanged("CurrentFilePercent");
-                    RaisePropertyChanged("CurrentFileTimeLeft");
-                    RaisePropertyChanged("CurrentFileMbLeft");
-                    RaisePropertyChanged("TotalMbLeft");
-                    RaisePropertyChanged("TotalTimeLeft");
+                    this.raisePropertyChanged("CurrentFilePercent");
+                    this.raisePropertyChanged("CurrentFileTimeLeft");
+                    this.raisePropertyChanged("CurrentFileMbLeft");
+                    this.raisePropertyChanged("TotalMbLeft");
+                    this.raisePropertyChanged("TotalTimeLeft");
 
                     string videoId = await Youtube.Upload(upload, videosInsertRequest_ProgressChanged, Settings.UserSuffix);
 
@@ -466,13 +485,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.appStatus = AppStatus.Idle;
 
                 PowerSavingHelper.EnablePowerSaving();
-                RaisePropertyChanged("AppStatus");
+                this.raisePropertyChanged("AppStatus");
 
-                RaisePropertyChanged("CurrentFilePercent");
-                RaisePropertyChanged("CurrentFileTimeLeft");
-                RaisePropertyChanged("CurrentFileMbLeft");
-                RaisePropertyChanged("TotalMbLeft");
-                RaisePropertyChanged("TotalTimeLeft");
+                this.raisePropertyChanged("CurrentFilePercent");
+                this.raisePropertyChanged("CurrentFileTimeLeft");
+                this.raisePropertyChanged("CurrentFileMbLeft");
+                this.raisePropertyChanged("TotalMbLeft");
+                this.raisePropertyChanged("TotalTimeLeft");
 
                 if (oneUploadFinished)
                 {
@@ -512,9 +531,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.templateViewModel.SerializeTemplateList();
 
                 this.observableTemplateViewModels.AddTemplates(list);
-                this.SelectedTemplate = this.observableTemplateViewModels.GetTemplateByGuid(template.Guid);
-
-                RaisePropertyChanged("templateList");                
+                this.SelectedTemplate = this.observableTemplateViewModels.GetTemplateByGuid(template.Guid);               
             }
 
             if(!result && this.templateList.TemplateCount == 0)
@@ -591,7 +608,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.totalBytesToUpload = length;
-            RaisePropertyChanged("TotalMbLeft");
+            this.raisePropertyChanged("TotalMbLeft");
         }
 
         void videosInsertRequest_ProgressChanged(IUploadProgress progress)
@@ -600,11 +617,11 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.currentUploadBytesSent = progress.BytesSent;
 
-                RaisePropertyChanged("CurrentFilePercent");
-                RaisePropertyChanged("CurrentFileTimeLeft");
-                RaisePropertyChanged("CurrentFileMbLeft");
-                RaisePropertyChanged("TotalMbLeft");
-                RaisePropertyChanged("TotalTimeLeft");
+                this.raisePropertyChanged("CurrentFilePercent");
+                this.raisePropertyChanged("CurrentFileTimeLeft");
+                this.raisePropertyChanged("CurrentFileMbLeft");
+                this.raisePropertyChanged("TotalMbLeft");
+                this.raisePropertyChanged("TotalTimeLeft");
             }
         }
     }

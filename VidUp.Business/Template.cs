@@ -37,6 +37,8 @@ namespace Drexel.VidUp.Business
         private DateTime defaultPublishAtTime;
         [JsonProperty]
         private string thumbnailFolderPath;
+        [JsonProperty]
+        private bool isDefault;
 
         public Template()
         {
@@ -99,30 +101,30 @@ namespace Drexel.VidUp.Business
         }
         public string YtDescription
         {
-            get => ytDescription;
+            get => this.ytDescription;
             set
             {
-                ytDescription = value;
+                this.ytDescription = value;
                 this.lastModified = DateTime.Now;
             }
         }
 
         public List<string> Tags
         {
-            get => tags;
+            get => this.tags;
             set
             {
-                tags = value;
+                this.tags = value;
                 this.lastModified = DateTime.Now;
             }
         }
 
         public YtVisibility YtVisibility
         {
-            get => ytVisibility;
+            get => this.ytVisibility;
             set
             {
-                ytVisibility = value;
+                this.ytVisibility = value;
                 this.lastModified = DateTime.Now;
             }
         }
@@ -137,27 +139,37 @@ namespace Drexel.VidUp.Business
             get => this.pictureFilePath;
             set
             {
-                pictureFilePath = value;
+                this.pictureFilePath = value;
                 this.lastModified = DateTime.Now;
             }
         }
 
         public string RootFolderPath
         {
-            get => rootFolderPath;
+            get => this.rootFolderPath;
             set
             {
-                rootFolderPath = value;
+                this.rootFolderPath = value;
                 this.lastModified = DateTime.Now;
             }
         }
 
         public string ThumbnailFolderPath
         {
-            get => thumbnailFolderPath;
+            get => this.thumbnailFolderPath;
             set
             {
-                thumbnailFolderPath = value;
+                this.thumbnailFolderPath = value;
+                this.lastModified = DateTime.Now;
+            }
+        }
+
+        public bool IsDefault
+        {
+            get => this.isDefault;
+            set
+            {
+                this.isDefault = value;
                 this.lastModified = DateTime.Now;
             }
         }

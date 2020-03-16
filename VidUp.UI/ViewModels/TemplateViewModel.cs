@@ -173,6 +173,16 @@ namespace Drexel.VidUp.UI.ViewModels
                 RaisePropertyChangedAndSerializeTemplateList("ThumbnailFolderPath");
             }
         }
+
+        public bool IsDefault
+        {
+            get => this.template.IsDefault;
+            set
+            {
+                this.mainWindowViewModel.SetDefaultTemplate(this.template, value);
+                RaisePropertyChangedAndSerializeTemplateList("IsDefault");
+            }
+        }
         #endregion properties
 
         public TemplateViewModel(MainWindowViewModel mainWindowViewModel)

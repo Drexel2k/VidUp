@@ -77,12 +77,12 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.UploadStatus = value;
-                this.RaisePropertyChanged("UploadErrorMessage");
-                this.RaisePropertyChanged("ShowUploadErrorIcon");
-                this.RaisePropertyChanged("UploadStatus");
-                this.RaisePropertyChanged("UploadStart");
-                this.RaisePropertyChanged("UploadEnd");
-                this.RaisePropertyChanged("ControlsEnabled");
+                this.raisePropertyChanged("UploadErrorMessage");
+                this.raisePropertyChanged("ShowUploadErrorIcon");
+                this.raisePropertyChanged("UploadStatus");
+                this.raisePropertyChanged("UploadStart");
+                this.raisePropertyChanged("UploadEnd");
+                this.raisePropertyChanged("ControlsEnabled");
             }
         }
 
@@ -101,7 +101,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.SerializeAllUploads();
                 this.SerializeTemplateList();
 
-                this.RaisePropertyChanged(null);
+                this.raisePropertyChanged(null);
             }
         }
 
@@ -143,8 +143,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Title = value;
                 this.SerializeAllUploads();
 
-                RaisePropertyChanged("YtTitle");
-                RaisePropertyChanged("Title");
+                this.raisePropertyChanged("YtTitle");
+                this.raisePropertyChanged("Title");
             }
         }
 
@@ -156,7 +156,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Description = value;
                 this.SerializeAllUploads();
 
-                RaisePropertyChanged("Description");
+                this.raisePropertyChanged("Description");
             }
         }
 
@@ -168,7 +168,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Tags = new List<string>(value.Split(','));
                 this.SerializeAllUploads();
 
-                RaisePropertyChanged("TagsAsString");
+                this.raisePropertyChanged("TagsAsString");
             }
         }
 
@@ -180,7 +180,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Tags = value;
                 this.SerializeAllUploads();
 
-                RaisePropertyChanged("TagsAsString");
+                this.raisePropertyChanged("TagsAsString");
             }
         }
 
@@ -200,7 +200,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Visibility = value;
                 this.SerializeAllUploads();
 
-                RaisePropertyChanged("Visibility");
+                this.raisePropertyChanged("Visibility");
             }
         }
 
@@ -270,7 +270,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.SerializeAllUploads();
 
-            RaisePropertyChanged("PublishAtTime");
+            this.raisePropertyChanged("PublishAtTime");
         }
 
         public QuarterHourViewModels QuarterHourViewModels
@@ -308,9 +308,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.SerializeAllUploads();
 
-                RaisePropertyChanged("PublishAt");
-                RaisePropertyChanged("PublishAtTime");
-                RaisePropertyChanged("PublishAtDate");
+                this.raisePropertyChanged("PublishAt");
+                this.raisePropertyChanged("PublishAtTime");
+                this.raisePropertyChanged("PublishAtDate");
             }
         }
 
@@ -340,7 +340,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.SetPublishAtDate(value);
                 this.SerializeAllUploads();
 
-                RaisePropertyChanged("PublishAtDate");
+                this.raisePropertyChanged("PublishAtDate");
             }
         }
 
@@ -362,7 +362,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.ThumbnailPath = value;
-                RaisePropertyChanged("ThumbnailPath");
+                this.raisePropertyChanged("ThumbnailPath");
             }
         }
 
@@ -380,7 +380,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.resetToTemplateValueCommand = new GenericCommand(resetToTemplateVuale);
         } 
 
-        private void RaisePropertyChanged(string propertyName)
+        private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
             PropertyChangedEventHandler handler = PropertyChanged;
@@ -455,24 +455,24 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     case "title":
                         this.upload.CopyTitleFromTemplate();
-                        RaisePropertyChanged("Title");
-                        RaisePropertyChanged("YtTitle");
+                        raisePropertyChanged("Title");
+                        raisePropertyChanged("YtTitle");
                         break;
                     case "description":
                         this.upload.CopyDescriptionFromTemplate();
-                        RaisePropertyChanged("Description");
+                        raisePropertyChanged("Description");
                         break;
                     case "tags":
                         this.upload.CopyTagsFromtemplate();
-                        RaisePropertyChanged("TagsAsString");
+                        raisePropertyChanged("TagsAsString");
                         break;
                     case "visibility":
                         this.upload.CopyVisbilityFromTemplate();
-                        RaisePropertyChanged("Visibility");
+                        raisePropertyChanged("Visibility");
                         break;
                     default:
                         this.upload.CopyTemplateValues();
-                        RaisePropertyChanged(null);
+                        raisePropertyChanged(null);
                         break;
                 }
 

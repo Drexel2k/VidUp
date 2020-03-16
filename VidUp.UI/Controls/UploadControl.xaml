@@ -8,9 +8,12 @@
              d:DesignWidth="800"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              x:Name="UCUpload">
-    <GroupBox Padding="0" x:Name="GroupBox" Margin="4" MouseEnter="GroupBox_MouseEnter" MouseLeave="GroupBox_MouseLeave" VerticalAlignment="Top" >
-        <GroupBox.Header>
-            <TextBlock Text="{Binding YtTitle, Mode=OneWay}" Margin="2" MaxWidth="610" TextWrapping="Wrap" />
+    <GroupBox Padding="0" x:Name="GroupBox" Margin="4" VerticalAlignment="Top" >
+        <GroupBox.Header >
+            <StackPanel Orientation="Horizontal" Margin="0">
+                <TextBlock Text="{Binding YtTitle, Mode=OneWay}" Margin="2" Width="599" TextWrapping="Wrap" />
+                <Button x:Name="Minimize" Padding="0" Width="17" Height="20"  ToolTip="Minimize." Content="_" Style="{StaticResource MaterialDesignOutlinedButtonEx}" BorderBrush="Transparent" Foreground="Black" Click="minimizeClick" Visibility="Collapsed" />
+            </StackPanel>
         </GroupBox.Header>
 
         <Grid Height="Auto" Width="620" MaxWidth="620"  >
@@ -63,7 +66,7 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>                
                 <Label Content="Title: " Width="115" />
-                <TextBox x:Name="Title" Text="{Binding Title}"  Width="470" LostFocus="CtrlLostFocus" IsEnabled="{Binding ControlsEnabled}" />
+                <TextBox x:Name="Title" Text="{Binding Title}"  Width="470" IsEnabled="{Binding ControlsEnabled}" />
                 <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." Background="Transparent" />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
@@ -72,7 +75,7 @@
                 <Label Width="410">
                     <TextBlock Text="{Binding ThumbnailPath, Mode=OneWay}" TextWrapping="Wrap" />
                 </Label>
-                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Padding="0" Width="70" Height="25"  Grid.Column="2" IsEnabled="{Binding ControlsEnabled}" Cursor="Hand">
+                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Padding="0" Width="70" Height="25"  Grid.Column="2" IsEnabled="{Binding ControlsEnabled}">
                     Browse
                 </Button>
             </StackPanel>
@@ -83,7 +86,7 @@
                     </Button>
                     <Label Content="Description: " Width="110" HorizontalAlignment="Left" />
                 </StackPanel>
-                <TextBox x:Name="Description" Text="{Binding Description, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MaxHeight ="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" LostFocus="CtrlLostFocus" IsEnabled="{Binding ControlsEnabled}" />
+                <TextBox x:Name="Description" Text="{Binding Description, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MaxHeight ="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus" />
             </StackPanel>
             <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="2">
                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
@@ -93,7 +96,7 @@
                     <Label Content="Tags: " Width="35" />
                     <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." Background="Transparent" />
                 </StackPanel>
-                <TextBox x:Name="Tags" Text="{Binding TagsAsString}" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" LostFocus="CtrlLostFocus" IsEnabled="{Binding ControlsEnabled}" />
+                <TextBox x:Name="Tags" Text="{Binding TagsAsString}" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus" />
             </StackPanel>
             <StackPanel  Grid.Row="6" Grid.Column="0" Orientation="Horizontal">
                 <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset visibility to template value." Command="{Binding ResetToTemplateValueCommand}" CommandParameter="visibility" IsEnabled="{Binding ControlsEnabled}">

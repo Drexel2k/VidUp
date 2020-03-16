@@ -10,7 +10,6 @@ namespace Drexel.VidUp.UI.ViewModels
     public class ObservableTemplateViewModels : INotifyCollectionChanged, IEnumerable<TemplateComboboxViewModel>
     {
         private List<TemplateComboboxViewModel> templateComboboxViewModels;
-        private TemplateList templateList;
 
         public int TemplateCount { get => templateComboboxViewModels.Count;  }
 
@@ -18,8 +17,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public ObservableTemplateViewModels(TemplateList templateList)
         {
-            this.templateList = templateList;
-
             this.templateComboboxViewModels = new List<TemplateComboboxViewModel>();
             foreach (Template template in templateList)
             {
@@ -76,6 +73,15 @@ namespace Drexel.VidUp.UI.ViewModels
         public TemplateComboboxViewModel GetTemplateByGuid(Guid guid)
         {
             return this.templateComboboxViewModels.Find(templateviewModel => templateviewModel.Guid == guid.ToString());
+        }
+
+        internal void RaiseNameChange(Template template)
+        {
+            TemplateComboboxViewModel viewModel = this.templateComboboxViewModels.Find(viewModel => viewModel.Guid == template.Guid.ToString());
+            if(viewModel != null)
+            {
+                viewModel.RaiseNameChange();
+            }
         }
     }
 }

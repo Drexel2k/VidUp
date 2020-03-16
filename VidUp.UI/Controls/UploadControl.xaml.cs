@@ -48,29 +48,42 @@ namespace Drexel.VidUp.UI.Controls
                 uploadViewModel.SetPublishAtTime(selectedQuarterHour.QuarterHour);
             }
         }
-
-        private void GroupBox_MouseEnter(object sender, MouseEventArgs e)
+        private void controlGotFocus(object sender, RoutedEventArgs e)
         {
-            this.Description.MinHeight = 200;
-            this.Tags.MinHeight = 100;
+            TextBox control = (TextBox)sender;
+            if(control.Name == "Description")
+            {
+                control.MinHeight = 200;
+            }
+
+            if (control.Name == "Tags")
+            {
+                control.MinHeight = 100;
+            }
+
+            UploadControl uploadControl = (UploadControl)((GroupBox)((Grid)((StackPanel)control.Parent).Parent).Parent).Parent;
+            uploadControl.Minimize.Visibility = Visibility.Visible;
         }
 
-        private void GroupBox_MouseLeave(object sender, MouseEventArgs e)
+        private void controlLostFocus(object sender, RoutedEventArgs e)
         {
-            if (!this.Title.IsFocused && !this.Description.IsFocused && !this.Tags.IsFocused)
+            TextBox control = (TextBox)sender;
+            control.MinHeight = 0;
+
+            UploadControl uploadControl = (UploadControl)((GroupBox)((Grid)((StackPanel)control.Parent).Parent).Parent).Parent;
+            if(uploadControl.Description.MinHeight == 0 && uploadControl.Tags.MinHeight == 0)
             {
-                this.Description.MinHeight = 0;
-                this.Tags.MinHeight = 0;
+                uploadControl.Minimize.Visibility = Visibility.Collapsed;
             }
+
         }
 
-        private void CtrlLostFocus(object sender, RoutedEventArgs e)
+        private void minimizeClick(object sender, RoutedEventArgs e)
         {
-            if (!this.GroupBox.IsMouseOver)
-            {
-                this.Description.MinHeight = 0;
-                this.Tags.MinHeight = 0;
-            }
+            UploadControl control = (UploadControl)((GroupBox)((StackPanel)((Button)sender).Parent).Parent).Parent;
+            control.Description.MinHeight = 0;
+            control.Tags.MinHeight = 0;
+            control.Minimize.Visibility = Visibility.Collapsed;
         }
     }
 }
