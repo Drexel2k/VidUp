@@ -17,6 +17,9 @@ namespace Drexel.VidUp.UI.Controls
     /// <summary>
     /// Interaktionslogik für TemplateControl.xaml
     /// </summary>
+    /// 
+
+    //todo: make selection of picture file path, root folder path and thumbnail folder path clearable
     public partial class TemplateControl : UserControl
     {
         public TemplateControl()

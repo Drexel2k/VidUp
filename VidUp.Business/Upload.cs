@@ -25,7 +25,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string filePath;
         [JsonProperty]
-        private string thumbnailPath;
+        private string thumbnailFilePath;
         [JsonProperty]
         private Template template;
         [JsonProperty]
@@ -42,7 +42,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private List<string> tags;
         [JsonProperty]
-        private YtVisibility visibility;
+        private Visibility visibility;
 
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
@@ -81,68 +81,6 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void CopyTemplateValues()
-        {
-            this.CopyTitleFromTemplate();
-            this.CopyDescriptionFromTemplate();
-            this.CopyTagsFromtemplate();
-            this.CopyVisbilityFromTemplate();
-        }
-
-        public void CopyVisbilityFromTemplate()
-        {
-            if (this.template != null)
-            {
-                this.visibility = this.template.YtVisibility;
-            }
-        }
-
-       public void CopyTagsFromtemplate()
-        {
-            if (this.template != null)
-            {
-                if (this.template.Tags != null && this.template.Tags.Count > 0)
-                {
-                    this.tags.Clear();
-                    this.tags.AddRange(this.template.Tags);
-                }
-            }
-        }
-
-        public void CopyDescriptionFromTemplate()
-        {
-            if (this.template != null)
-            {
-                if (!string.IsNullOrWhiteSpace(this.template.YtDescription))
-                {
-                    this.description = this.template.YtDescription;
-                }
-            }
-        }
-
-       public void CopyTitleFromTemplate()
-        {
-            if (this.template != null)
-            {
-                if (!string.IsNullOrWhiteSpace(this.template.YtTitle))
-                {
-                    this.title = this.Template.YtTitle;
-                    Regex regex = new Regex(@"#([^#]+)#");
-                    int matchIndex = 0;
-                    foreach (Match match in regex.Matches(this.FilePath))
-                    {
-                        this.title = this.title.Replace("#" + matchIndex + "#", match.Groups[1].Value);
-
-                        matchIndex++;
-                    }
-                }
-                else
-                {
-                    this.title = string.Empty;
-                }
-            }
-        }
-
         public UplStatus UploadStatus
         {
             get { return this.uploadStatus; }
@@ -153,6 +91,7 @@ namespace Drexel.VidUp.Business
                 if (value == UplStatus.Uploading)
                 {
                     this.uploadStart = DateTime.Now;
+                    this.uploadEnd = DateTime.MinValue;
                 }
 
                 if (value == UplStatus.Finished)
@@ -184,14 +123,14 @@ namespace Drexel.VidUp.Business
         {
             get
             {
-                string title = Path.GetFileNameWithoutExtension(this.filePath);
-                if (!string.IsNullOrWhiteSpace(this.title))
+                if (this.title.Length <= 100)
                 {
-                    title = this.title;
+                    return this.title;
                 }
-
-                int cutOffLength = title.Length <= 100 ? title.Length : 100;
-                return title.Substring(0, cutOffLength);
+                else
+                {
+                    return title.Substring(0, 100);
+                }
             }
         }
 
@@ -203,12 +142,12 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string ThumbnailPath
+        public string ThumbnailFilePath
         {
-            get { return this.thumbnailPath; }
+            get { return this.thumbnailFilePath; }
             set
             {
-                this.thumbnailPath = value;
+                this.thumbnailFilePath = value;
                 this.lastModified = DateTime.Now;
             }
         }
@@ -233,7 +172,13 @@ namespace Drexel.VidUp.Business
             }
             set
             {
-                this.title = value;
+                string title = Path.GetFileNameWithoutExtension(this.filePath);
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    title = value;
+                }
+
+                this.title = title;
             }
         }
 
@@ -249,7 +194,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public YtVisibility Visibility
+        public Visibility Visibility
         {
             get
             {
@@ -275,7 +220,71 @@ namespace Drexel.VidUp.Business
             this.uploadStatus = UplStatus.ReadyForUpload;
             this.tags = new List<string>();
 
+            //to ensure at least file name is set as title.
+            this.Title = string.Empty;
             this.autoSetThumbnail();
+        }
+
+        public void CopyTemplateValues()
+        {
+            this.CopyTitleFromTemplate();
+            this.CopyDescriptionFromTemplate();
+            this.CopyTagsFromtemplate();
+            this.CopyVisbilityFromTemplate();
+        }
+
+        public void CopyVisbilityFromTemplate()
+        {
+            if (this.template != null)
+            {
+                this.visibility = this.template.YtVisibility;
+            }
+        }
+
+        public void CopyTagsFromtemplate()
+        {
+            if (this.template != null)
+            {
+                if (this.template.Tags != null && this.template.Tags.Count > 0)
+                {
+                    this.tags.Clear();
+                    this.tags.AddRange(this.template.Tags);
+                }
+            }
+        }
+
+        public void CopyDescriptionFromTemplate()
+        {
+            if (this.template != null)
+            {
+                if (!string.IsNullOrWhiteSpace(this.template.Description))
+                {
+                    this.description = this.template.Description;
+                }
+            }
+        }
+
+        public void CopyTitleFromTemplate()
+        {
+            if (this.template != null)
+            {
+                if (!string.IsNullOrWhiteSpace(this.template.Title))
+                {
+                    this.title = this.Template.Title;
+                    Regex regex = new Regex(@"#([^#]+)#");
+                    int matchIndex = 0;
+                    foreach (Match match in regex.Matches(this.FilePath))
+                    {
+                        this.title = this.title.Replace("#" + matchIndex + "#", match.Groups[1].Value);
+
+                        matchIndex++;
+                    }
+                }
+                else
+                {
+                    this.Title = string.Empty;
+                }
+            }
         }
 
         public void SetPublishAtTime(DateTime quarterHour)
@@ -312,7 +321,7 @@ namespace Drexel.VidUp.Business
                     {
                         if(extensions.Contains(Path.GetExtension(currentFile).ToLower()))
                         {
-                            this.ThumbnailPath = currentFile;
+                            this.ThumbnailFilePath = currentFile;
                             found = true;
                             break;
                         }
@@ -328,10 +337,19 @@ namespace Drexel.VidUp.Business
                     {
                         if (extensions.Contains(Path.GetExtension(currentFile).ToLower()))
                         {
-                            this.ThumbnailPath = currentFile;
+                            this.ThumbnailFilePath = currentFile;
+                            found = true;
                             break;
                         }
                     }
+                }
+            }
+
+            if(!found)
+            {
+                if(this.template != null && !string.IsNullOrWhiteSpace(this.template.ThumbnailFallbackFilePath))
+                {
+                    this.thumbnailFilePath = this.template.ThumbnailFallbackFilePath;
                 }
             }
         }

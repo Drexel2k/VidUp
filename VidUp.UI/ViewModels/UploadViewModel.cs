@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -115,19 +116,44 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.LastModified;
         }
 
-        public DateTime UploadStart
+        public string UploadStart
         {
-            get => this.upload.UploadStart;
+            get
+            {
+                if (this.upload.UploadStart > DateTime.MinValue)
+                {
+                    return this.upload.UploadStart.ToString("g");
+                }
+
+                return null;
+            }
         }
 
-        public DateTime UploadEnd
+        public string UploadEnd
         {
-            get => this.upload.UploadEnd;
+            get
+            {
+                if (this.upload.UploadEnd > DateTime.MinValue)
+                {
+                    return this.upload.UploadEnd.ToString("g");
+                }
+
+                return null;
+            }
         }
 
-        public string PictureFilePath
+        public BitmapImage PictureFilePath
         {
-            get => this.upload.PictureFilePath;
+            get
+            {
+                BitmapImage bi3 = new BitmapImage();
+                bi3.BeginInit();
+                bi3.UriSource = new Uri(this.upload.PictureFilePath, UriKind.Absolute);
+                bi3.CacheOption = BitmapCacheOption.OnLoad;
+                bi3.EndInit();
+
+                return bi3;
+            }
         }
 
         public string YtTitle
@@ -162,7 +188,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string TagsAsString
         {
-            get => string.Join(',', this.upload.Tags);
+            get => string.Join(",", this.upload.Tags);
             set
             {
                 this.upload.Tags = new List<string>(value.Split(','));
@@ -184,15 +210,15 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public Array YtVisibilities
+        public Array Visibilities
         {
             get
             {
-                return Enum.GetValues(typeof(YtVisibility));
+                return Enum.GetValues(typeof(Visibility));
             }
         }
 
-        public YtVisibility Visibility
+        public Visibility Visibility
         {
             get => this.upload.Visibility;
             set
@@ -221,7 +247,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this.upload.ThumbnailPath) || File.Exists(this.upload.ThumbnailPath))
+                if (string.IsNullOrWhiteSpace(this.upload.ThumbnailFilePath) || File.Exists(this.upload.ThumbnailFilePath))
                 {
                     return "Collapsed";
                 }
@@ -238,18 +264,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string ShowUploadErrorIcon
-        {
-            get
-            {
-                if (!(this.upload.UploadStatus == UplStatus.Failed))
-                {
-                    return "Collapsed";
-                }
-
-                return "Visible";
-            }
-        }
         public bool ControlsEnabled
         {
             get
@@ -353,16 +367,16 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         public Upload Upload { get => this.upload;  }
-        public string ThumbnailPath
+        public string ThumbnailFilePath
         {
             get
             {
-                return this.upload.ThumbnailPath;
+                return this.upload.ThumbnailFilePath;
             }
             set
             {
-                this.upload.ThumbnailPath = value;
-                this.raisePropertyChanged("ThumbnailPath");
+                this.upload.ThumbnailFilePath = value;
+                this.raisePropertyChanged("ThumbnailFilePath");
             }
         }
 
@@ -404,7 +418,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.UploadStatus = UplStatus.ReadyForUpload;
             JsonSerialization.SerializeAllUploads();
-            this.mainWindowViewModel.SumTotalBytesToUpload();
+            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
         }
 
         private void setPausedUploadState(object parameter)
@@ -412,7 +426,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.UploadStatus = UplStatus.Paused;
             JsonSerialization.SerializeAllUploads();
 
-            this.mainWindowViewModel.SumTotalBytesToUpload();
+            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
         }
 
         private void setTemplateToNull(object parameter)
@@ -442,7 +456,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (result == DialogResult.OK)
             {
-                this.ThumbnailPath = fileDialog.FileName;
+                this.ThumbnailFilePath = fileDialog.FileName;
                 JsonSerialization.SerializeAllUploads();
             }
         }

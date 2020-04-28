@@ -27,6 +27,10 @@ namespace Drexel.VidUp.JSON
             {
                 JsonSerialization.serializationFolder = value;
             }
+            get
+            {
+                return JsonSerialization.serializationFolder;
+            }
         }
         public static void Initialize()
         {

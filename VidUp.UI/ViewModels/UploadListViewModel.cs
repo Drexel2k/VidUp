@@ -14,11 +14,13 @@ namespace Drexel.VidUp.UI.ViewModels
     class UploadListViewModel
     {
         private UploadList uploadList;
+        //needed for template combobox in upload control
         private TemplateList templateList;
         private MainWindowViewModel mainWindowViewModel;
 
         private GenericCommand deleteCommand;
         private ObservableUploadViewModels observableUploadViewModels;
+
 
         public TemplateList TemplateList
         {
@@ -27,7 +29,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 return this.templateList;
             }
         }
-
         public GenericCommand DeleteCommand
         {
             get
@@ -35,8 +36,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 return this.deleteCommand;
             }
         }
-
-       
 
         public ObservableUploadViewModels ObservableUploadViewModels
         {
@@ -53,7 +52,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.mainWindowViewModel);
 
             this.templateList = templateList;
-            this.deleteCommand = new GenericCommand(deleteUpload);
+            this.deleteCommand = new GenericCommand(removeUpload);
         }
 
         public void AddUploads(List<Upload> uploads, TemplateList templateList)
@@ -64,7 +63,7 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeTemplateList();
             this.observableUploadViewModels.AddUploads(uploads);
 
-            this.mainWindowViewModel.SumTotalBytesToUpload();
+            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
         }
 
         internal void RemoveAllUploaded()
@@ -79,11 +78,12 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeUploadList();
         }
 
-        private void deleteUpload(object parameter)
+        private void removeUpload(object parameter)
         {
             Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
 
             this.uploadList.Remove(upload);
+            this.mainWindowViewModel.DeleteThumbnailIfPossible(upload.ThumbnailFilePath);
 
             if(upload.UploadStatus != UplStatus.Finished && upload.Template != null)
             {
@@ -95,7 +95,7 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeTemplateList();
             this.observableUploadViewModels.Remove(upload);
 
-            this.mainWindowViewModel.SumTotalBytesToUpload();
+            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
         }
 
         public void RemoveTemplateFromUploads(Template template)

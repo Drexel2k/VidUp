@@ -20,6 +20,7 @@ namespace Drexel.VidUp.UI.Controls
     /// </summary>
     public partial class UploadControl : UserControl
     {
+        //todo: make thumbnail file path clearable
         public UploadControl()
         {
             InitializeComponent();
@@ -62,7 +63,7 @@ namespace Drexel.VidUp.UI.Controls
             }
 
             UploadControl uploadControl = (UploadControl)((GroupBox)((Grid)((StackPanel)control.Parent).Parent).Parent).Parent;
-            uploadControl.Minimize.Visibility = Visibility.Visible;
+            uploadControl.Minimize.Visibility = System.Windows.Visibility.Visible;
         }
 
         private void controlLostFocus(object sender, RoutedEventArgs e)
@@ -73,7 +74,7 @@ namespace Drexel.VidUp.UI.Controls
             UploadControl uploadControl = (UploadControl)((GroupBox)((Grid)((StackPanel)control.Parent).Parent).Parent).Parent;
             if(uploadControl.Description.MinHeight == 0 && uploadControl.Tags.MinHeight == 0)
             {
-                uploadControl.Minimize.Visibility = Visibility.Collapsed;
+                uploadControl.Minimize.Visibility = System.Windows.Visibility.Collapsed;
             }
 
         }
@@ -83,7 +84,7 @@ namespace Drexel.VidUp.UI.Controls
             UploadControl control = (UploadControl)((GroupBox)((StackPanel)((Button)sender).Parent).Parent).Parent;
             control.Description.MinHeight = 0;
             control.Tags.MinHeight = 0;
-            control.Minimize.Visibility = Visibility.Collapsed;
+            control.Minimize.Visibility = System.Windows.Visibility.Collapsed;
         }
     }
 }

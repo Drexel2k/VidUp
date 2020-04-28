@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Drexel.VidUp.Business
 {
-    public enum YtVisibility
+    public enum Visibility
     {
         [Description("Public")]
         Public,

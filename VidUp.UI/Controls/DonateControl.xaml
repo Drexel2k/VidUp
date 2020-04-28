@@ -31,11 +31,11 @@
         <TextBlock Grid.Row="7">Recurring donation (U.S. platform): <Hyperlink NavigateUri="https://www.patreon.com/Drexel2k" RequestNavigate="Hyperlink_RequestNavigate">Patreon</Hyperlink></TextBlock>
         <TextBlock Grid.Row="8">Recurring donation (German platform): <Hyperlink NavigateUri="https://steadyhq.com/en/drexel" RequestNavigate="Hyperlink_RequestNavigate">SteadHQ</Hyperlink></TextBlock>
 
-        <Button Grid.Row="9" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" Cursor="Hand" HorizontalAlignment="Left">
+        <Button Grid.Row="9" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>
             </Button.CommandParameter>
-            ACCEPT
+            CLOSE
         </Button>
 
     </Grid>

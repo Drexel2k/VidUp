@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Drexel.VidUp.UI.Controls"
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
+             xmlns:ui="clr-namespace:Drexel.VidUp.UI"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="330">
@@ -22,17 +23,25 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0">New Template</TextBlock>
         <TextBlock FontSize="9" Margin="0, 12, 0, 0" Grid.Row="1">VidUp Display Information:</TextBlock>
-        <TextBox wpf:HintAssist.Hint="Template Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Grid.Row="2" IsManipulationEnabled="True"/>
+        <TextBox wpf:HintAssist.Hint="Template Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Grid.Row="2" IsManipulationEnabled="True"/>
         <Grid  Grid.Row="3" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="20" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBox wpf:HintAssist.Hint="Template Picture" Text="{Binding PictureFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" />
+            <DockPanel Grid.Column="0" LastChildFill="True">
+                <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File does exist. Current file will be renamed in VidUp's template iamges folder." ToolTipService.ShowDuration="60000" Visibility="{Binding PictureFilePath, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.TemplateImageFolder}}" Margin="0 0 0 4"  VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+                <TextBox wpf:HintAssist.Hint="Template Picture" Text="{Binding PictureFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False"  />
+            </DockPanel >
+            <!--<StackPanel Grid.Column="0" Orientation="Horizontal"  >
+                <materialDesign:PackIcon Kind="Warning" ToolTip="File does exist. Current file will be renamed in VidUp's template iamges folder." ToolTipService.ShowDuration="60000" Visibility="{Binding PictureFilePath, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}}" Margin="0 0 0 4"  VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+                <TextBox wpf:HintAssist.Hint="Template Picture" Text="{Binding PictureFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" HorizontalAlignment="Stretch" />
+                
+            </StackPanel>-->
             <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...-->
-            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For visualization of uploads in upload view. Recommended size: 618x50px." Background="Transparent" />
-            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2" Cursor="Hand">
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For visualization of uploads in upload view. Recommended size: 618x50px." ToolTipService.ShowDuration="60000" Background="Transparent" />
+            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2">
                 Browse
             </Button>
         </Grid>
@@ -45,22 +54,20 @@
             </Grid.ColumnDefinitions>
             <TextBox wpf:HintAssist.Hint="Root Folder" Text="{Binding RootFolderPath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" />
             <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...-->
-            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file added from this folder or any subfolder this template is assigne automatically." Background="Transparent" />
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file added from this folder or any subfolder this template is assigne automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />
             <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2">
                 Browse
             </Button>
         </Grid>
         <StackPanel Orientation="Horizontal" Grid.Row="6"
                     Margin="0 16 0 0">
-            <Button IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}"
-                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}" IsEnabled="{Binding FormValid}" Cursor="Hand" >
+            <Button IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" IsEnabled="{Binding FormValid}" >
                 <Button.CommandParameter>
                     <system:Boolean>True</system:Boolean>
                 </Button.CommandParameter>
                 ACCEPT
             </Button>
-            <Button IsCancel="True" Margin="8 0 0 0" Style="{DynamicResource MaterialDesignFlatButton}"
-                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+            <Button IsCancel="True" Margin="8 0 0 0" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
                 </Button.CommandParameter>

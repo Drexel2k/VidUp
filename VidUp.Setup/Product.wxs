@@ -1,8 +1,15 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+
   
   <Product Id="*" Name="VidUp $(var.BuildVersion)" Language="1033" Version="$(var.BuildVersion)" Manufacturer="Drexel Development" UpgradeCode="{41AC4E42-952A-4D5B-ABB5-8EC4153BE8AF}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <PropertyRef Id='WIXNETFX4RELEASEINSTALLED'/>
+    <Condition Message='This setup requires the .NET Framework 4.7.2 (or greater) to be installed.'>
+      <![CDATA[Installed OR (WIXNETFX4RELEASEINSTALLED >= "#461808")]]>
+    </Condition>
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of VidUp is already installed." AllowSameVersionUpgrades="no" AllowDowngrades="no" />
     <MediaTemplate EmbedCab="yes" />
@@ -11,6 +18,7 @@
     <Property Id="ARPPRODUCTICON">AppIcon</Property>
 
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <!-- Add WixUiExtension as reference to setup project-->
     <UIRef Id="WixUI_InstallDir" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.VidUp.UI.ProjectDir)license.rtf"/>
 
@@ -26,39 +34,38 @@
       <Directory Id="ProgramMenuFolder">
         <Directory Id="InstallProgramMenuFolder" Name="VidUp" />
       </Directory>
-      
+
       <?if $(var.Platform)=x64?>
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="VidUp" />
-        
+
       </Directory>
       <?else?>
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLFOLDER" Name="VidUp" />
       </Directory>
       <?endif?>
-      
+
     </Directory>
   </Fragment>
 
   <Fragment>
 
-    <ComponentGroup Id="ProductComponents">
-
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <!-- Shortcut -->
       <ComponentRef Id="MainAppShortcut" />
 
     </ComponentGroup>
 
-    <DirectoryRef Id="INSTALLFOLDER" FileSource="../VidUp.UI/publish/$(var.Configuration)/$(var.Platform)">
+    <DirectoryRef Id="INSTALLFOLDER"  FileSource="$(var.SolutionDir)/VidUp.UI/bin/$(var.Configuration)/$(var.Platform)">
       <Component Id="MainAppShortcut" Guid="{9A1E7774-886A-47D9-ACCF-7E5AE3BC51F0}">
 
-        <Shortcut Id="MainAppShortcut" Name="VidUp" Target="[INSTALLFOLDER]VidUp.exe" Directory="InstallProgramMenuFolder" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
+        <Shortcut Id="MainAppShortcut" Name="VidUp" Target="[INSTALLFOLDER]VidUp.UI.exe" Directory="InstallProgramMenuFolder" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
         <!-- not really need, but the component section needs a key-->
         <RegistryValue Id="RegShortcutKey" Root="HKCU" Key="Software/VidUp" Name="Shortcut" Value="1" Type="integer" KeyPath="yes" />
         <RemoveFolder Id="RemoveStartMenu" Directory="InstallProgramMenuFolder" On="uninstall" />
       </Component>
     </DirectoryRef>
-    
+
   </Fragment>
 </Wix>

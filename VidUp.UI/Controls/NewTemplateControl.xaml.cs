@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Forms;
 
 namespace Drexel.VidUp.UI.Controls
 {
     /// <summary>
     /// Interaktionslogik für NewTemplateControl.xaml
     /// </summary>
-    public partial class NewTemplateControl : UserControl
+    public partial class NewTemplateControl : System.Windows.Controls.UserControl
     {
+        //todo: make selection of picture file path and root folder path clearable
         public NewTemplateControl()
         {
             InitializeComponent();

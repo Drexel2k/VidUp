@@ -4,48 +4,52 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.10</ProductVersion>
-    <ProjectGuid>9140f98b-8dfd-4ca2-9f62-76347e5a57ad</ProjectGuid>
+    <ProjectGuid>c4e4dba7-342f-43fb-9370-2c2211cef9f8</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>VidUp.Setup.$(Configuration).$(Platform)</OutputName>
     <OutputType>Package</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DefineConstants>Debug;</DefineConstants>
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ComponentsGenerated.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <WixExtension Include="WixNetFxExtension">
+      <HintPath>$(WixExtDir)\WixNetFxExtension.dll</HintPath>
+      <Name>WixNetFxExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\VidUp.UI\VidUp.UI.csproj">
       <Name>VidUp.UI</Name>
-      <Project>{00ce8b5c-acfa-4dee-b5a4-3dfac4ef5284}</Project>
+      <Project>{0c92042c-fc79-4e92-9123-ff9df92c4a28}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <WixExtension Include="WixUIExtension">
-      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
-      <Name>WixUIExtension</Name>
-    </WixExtension>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
@@ -53,26 +57,16 @@
     <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
   </Target>
   <Target Name="BeforeBuild">
-    <Exec Command="rd /s /q  &quot;../VidUp.UI/publish&quot;" />
-	<Exec Command="rd /s /q  &quot;bin/$(Platform)/$(Configuration)&quot;" />
-    <Exec Command="dotnet publish &quot;$(ProjectDir)../VidUp.UI/VidUp.UI.csproj&quot; /p:PublishProfile=$(Configuration)$(Platform)" />
-    <GetAssemblyIdentity AssemblyFiles="../VidUp.UI/publish/$(Configuration)/$(Platform)/VidUp.dll">
+    <Exec Command="rd /s /q  &quot;bin&quot;" />
+    <GetAssemblyIdentity AssemblyFiles="$(SolutionDir)VidUp.UI/bin/$(Configuration)/$(Platform)/VidUp.UI.exe">
       <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
     </GetAssemblyIdentity>
     <PropertyGroup>
-      <DefineConstants>BuildVersion=%(AssemblyVersion.Version);BasePath=../VidUp.UI/publish/$(Configuration)/$(Platform)</DefineConstants>
+      <DefineConstants>BuildVersion=%(AssemblyVersion.Version);BasePath=$(SolutionDir)VidUp.Ui/bin/$(Configuration)/$(Platform)</DefineConstants>
     </PropertyGroup>
-    <HeatDirectory OutputFile="ComponentsGenerated.wxs" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="PublishedComponents" SuppressCom="true" Directory="../VidUp.UI/publish/$(Configuration)/$(Platform)" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" />
+    <HeatDirectory OutputFile="ComponentsGenerated.wxs" DirectoryRefId="INSTALLFOLDER" ComponentGroupName="PublishedComponents" SuppressCom="true" Directory="$(SolutionDir)VidUp.UI/bin/$(Configuration)/$(Platform)/" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" />
   </Target>
   <Target Name="AfterBuild">
-    <GetAssemblyIdentity AssemblyFiles="../VidUp.UI/publish/$(Configuration)/$(Platform)/VidUp.dll">
-      <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
-    </GetAssemblyIdentity>
-	
-	<Exec Command="rename &quot;bin\$(Platform)\$(Configuration)\VidUp.Setup.$(Configuration).$(Platform).msi&quot; &quot;VidUp.Setup.%(AssemblyVersion.Version).$(Configuration).$(Platform).msi&quot;" />
+    <Exec Command="rename &quot;bin\$(Configuration)\$(Platform)\VidUp.Setup.$(Configuration).$(Platform).msi&quot; &quot;VidUp.Setup.%(AssemblyVersion.Version).$(Configuration).$(Platform).msi&quot;" />
   </Target>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
 </Project>

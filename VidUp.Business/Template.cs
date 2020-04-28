@@ -20,13 +20,13 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string name;
         [JsonProperty]
-        private string ytTitle;
+        private string title;
         [JsonProperty]
-        private string ytDescription;
+        private string description;
         [JsonProperty]
         private List<string> tags;
         [JsonProperty]
-        private YtVisibility ytVisibility;
+        private Visibility visibility;
         [JsonProperty]
         private List<Upload> uploads;
         [JsonProperty]
@@ -37,6 +37,8 @@ namespace Drexel.VidUp.Business
         private DateTime defaultPublishAtTime;
         [JsonProperty]
         private string thumbnailFolderPath;
+        [JsonProperty]
+        private string thumbnailFallbackFilePath;
         [JsonProperty]
         private bool isDefault;
 
@@ -55,7 +57,7 @@ namespace Drexel.VidUp.Business
             this.tags = new List<string>();
             this.created = DateTime.Now;
             this.lastModified = this.created;
-            this.ytVisibility = YtVisibility.Private;
+            this.visibility = Visibility.Private;
         }
 
         public void SetTemplateReferenceToUploads()
@@ -90,21 +92,21 @@ namespace Drexel.VidUp.Business
                 this.lastModified = DateTime.Now;
              }
         }
-        public string YtTitle
+        public string Title
         {
-            get => this.ytTitle;
+            get => this.title;
             set 
             {
-                this.ytTitle = value;
+                this.title = value;
                 this.lastModified = DateTime.Now;
             }
         }
-        public string YtDescription
+        public string Description
         {
-            get => this.ytDescription;
+            get => this.description;
             set
             {
-                this.ytDescription = value;
+                this.description = value;
                 this.lastModified = DateTime.Now;
             }
         }
@@ -119,12 +121,12 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public YtVisibility YtVisibility
+        public Visibility YtVisibility
         {
-            get => this.ytVisibility;
+            get => this.visibility;
             set
             {
-                this.ytVisibility = value;
+                this.visibility = value;
                 this.lastModified = DateTime.Now;
             }
         }
@@ -160,6 +162,16 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.thumbnailFolderPath = value;
+                this.lastModified = DateTime.Now;
+            }
+        }
+
+        public string ThumbnailFallbackFilePath
+        {
+            get => this.thumbnailFallbackFilePath;
+            set
+            {
+                this.thumbnailFallbackFilePath = value;
                 this.lastModified = DateTime.Now;
             }
         }

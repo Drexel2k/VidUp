@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -66,22 +67,22 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string YtTitle 
+        public string Title 
         { 
-            get => this.template != null ? this.template.YtTitle : null;
+            get => this.template != null ? this.template.Title : null;
             set
             {
-                this.template.YtTitle = value;
+                this.template.Title = value;
                 RaisePropertyChangedAndSerializeTemplateList("YtTitle");
 
             }
         }
-        public string YtDescription 
+        public string Description 
         { 
-            get => this.template != null ? this.template.YtDescription : null;
+            get => this.template != null ? this.template.Description : null;
             set
             {
-                this.template.YtDescription = value;
+                this.template.Description = value;
                 RaisePropertyChangedAndSerializeTemplateList("YtDescription");
 
             }
@@ -89,16 +90,16 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string TagsAsString 
         { 
-            get => this.template != null ? string.Join(',', this.template.Tags) : null;
+            get => this.template != null ? string.Join(",", this.template.Tags) : null;
             set
             {
                 this.template.Tags = new List<string>(value.Split(','));
                 RaisePropertyChangedAndSerializeTemplateList("TagsAsString");
             }
         }
-        public YtVisibility YtVisibility 
+        public Visibility Visibility 
         { 
-            get => this.template != null ? this.template.YtVisibility : YtVisibility.Private;
+            get => this.template != null ? this.template.YtVisibility : Visibility.Private;
             set
             {
                 this.template.YtVisibility = value;
@@ -106,11 +107,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public Array YtVisibilities
+        public Array Visibilities
         {
             get
             {
-                return Enum.GetValues(typeof(YtVisibility));
+                return Enum.GetValues(typeof(Visibility));
             }
         }
 
@@ -139,9 +140,23 @@ namespace Drexel.VidUp.UI.ViewModels
 
 
 
-        public string PictureFilePathForRendering
+        public BitmapImage PictureFilePathForRendering
         {
-            get => this.template != null ? this.template.PictureFilePathForRendering : null;
+            get
+            {
+                if(this.template != null)
+                {
+                    BitmapImage bi3 = new BitmapImage();
+                    bi3.BeginInit();
+                    bi3.UriSource = new Uri(this.template.PictureFilePathForRendering, UriKind.Absolute);
+                    bi3.CacheOption = BitmapCacheOption.OnLoad;
+                    bi3.EndInit();
+
+                    return bi3;
+                }
+
+                return null;
+            }
         }
 
         public string PictureFilePathForEditing
@@ -174,9 +189,23 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string ThumbnailFallbackFilePath
+        {
+            get => this.template != null ? this.template.ThumbnailFallbackFilePath : null;
+            set
+            {
+                string filePath = this.mainWindowViewModel.CopyThumbnailFallbackImageToStorageFolder(value);
+                this.template.ThumbnailFallbackFilePath = filePath;
+                RaisePropertyChangedAndSerializeTemplateList("ThumbnailFallbackFilePath");
+            }
+        }
+
+
+        
+
         public bool IsDefault
         {
-            get => this.template.IsDefault;
+            get => this.template != null ? this.template.IsDefault : false;
             set
             {
                 this.mainWindowViewModel.SetDefaultTemplate(this.template, value);
@@ -239,6 +268,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (result == DialogResult.OK)
                 {
                     this.ThumbnailFolderPath = folderDialog.SelectedPath;
+                }
+            }
+
+            if ((string)parameter == "thumbfallback")
+            {
+                OpenFileDialog fileDialog = new OpenFileDialog();
+                DialogResult result = fileDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    this.ThumbnailFallbackFilePath = fileDialog.FileName;
                 }
             }
         }

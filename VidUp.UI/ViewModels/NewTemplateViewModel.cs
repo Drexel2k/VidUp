@@ -89,7 +89,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public NewTemplateViewModel()
+        public NewTemplateViewModel(string templateImageFolder)
         {
             this.openFileDialogCommand = new GenericCommand(openFileDialog);
         }

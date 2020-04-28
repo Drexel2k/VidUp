@@ -7,12 +7,13 @@
              mc:Ignorable="d" 
              d:DesignWidth="800"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
+             xmlns:validators="clr-namespace:Drexel.VidUp.UI.Validators"
              x:Name="UCUpload">
     <GroupBox Padding="0" x:Name="GroupBox" Margin="4" VerticalAlignment="Top" >
         <GroupBox.Header >
             <StackPanel Orientation="Horizontal" Margin="0">
                 <TextBlock Text="{Binding YtTitle, Mode=OneWay}" Margin="2" Width="599" TextWrapping="Wrap" />
-                <Button x:Name="Minimize" Padding="0" Width="17" Height="20"  ToolTip="Minimize." Content="_" Style="{StaticResource MaterialDesignOutlinedButtonEx}" BorderBrush="Transparent" Foreground="Black" Click="minimizeClick" Visibility="Collapsed" />
+                <Button x:Name="Minimize" Padding="0" Width="17" Height="20"  ToolTip="Minimize." ToolTipService.ShowDuration="60000"  Content="_" Style="{StaticResource MaterialDesignOutlinedButtonEx}" BorderBrush="Transparent" Foreground="Black" Click="minimizeClick" Visibility="Collapsed" />
             </StackPanel>
         </GroupBox.Header>
 
@@ -42,7 +43,7 @@
                 Check
             </CheckBox>-->
 
-            <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="3"  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+            <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="3 3 6 3"  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                 <materialDesign:PopupBox  StaysOpen="False" >
                     <StackPanel>
                         <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" />
@@ -56,54 +57,79 @@
 
             <StackPanel  Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                 <Label Content="File: " Width="110" />
-                <materialDesign:PackIcon Kind="Warning" ToolTip="File does not exist!" Visibility="{Binding ShowFileNotExistsIcon}" Margin="0 4 0 0"  />
+                <materialDesign:PackIcon Kind="Warning" ToolTip="File does not exist!" ToolTipService.ShowDuration="60000" Visibility="{Binding FilePath, Mode=OneWay, Converter={converters:FileExistsCollapsedConverter}}" Margin="0 4 0 0"  />
                 <Label>
                      <TextBlock Text="{Binding FilePath, Mode=OneWay}" TextWrapping="Wrap" MaxWidth="500" />
                 </Label>
             </StackPanel>
             <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset title to template value." Command="{Binding ResetToTemplateValueCommand}" CommandParameter="title" IsEnabled="{Binding ControlsEnabled}">
+                <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset title to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="title" IsEnabled="{Binding ControlsEnabled}">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>                
                 <Label Content="Title: " Width="115" />
-                <TextBox x:Name="Title" Text="{Binding Title}"  Width="470" IsEnabled="{Binding ControlsEnabled}" />
-                <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." Background="Transparent" />
+                <TextBox x:Name="Title" Width="470" IsEnabled="{Binding ControlsEnabled}">
+                    <TextBox.Text>
+                        <Binding Path="Title" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" Delay="500" >
+                            <Binding.ValidationRules>
+                                <validators:YoutubeInvalidCharsRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                <Label Content="Thumbnail: " Width="110" />
-                <materialDesign:PackIcon Kind="Warning" ToolTip="Thumbnail does not exist!" Visibility="{Binding ShowThumbnailNotExistsIcon}" Margin="0 4 0 0"  />
-                <Label Width="410">
-                    <TextBlock Text="{Binding ThumbnailPath, Mode=OneWay}" TextWrapping="Wrap" />
-                </Label>
-                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Padding="0" Width="70" Height="25"  Grid.Column="2" IsEnabled="{Binding ControlsEnabled}">
-                    Browse
-                </Button>
+                <DockPanel Width="534">
+                    <Label Content="Thumbnail: " Width="110" />
+                    <materialDesign:PackIcon Kind="Warning" ToolTip="Thumbnail does not exist!" ToolTipService.ShowDuration="60000" Visibility="{Binding ThumbnailFilePath, Mode=OneWay, Converter={converters:StringIsNullOrFileExistsCollapsedConverter}}" Margin="0 4 0 0"  />
+                    <Label >
+                        <TextBlock Text="{Binding ThumbnailFilePath, Mode=OneWay}" TextWrapping="Wrap" />
+                    </Label>
+                </DockPanel>
+                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10 0 0 0" Padding="0" Width="70" Height="25" IsEnabled="{Binding ControlsEnabled}" Content="Browse"/>
             </StackPanel>
             <StackPanel  Grid.Row="4" Grid.ColumnSpan="2" Orientation="Vertical">
                 <StackPanel  Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal">
-                    <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset description to template value." Command="{Binding ResetToTemplateValueCommand}" CommandParameter="description" IsEnabled="{Binding ControlsEnabled}">
+                    <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset description to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="description" IsEnabled="{Binding ControlsEnabled}">
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Description: " Width="110" HorizontalAlignment="Left" />
                 </StackPanel>
-                <TextBox x:Name="Description" Text="{Binding Description, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MaxHeight ="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus" />
+                <TextBox x:Name="Description" TextWrapping="Wrap" AcceptsReturn="True" MaxLength="5000"
+                         Width="615" MaxHeight ="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus">
+                    <TextBox.Text>
+                        <Binding Path="Description" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" Delay="500" >
+                            <Binding.ValidationRules>
+                                <validators:YoutubeInvalidCharsRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
             </StackPanel>
             <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="2">
                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset tags to template value." Command="{Binding ResetToTemplateValueCommand}" CommandParameter="tags" IsEnabled="{Binding ControlsEnabled}">
+                    <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset tags to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="tags" IsEnabled="{Binding ControlsEnabled}">
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Tags: " Width="35" />
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 </StackPanel>
-                <TextBox x:Name="Tags" Text="{Binding TagsAsString}" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus" />
+                <TextBox x:Name="Tags" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus">
+                    <TextBox.Text>
+                        <Binding Path="TagsAsString" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" Delay="500" >
+                            <Binding.ValidationRules>
+                                <validators:YoutubeInvalidCharsRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
             </StackPanel>
             <StackPanel  Grid.Row="6" Grid.Column="0" Orientation="Horizontal">
-                <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset visibility to template value." Command="{Binding ResetToTemplateValueCommand}" CommandParameter="visibility" IsEnabled="{Binding ControlsEnabled}">
+                <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset visibility to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="visibility" IsEnabled="{Binding ControlsEnabled}">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Visbility: " Width="110" />
-                <ComboBox  ItemsSource="{Binding YtVisibilities}" SelectedItem="{Binding Visibility}" Width="190"  IsEnabled="{Binding ControlsEnabled}">
+                <ComboBox  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding Visibility}" Width="190"  IsEnabled="{Binding ControlsEnabled}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -120,22 +146,24 @@
             </StackPanel>
 
             <StackPanel  Grid.Row="7" Grid.Column="0" Orientation="Horizontal">
-                <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset all values to template values." Command="{Binding ResetToTemplateValueCommand}" CommandParameter="all" IsEnabled="{Binding ControlsEnabled}">
+                <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 0 0 5" ToolTip="Reset all values to template values." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="all" IsEnabled="{Binding ControlsEnabled}">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Template: " Width="110" />
                 <!--Binding OneWay because setting is handled by event. -->
                 <ComboBox SelectedItem="{Binding Template, Mode=OneWay}" ItemsSource="{Binding DataContext.TemplateList, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" IsEnabled="{Binding ControlsEnabled}" />
             </StackPanel>
-            <StackPanel  Grid.Row="8" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+            <DockPanel  Grid.Row="8" Grid.Column="0"  Grid.ColumnSpan="2">
                 <Label Content="Status: " Width="45" />
-                <materialDesign:PackIcon Kind="Warning" ToolTip="{Binding UploadErrorMessage}" Visibility="{Binding ShowUploadErrorIcon}" Margin="0 4 0 0"  />
+                <materialDesign:PackIcon Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="0 4 0 0" />
                 <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="100" Margin="0 0 65 0" />
                 <Label Content="Upload Started: " Width="90" />
-                <Label Content="{Binding UploadStart, Mode=OneWay}"  Width="100"  Margin="0 0 25 0" />
+                <Label Content="{Binding UploadStart, Mode=OneWay}"  Width="100"  Margin="0 0 0 0" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Label Content="Upload Ended: " Width="85" />
-                <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="90" />
-            </StackPanel>
+                <Label Content="{Binding UploadEnd, Mode=OneWay}"  Width="100" HorizontalAlignment="right" />
+                </StackPanel>
+            </DockPanel>
 
 
         </Grid>

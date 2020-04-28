@@ -77,7 +77,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         internal void RaiseNameChange(Template template)
         {
-            TemplateComboboxViewModel viewModel = this.templateComboboxViewModels.Find(viewModel => viewModel.Guid == template.Guid.ToString());
+            TemplateComboboxViewModel viewModel = this.templateComboboxViewModels.Find(viewModel2 => viewModel2.Guid == template.Guid.ToString());
             if(viewModel != null)
             {
                 viewModel.RaiseNameChange();

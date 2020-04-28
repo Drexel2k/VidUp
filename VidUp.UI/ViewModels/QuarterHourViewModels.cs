@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Drexel.VidUp.UI.Definitions;
 
 namespace Drexel.VidUp.UI.ViewModels
 {

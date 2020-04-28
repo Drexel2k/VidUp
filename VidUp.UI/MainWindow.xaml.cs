@@ -1,4 +1,5 @@
 ﻿using Drexel.VidUp.Business;
+using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.UI.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,18 @@ namespace Drexel.VidUp.UI
             }
 
             mainWindowViewModel.AddUploads(uploads);
+        }
+
+        private void CMainWindow_Activated(object sender, EventArgs e)
+        {
+            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
+            mainWindowViewModel.WindowActivated();
+        }
+
+        private void CMainWindow_Deactivated(object sender, EventArgs e)
+        {
+            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
+            mainWindowViewModel.WindowDeactivated();
         }
     }
 }
