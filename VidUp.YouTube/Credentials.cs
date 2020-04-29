@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Drexel.VidUp.YouTube
+namespace Drexel.VidUp.Youtube
 {
     public static class Credentials
     {
