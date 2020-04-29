@@ -31,15 +31,9 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Column="0" LastChildFill="True">
-                <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File does exist. Current file will be renamed in VidUp's template iamges folder." ToolTipService.ShowDuration="60000" Visibility="{Binding PictureFilePath, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.TemplateImageFolder}}" Margin="0 0 0 4"  VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-                <TextBox wpf:HintAssist.Hint="Template Picture" Text="{Binding PictureFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False"  />
+                <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File does exist. Current file will be renamed in VidUp's template images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding ImageFilePath, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.TemplateImageFolder}}" Margin="0 0 0 4"  VerticalAlignment="Bottom" HorizontalAlignment="Left"  Background="Transparent" />
+                <TextBox wpf:HintAssist.Hint="Template Image" Text="{Binding ImageFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False"  />
             </DockPanel >
-            <!--<StackPanel Grid.Column="0" Orientation="Horizontal"  >
-                <materialDesign:PackIcon Kind="Warning" ToolTip="File does exist. Current file will be renamed in VidUp's template iamges folder." ToolTipService.ShowDuration="60000" Visibility="{Binding PictureFilePath, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}}" Margin="0 0 0 4"  VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-                <TextBox wpf:HintAssist.Hint="Template Picture" Text="{Binding PictureFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" HorizontalAlignment="Stretch" />
-                
-            </StackPanel>-->
-            <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...-->
             <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For visualization of uploads in upload view. Recommended size: 618x50px." ToolTipService.ShowDuration="60000" Background="Transparent" />
             <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2">
                 Browse
@@ -54,7 +48,7 @@
             </Grid.ColumnDefinitions>
             <TextBox wpf:HintAssist.Hint="Root Folder" Text="{Binding RootFolderPath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" />
             <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...-->
-            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file added from this folder or any subfolder this template is assigne automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file added from this folder or any subfolder this template is assigned automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />
             <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2">
                 Browse
             </Button>

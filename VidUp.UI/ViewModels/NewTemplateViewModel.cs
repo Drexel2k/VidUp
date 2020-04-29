@@ -10,7 +10,7 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private GenericCommand openFileDialogCommand;
         private string name;
-        private string pictureFilePath;
+        private string imageFilePath;
         private string rootFolderPath;
         private bool formVaild = false;
 
@@ -38,18 +38,18 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
         }
-        public string PictureFilePath
+        public string ImageFilePath
         {
             get
             {
-                return this.pictureFilePath;
+                return this.imageFilePath;
             }
             set
             {
-                if (this.pictureFilePath != value)
+                if (this.imageFilePath != value)
                 {
-                    this.pictureFilePath = value;
-                    RaisePropertyChanged("PictureFilePath");
+                    this.imageFilePath = value;
+                    RaisePropertyChanged("ImageFilePath");
                 }
             }
         }
@@ -113,7 +113,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (result == DialogResult.OK)
                 {
-                    this.PictureFilePath = fileDialog.FileName;
+                    this.ImageFilePath = fileDialog.FileName;
                 }
             }
 

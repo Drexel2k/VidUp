@@ -117,7 +117,7 @@ namespace Drexel.VidUp.Business
                 this.lastModified = DateTime.Now;
             }
         }
-        public string PictureFilePath { get => getPicturePath(this.template); }
+        public string ImageFilePath { get => this.getImagePath(this.template); }
 
         public string YtTitle
         {
@@ -354,14 +354,14 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        private string getPicturePath(Template template)
+        private string getImagePath(Template template)
         {
             if (this.template == null)
             {
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "images/defaultupload.png");
             }
 
-           return this.template.PictureFilePathForRendering;
+           return this.template.ImageFilePathForRendering;
         }
     }
 }

@@ -148,6 +148,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public void DeleteTemplateImageIfPossible(string filePath)
+        {
+            this.templateList.DeleteImageIfPossible(filePath);
+        }
+
         public GenericCommand AddUploadCommand
         {
             get
@@ -199,9 +204,9 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeTemplateList();
         }
 
-        internal string CopyThumbnailFallbackImageToStorageFolder(string filePath)
+        internal string CopyImageToStorageFolder(string filePath, string targetFolderPath)
         {
-            return this.templateList.CopyPictureToStorageFolder(filePath, Settings.ThumbnailFallbackImageFolder);
+            return this.templateList.CopyImageToStorageFolder(filePath, targetFolderPath);
         }
 
         public GenericCommand DonateCommand
@@ -630,7 +635,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if(result)
             { 
                 NewTemplateViewModel data = (NewTemplateViewModel)view.DataContext;
-                Template template = new Template(data.Name, data.PictureFilePath, data.RootFolderPath);
+                Template template = new Template(data.Name, data.ImageFilePath, data.RootFolderPath);
                 List<Template> list = new List<Template>();
                 list.Add(template);
                 this.templateList.AddTemplates(list);
@@ -703,6 +708,13 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        /// <summary>
+        /// Checks:
+        /// 1. is image not in fallback thumnail image storage folder -> do nothing
+        /// 2. is image referenced in any other template -> do nothing
+        /// 3. is image referenced in any other upload -> do nothing
+        /// </summary>
+        /// <param name="thumbnailFilePath"></param>
         public void DeleteThumbnailIfPossible(string thumbnailFilePath)
         {
             if (thumbnailFilePath != null)

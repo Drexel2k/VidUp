@@ -142,17 +142,22 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public BitmapImage PictureFilePath
+        public BitmapImage ImageBitmap
         {
             get
             {
-                BitmapImage bi3 = new BitmapImage();
-                bi3.BeginInit();
-                bi3.UriSource = new Uri(this.upload.PictureFilePath, UriKind.Absolute);
-                bi3.CacheOption = BitmapCacheOption.OnLoad;
-                bi3.EndInit();
+                if (File.Exists(this.upload.ImageFilePath))
+                {
+                    BitmapImage bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(this.upload.ImageFilePath, UriKind.Absolute);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
 
-                return bi3;
+                    return bitmap;
+                }
+
+                return null;
             }
         }
 
@@ -375,7 +380,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
             set
             {
+                string oldFilePath = this.upload.ThumbnailFilePath;
                 this.upload.ThumbnailFilePath = value;
+                this.mainWindowViewModel.DeleteThumbnailIfPossible(oldFilePath);
                 this.raisePropertyChanged("ThumbnailFilePath");
             }
         }

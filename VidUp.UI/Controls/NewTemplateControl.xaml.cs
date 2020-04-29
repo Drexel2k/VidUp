@@ -10,7 +10,7 @@ namespace Drexel.VidUp.UI.Controls
     /// </summary>
     public partial class NewTemplateControl : System.Windows.Controls.UserControl
     {
-        //todo: make selection of picture file path and root folder path clearable
+        //todo: make selection of image file path and root folder path clearable
         public NewTemplateControl()
         {
             InitializeComponent();

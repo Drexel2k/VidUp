@@ -30,7 +30,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private List<Upload> uploads;
         [JsonProperty]
-        private string pictureFilePath;
+        private string imageFilePath;
         [JsonProperty]
         private string rootFolderPath;
         [JsonProperty]
@@ -47,11 +47,11 @@ namespace Drexel.VidUp.Business
             this.uploads = new List<Upload>();
             this.tags = new List<string>();
         }
-        public Template(string name, string picturefilePath, string rootFolderPath)
+        public Template(string name, string imagefilePath, string rootFolderPath)
         {
             this.guid = Guid.NewGuid();
             this.name = name;
-            this.PictureFilePathForEditing = picturefilePath;
+            this.ImageFilePathForEditing = imagefilePath;
             this.rootFolderPath = rootFolderPath;
             this.uploads = new List<Upload>();
             this.tags = new List<string>();
@@ -131,17 +131,17 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string PictureFilePathForRendering
+        public string ImageFilePathForRendering
         {
-            get => getPictureFilePath();
+            get => this.getImageFilePath();
         }
 
-        public string PictureFilePathForEditing
+        public string ImageFilePathForEditing
         {
-            get => this.pictureFilePath;
+            get => this.imageFilePath;
             set
             {
-                this.pictureFilePath = value;
+                this.imageFilePath = value;
                 this.lastModified = DateTime.Now;
             }
         }
@@ -200,14 +200,14 @@ namespace Drexel.VidUp.Business
         }
 
         #endregion properties
-        private string getPictureFilePath()
+        private string getImageFilePath()
         {
-            if (string.IsNullOrWhiteSpace(this.pictureFilePath))
+            if (string.IsNullOrWhiteSpace(this.imageFilePath) || !File.Exists(this.imageFilePath))
             {
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "images/defaultupload.png");
             }
 
-            return this.pictureFilePath;
+            return this.imageFilePath;
         }
 
         public void AddUpload(Upload upload)

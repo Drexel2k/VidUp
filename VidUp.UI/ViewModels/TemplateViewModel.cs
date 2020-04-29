@@ -18,6 +18,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private MainWindowViewModel mainWindowViewModel;
         private QuarterHourViewModels quarterHourViewModels;
         private GenericCommand openFileDialogCommand;
+        private string lastThumbnailFallbackFilePathAdded = null;
+        private string lastImageFilePathAdded;
 
         #region properties
 
@@ -140,34 +142,47 @@ namespace Drexel.VidUp.UI.ViewModels
 
 
 
-        public BitmapImage PictureFilePathForRendering
+        public BitmapImage ImageBitmap
         {
             get
             {
-                if(this.template != null)
+                if(this.template != null && File.Exists(this.template.ImageFilePathForRendering))
                 {
-                    BitmapImage bi3 = new BitmapImage();
-                    bi3.BeginInit();
-                    bi3.UriSource = new Uri(this.template.PictureFilePathForRendering, UriKind.Absolute);
-                    bi3.CacheOption = BitmapCacheOption.OnLoad;
-                    bi3.EndInit();
+                    BitmapImage bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(this.template.ImageFilePathForRendering, UriKind.Absolute);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
 
-                    return bi3;
+                    return bitmap;
                 }
 
                 return null;
             }
         }
 
-        public string PictureFilePathForEditing
+        public string ImageFilePathForEditing
         {
-            get => this.template != null ? this.template.PictureFilePathForEditing : null;
+            get => this.template != null ? this.template.ImageFilePathForEditing : null;
             set
             {
-                this.template.PictureFilePathForEditing = value;
-                RaisePropertyChanged("PictureFilePathForRendering");
-                RaisePropertyChangedAndSerializeTemplateList("PictureFilePathForEditing");
+                //care this RaisePropertyChanged must take place immediately to show rename hint correctly.
+                this.lastImageFilePathAdded = value;
+                RaisePropertyChanged("LastImageFilePathAdded");
+
+                string newFilePath = this.mainWindowViewModel.CopyImageToStorageFolder(value, Settings.TemplateImageFolder);
+                string oldFilePath = this.template.ImageFilePathForEditing;
+                this.template.ImageFilePathForEditing = newFilePath;
+                this.mainWindowViewModel.DeleteTemplateImageIfPossible(oldFilePath);
+                
+                RaisePropertyChanged("ImageBitmap");
+                RaisePropertyChangedAndSerializeTemplateList("ImageFilePathForEditing");
             }
+        }
+
+        public string LastImageFilePathAdded
+        {
+            get => this.lastImageFilePathAdded;
         }
         public string RootFolderPath 
         { 
@@ -194,14 +209,23 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.template != null ? this.template.ThumbnailFallbackFilePath : null;
             set
             {
-                string filePath = this.mainWindowViewModel.CopyThumbnailFallbackImageToStorageFolder(value);
+                //care this RaisePropertyChanged must take place immediately to show rename hint correctly.
+                this.lastThumbnailFallbackFilePathAdded = value;
+                RaisePropertyChanged("LastThumbnailFallbackFilePathAdded");
+
+                string filePath = this.mainWindowViewModel.CopyImageToStorageFolder(value, Settings.ThumbnailFallbackImageFolder);
+                string oldFilePath = this.template.ThumbnailFallbackFilePath;
                 this.template.ThumbnailFallbackFilePath = filePath;
+                this.mainWindowViewModel.DeleteThumbnailIfPossible(oldFilePath);
+
                 RaisePropertyChangedAndSerializeTemplateList("ThumbnailFallbackFilePath");
             }
         }
 
-
-        
+        public string LastThumbnailFallbackFilePathAdded
+        {
+            get => this.lastThumbnailFallbackFilePathAdded;
+        }
 
         public bool IsDefault
         {
@@ -245,7 +269,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (result == DialogResult.OK)
                 {
-                    this.PictureFilePathForEditing = fileDialog.FileName;
+                    this.ImageFilePathForEditing = fileDialog.FileName;
                 }
             }
 
