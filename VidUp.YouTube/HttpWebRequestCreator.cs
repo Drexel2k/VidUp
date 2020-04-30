@@ -77,7 +77,7 @@ namespace Drexel.VidUp.Youtube
             request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + accessToken);
 
             //raise limits for large uploads
-            if (length > 5 * 1024 * 1024)
+            if (length > 100 * 1024 * 1024)
             {
                 request.Timeout = int.MaxValue;
                 request.AllowWriteStreamBuffering = false;

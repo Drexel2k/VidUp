@@ -71,6 +71,8 @@ namespace Drexel.VidUp.Youtube
             {
                 //request upload session/uri
                 HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(YoutubeUpload.uploadEndpoint, "POST", jsonBytes, "application/json; charset=utf-8");
+                //slug header adds original video file name to youtube studio
+                request.Headers.Add("Slug", Path.GetFileName(upload.FilePath));
                 request.Headers.Add("X-Upload-Content-Length", info.Length.ToString());
                 request.Headers.Add("X-Upload-Content-Type", "video/*");
 
