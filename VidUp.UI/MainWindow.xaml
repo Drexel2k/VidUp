@@ -48,7 +48,7 @@
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem Header="Templates" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
-                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="Name"/>
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="NameWithDefaultIndicator"/>
                         <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="images/file-document-box-plus.png" Command="{Binding NewTemplateCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>

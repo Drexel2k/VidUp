@@ -15,7 +15,7 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private Template template;
         public event PropertyChangedEventHandler PropertyChanged;
-        private MainWindowViewModel mainWindowViewModel;
+
         private QuarterHourViewModels quarterHourViewModels;
         private GenericCommand openFileDialogCommand;
         private string lastThumbnailFallbackFilePathAdded = null;
@@ -35,7 +35,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.template = value;
                     //all properties changed
-                    RaisePropertyChanged(null);
+                    this.raisePropertyChanged(null);
                 }
             }
         }
@@ -65,7 +65,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Name = value;
-                RaisePropertyChangedAndSerializeTemplateList("Name");
+                raisePropertyChangedAndSerializeTemplateList("Name");
             }
         }
 
@@ -75,7 +75,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Title = value;
-                RaisePropertyChangedAndSerializeTemplateList("YtTitle");
+                raisePropertyChangedAndSerializeTemplateList("YtTitle");
 
             }
         }
@@ -85,7 +85,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Description = value;
-                RaisePropertyChangedAndSerializeTemplateList("YtDescription");
+                raisePropertyChangedAndSerializeTemplateList("YtDescription");
 
             }
         }
@@ -96,7 +96,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Tags = new List<string>(value.Split(','));
-                RaisePropertyChangedAndSerializeTemplateList("TagsAsString");
+                raisePropertyChangedAndSerializeTemplateList("TagsAsString");
             }
         }
         public Visibility Visibility 
@@ -105,7 +105,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.YtVisibility = value;
-                RaisePropertyChangedAndSerializeTemplateList("YtVisibility");
+                raisePropertyChangedAndSerializeTemplateList("YtVisibility");
             }
         }
 
@@ -168,15 +168,12 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 //care this RaisePropertyChanged must take place immediately to show rename hint correctly.
                 this.lastImageFilePathAdded = value;
-                RaisePropertyChanged("LastImageFilePathAdded");
+                raisePropertyChanged("LastImageFilePathAdded");
 
-                string newFilePath = this.mainWindowViewModel.CopyImageToStorageFolder(value, Settings.TemplateImageFolder);
-                string oldFilePath = this.template.ImageFilePathForEditing;
-                this.template.ImageFilePathForEditing = newFilePath;
-                this.mainWindowViewModel.DeleteTemplateImageIfPossible(oldFilePath);
+                this.template.ImageFilePathForEditing = value;
                 
-                RaisePropertyChanged("ImageBitmap");
-                RaisePropertyChangedAndSerializeTemplateList("ImageFilePathForEditing");
+                raisePropertyChanged("ImageBitmap");
+                raisePropertyChangedAndSerializeTemplateList("ImageFilePathForEditing");
             }
         }
 
@@ -190,7 +187,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.RootFolderPath = value;
-                RaisePropertyChangedAndSerializeTemplateList("RootFolderPath");
+                raisePropertyChangedAndSerializeTemplateList("RootFolderPath");
             }
         }
 
@@ -200,7 +197,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.ThumbnailFolderPath = value;
-                RaisePropertyChangedAndSerializeTemplateList("ThumbnailFolderPath");
+                raisePropertyChangedAndSerializeTemplateList("ThumbnailFolderPath");
             }
         }
 
@@ -211,14 +208,10 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 //care this RaisePropertyChanged must take place immediately to show rename hint correctly.
                 this.lastThumbnailFallbackFilePathAdded = value;
-                RaisePropertyChanged("LastThumbnailFallbackFilePathAdded");
+                raisePropertyChanged("LastThumbnailFallbackFilePathAdded");
+                this.template.ThumbnailFallbackFilePath = value;
 
-                string filePath = this.mainWindowViewModel.CopyImageToStorageFolder(value, Settings.ThumbnailFallbackImageFolder);
-                string oldFilePath = this.template.ThumbnailFallbackFilePath;
-                this.template.ThumbnailFallbackFilePath = filePath;
-                this.mainWindowViewModel.DeleteThumbnailIfPossible(oldFilePath);
-
-                RaisePropertyChangedAndSerializeTemplateList("ThumbnailFallbackFilePath");
+                this.raisePropertyChangedAndSerializeTemplateList("ThumbnailFallbackFilePath");
             }
         }
 
@@ -232,15 +225,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.template != null ? this.template.IsDefault : false;
             set
             {
-                this.mainWindowViewModel.SetDefaultTemplate(this.template, value);
-                RaisePropertyChangedAndSerializeTemplateList("IsDefault");
+                this.template.IsDefault = true;
+                raisePropertyChangedAndSerializeTemplateList("IsDefault");
             }
         }
         #endregion properties
 
-        public TemplateViewModel(MainWindowViewModel mainWindowViewModel)
+        public TemplateViewModel()
         {
-            this.mainWindowViewModel = mainWindowViewModel;
             this.openFileDialogCommand = new GenericCommand(openFileDialog);
             this.quarterHourViewModels = new QuarterHourViewModels();
         }
@@ -250,11 +242,11 @@ namespace Drexel.VidUp.UI.ViewModels
             this.template.DefaultPublishAtTime = publishAtTime;
             this.SerializeTemplateList();
         }
-        private void RaisePropertyChanged(string propertyName)
+        private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
             PropertyChangedEventHandler handler = PropertyChanged;
-            if (PropertyChanged != null)
+            if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
@@ -307,10 +299,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-
-        private void RaisePropertyChangedAndSerializeTemplateList(string propertyName)
+        private void raisePropertyChangedAndSerializeTemplateList(string propertyName)
         {
-            this.RaisePropertyChanged(propertyName);
+            this.raisePropertyChanged(propertyName);
             this.SerializeTemplateList();
         }
 

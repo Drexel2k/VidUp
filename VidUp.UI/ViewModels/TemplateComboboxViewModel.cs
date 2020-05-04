@@ -20,13 +20,29 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 return this.template;
             }
+            set
+            {
+                if (this.template != null)
+                {
+                    this.template.PropertyChanged -= templatePropertyChanged;
+                }
+
+                this.template = value;
+
+                if (this.template != null)
+                {
+                    this.template.PropertyChanged += templatePropertyChanged;
+                }
+
+                this.raisePropertyChanged(string.Empty);
+            }
         }
 
         public string Guid
         {
             get => this.template != null ? this.template.Guid.ToString() : string.Empty;
         }
-        public string Name
+        public string NameWithDefaultIndicator
         {
             get
             {
@@ -39,21 +55,43 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string Name
+        {
+            get
+            {
+                if (this.template != null)
+                {
+                    return this.template.Name;
+                }
+
+                return null;
+            }
+        }
+
         public TemplateComboboxViewModel(Template template)
         {
             this.template = template;
+
+            if (template != null)
+            {
+                this.template.PropertyChanged += templatePropertyChanged;
+            }
         }
 
-        internal void RaiseNameChange()
+        private void templatePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            this.raisePropertyChanged("Name");
+            if(e.PropertyName == "Name" || e.PropertyName == "IsDefault")
+            {
+                this.raisePropertyChanged("Name");
+                this.raisePropertyChanged("NameWithDefaultIndicator");
+            }
         }
 
         private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
             PropertyChangedEventHandler handler = PropertyChanged;
-            if (PropertyChanged != null)
+            if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }

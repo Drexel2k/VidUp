@@ -46,6 +46,8 @@ namespace Drexel.VidUp.JSON
             }
 
             JsonSerializer serializer = new JsonSerializer();
+
+            //this converters returns existing Upload objects.
             serializer.Converters.Add(new UploadGuidStringConverter());
 
             using (StreamReader sr = new StreamReader(uploadListFilePath))
@@ -53,6 +55,8 @@ namespace Drexel.VidUp.JSON
             {
                 DeSerializationRepository.UploadList = serializer.Deserialize<UploadList>(reader);
             }
+
+            DeSerializationRepository.UploadList.SetEventListeners();
         }
 
         public static void Deserialize()

@@ -4,42 +4,140 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 
 namespace Drexel.VidUp.Business
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class TemplateList : IEnumerable
+    public class TemplateList : INotifyCollectionChanged, IEnumerable<Template>
     {
         [JsonProperty]
         private List<Template> templates;
         private string templatesImagesStorageFolder;
+        private string thumbnailFallbackStorageFolder;
+        private string thumbnailFallbackImageFolder;
+        private CheckFileUsage checkFileUsage;
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         public int TemplateCount { get => this.templates.Count; }
 
-        public TemplateList(List<Template> templates, string templatesImagesStorageFolder) : this(templatesImagesStorageFolder)
+        public string ThumbnailFallbackImageFolder
+        {
+            set
+            {
+                this.thumbnailFallbackImageFolder = value;
+            }
+        }
+
+        public CheckFileUsage CheckFileUsage
+        {
+            set
+            {
+                this.checkFileUsage = value;
+            }
+        }
+
+        public TemplateList(List<Template> templates, string templatesImagesStorageFolder, string thumbnailFallbackStorageFolder) : this(templatesImagesStorageFolder, thumbnailFallbackStorageFolder)
         {
             if(templates != null)
             {
                 this.templates = templates;
+
+                foreach(Template template in templates)
+                {
+                    template.PropertyChanged += templatePropertyChanged;
+                    template.TemplateList = this;
+                }
             }
         }
 
-        public TemplateList(string templatesImagesStorageFolder)
+        public TemplateList(string templatesImagesStorageFolder, string thumbnailFallbackFilePath)
         {
             this.templatesImagesStorageFolder = templatesImagesStorageFolder;
+            this.thumbnailFallbackStorageFolder = thumbnailFallbackFilePath;
             this.templates = new List<Template>();
         }
 
-        #region IEnumerable
-        public List<Template>.Enumerator GetEnumerator()
+        private void templatePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            return this.templates.GetEnumerator();
+
+            if (e.PropertyName == "IsDefault")
+            {
+                Template template = (Template)sender;
+                if (sender != null)
+                {
+                    if (template.IsDefault == true)
+                    {
+                        foreach (Template templateInternal in this.templates)
+                        {
+                            if (templateInternal != template && templateInternal.IsDefault)
+                            {
+                                templateInternal.IsDefault = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (e.PropertyName == "ThumbnailFallbackFilePath")
+            {
+                PropertyChangedEventArgsEx args = (PropertyChangedEventArgsEx)e;
+
+                string oldValue = (string)args.OldValue;
+                this.deleteThumbnailFallbackIfPossible(oldValue);
+            }
+
+            if (e.PropertyName == "ImageFilePathForEditing")
+            {
+                PropertyChangedEventArgsEx args = (PropertyChangedEventArgsEx)e;
+
+                string oldValue = (string)args.OldValue;
+                this.deleteImageIfPossible(oldValue);
+            }
         }
-        IEnumerator IEnumerable.GetEnumerator()
+
+        private void deleteThumbnailFallbackIfPossible(string thumbnailFallbackFilePath)
         {
-            return (IEnumerator)this.GetEnumerator();
+            string thumbnailFileFolder = Path.GetDirectoryName(thumbnailFallbackFilePath);
+            if (!string.IsNullOrWhiteSpace(thumbnailFileFolder))
+            {
+                if (String.Compare(Path.GetFullPath(this.thumbnailFallbackImageFolder).TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
+                {
+                    return;
+                }
+
+                bool found = false;
+                foreach (Template template in this.templates)
+                {
+                    if (template.ThumbnailFallbackFilePath != null)
+                    {
+                        if (String.Compare(Path.GetFullPath(thumbnailFallbackFilePath), Path.GetFullPath(template.ThumbnailFallbackFilePath), StringComparison.InvariantCultureIgnoreCase) == 0)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found)
+                {
+                    if (this.checkFileUsage != null)
+                    {
+                        found = this.checkFileUsage(thumbnailFallbackFilePath);
+                    }
+                }
+
+                if (!found)
+                {
+                    if (File.Exists(thumbnailFallbackFilePath))
+                    {
+                        File.Delete(thumbnailFallbackFilePath);
+                    }
+                }
+            }
         }
 
         public Template GetTemplateForUpload(Upload upload)
@@ -69,7 +167,6 @@ namespace Drexel.VidUp.Business
         {
             return this.templates.Find(template => template.IsDefault);
         }
-        #endregion IEnumerable
 
         public Template this[int index]
         {
@@ -83,11 +180,23 @@ namespace Drexel.VidUp.Business
         {
             foreach (Template template in templates)
             {
-                string newFilePath = this.CopyImageToStorageFolder(template.ImageFilePathForEditing, this.templatesImagesStorageFolder);
+                string newFilePath = this.CopyTemplateImageToStorageFolder(template.ImageFilePathForEditing);
                 template.ImageFilePathForEditing = newFilePath;
+                template.PropertyChanged += this.templatePropertyChanged;
             }
 
             this.templates.AddRange(templates);
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
+        }
+
+        public string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
+        {
+            return this.CopyImageToStorageFolder(thumbnailFallbackFilePath, this.thumbnailFallbackStorageFolder);
+        }
+
+        public string CopyTemplateImageToStorageFolder(string templateImageFilePath)
+        {
+            return this.CopyImageToStorageFolder(templateImageFilePath, this.templatesImagesStorageFolder);
         }
 
         public string CopyImageToStorageFolder(string imageFilePath, string storageFolder)
@@ -115,6 +224,25 @@ namespace Drexel.VidUp.Business
             return null;
         }
 
+        public bool TemplateContainsFallbackThumbnail(string filePath)
+        {
+            if (filePath != null)
+            {
+                foreach (Template template in this.templates)
+                {
+                    if (template.ThumbnailFallbackFilePath != null)
+                    {
+                        if (String.Compare(Path.GetFullPath(filePath), Path.GetFullPath(template.ThumbnailFallbackFilePath), StringComparison.InvariantCultureIgnoreCase) == 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private string addFileNameAppendix(string fileName, string storageFolder, int appendix)
         {
             string newfileName = string.Format("{0}{1}{2}", Path.GetFileNameWithoutExtension(fileName), appendix, Path.GetExtension(fileName));
@@ -135,7 +263,12 @@ namespace Drexel.VidUp.Business
         public void Remove(Template template)
         {
             this.templates.Remove(template);
-            this.DeleteImageIfPossible(template.ImageFilePathForEditing);
+            template.PropertyChanged -= this.templatePropertyChanged;
+
+            this.deleteThumbnailFallbackIfPossible(template.ThumbnailFallbackFilePath);
+            this.deleteImageIfPossible(template.ImageFilePathForEditing);
+
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, template));
         }
 
         /// <summary>
@@ -144,7 +277,7 @@ namespace Drexel.VidUp.Business
         /// 2. is image referenced in any other template -> do nothing
         /// </summary>
         /// <param name="imageFilePath"></param>
-        public void DeleteImageIfPossible(string imageFilePath)
+        private void deleteImageIfPossible(string imageFilePath)
         {
             if (imageFilePath != null)
             {
@@ -201,6 +334,25 @@ namespace Drexel.VidUp.Business
         public Template Find(Predicate<Template> match)
         {
             return this.templates.Find(match);
+        }
+
+        public IEnumerator<Template> GetEnumerator()
+        {
+            return this.templates.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        private void raiseNotifyCollectionChanged(NotifyCollectionChangedEventArgs args)
+        {
+            NotifyCollectionChangedEventHandler handler = this.CollectionChanged;
+            if (handler != null)
+            {
+                handler(this, args);
+            }
         }
     }
 }

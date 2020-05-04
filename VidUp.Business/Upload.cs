@@ -10,7 +10,7 @@ using System.Linq;
 namespace Drexel.VidUp.Business
 {
     [JsonObject(MemberSerialization=MemberSerialization.OptIn)]
-    public class Upload
+    public class Upload : INotifyPropertyChanged
     {
         [JsonProperty]
         private Guid guid;
@@ -44,9 +44,24 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private Visibility visibility;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
-        public DateTime LastModified { get => this.lastModified; }
+
+        public DateTime LastModified
+        {
+            get => this.lastModified;
+        }
+        private DateTime lastModifiedInternal
+        {
+            set
+            {
+                this.lastModified = value;
+                this.raisePropertyChanged("LastModified");
+            }
+        }
+
         public DateTime UploadStart { get => this.uploadStart; }
         public DateTime UploadEnd { get => this.uploadEnd; }
         public string FilePath { get => this.filePath; }
@@ -76,8 +91,8 @@ namespace Drexel.VidUp.Business
                     this.template = value;
                 }
 
-                
-                this.lastModified = DateTime.Now;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("Template");
             }
         }
 
@@ -99,7 +114,8 @@ namespace Drexel.VidUp.Business
                     this.uploadEnd = DateTime.Now;
                 }
 
-                this.lastModified = DateTime.Now;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("UploadStatus");
             }
         }
 
@@ -114,7 +130,8 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.tags = value;
-                this.lastModified = DateTime.Now;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("Tags");
             }
         }
         public string ImageFilePath { get => this.getImagePath(this.template); }
@@ -147,8 +164,10 @@ namespace Drexel.VidUp.Business
             get { return this.thumbnailFilePath; }
             set
             {
+                string oldValue = this.thumbnailFilePath;
                 this.thumbnailFilePath = value;
-                this.lastModified = DateTime.Now;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("ThumbnailFilePath", oldValue, value);
             }
         }
 
@@ -161,6 +180,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.uploadErrorMessage = value;
+                this.raisePropertyChanged("UploadErrorMessage");
             }
         }
 
@@ -179,6 +199,8 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.title = title;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("Title");
             }
         }
 
@@ -191,6 +213,8 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.description = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("Description");
             }
         }
 
@@ -203,6 +227,22 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.visibility = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("Visibility");
+            }
+        }
+
+        public long FileLength
+        {
+            get
+            {
+                FileInfo fileInfo = new FileInfo(this.filePath);
+                if (fileInfo.Exists)
+                {
+                    return fileInfo.Length;
+                }
+
+                return 0;
             }
         }
 
@@ -238,6 +278,7 @@ namespace Drexel.VidUp.Business
             if (this.template != null)
             {
                 this.visibility = this.template.YtVisibility;
+                this.raisePropertyChanged("Visibility");
             }
         }
 
@@ -249,6 +290,7 @@ namespace Drexel.VidUp.Business
                 {
                     this.tags.Clear();
                     this.tags.AddRange(this.template.Tags);
+                    this.raisePropertyChanged("Tags");
                 }
             }
         }
@@ -260,6 +302,7 @@ namespace Drexel.VidUp.Business
                 if (!string.IsNullOrWhiteSpace(this.template.Description))
                 {
                     this.description = this.template.Description;
+                    this.raisePropertyChanged("Description");
                 }
             }
         }
@@ -284,13 +327,16 @@ namespace Drexel.VidUp.Business
                 {
                     this.Title = string.Empty;
                 }
+
+                this.raisePropertyChanged("Title");
             }
         }
 
         public void SetPublishAtTime(DateTime quarterHour)
         {
             this.publishAt = new DateTime(this.publishAt.Year, this.publishAt.Month, this.publishAt.Day, quarterHour.Hour, quarterHour.Minute, 0);
-            this.lastModified = DateTime.Now;
+            this.lastModifiedInternal = DateTime.Now;
+            this.raisePropertyChanged("PublishAtTime");
         }
 
         public void SetPublishAtDate(DateTime publishDate)
@@ -304,7 +350,8 @@ namespace Drexel.VidUp.Business
             }
 
             this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, this.publishAt.Hour, this.publishAt.Minute, 0);
-            this.lastModified = DateTime.Now;
+            this.lastModifiedInternal = DateTime.Now;
+            this.raisePropertyChanged("PublishAtDate");
         }
 
         private void autoSetThumbnail()
@@ -352,6 +399,8 @@ namespace Drexel.VidUp.Business
                     this.thumbnailFilePath = this.template.ThumbnailFallbackFilePath;
                 }
             }
+
+            this.raisePropertyChanged("ThumbnailFilePath");
         }
 
         private string getImagePath(Template template)
@@ -362,6 +411,25 @@ namespace Drexel.VidUp.Business
             }
 
            return this.template.ImageFilePathForRendering;
+        }
+
+        private void raisePropertyChanged(string propertyName)
+        {
+            // take a copy to prevent thread issues
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private void raisePropertyChanged(string propertyName, string oldValue, string newValue)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgsEx(propertyName, oldValue, newValue));
+            }
         }
     }
 }

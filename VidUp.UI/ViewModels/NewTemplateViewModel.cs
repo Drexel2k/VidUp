@@ -34,7 +34,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         this.FormValid = false;
                     }
 
-                    RaisePropertyChanged("Name");
+                    raisePropertyChanged("Name");
                 }
             }
         }
@@ -49,7 +49,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.imageFilePath != value)
                 {
                     this.imageFilePath = value;
-                    RaisePropertyChanged("ImageFilePath");
+                    raisePropertyChanged("ImageFilePath");
                 }
             }
         }
@@ -64,7 +64,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.rootFolderPath != value)
                 {
                     this.rootFolderPath = value;
-                    RaisePropertyChanged("RootFolderPath");
+                    raisePropertyChanged("RootFolderPath");
                 }
             }
         }
@@ -83,7 +83,7 @@ namespace Drexel.VidUp.UI.ViewModels
             private set
             {
                 this.formVaild = value;
-                this.RaisePropertyChanged("FormValid");
+                this.raisePropertyChanged("FormValid");
             }
         }
 
@@ -94,11 +94,11 @@ namespace Drexel.VidUp.UI.ViewModels
             this.openFileDialogCommand = new GenericCommand(openFileDialog);
         }
 
-        private void RaisePropertyChanged(string propertyName)
+        private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (PropertyChanged != null)
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+            if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }

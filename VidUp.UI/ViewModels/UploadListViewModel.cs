@@ -15,20 +15,19 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private UploadList uploadList;
         //needed for template combobox in upload control
-        private TemplateList templateList;
-        private MainWindowViewModel mainWindowViewModel;
+        private ObservableTemplateViewModels observableTemplateViewModels;
 
         private GenericCommand deleteCommand;
         private ObservableUploadViewModels observableUploadViewModels;
 
-
-        public TemplateList TemplateList
+        public ObservableTemplateViewModels ObservableTemplateViewModels
         {
             get
             {
-                return this.templateList;
+                return this.observableTemplateViewModels;
             }
         }
+
         public GenericCommand DeleteCommand
         {
             get
@@ -45,14 +44,13 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadListViewModel(UploadList uploadList, TemplateList templateList, MainWindowViewModel mainWindowViewModel)
+        public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels)
         {
             this.uploadList = uploadList;
-            this.mainWindowViewModel = mainWindowViewModel;
-            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.mainWindowViewModel);
+            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList);
 
-            this.templateList = templateList;
-            this.deleteCommand = new GenericCommand(removeUpload);
+            this.observableTemplateViewModels = observableTemplateViewModels;
+            this.deleteCommand = new GenericCommand(RemoveUpload);
         }
 
         public void AddUploads(List<Upload> uploads, TemplateList templateList)
@@ -62,29 +60,20 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeUploadList();
             JsonSerialization.SerializeTemplateList();
             this.observableUploadViewModels.AddUploads(uploads);
-
-            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
         }
 
         internal void RemoveAllUploaded()
         {
-            List<Upload> uploads = this.uploadList.GetUploads(upload => upload.UploadStatus == UplStatus.Finished);
-            foreach (Upload upload in uploads)
-            {
-                this.uploadList.Remove(upload);
-                this.ObservableUploadViewModels.Remove(upload);
-            }
-
+            this.uploadList.RemoveUploads(upload => upload.UploadStatus == UplStatus.Finished);
             JsonSerialization.SerializeUploadList();
         }
 
-        private void removeUpload(object parameter)
+        //exposed for testing
+        public void RemoveUpload(object parameter)
         {
             Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
 
             this.uploadList.Remove(upload);
-            this.mainWindowViewModel.DeleteThumbnailIfPossible(upload.ThumbnailFilePath);
-
             if(upload.UploadStatus != UplStatus.Finished && upload.Template != null)
             {
                 upload.Template = null;
@@ -93,14 +82,6 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeAllUploads();
             JsonSerialization.SerializeUploadList();
             JsonSerialization.SerializeTemplateList();
-            this.observableUploadViewModels.Remove(upload);
-
-            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
-        }
-
-        public void RemoveTemplateFromUploads(Template template)
-        {
-            this.observableUploadViewModels.RemoveTemplateFromUploads(template);
         }
 
         public void SetUploadStatus(Guid guid, UplStatus uploadStatus)

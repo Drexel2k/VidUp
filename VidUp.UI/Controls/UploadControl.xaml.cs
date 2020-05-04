@@ -33,9 +33,9 @@ namespace Drexel.VidUp.UI.Controls
             ComboBox comboBox = (ComboBox)sender;
             UploadViewModel uploadViewModel = (UploadViewModel)comboBox.DataContext;
             Template selectedTemplate = (Template)comboBox.SelectedItem;
-            if (uploadViewModel.Template != selectedTemplate)
+            if (uploadViewModel.SelectedTemplate.Template != selectedTemplate)
             {
-                uploadViewModel.Template = selectedTemplate;
+                uploadViewModel.SelectedTemplate.Template = selectedTemplate;
             }
         }
 

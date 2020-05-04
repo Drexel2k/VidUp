@@ -23,8 +23,6 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetToTemplateValueCommand;
 
-        private MainWindowViewModel mainWindowViewModel;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string Guid
@@ -92,12 +90,12 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.FilePath;
         }
 
-        public Template Template
+        public TemplateComboboxViewModel SelectedTemplate
         {
-            get => this.upload.Template;
+            get => new TemplateComboboxViewModel(this.upload.Template);
             set
             {
-                this.upload.Template = value;
+                this.upload.Template = value.Template;
 
                 this.SerializeAllUploads();
                 this.SerializeTemplateList();
@@ -317,7 +315,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.upload.PublishAt.Date == DateTime.MinValue)
                 {
-                    this.upload.SetPublishAtDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1));
+                    this.upload.SetPublishAtDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1));
                 }
                 else
                 {
@@ -382,15 +380,13 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 string oldFilePath = this.upload.ThumbnailFilePath;
                 this.upload.ThumbnailFilePath = value;
-                this.mainWindowViewModel.DeleteThumbnailIfPossible(oldFilePath);
                 this.raisePropertyChanged("ThumbnailFilePath");
             }
         }
 
-        public UploadViewModel (Upload upload, MainWindowViewModel mainWindowViewModel)
+        public UploadViewModel (Upload upload)
         {
             this.upload = upload;
-            this.mainWindowViewModel = mainWindowViewModel;
 
             this.quarterHourViewModels = new QuarterHourViewModels();
 
@@ -405,7 +401,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             // take a copy to prevent thread issues
             PropertyChangedEventHandler handler = PropertyChanged;
-            if (PropertyChanged != null)
+            if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
@@ -425,15 +421,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.UploadStatus = UplStatus.ReadyForUpload;
             JsonSerialization.SerializeAllUploads();
-            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
         }
 
         private void setPausedUploadState(object parameter)
         {
             this.UploadStatus = UplStatus.Paused;
             JsonSerialization.SerializeAllUploads();
-
-            this.mainWindowViewModel.SumTotalBytesToUploadAndRefreshTotalMbLeft();
         }
 
         private void setTemplateToNull(object parameter)
@@ -444,7 +437,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 return;
             }
 
-            this.Template = null;
+            this.SelectedTemplate = null;
             JsonSerialization.SerializeAllUploads();
             JsonSerialization.SerializeTemplateList();
         }
