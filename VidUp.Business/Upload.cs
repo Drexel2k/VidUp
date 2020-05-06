@@ -358,6 +358,7 @@ namespace Drexel.VidUp.Business
         {
             string[] extensions = { ".png", ".jpg", ".jpeg" };
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();
+            string oldFilePath = this.thumbnailFilePath;
 
             bool found = false;
             if(this.template!=null && !string.IsNullOrWhiteSpace(this.template.ThumbnailFolderPath) && Directory.Exists(this.template.ThumbnailFolderPath))
@@ -400,7 +401,7 @@ namespace Drexel.VidUp.Business
                 }
             }
 
-            this.raisePropertyChanged("ThumbnailFilePath");
+            this.raisePropertyChanged("ThumbnailFilePath", oldFilePath, this.thumbnailFilePath);
         }
 
         private string getImagePath(Template template)

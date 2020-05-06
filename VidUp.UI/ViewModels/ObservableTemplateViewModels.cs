@@ -65,6 +65,22 @@ namespace Drexel.VidUp.UI.ViewModels
             throw new InvalidOperationException("ObservableTemplateViewModels supports only adding and removing.");
         }
 
+        internal TemplateComboboxViewModel GetViewModel(Template template)
+        {
+            if (template != null)
+            {
+                foreach (TemplateComboboxViewModel templateComboboxViewModel in this.templateComboboxViewModels)
+                {
+                    if (templateComboboxViewModel.Template == template)
+                    {
+                        return templateComboboxViewModel;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         public TemplateComboboxViewModel this[int index]
         {
             get => this.templateComboboxViewModels[index];

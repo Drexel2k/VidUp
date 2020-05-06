@@ -23,6 +23,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetToTemplateValueCommand;
 
+        private ObservableTemplateViewModels observableTemplateViewModels;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string Guid
@@ -73,16 +75,6 @@ namespace Drexel.VidUp.UI.ViewModels
         public UplStatus UploadStatus
         {
             get => this.upload.UploadStatus;
-            set
-            {
-                this.upload.UploadStatus = value;
-                this.raisePropertyChanged("UploadErrorMessage");
-                this.raisePropertyChanged("ShowUploadErrorIcon");
-                this.raisePropertyChanged("UploadStatus");
-                this.raisePropertyChanged("UploadStart");
-                this.raisePropertyChanged("UploadEnd");
-                this.raisePropertyChanged("ControlsEnabled");
-            }
         }
 
         public string FilePath
@@ -92,11 +84,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public TemplateComboboxViewModel SelectedTemplate
         {
-            get => new TemplateComboboxViewModel(this.upload.Template);
+            get => this.observableTemplateViewModels.GetViewModel(this.upload.Template);
             set
             {
+                //combobox handling initiated in code behind
                 this.upload.Template = value.Template;
-
+                
                 this.SerializeAllUploads();
                 this.SerializeTemplateList();
 
@@ -307,7 +300,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    return true; ;
+                    return true;
                 }
             }
 
@@ -384,9 +377,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadViewModel (Upload upload)
+        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels)
         {
             this.upload = upload;
+            this.observableTemplateViewModels = observableTemplateViewModels;
+            this.upload.PropertyChanged += uploadPropertyChanged;
 
             this.quarterHourViewModels = new QuarterHourViewModels();
 
@@ -395,7 +390,22 @@ namespace Drexel.VidUp.UI.ViewModels
             this.noTemplateCommand = new GenericCommand(setTemplateToNull);
             this.openFileDialogCommand = new GenericCommand(openThumbnailDialog);
             this.resetToTemplateValueCommand = new GenericCommand(resetToTemplateVuale);
-        } 
+        }
+
+        private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "UploadStatus")
+            {
+                this.raisePropertyChanged("UploadErrorMessage");
+                this.raisePropertyChanged("ShowUploadErrorIcon");
+                this.raisePropertyChanged("UploadStatus");
+                this.raisePropertyChanged("UploadStart");
+                this.raisePropertyChanged("UploadEnd");
+                this.raisePropertyChanged("ControlsEnabled");
+
+                return;
+            }
+        }
 
         private void raisePropertyChanged(string propertyName)
         {
@@ -419,13 +429,13 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void resetUploadState(object parameter)
         {
-            this.UploadStatus = UplStatus.ReadyForUpload;
+            this.upload.UploadStatus = UplStatus.ReadyForUpload;
             JsonSerialization.SerializeAllUploads();
         }
 
         private void setPausedUploadState(object parameter)
         {
-            this.UploadStatus = UplStatus.Paused;
+            this.upload.UploadStatus = UplStatus.Paused;
             JsonSerialization.SerializeAllUploads();
         }
 

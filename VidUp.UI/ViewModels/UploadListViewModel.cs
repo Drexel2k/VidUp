@@ -47,22 +47,13 @@ namespace Drexel.VidUp.UI.ViewModels
         public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels)
         {
             this.uploadList = uploadList;
-            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList);
-
             this.observableTemplateViewModels = observableTemplateViewModels;
+            
+            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels);
             this.deleteCommand = new GenericCommand(RemoveUpload);
         }
 
-        public void AddUploads(List<Upload> uploads, TemplateList templateList)
-        {
-            this.uploadList.AddUploads(uploads, templateList);
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeUploadList();
-            JsonSerialization.SerializeTemplateList();
-            this.observableUploadViewModels.AddUploads(uploads);
-        }
-
-        internal void RemoveAllUploaded()
+        public void RemoveAllUploaded()
         {
             this.uploadList.RemoveUploads(upload => upload.UploadStatus == UplStatus.Finished);
             JsonSerialization.SerializeUploadList();
@@ -82,12 +73,6 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeAllUploads();
             JsonSerialization.SerializeUploadList();
             JsonSerialization.SerializeTemplateList();
-        }
-
-        public void SetUploadStatus(Guid guid, UplStatus uploadStatus)
-        {
-            UploadViewModel upload = this.observableUploadViewModels.GetUploadByGuid(guid);
-            upload.UploadStatus = uploadStatus;
         }
     }
 }

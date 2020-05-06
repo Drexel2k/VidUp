@@ -234,7 +234,7 @@
       <Name>VidUp.Business</Name>
     </ProjectReference>
     <ProjectReference Include="..\VidUp.Json\VidUp.Json.csproj">
-      <Project>{33d84357-abb1-4a1d-93a2-cf3266a792d4}</Project>
+      <Project>{33D84357-ABB1-4A1D-93A2-CF3266A792D4}</Project>
       <Name>VidUp.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\VidUp.Youtube\VidUp.Youtube.csproj">

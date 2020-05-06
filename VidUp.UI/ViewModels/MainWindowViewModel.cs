@@ -39,22 +39,13 @@ namespace Drexel.VidUp.UI.ViewModels
         private AppStatus appStatus;
         private PostUploadAction postUploadAction;
 
-        //todo: refactor uploading in seperate class
-        //will be updated after every finished upload to the current total bytes left
-        private long totalBytesToUpload = 0;
-        //will be updated during upload when files are added or removed
-        private long sessionTotalBytesToUplopad = 0;
-        private long uploadedLength = 0;
-
-        //total time left is only calculated by the average of the current upload and not of the whole session
-        private long currentUploadBytes;
-        private long currentUploadBytesSent;
-        private DateTime currentUploadStart;
-
-        private long currentUploadSpeedInBytesPerSecond;
+        //contains sum of upload with status ReadyForUpload or Uploading
+        private long currentTotalBytesToUpload = 0;
         private long maxUploadInBytesPerSecond = 0;
 
-        private float progressPercentage;
+        private Uploader uploader;
+        private UploadStats uploadStats;
+
         private TaskbarItemProgressState taskbarItemProgressState = TaskbarItemProgressState.Normal;
 
         private bool windowActive = true;
@@ -272,11 +263,16 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-       public double ProgressPercentage
+       public float ProgressPercentage
        {
             get
             {
-                return this.progressPercentage;
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return this.uploadStats.ProgressPercentage;
+                }
+
+                return 0;
             }
        }
 
@@ -288,14 +284,13 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-
     public string CurrentFilePercent
         {
             get
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return string.Format("{0}%", (int)((float)this.currentUploadBytesSent / this.currentUploadBytes * 100));
+                    return string.Format("{0}%", this.uploadStats.CurrentFilePercent);
                 }
 
                 return "n/a";
@@ -305,16 +300,15 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                TimeSpan timeLeft = TimeSpan.Zero;
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    TimeSpan duration = DateTime.Now - this.currentUploadStart;
-                    if (this.currentUploadBytesSent > 0)
+                    
+                    if (this.uploadStats.CurrentFileTimeLeft > TimeSpan.MinValue)
                     {
-                        float factor = (float)this.currentUploadBytesSent / this.currentUploadBytes;
-                        TimeSpan totalDuration = TimeSpan.FromMilliseconds(duration.TotalMilliseconds / factor);
-                        timeLeft = totalDuration - duration;
-                        return string.Format("{0}h {1}m {2}s", (int)timeLeft.TotalHours, timeLeft.Minutes, timeLeft.Seconds);
+                        return string.Format("{0}h {1}m {2}s",
+                            (int)this.uploadStats.CurrentFileTimeLeft.TotalHours,
+                            this.uploadStats.CurrentFileTimeLeft.Minutes,
+                            this.uploadStats.CurrentFileTimeLeft.Seconds);
                     }
 
                     return "calclulating...";
@@ -330,7 +324,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return ((int)((float)(this.currentUploadBytes - this.currentUploadBytesSent) / byteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                    return this.uploadStats.CurrentFileMbLeft.ToString("N0", CultureInfo.CurrentCulture);
                 }
 
                 return "n/a";
@@ -343,7 +337,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return (this.currentUploadSpeedInBytesPerSecond / 1024f ).ToString("N0", CultureInfo.CurrentCulture);
+                    return this.uploadStats.CurrentSpeedInKiloBytesPerSecond.ToString("N0", CultureInfo.CurrentCulture);
                 }
 
                 return "n/a";
@@ -354,16 +348,14 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                TimeSpan timeLeft = TimeSpan.Zero;
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    TimeSpan duration = DateTime.Now - this.currentUploadStart;
-                    if (this.currentUploadBytesSent > 0)
+                    if (this.uploadStats.TotalTimeLeft > TimeSpan.MinValue)
                     { 
-                        float factor = (float)this.currentUploadBytesSent / this.totalBytesToUpload;
-                        TimeSpan totalDuration = TimeSpan.FromMilliseconds (duration.TotalMilliseconds / factor);
-                        timeLeft = totalDuration - duration;
-                        return string.Format("{0}h {1}m {2}s", (int)timeLeft.TotalHours, timeLeft.Minutes, timeLeft.Seconds);
+                        return string.Format("{0}h {1}m {2}s",
+                            (int)this.uploadStats.TotalTimeLeft.TotalHours,
+                            this.uploadStats.TotalTimeLeft.Minutes,
+                            this.uploadStats.TotalTimeLeft.Seconds);
                     }
 
                     return "calclulating...";
@@ -377,7 +369,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return ((int)((float)(totalBytesToUpload - currentUploadBytesSent) / byteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return this.uploadStats.TotalMbLeft.ToString("N0", CultureInfo.CurrentCulture);
+                }
+
+                return ((int)((float)this.uploadList.TotalBytesToUpload / MainWindowViewModel.byteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
             }
         }
 
@@ -405,13 +402,13 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.maxUploadInBytesPerSecond = 0;
                 }
 
-                YoutubeUpload.MaxUploadInBytesPerSecond = this.maxUploadInBytesPerSecond;
+
+                //todo: set to uploader
+                //YoutubeUpload.MaxUploadInBytesPerSecond = this.maxUploadInBytesPerSecond;
                 this.raisePropertyChanged("MaxUploadInKiloBytesPerSecond");
             }
         }
         
-
-
         public TemplateViewModel TemplateViewModel
         {
             get
@@ -512,13 +509,17 @@ namespace Drexel.VidUp.UI.ViewModels
                     uploads.Add(new Upload(fileName));
                 }
 
-                this.uploadListViewModel.AddUploads(uploads, this.templateList);
+                this.AddUploads(uploads);
             }
         }
 
         public void AddUploads(List<Upload> uploads)
         {
-            this.uploadListViewModel.AddUploads(uploads, this.templateList);
+            this.uploadList.AddUploads(uploads, this.templateList);
+
+            JsonSerialization.SerializeAllUploads();
+            JsonSerialization.SerializeUploadList();
+            JsonSerialization.SerializeTemplateList();
         }
 
         private void removeAllUploaded(object obj)
@@ -537,48 +538,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("AppStatus");
 
                 bool oneUploadFinished = false;
-                Upload upload = this.uploadList.GetUpload(upload2 => upload2.UploadStatus == UplStatus.ReadyForUpload && File.Exists(upload2.FilePath));
-
-                this.sessionTotalBytesToUplopad = this.totalBytesToUpload;
-                this.uploadedLength = 0;
-
-                while (upload != null)
-                {
-                    upload.UploadErrorMessage = null;
-                    this.currentUploadBytes = upload.FileLength;
-                    this.currentUploadStart = DateTime.Now;
-
-                    this.uploadListViewModel.SetUploadStatus(upload.Guid, UplStatus.Uploading);
-                    this.raisePropertyChanged("CurrentFilePercent");
-                    this.raisePropertyChanged("CurrentFileTimeLeft");
-                    this.raisePropertyChanged("CurrentFileMbLeft");
-                    this.raisePropertyChanged("TotalMbLeft");
-                    this.raisePropertyChanged("TotalTimeLeft");
-                    this.raisePropertyChanged("CurrentUploadSpeedInKiloBytesPerSecond");
-
-                    UploadResult result = await YoutubeUpload.Upload(upload, this.maxUploadInBytesPerSecond, updateUploadProgress);
-
-                    if (!string.IsNullOrWhiteSpace(result.VideoId))
-                    {
-                        oneUploadFinished = true;
-                        this.uploadListViewModel.SetUploadStatus(upload.Guid, UplStatus.Finished);
-                    }
-                    else
-                    {
-                        this.uploadListViewModel.SetUploadStatus(upload.Guid, UplStatus.Failed);
-                    }
-
-                    this.uploadedLength += upload.FileLength;
-                    this.currentUploadBytes = 0;
-                    this.currentUploadBytesSent = 0;
-                    JsonSerialization.SerializeAllUploads();
-
-                    uploadedLength += this.currentUploadBytes;
-                    upload = this.uploadList.GetUpload(upload2 => upload2.UploadStatus == UplStatus.ReadyForUpload);
-                }
-
-                this.progressPercentage = 1f;
-                this.raisePropertyChanged("ProgressPercentage");
+                this.uploader = new Uploader(this.uploadList);
+                this.uploadStats = new UploadStats();
+                oneUploadFinished = await uploader.Upload(null, null, this.updateUploadProgress, this.uploadStats, this.maxUploadInBytesPerSecond);
+                this.uploader = null;
+                this.uploadStats = null;
 
                 this.appStatus = AppStatus.Idle;
 
@@ -705,8 +669,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.RemoveTemplate(template);
             this.templateList.Remove(template);
 
-            this.DeleteThumbnailIfPossible(template.ThumbnailFallbackFilePath);
-
             JsonSerialization.SerializeTemplateList();
             JsonSerialization.SerializeAllUploads();
             if (this.ObservableTemplateViewModels.TemplateCount == 0)
@@ -715,87 +677,19 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        /// <summary>
-        /// Checks:
-        /// 1. is image not in fallback thumnail image storage folder -> do nothing
-        /// 2. is image referenced in any other template -> do nothing
-        /// 3. is image referenced in any other upload -> do nothing
-        /// </summary>
-        /// <param name="thumbnailFilePath"></param>
-        public void DeleteThumbnailIfPossible(string thumbnailFilePath)
-        {
-            if (thumbnailFilePath != null)
-            {
-                string thumbnailFileFolder = Path.GetDirectoryName(thumbnailFilePath);
-                if (String.Compare(Path.GetFullPath(Settings.ThumbnailFallbackImageFolder).TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
-                {
-                    return;
-                }
-
-                bool found = false;
-                foreach (Template template in this.templateList)
-                {
-                    if (template.ThumbnailFallbackFilePath != null)
-                    {
-                        if (String.Compare(Path.GetFullPath(thumbnailFilePath), Path.GetFullPath(template.ThumbnailFallbackFilePath), StringComparison.InvariantCultureIgnoreCase) == 0)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!found)
-                {
-                    foreach (Upload upload in this.uploadList)
-                    {
-                        if (upload.ThumbnailFilePath != null)
-                        {
-                            if (String.Compare(Path.GetFullPath(thumbnailFilePath), Path.GetFullPath(upload.ThumbnailFilePath), StringComparison.InvariantCultureIgnoreCase) == 0)
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (!found)
-                {
-                    if (File.Exists(thumbnailFilePath))
-                    {
-                        File.Delete(thumbnailFilePath);
-                    }
-                }
-            }
-        }
-
         private void uploadListPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            this.totalBytesToUpload = this.uploadList.TotalBytesToUpload;
-            this.raisePropertyChanged("TotalMbLeft");
-        }
-
-        void updateUploadProgress(YoutubeUploadStats stats)
-        {
-            this.currentUploadBytesSent = stats.BytesSent;
-            this.currentUploadSpeedInBytesPerSecond = stats.CurrentSpeedInBytesPerSecond;
-
-            //upload has been added or removed
-            long delta = this.sessionTotalBytesToUplopad - (this.totalBytesToUpload + this.uploadedLength);
-            if (delta != 0)
+            if (e.PropertyName == "TotalBytesToUpload")
             {
-                //delta is negative when files have been added
-                this.sessionTotalBytesToUplopad -= delta;
+                this.raisePropertyChanged("TotalMbLeft");
             }
-
-            this.progressPercentage = (this.uploadedLength + this.currentUploadBytesSent) / (float)this.sessionTotalBytesToUplopad;
-
+        }
+        void updateUploadProgress()
+        {
             this.raisePropertyChanged("ProgressPercentage");
             this.raisePropertyChanged("CurrentFilePercent");
             this.raisePropertyChanged("CurrentFileTimeLeft");
             this.raisePropertyChanged("CurrentFileMbLeft");
-            this.raisePropertyChanged("CurrentFileOverallSpeed");
             this.raisePropertyChanged("TotalMbLeft");
             this.raisePropertyChanged("TotalTimeLeft");
             this.raisePropertyChanged("CurrentUploadSpeedInKiloBytesPerSecond");
@@ -813,7 +707,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void resetTaskbarItemInfo()
         {
-            this.progressPercentage = 0f;
             this.taskbarItemProgressState = TaskbarItemProgressState.Normal;
             this.raisePropertyChanged("ProgressPercentage");
             this.raisePropertyChanged("TaskbarItemProgressState");

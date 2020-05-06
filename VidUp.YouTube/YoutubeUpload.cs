@@ -123,11 +123,13 @@ namespace Drexel.VidUp.Youtube
 
                 YoutubeUpload.stream = null;
 
-                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                using (HttpWebResponse httpResponse = (HttpWebResponse)await request.GetResponseAsync())
                 {
-                    StreamReader reader = new StreamReader(response.GetResponseStream());
-                    YoutubeVideoResponse videoResponse = JsonConvert.DeserializeObject<YoutubeVideoResponse>(await reader.ReadToEndAsync());
-                    result.VideoId = videoResponse.Id;
+                    StreamReader reader = new StreamReader(httpResponse.GetResponseStream());
+
+                    var definition = new { Id = "" };
+                    var response = JsonConvert.DeserializeAnonymousType(await reader.ReadToEndAsync(), definition);
+                    result.VideoId = response.Id;
                 }
             }
             catch (WebException e)
@@ -180,11 +182,11 @@ namespace Drexel.VidUp.Youtube
                     if (e.Response != null)
                     {
                         StreamReader reader = new StreamReader(e.Response.GetResponseStream());
-                        upload.UploadErrorMessage = $"Thumbnail upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                        upload.UploadErrorMessage += $"Thumbnail upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
                     }
                     else
                     {
-                        upload.UploadErrorMessage = $"Thumbnail upload failed: {e.ToString()}";
+                        upload.UploadErrorMessage += $"Thumbnail upload failed: {e.ToString()}";
                     }
 
                     return false;

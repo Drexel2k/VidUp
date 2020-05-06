@@ -32,10 +32,10 @@ namespace Drexel.VidUp.UI.Controls
         {
             ComboBox comboBox = (ComboBox)sender;
             UploadViewModel uploadViewModel = (UploadViewModel)comboBox.DataContext;
-            Template selectedTemplate = (Template)comboBox.SelectedItem;
-            if (uploadViewModel.SelectedTemplate.Template != selectedTemplate)
+            TemplateComboboxViewModel selectedTemplate = (TemplateComboboxViewModel)comboBox.SelectedItem;
+            if (uploadViewModel.SelectedTemplate.Template != selectedTemplate.Template)
             {
-                uploadViewModel.SelectedTemplate.Template = selectedTemplate;
+                uploadViewModel.SelectedTemplate = new TemplateComboboxViewModel(selectedTemplate.Template);
             }
         }
 
