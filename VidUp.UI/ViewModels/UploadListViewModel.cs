@@ -53,12 +53,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.deleteCommand = new GenericCommand(RemoveUpload);
         }
 
-        public void RemoveAllUploaded()
-        {
-            this.uploadList.RemoveUploads(upload => upload.UploadStatus == UplStatus.Finished);
-            JsonSerialization.SerializeUploadList();
-        }
-
         //exposed for testing
         public void RemoveUpload(object parameter)
         {

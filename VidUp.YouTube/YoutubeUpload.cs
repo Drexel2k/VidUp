@@ -83,14 +83,13 @@ namespace Drexel.VidUp.Youtube
                 }
 
                 string location;
-                using (HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync())
+                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
                 {
                     location = response.Headers["Location"];
                 }
 
-                FileStream fileStream = new FileStream(upload.FilePath, FileMode.Open);
+                using (FileStream fileStream = new FileStream(upload.FilePath, FileMode.Open))
                 using (ThrottledBufferedStream inputStream = new ThrottledBufferedStream(fileStream, maxUploadInBytesPerSecond))
-                //using (FileStream inputStream = new FileStream(upload.FilePath, FileMode.Open))
                 {
                     YoutubeUpload.stream = inputStream;
                     request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(location, "PUT", upload.FilePath);
@@ -118,32 +117,41 @@ namespace Drexel.VidUp.Youtube
                                 lastStatUpdate = DateTime.Now;
                             }
                         }
-                    }
+                    } 
                 }
 
                 YoutubeUpload.stream = null;
 
                 using (HttpWebResponse httpResponse = (HttpWebResponse)await request.GetResponseAsync())
                 {
-                    StreamReader reader = new StreamReader(httpResponse.GetResponseStream());
-
-                    var definition = new { Id = "" };
-                    var response = JsonConvert.DeserializeAnonymousType(await reader.ReadToEndAsync(), definition);
-                    result.VideoId = response.Id;
+                    using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
+                    {
+                            var definition = new { Id = "" };
+                            var response = JsonConvert.DeserializeAnonymousType(await reader.ReadToEndAsync(), definition);
+                            result.VideoId = response.Id;
+                    }
                 }
             }
             catch (WebException e)
             {
                 if (e.Response != null)
                 {
-                    StreamReader reader = new StreamReader(e.Response.GetResponseStream());
-                    upload.UploadErrorMessage = $"Video upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                    using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
+                    {
+                        upload.UploadErrorMessage = $"Video upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                        e.Response.Close();
+                    }
                 }
                 else
                 {
                     upload.UploadErrorMessage = $"Video upload failed: {e.ToString()}";
                 }
 
+                return result;
+            }
+            catch(IOException e)
+            {
+                upload.UploadErrorMessage = $"Video upload failed: {e.ToString()}";
                 return result;
             }
 
@@ -159,7 +167,7 @@ namespace Drexel.VidUp.Youtube
             {
                 try
                 {
-                    HttpWebRequest request = request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
+                    HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
                             string.Format("{0}?videoId={1}", YoutubeUpload.thumbnailEndpoint, videoId), "POST", upload.ThumbnailFilePath);
 
                         using (FileStream inputStream = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
@@ -181,14 +189,22 @@ namespace Drexel.VidUp.Youtube
                 {
                     if (e.Response != null)
                     {
-                        StreamReader reader = new StreamReader(e.Response.GetResponseStream());
-                        upload.UploadErrorMessage += $"Thumbnail upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                        using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
+                        {
+                            upload.UploadErrorMessage += $"Thumbnail upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                            e.Response.Close();
+                        }
                     }
                     else
                     {
                         upload.UploadErrorMessage += $"Thumbnail upload failed: {e.ToString()}";
                     }
 
+                    return false;
+                }
+                catch (IOException e)
+                {
+                    upload.UploadErrorMessage = $"Thumbnail upload failed: {e.ToString()}";
                     return false;
                 }
             }

@@ -11,7 +11,7 @@ using System.Text;
 namespace Drexel.VidUp.Business
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class TemplateList : INotifyCollectionChanged, IEnumerable<Template>
+    public class TemplateList : INotifyCollectionChanged, INotifyPropertyChanged, IEnumerable<Template>
     {
         [JsonProperty]
         private List<Template> templates;
@@ -21,6 +21,7 @@ namespace Drexel.VidUp.Business
         private CheckFileUsage checkFileUsage;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public int TemplateCount { get => this.templates.Count; }
 
@@ -186,6 +187,8 @@ namespace Drexel.VidUp.Business
             }
 
             this.templates.AddRange(templates);
+
+            this.raiseNotifyPropertyChanged("TemplateCount");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
         }
 
@@ -268,6 +271,7 @@ namespace Drexel.VidUp.Business
             this.deleteThumbnailFallbackIfPossible(template.ThumbnailFallbackFilePath);
             this.deleteImageIfPossible(template.ImageFilePathForEditing);
 
+            this.raiseNotifyPropertyChanged("TemplateCount");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, template));
         }
 
@@ -352,6 +356,15 @@ namespace Drexel.VidUp.Business
             if (handler != null)
             {
                 handler(this, args);
+            }
+        }
+
+        private void raiseNotifyPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

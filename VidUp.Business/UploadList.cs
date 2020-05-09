@@ -108,6 +108,8 @@ namespace Drexel.VidUp.Business
         {
             List<Upload> oldUploads = this.uploads.FindAll(predicate);
             this.uploads.RemoveAll(predicate);
+
+            this.raiseNotifyPropertyChanged("TotalBytesToUpload");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldUploads));
         }
 

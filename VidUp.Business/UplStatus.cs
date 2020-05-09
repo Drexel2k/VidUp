@@ -13,11 +13,11 @@ namespace Drexel.VidUp.Business
         Paused,
         [Description("Uploading")]
         Uploading,
-        [Description("Canceled")]
-        Canceled,
-        [Description("Finished")]
+        [Description("Upload Stopped")]
+        Stopped,
+        [Description("Upload Finished")]
         Finished,
-        [Description("Failed")]
+        [Description("Upload Failed")]
         Failed
     }
 }

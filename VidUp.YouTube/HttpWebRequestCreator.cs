@@ -73,6 +73,7 @@ namespace Drexel.VidUp.Youtube
 
             Uri uri = new Uri(endpoint);
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            request.KeepAlive = false; //http keep alive makes http requests to eon server use the same tcp connection. As we have few but long lasting requests we want a new connection every time to prevent connection closes, timeout issues etc.
             request.Method = httpMethod;
             request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + accessToken);
 
