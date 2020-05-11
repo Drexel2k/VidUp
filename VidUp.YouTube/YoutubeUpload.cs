@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -71,8 +72,17 @@ namespace Drexel.VidUp.Youtube
             {
                 //request upload session/uri
                 HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(YoutubeUpload.uploadEndpoint, "POST", jsonBytes, "application/json; charset=utf-8");
-                //slug header adds original video file name to youtube studio
-                request.Headers.Add("Slug", Path.GetFileName(upload.FilePath));
+                //slug header adds original video file name to youtube studio, lambda filters to valid chars (ascii >=32 and <=255)
+                request.Headers.Add("Slug", new String(Path.GetFileName(upload.FilePath).Where(c =>
+                {
+                    char ch = (char)((uint)byte.MaxValue & c);
+                    if (ch >= ' ' || ch == '\t')
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }).ToArray()));
                 request.Headers.Add("X-Upload-Content-Length", info.Length.ToString());
                 request.Headers.Add("X-Upload-Content-Type", "video/*");
 

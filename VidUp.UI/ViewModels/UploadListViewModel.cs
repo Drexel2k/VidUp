@@ -50,19 +50,14 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableTemplateViewModels = observableTemplateViewModels;
             
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels);
-            this.deleteCommand = new GenericCommand(RemoveUpload);
+            this.deleteCommand = new GenericCommand(this.RemoveUpload);
         }
 
         //exposed for testing
         public void RemoveUpload(object parameter)
         {
             Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
-
-            this.uploadList.Remove(upload);
-            if(upload.UploadStatus != UplStatus.Finished && upload.Template != null)
-            {
-                upload.Template = null;
-            }
+            this.uploadList.RemoveUploads(upload2 => upload2 == upload);
 
             JsonSerialization.SerializeAllUploads();
             JsonSerialization.SerializeUploadList();

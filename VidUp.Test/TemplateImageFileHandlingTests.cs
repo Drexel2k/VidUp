@@ -2,18 +2,17 @@
 using System.IO;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.UI.ViewModels;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Drexel.VidUp.Test
 {
-    [TestClass]
     public class TemplateImageFileHandlingTests
     {
         private static MainWindowViewModel mainWindowViewModel;
-        private static string t1RootFolder = Path.Combine(Directory.GetCurrentDirectory(), "T1Root");
-        private static string templateImage1SourceFilePath = Path.Combine(Directory.GetCurrentDirectory(), "TestAssets", "image1.png");
-        private static string templateImage1TargetFilePath = Path.Combine(Settings.TemplateImageFolder, "image1.png");
-        private static string templateImageFileExistedImage12TargetFilePath = Path.Combine(Settings.TemplateImageFolder, "image12.png");
+        private static string t1RootFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, "T1Root");
+        private static string templateImage1SourceFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestAssets", "image1.png");
+        private static string templateImage1TargetFilePath;
+        private static string templateImageFileExistedImage12TargetFilePath;
 
         private static Template t1;
         private static Template t2;
@@ -21,12 +20,12 @@ namespace Drexel.VidUp.Test
 
         private static TemplateList templateList;
 
-        [ClassInitialize]
-        public static void Initialize(TestContext context)
+        [OneTimeSetUp]
+        public static void Initialize()
         {
-            if (Directory.Exists(Settings.StorageFolder))
+            if (Directory.Exists(BaseSettings.StorageFolder))
             {
-                Directory.Delete(Settings.StorageFolder, true);
+                Directory.Delete(BaseSettings.StorageFolder, true);
             }
 
             if (Directory.Exists(TemplateImageFileHandlingTests.t1RootFolder))
@@ -34,10 +33,14 @@ namespace Drexel.VidUp.Test
                 Directory.Delete(TemplateImageFileHandlingTests.t1RootFolder, true);
             }
 
-            TemplateImageFileHandlingTests.mainWindowViewModel = new MainWindowViewModel(Settings.UserSuffix, Settings.StorageFolder, Settings.TemplateImageFolder, Settings.ThumbnailFallbackImageFolder, out TemplateImageFileHandlingTests.templateList);
-
             Directory.CreateDirectory(TemplateImageFileHandlingTests.t1RootFolder);
             Directory.CreateDirectory(Path.Combine(TemplateImageFileHandlingTests.t1RootFolder, "videos"));
+
+            CurrentSettings.StorageFolder = Path.Combine(BaseSettings.StorageFolder, "TemplateImageFileHandlingTests");
+            TemplateImageFileHandlingTests.templateImage1TargetFilePath = Path.Combine(CurrentSettings.TemplateImageFolder, "image1.png");
+            TemplateImageFileHandlingTests.templateImageFileExistedImage12TargetFilePath = Path.Combine(CurrentSettings.TemplateImageFolder, "image12.png");
+
+            TemplateImageFileHandlingTests.mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out TemplateImageFileHandlingTests.templateList);
 
             TemplateImageFileHandlingTests.t1 = new Template("T1", null, TemplateImageFileHandlingTests.t1RootFolder, TemplateImageFileHandlingTests.templateList);
             TemplateImageFileHandlingTests.t2 = new Template("T2", null, null, TemplateImageFileHandlingTests.templateList);
@@ -48,53 +51,60 @@ namespace Drexel.VidUp.Test
             TemplateImageFileHandlingTests.mainWindowViewModel.AddTemplate(t3);
         }
 
-        [ClassCleanup]
+        [OneTimeTearDown]
         public static void CleanUp()
         {
-            mainWindowViewModel = null;
-            Directory.Delete(Settings.StorageFolder, true);
-            Directory.Delete(TemplateImageFileHandlingTests.t1RootFolder, true);
+            TemplateImageFileHandlingTests.mainWindowViewModel = null;
+            if (Directory.Exists(BaseSettings.StorageFolder))
+            {
+                Directory.Delete(BaseSettings.StorageFolder, true);
+            }
+
+            if (Directory.Exists(TemplateImageFileHandlingTests.t1RootFolder))
+            {
+                Directory.Delete(TemplateImageFileHandlingTests.t1RootFolder, true);
+            }
         }
 
-        [TestMethod]
-        public void T001_TestAddT1TemplateImage()
+        [Test, Order(1)]
+        public static void TestAddT1TemplateImage()
         {
             TemplateImageFileHandlingTests.t1.ImageFilePathForEditing = TemplateImageFileHandlingTests.templateImage1SourceFilePath;
             Assert.IsTrue(TemplateImageFileHandlingTests.t1.ImageFilePathForEditing == TemplateImageFileHandlingTests.templateImage1TargetFilePath);
             Assert.IsTrue(File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
 
-        [TestMethod]
-        public void T002_TestAddT2TemplateImageAgain()
+        [Test, Order(2)]
+        public static void TestAddT2TemplateImageAgain()
         {
             TemplateImageFileHandlingTests.t2.ImageFilePathForEditing = TemplateImageFileHandlingTests.templateImage1SourceFilePath;
             Assert.IsTrue(File.Exists(TemplateImageFileHandlingTests.templateImageFileExistedImage12TargetFilePath));
         }
 
-        [TestMethod]
-        public void T003_TestAddT2TemplateImageFromTemplateImageStorageFolder()
+        [Test, Order(3)]
+        public static void TestAddT2TemplateImageFromTemplateImageStorageFolder()
         {
             TemplateImageFileHandlingTests.t2.ImageFilePathForEditing = TemplateImageFileHandlingTests.templateImage1TargetFilePath;
             Assert.IsTrue(TemplateImageFileHandlingTests.t2.ImageFilePathForEditing == TemplateImageFileHandlingTests.templateImage1TargetFilePath);
-            Assert.IsTrue(!File.Exists(Path.Combine(Settings.TemplateImageFolder, "image13.png")));
+            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.TemplateImageFolder, "image13.png")));
         }
 
-        [TestMethod]
-        public void T004_TestRemoveT1TemplateImag()
+        [Test, Order(4)]
+        public static void TestRemoveT1TemplateImage()
         {
             TemplateImageFileHandlingTests.t1.ImageFilePathForEditing = null;
             Assert.IsTrue(File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
 
-        [TestMethod]
-        public void T005_TestRemoveT2TemplateImage()
+        [Test, Order(5)]
+        public static void TestRemoveT2TemplateImage()
         {
             TemplateImageFileHandlingTests.t2.ImageFilePathForEditing = null;
             Assert.IsTrue(!File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
 
-        [TestMethod]
-        public void T006_TestAddT1T2TemplateImage()
+        [Test, Order(6)]
+        public static void TestAddT1T2TemplateImage()
         {
             TemplateImageFileHandlingTests.t1.ImageFilePathForEditing = TemplateImageFileHandlingTests.templateImage1SourceFilePath;
             Assert.IsTrue(TemplateImageFileHandlingTests.t1.ImageFilePathForEditing == TemplateImageFileHandlingTests.templateImage1TargetFilePath);
@@ -104,15 +114,15 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(TemplateImageFileHandlingTests.t2.ImageFilePathForEditing == TemplateImageFileHandlingTests.templateImage1TargetFilePath);
         }
 
-        [TestMethod]
-        public void T007_TestRemoveT1()
+        [Test, Order(7)]
+        public static void TestRemoveT1()
         {
             TemplateImageFileHandlingTests.mainWindowViewModel.RemoveTemplate(TemplateImageFileHandlingTests.t1.Guid.ToString());
             Assert.IsTrue(File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
 
-        [TestMethod]
-        public void T008_TestRemoveT2()
+        [Test, Order(8)]
+        public static void TestRemoveT2()
         {
             TemplateImageFileHandlingTests.mainWindowViewModel.RemoveTemplate(TemplateImageFileHandlingTests.t2.Guid.ToString());
             Assert.IsTrue(!File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));

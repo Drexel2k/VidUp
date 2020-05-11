@@ -34,9 +34,9 @@ namespace Drexel.VidUp.JSON
         }
         public static void Initialize()
         {
-            JsonSerialization.uploadListFilePath = string.Format(@"{0}\uploadlist.json", JsonSerialization.serializationFolder);
-            JsonSerialization.templateListFilePath = string.Format(@"{0}\templatelist.json", JsonSerialization.serializationFolder);
-            JsonSerialization.allUploadsFilePath = string.Format(@"{0}\uploads.json", JsonSerialization.serializationFolder);
+            JsonSerialization.uploadListFilePath = Path.Combine(JsonSerialization.serializationFolder, "uploadlist.json");
+            JsonSerialization.templateListFilePath = Path.Combine(JsonSerialization.serializationFolder, "templatelist.json");
+            JsonSerialization.allUploadsFilePath = Path.Combine(JsonSerialization.serializationFolder, "uploads.json");
         }
         public static void DeserializeUploadList()
         {

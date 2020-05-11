@@ -45,8 +45,13 @@
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Upload">
                         <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload.png"  Command="{Binding StartUploadingCommand}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}">
+                                <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
+                            </Fluent:CheckBox>
+                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
                         <Fluent:Button Header="Stop Uploading" IsEnabled="{Binding AppStatus}" SizeDefinition="Middle,Middle,Small" Icon="images/stop-upload.png"  Command="" />
-                        <Fluent:Button Header="Resume Uploading" IsEnabled="{Binding AppStatus}" SizeDefinition="Middle,Middle,Small" Icon="images/resume-upload.png"  Command="" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
                         <Grid>
@@ -56,20 +61,30 @@
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition />
-                                <RowDefinition />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Remove all with Status:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveUploadsWithStatusCommand}" CommandParameter="{Binding RemoveVisibility}" />
-                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding RemoveVisibility}" Width="150">
-                                <Fluent:ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
-                                    </DataTemplate>
-                                </Fluent:ComboBox.ItemTemplate>
-                            </Fluent:ComboBox>
-                            <Fluent:Button Grid.Row="1" Grid.Column="0" Header="Remove all with Template: " SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveUploadsWithTemplateCommand}" CommandParameter="{Binding RemoveSelectedTemplate}" />
-                            <Fluent:ComboBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding RemoveSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
+                            <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Remove Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveUploadsCommand}" />
+                            <Grid Grid.Row="1" Grid.Column="0" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="22" />
+                                    <RowDefinition Height="22" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">Status:</TextBlock>
+                                <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding RemoveUploadStatuses}" SelectedItem="{Binding RemoveUploadStatus}" Width="150">
+                                    <Fluent:ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>
+                                        </DataTemplate>
+                                    </Fluent:ComboBox.ItemTemplate>
+                                </Fluent:ComboBox>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Margin="5 2 0 0">Template:</TextBlock>
+                                <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding RemoveTemplateViewModels}" SelectedItem="{Binding RemoveSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
+                            </Grid>
                         </Grid>
-                        <Fluent:Button Header="Remove all" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveAllUploadsCommand}" />
 
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>

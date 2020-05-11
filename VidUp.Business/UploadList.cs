@@ -57,17 +57,6 @@ namespace Drexel.VidUp.Business
             this.uploads = new List<Upload>();
         }
 
-        public void Remove(Upload upload)
-        {
-            this.uploads.Remove(upload);
-            upload.PropertyChanged -= this.uploadPropertyChanged;
-
-            this.deleteThumbnailIfPossible(upload.ThumbnailFilePath);
-
-            this.raiseNotifyPropertyChanged("TotalBytesToUpload");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, upload));
-        }
-
         public void AddUploads(List<Upload> uploads, TemplateList templateList)
         {
             foreach(Upload upload in uploads)
@@ -108,6 +97,18 @@ namespace Drexel.VidUp.Business
         {
             List<Upload> oldUploads = this.uploads.FindAll(predicate);
             this.uploads.RemoveAll(predicate);
+
+            foreach (Upload upload in oldUploads)
+            {
+                if (upload.UploadStatus != UplStatus.Finished && upload.Template != null)
+                {
+                    upload.Template = null;
+                }
+
+                upload.PropertyChanged -= this.uploadPropertyChanged;
+
+                this.deleteThumbnailIfPossible(upload.ThumbnailFilePath);
+            }
 
             this.raiseNotifyPropertyChanged("TotalBytesToUpload");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldUploads));

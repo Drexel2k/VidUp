@@ -1,0 +1,115 @@
+[
+  {
+    "guid": "2f80c321-2261-4726-a764-3870ac9340a5",
+    "created": "2020-05-10T11:59:31.5086271+02:00",
+    "lastModified": "2020-05-10T11:59:31.5086271+02:00",
+    "name": "234",
+    "title": null,
+    "description": null,
+    "tags": [],
+    "visibility": "Private",
+    "uploads": [
+      "e0acc743-0c49-4dd7-ba4a-093b6686e43b",
+      "cb3ac8aa-4297-4d3c-9d09-4de6743a84e3"
+    ],
+    "imageFilePath": null,
+    "rootFolderPath": null,
+    "defaultPublishAtTime": "0001-01-01T00:00:00",
+    "thumbnailFolderPath": null,
+    "thumbnailFallbackFilePath": null,
+    "isDefault": false
+  },
+  {
+    "guid": "63dcb6ac-3065-49c4-8725-0a58b637385f",
+    "created": "2020-05-10T11:59:35.4762826+02:00",
+    "lastModified": "2020-05-10T11:59:35.4762826+02:00",
+    "name": "345",
+    "title": null,
+    "description": null,
+    "tags": [],
+    "visibility": "Private",
+    "uploads": [],
+    "imageFilePath": null,
+    "rootFolderPath": null,
+    "defaultPublishAtTime": "0001-01-01T00:00:00",
+    "thumbnailFolderPath": null,
+    "thumbnailFallbackFilePath": null,
+    "isDefault": false
+  },
+  {
+    "guid": "19f37916-68e6-4425-af12-23af87b513c7",
+    "created": "2020-05-10T11:59:40.1127181+02:00",
+    "lastModified": "2020-05-11T07:11:02.7235417+02:00",
+    "name": "456",
+    "title": null,
+    "description": null,
+    "tags": [],
+    "visibility": "Private",
+    "uploads": [
+      "da2ede66-e9f9-415a-8fe0-007b8a168d36",
+      "4be32408-92c0-4d48-8a27-5d98305c79cd"
+    ],
+    "imageFilePath": null,
+    "rootFolderPath": "{BaseDir}\\T1Root\\videos",
+    "defaultPublishAtTime": "0001-01-01T00:00:00",
+    "thumbnailFolderPath": null,
+    "thumbnailFallbackFilePath": null,
+    "isDefault": false
+  },
+  {
+    "guid": "7f258a2d-171e-4cf0-8ba6-89966929b742",
+    "created": "2020-05-10T11:59:44.7263885+02:00",
+    "lastModified": "2020-05-10T11:59:44.7263885+02:00",
+    "name": "567",
+    "title": null,
+    "description": null,
+    "tags": [],
+    "visibility": "Private",
+    "uploads": [
+      "e9d3be6a-c987-4b63-be32-e075a7e8a129",
+      "9dcd58c4-ef2a-427a-8629-44a812404611"
+    ],
+    "imageFilePath": null,
+    "rootFolderPath": null,
+    "defaultPublishAtTime": "0001-01-01T00:00:00",
+    "thumbnailFolderPath": null,
+    "thumbnailFallbackFilePath": null,
+    "isDefault": false
+  },
+  {
+    "guid": "abb4b082-5db1-4767-a529-ac34592730d2",
+    "created": "2020-05-10T11:59:50.1295836+02:00",
+    "lastModified": "2020-05-10T11:59:50.1295836+02:00",
+    "name": "678",
+    "title": null,
+    "description": null,
+    "tags": [],
+    "visibility": "Private",
+    "uploads": [],
+    "imageFilePath": null,
+    "rootFolderPath": null,
+    "defaultPublishAtTime": "0001-01-01T00:00:00",
+    "thumbnailFolderPath": null,
+    "thumbnailFallbackFilePath": null,
+    "isDefault": false
+  },
+  {
+    "guid": "e2188eed-589d-4233-862c-bc2380cbaf01",
+    "created": "2020-05-10T11:59:55.2428588+02:00",
+    "lastModified": "2020-05-10T11:59:55.2438557+02:00",
+    "name": "789",
+    "title": null,
+    "description": null,
+    "tags": [],
+    "visibility": "Private",
+    "uploads": [
+      "ff328893-5e6c-4e00-b3d2-7dce42e474e7"
+    ],
+    "imageFilePath": null,
+    "rootFolderPath": null,
+    "defaultPublishAtTime": "0001-01-01T00:00:00",
+    "thumbnailFolderPath": null,
+    "thumbnailFallbackFilePath": null,
+    "isDefault": false
+  }
+]
