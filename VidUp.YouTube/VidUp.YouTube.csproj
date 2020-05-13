@@ -75,18 +75,18 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Credentials.cs" />
-    <Compile Include="HttpWebRequestCreator.cs" />
+    <Compile Include="Service\HttpWebRequestCreator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ThrottledBufferedStream.cs" />
+    <Compile Include="Service\ThrottledBufferedStream.cs" />
     <Compile Include="Uploader.cs" />
     <Compile Include="UploadResult.cs" />
     <Compile Include="UploadStats.cs" />
-    <Compile Include="YoutubeUpload.cs" />
-    <Compile Include="YoutubeAuthentication.cs" />
-    <Compile Include="YoutubeSnippet.cs" />
-    <Compile Include="YoutubeStatus.cs" />
-    <Compile Include="YoutubeUploadStats.cs" />
-    <Compile Include="YoutubeVideoRequest.cs" />
+    <Compile Include="Service\YoutubeUpload.cs" />
+    <Compile Include="Service\YoutubeAuthentication.cs" />
+    <Compile Include="Data\YoutubeSnippet.cs" />
+    <Compile Include="Data\YoutubeStatus.cs" />
+    <Compile Include="Service\YoutubeUploadStats.cs" />
+    <Compile Include="Data\YoutubeVideoRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VidUp.Business\VidUp.Business.csproj">
@@ -105,5 +105,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

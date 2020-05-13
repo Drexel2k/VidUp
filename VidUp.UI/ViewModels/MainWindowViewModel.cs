@@ -16,6 +16,7 @@ using Drexel.VidUp.UI.Definitions;
 using System.Security.Policy;
 using Drexel.VidUp.UI.Converters;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube.Service;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -47,7 +48,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private Uploader uploader;
         private UploadStats uploadStats;
 
-        private TaskbarItemProgressState taskbarItemProgressState = TaskbarItemProgressState.Normal;
+        private TaskbarState taskbarState = TaskbarState.Normal;
 
         private bool windowActive = true;
 
@@ -286,6 +287,16 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.appStatus;
         }
 
+        private TaskbarState taskbarStateInternal
+        {
+            set
+            {
+                this.taskbarState = value;
+                this.raisePropertyChanged("ProgressPercentage");
+                this.raisePropertyChanged("TaskbarItemProgressState");
+            }
+        }
+
         public PostUploadAction PostUploadAction
         {
             get => this.postUploadAction;
@@ -323,8 +334,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     return this.uploadStats.ProgressPercentage;
                 }
-
-                return 0;
+                else
+                {
+                    if (this.taskbarState == TaskbarState.Normal)
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
             }
        }
 
@@ -332,7 +352,21 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.taskbarItemProgressState;
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return TaskbarItemProgressState.Normal;
+                }
+                else
+                {
+                    if (this.taskbarState == TaskbarState.Normal)
+                    {
+                        return TaskbarItemProgressState.Normal;
+                    }
+                    else
+                    {
+                        return TaskbarItemProgressState.Paused;
+                    }
+                }
             }
         }
 
@@ -652,7 +686,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async void startUploading(object obj)
         {
-            //button alle finished aus UploadList entfernen.
             if (this.appStatus == AppStatus.Idle)
             {
                 this.appStatus = AppStatus.Uploading;
@@ -688,8 +721,7 @@ namespace Drexel.VidUp.UI.ViewModels
                             ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
                             break;
                         default:
-                            this.taskbarItemProgressState = TaskbarItemProgressState.Indeterminate;
-                            this.raisePropertyChanged("TaskbarItemProgressState");
+                            this.notifyTaskbarItemInfo();
                             if (this.windowActive)
                             {
                                 System.Timers.Timer timer = new System.Timers.Timer(5000d);
@@ -886,17 +918,20 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.windowActive = true;
 
-            if (this.taskbarItemProgressState != TaskbarItemProgressState.Normal)
+            if (this.taskbarState != TaskbarState.Normal)
             {
                 this.resetTaskbarItemInfo();
             }
         }
 
+        private void notifyTaskbarItemInfo()
+        {
+            this.taskbarStateInternal = TaskbarState.Notification;
+        }
+
         private void resetTaskbarItemInfo()
         {
-            this.taskbarItemProgressState = TaskbarItemProgressState.Normal;
-            this.raisePropertyChanged("ProgressPercentage");
-            this.raisePropertyChanged("TaskbarItemProgressState");
+            this.taskbarStateInternal = TaskbarState.Normal;
         }
 
         public void WindowDeactivated()

@@ -14,8 +14,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Drexel.VidUp.Youtube.Data;
 
-namespace Drexel.VidUp.Youtube
+namespace Drexel.VidUp.Youtube.Service
 {
     public class YoutubeUpload
     {
@@ -51,7 +52,7 @@ namespace Drexel.VidUp.Youtube
             try
             {
                 string range = null;
-                if (string.IsNullOrWhiteSpace(upload.Location))
+                if (string.IsNullOrWhiteSpace(upload.ResumableSessionUri))
                 {
                     await YoutubeUpload.requestNewUpload(upload);
                 }
@@ -75,11 +76,11 @@ namespace Drexel.VidUp.Youtube
                     HttpWebRequest request = null;
                     if (uploadStartByteIndex > 0)
                     {
-                        request = await HttpWebRequestCreator.CreateAuthenticatedResumeHttpWebRequest(upload.Location, "PUT", upload.FilePath, uploadStartByteIndex);
+                        request = await HttpWebRequestCreator.CreateAuthenticatedResumeHttpWebRequest(upload.ResumableSessionUri, "PUT", upload.FilePath, uploadStartByteIndex);
                     }
                     else
                     {
-                        request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(upload.Location, "PUT", upload.FilePath);
+                        request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(upload.ResumableSessionUri, "PUT", upload.FilePath);
                     }
 
 
@@ -109,8 +110,8 @@ namespace Drexel.VidUp.Youtube
                             {
                                 stats.BytesSent = totalBytesRead;
                                 stats.CurrentSpeedInBytesPerSecond = inputStream.CurrentSpeedInBytesPerSecond;
-                                updateUploadProgress(stats);
                                 upload.BytesSent = uploadStartByteIndex + totalBytesRead;
+                                updateUploadProgress(stats);
                                 lastStatUpdate = DateTime.Now;
                             }
                         }
@@ -167,7 +168,7 @@ namespace Drexel.VidUp.Youtube
 
         private static async Task<string> getRange(Upload upload)
         {
-            HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedResumeInformationHttpWebRequest(upload.Location, "PUT", upload.FilePath);
+            HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedResumeInformationHttpWebRequest(upload.ResumableSessionUri, "PUT", upload.FilePath);
 
             try
             {
@@ -246,7 +247,7 @@ namespace Drexel.VidUp.Youtube
 
             using (HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync())
             {
-                upload.Location = response.Headers["Location"];
+                upload.ResumableSessionUri = response.Headers["Location"];
             }
         }
 

@@ -44,7 +44,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private Visibility visibility;
         [JsonProperty]
-        private string location;
+        private string resumableSessionUri;
         [JsonProperty]
         private long bytesSent;
 
@@ -108,7 +108,7 @@ namespace Drexel.VidUp.Business
                 this.uploadStatus = value;
                 if (value == UplStatus.ReadyForUpload)
                 {
-                    this.Location = null;
+                    this.ResumableSessionUri = null;
                     this.BytesSent = 0;
                 }
 
@@ -255,16 +255,16 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string Location
+        public string ResumableSessionUri
         {
             get
             {
-                return this.location;
+                return this.resumableSessionUri;
             }
             set
             {
-                this.location = value;
-                this.raisePropertyChanged("Location");
+                this.resumableSessionUri = value;
+                this.raisePropertyChanged("ResumableSessionUri");
             }
         }
         public long BytesSent

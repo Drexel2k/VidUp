@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Drexel.VidUp.Youtube
+namespace Drexel.VidUp.Youtube.Service
 {
     public class ThrottledBufferedStream : Stream, IDisposable
     {

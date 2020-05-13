@@ -9,7 +9,7 @@ namespace Drexel.VidUp.UI.Definitions
     {
         [Description("None")]
         None,
-        [Description("Flash Taskbar")]
+        [Description("Taskbar Notification")]
         FlashTaskbar,
         [Description("Sleep Mode")]
         SleepMode,

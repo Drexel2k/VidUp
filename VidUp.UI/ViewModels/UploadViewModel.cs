@@ -487,6 +487,29 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             OpenFileDialog fileDialog = new OpenFileDialog();
+
+            if (!string.IsNullOrWhiteSpace(this.ThumbnailFilePath))
+            {
+                fileDialog.InitialDirectory = Path.GetDirectoryName(this.ThumbnailFilePath);
+            }
+            else
+            {
+                if (this.upload.Template != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(this.upload.Template.ThumbnailFolderPath))
+                    {
+                        fileDialog.InitialDirectory = this.upload.Template.ThumbnailFolderPath;
+                    }
+                    else 
+                    {
+                        if (!string.IsNullOrWhiteSpace(this.upload.Template.RootFolderPath))
+                        {
+                            fileDialog.InitialDirectory = this.upload.Template.RootFolderPath;
+                        }
+                    }
+                }
+            }
+
             DialogResult result = fileDialog.ShowDialog();
 
 

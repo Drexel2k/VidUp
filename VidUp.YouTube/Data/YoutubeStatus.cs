@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Drexel.VidUp.Youtube
+namespace Drexel.VidUp.Youtube.Data
 {
 	public class YoutubeStatus
 	{

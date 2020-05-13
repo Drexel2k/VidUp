@@ -90,7 +90,7 @@
                 <Label Padding="0 4 4 4" Width="425">
                     <TextBlock Text="{Binding ThumbnailFilePath, Mode=OneWay}" TextWrapping="Wrap" />
                 </Label>
-                <Button Command="{Binding ResetThumbnailCommand }"  Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10 5 2 0" Width="12" Height="12" IsEnabled="{Binding ControlsEnabled}" Grid.Column="1" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear Setting." >
+                <Button Command="{Binding ResetThumbnailCommand }"  Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10 5 2 0" Width="12" Height="12" IsEnabled="{Binding ControlsEnabled}" Grid.Column="1" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                     <Image Source="../Images/minus.png" />
                 </Button>
                 <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0 0 0 0" Padding="0" Width="70" Height="25" IsEnabled="{Binding ControlsEnabled}" Content="Browse"/>

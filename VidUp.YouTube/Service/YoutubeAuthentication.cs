@@ -12,7 +12,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Drexel.VidUp.Youtube
+namespace Drexel.VidUp.Youtube.Service
 {
     public class YoutubeAuthentication
     {

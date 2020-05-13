@@ -1,4 +1,4 @@
-﻿namespace Drexel.VidUp.UI
+﻿namespace Drexel.VidUp.UI.Definitions
 {
     public enum AppStatus
     {

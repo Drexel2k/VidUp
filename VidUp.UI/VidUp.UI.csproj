@@ -137,6 +137,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Definitions\QuarterHoursSource.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Definitions\TaskbarState.cs" />
     <Compile Include="ViewModels\AboutViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\NewTemplateViewModel.cs" />
@@ -185,7 +186,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AppStatus.cs" />
+    <Compile Include="Definitions\AppStatus.cs" />
     <Compile Include="CommonAssemblyInfo.cs" />
     <Compile Include="GenericCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">

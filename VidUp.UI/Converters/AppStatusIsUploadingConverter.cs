@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Data;
 using System.Windows.Markup;
+using Drexel.VidUp.UI.Definitions;
 
 namespace Drexel.VidUp.UI.Converters
 {

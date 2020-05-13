@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace Drexel.VidUp.Youtube
+namespace Drexel.VidUp.Youtube.Service
 {
     public static class HttpWebRequestCreator
     {
