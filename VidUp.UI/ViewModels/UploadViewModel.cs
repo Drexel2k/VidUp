@@ -219,7 +219,16 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.Visibility;
             set
             {
+                if (value != Visibility.Private && this.Visibility == Visibility.Private)
+                {
+                    if (this.PublishAt)
+                    {
+                        this.PublishAt = false;
+                    }
+                }
+
                 this.upload.Visibility = value;
+
                 this.SerializeAllUploads();
 
                 this.raisePropertyChanged("Visibility");
@@ -306,6 +315,14 @@ namespace Drexel.VidUp.UI.ViewModels
 
             set
             {
+                if (value && !this.PublishAt)
+                {
+                    if (this.Visibility != Visibility.Private)
+                    {
+                        this.Visibility = Visibility.Private;
+                    }
+                }
+
                 if (this.upload.PublishAt.Date == DateTime.MinValue)
                 {
                     this.upload.SetPublishAtDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1));
