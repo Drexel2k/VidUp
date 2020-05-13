@@ -87,5 +87,58 @@ namespace Drexel.VidUp.Youtube
 
             return request;
         }
+
+        public static async Task<HttpWebRequest> CreateAuthenticatedResumeInformationHttpWebRequest(string endpoint, string httpMethod, string file)
+        {
+            if (string.IsNullOrWhiteSpace(endpoint))
+            {
+                throw new ArgumentException("endpoint");
+            }
+
+            if (string.IsNullOrWhiteSpace(httpMethod))
+            {
+                throw new ArgumentException("httpMethod");
+            }
+
+            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
+            {
+                throw new ArgumentException("file");
+            }
+
+            FileInfo fileInfo = new FileInfo(file);
+
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod, 0);
+            request.ContentLength = 0;
+            request.Headers.Add("Content-Range", string.Format("bytes */{0}",fileInfo.Length.ToString()));
+
+            return request;
+        }
+
+        public static async Task<HttpWebRequest> CreateAuthenticatedResumeHttpWebRequest(string endpoint, string httpMethod, string file, long startByteIndex)
+        {
+            if (string.IsNullOrWhiteSpace(endpoint))
+            {
+                throw new ArgumentException("endpoint");
+            }
+
+            if (string.IsNullOrWhiteSpace(httpMethod))
+            {
+                throw new ArgumentException("httpMethod");
+            }
+
+            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
+            {
+                throw new ArgumentException("file");
+            }
+
+            FileInfo fileInfo = new FileInfo(file);
+            string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, fileInfo.Length - 1, fileInfo.Length);
+
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod, fileInfo.Length);
+            request.ContentLength = fileInfo.Length - startByteIndex;
+            request.Headers.Add("Content-Range", rangeString);
+
+            return request;
+        }
     }
 }

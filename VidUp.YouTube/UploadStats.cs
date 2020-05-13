@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.Youtube
 {
     public class UploadStats
     {
-        private const int byteMegaByteFactor = 1048567;
         private bool finished;
 
         private DateTime currentUploadStart = DateTime.MinValue;
         private long uploadedLength;
-        private long currentUploadBytes;
+        private long currentUploadBytesResumed;
         private long currentTotalBytesToUpload;
-        private long currentUploadBytesSent;
         private long sessionTotalBytesToUplopad;
         private long currentUploadSpeedInBytesPerSecond;
+
+        private Upload upload;
 
         public float ProgressPercentage
         { 
@@ -28,7 +30,7 @@ namespace Drexel.VidUp.Youtube
                     return 1;
                 }
                 {
-                    return (this.uploadedLength + currentUploadBytesSent) / (float)sessionTotalBytesToUplopad;
+                    return (this.uploadedLength + (this.upload.BytesSent - this.currentUploadBytesResumed)) / (float)sessionTotalBytesToUplopad;
                 }
             } 
         }
@@ -38,9 +40,9 @@ namespace Drexel.VidUp.Youtube
             get
             {
                 TimeSpan duration = DateTime.Now - this.currentUploadStart;
-                if (currentUploadBytesSent > 0)
+                if ((this.upload.BytesSent - this.currentUploadBytesResumed) > 0)
                 {
-                    float factor = (float)currentUploadBytesSent / currentUploadBytes;
+                    float factor = (float)(this.upload.BytesSent - this.currentUploadBytesResumed) / this.upload.FileLength;
                     TimeSpan totalDuration = TimeSpan.FromMilliseconds(duration.TotalMilliseconds / factor);
                     return totalDuration - duration;
                 }
@@ -54,21 +56,21 @@ namespace Drexel.VidUp.Youtube
         {
             get
             {
-                return (int)((float)(currentUploadBytes - currentUploadBytesSent) / byteMegaByteFactor);
+                return (int)((float)(this.upload.FileLength - this.upload.BytesSent) / Constants.ByteMegaByteFactor);
             }
         }
         public int CurrentFilePercent
         { 
             get
             {
-                return (int)((float)currentUploadBytesSent / currentUploadBytes * 100);
+                return (int)((float)this.upload.BytesSent / this.upload.FileLength * 100);
             }
         }
         public int TotalMbLeft
         { 
             get
             {
-                return (int)((float)(currentTotalBytesToUpload - currentUploadBytesSent) / byteMegaByteFactor);
+                return (int)((float)(this.currentTotalBytesToUpload - this.upload.BytesSent) / Constants.ByteMegaByteFactor);
             }
         }
         public TimeSpan TotalTimeLeft
@@ -76,9 +78,9 @@ namespace Drexel.VidUp.Youtube
             get
             {
                 TimeSpan duration2 = DateTime.Now - this.currentUploadStart;
-                if (currentUploadBytesSent > 0)
+                if ((this.upload.BytesSent - this.currentUploadBytesResumed) > 0)
                 {
-                    float factor = (float)currentUploadBytesSent / currentTotalBytesToUpload;
+                    float factor = (float)(this.upload.BytesSent - this.currentUploadBytesResumed) / currentTotalBytesToUpload;
                     TimeSpan totalDuration = TimeSpan.FromMilliseconds(duration2.TotalMilliseconds / factor);
                     return totalDuration - duration2;
                 }
@@ -97,33 +99,32 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
+        public long CurrentTotalBytesToUpload
+        {
+            get => currentTotalBytesToUpload;
+            set => currentTotalBytesToUpload = value;
+        }
+
         public UploadStats()
         {
         }
 
-        public void UpdateStats(long currentUploadBytesSent, long sessionTotalBytesToUplopad, long currentUploadSpeedInBytesPerSecond)
+        public void UpdateStats(long sessionTotalBytesToUplopad, long currentUploadSpeedInBytesPerSecond)
         {
-            this.currentUploadBytesSent = currentUploadBytesSent;
             this.sessionTotalBytesToUplopad = sessionTotalBytesToUplopad;
             this.currentUploadSpeedInBytesPerSecond = currentUploadSpeedInBytesPerSecond;
         }
 
-        public void Initialize(long currentTotalBytesToUpload)
+        public void InitializeNewUpload(Upload upload)
         {
-            this.currentTotalBytesToUpload = currentTotalBytesToUpload;
-        }
-
-        public void InitializeNewUpload(DateTime currentUploadStart, long currentUploadBytes)
-        {
-            this.currentUploadStart = currentUploadStart;
-            this.currentUploadBytes = currentUploadBytes;
+            this.currentUploadStart = DateTime.Now;
+            this.upload = upload;
+            this.currentUploadBytesResumed = this.upload.BytesSent;
         }
 
         public void FinishUpload(long uploadedLength)
         {
             this.uploadedLength += uploadedLength;
-            this.currentUploadBytesSent = 0;
-            this.currentUploadBytes = 0;
         }
 
         public void AllFinished()

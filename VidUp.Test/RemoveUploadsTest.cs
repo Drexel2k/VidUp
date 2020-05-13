@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using Drexel.VidUp.UI.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -86,6 +87,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(jArray.Count == 9);
 
             bool found = false;
+
             foreach (JObject upload in jArray.SelectTokens("$.[*]"))
             {
                 string guid = upload["guid"].Value<string>();
@@ -93,32 +95,49 @@ namespace Drexel.VidUp.Test
                 {
                     found = true;
                 }
+
             }
 
             Assert.IsTrue(!found);
 
             found = false;
+            bool foundAgain = false;
             foreach (JObject upload in jArray.SelectTokens("$.[*]"))
             {
                 string guid = upload["guid"].Value<string>();
                 if (guid == uploadVideo6GuidWithTemplate789)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
+                    string templateGuid = upload["template"].Value<string>();
+                    Assert.IsTrue(templateGuid == template789Guid);
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
 
             found = false;
+            foundAgain = false;
             foreach (JObject upload in jArray.SelectTokens("$.[*]"))
             {
                 string guid = upload["guid"].Value<string>();
                 if (guid == uploadVideo2GuidWithTemplate456)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
+                    string templateGuid = upload["template"].Value<string>();
+                    Assert.IsTrue(templateGuid == template456Guid);
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
 
 
@@ -189,6 +208,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
 
             found = false;
+            foundAgain = false;
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -196,6 +216,10 @@ namespace Drexel.VidUp.Test
                 {
                     if ((string)uploadGuid.Value == uploadVideo6GuidWithTemplate789)
                     {
+                        if (found)
+                        {
+                            foundAgain = true;
+                        }
                         found = true;
 
                         if ((string)((JValue)template["guid"]).Value != template789Guid)
@@ -206,10 +230,12 @@ namespace Drexel.VidUp.Test
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
             Assert.IsTrue(!foundInWrongTemplate);
 
             found = false;
+            foundAgain = false;
             foundInWrongTemplate = false;
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
@@ -218,6 +244,10 @@ namespace Drexel.VidUp.Test
                 {
                     if ((string)uploadGuid.Value == uploadVideo2GuidWithTemplate456)
                     {
+                        if (found)
+                        {
+                            foundAgain = true;
+                        }
                         found = true;
 
                         if ((string)((JValue)template["guid"]).Value != template456Guid)
@@ -228,6 +258,7 @@ namespace Drexel.VidUp.Test
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
             Assert.IsTrue(!foundInWrongTemplate);
         }
@@ -260,15 +291,23 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(jArray.Count == 10);
 
             bool found = false;
+            bool foundAgain = false;
             foreach (JObject upload in jArray.SelectTokens("$.[*]"))
             {
                 string guid = upload["guid"].Value<string>();
                 if (guid == uploadVideo6Guid)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
+                    string templateGuid = upload["template"].Value<string>();
+                    Assert.IsTrue(templateGuid == template789FilterGuid);
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
 
 
@@ -278,14 +317,20 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(jArray.Count == 9);
 
             found = false;
+            foundAgain = false;
             foreach (JValue guid in jArray.SelectTokens("$.[*]"))
             {
                 if ((string)guid.Value == uploadVideo6Guid)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(!found);
 
             //uploads with assigned template shall remain left in template's uploads in templatelist.json after finished uploads are removed
@@ -302,6 +347,7 @@ namespace Drexel.VidUp.Test
 
             bool foundInWrongTemplate = false;
             found = false;
+            foundAgain = false;
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -309,6 +355,11 @@ namespace Drexel.VidUp.Test
                 {
                     if ((string)uploadGuid.Value == uploadVideo6Guid)
                     {
+                        if (found)
+                        {
+                            foundAgain = true;
+                        }
+
                         found = true;
 
                         if ((string)((JValue)template["guid"]).Value != template789FilterGuid)
@@ -319,6 +370,7 @@ namespace Drexel.VidUp.Test
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
             Assert.IsTrue(!foundInWrongTemplate);
         }
@@ -783,15 +835,23 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(jArray.Count == 9);
 
             bool found = false;
+            bool foundAgain = false;
             foreach (JObject upload in jArray.SelectTokens("$.[*]"))
             {
                 string guid = upload["guid"].Value<string>();
                 if (guid == uploadVideo2GuidFinished)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
+                    string templateGuid = upload["template"].Value<string>();
+                    Assert.IsTrue(templateGuid == template456Guid);
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
 
             found = false;
@@ -813,14 +873,20 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(jArray.Count == 8);
 
             found = false;
+            foundAgain = false;
             foreach (JValue guid in jArray.SelectTokens("$.[*]"))
             {
                 if ((string)guid.Value == uploadVideo2GuidFinished)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(!found);
 
             found = false;
@@ -857,6 +923,7 @@ namespace Drexel.VidUp.Test
 
             bool foundInWrongTemplate = false;
             found = false;
+            foundAgain = false;
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -864,6 +931,11 @@ namespace Drexel.VidUp.Test
                 {
                     if ((string)uploadGuid.Value == uploadVideo2GuidFinished)
                     {
+                        if (found)
+                        {
+                            foundAgain = true;
+                        }
+
                         found = true;
 
                         if ((string)((JValue)template["guid"]).Value != template456Guid)
@@ -874,6 +946,7 @@ namespace Drexel.VidUp.Test
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
             Assert.IsTrue(!foundInWrongTemplate);
 
@@ -930,39 +1003,43 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(jArray.Count == 2);
 
             bool found = false;
+            bool foundAgain = false;
             foreach (JObject upload in jArray.SelectTokens("$.[*]"))
             {
                 string guid = upload["guid"].Value<string>();
                 if (guid == uploadVideo2GuidFinished)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
+                    string templateGuid = upload["template"].Value<string>();
+                    Assert.IsTrue(templateGuid == template456GuidVideo2);
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
 
             found = false;
-            foreach (JObject upload in jArray.SelectTokens("$.[*]"))
-            {
-                string guid = upload["guid"].Value<string>();
-                if (guid == uploadVideo5GuidFinished)
-                {
-                    found = true;
-                }
-            }
-
-            Assert.IsTrue(!found);
-
-            found = false;
+            foundAgain = false;
             foreach (JObject upload in jArray.SelectTokens("$.[*]"))
             {
                 string guid = upload["guid"].Value<string>();
                 if (guid == uploadVideo6GuidFinished)
                 {
+                    if (found)
+                    {
+                        foundAgain = true;
+                    }
                     found = true;
+                    string templateGuid = upload["template"].Value<string>();
+                    Assert.IsTrue(templateGuid == template789GuidVideo6);
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
 
             //all ready to upload uploads shall be removed from uploadlist.json
@@ -993,6 +1070,7 @@ namespace Drexel.VidUp.Test
 
             bool foundInWrongTemplate = false;
             found = false;
+            foundAgain = false;
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -1000,6 +1078,11 @@ namespace Drexel.VidUp.Test
                 {
                     if ((string)uploadGuid.Value == uploadVideo2GuidFinished)
                     {
+                        if (found)
+                        {
+                            foundAgain = true;
+                        }
+
                         found = true;
 
                         if ((string)((JValue)template["guid"]).Value != template456GuidVideo2)
@@ -1010,6 +1093,7 @@ namespace Drexel.VidUp.Test
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
             Assert.IsTrue(!foundInWrongTemplate);
 
@@ -1030,6 +1114,7 @@ namespace Drexel.VidUp.Test
 
             foundInWrongTemplate = false;
             found = false;
+            foundAgain = false;
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -1037,6 +1122,11 @@ namespace Drexel.VidUp.Test
                 {
                     if ((string)uploadGuid.Value == uploadVideo6GuidFinished)
                     {
+                        if (found)
+                        {
+                            foundAgain = false;
+                        }
+
                         found = true;
 
                         if ((string)((JValue)template["guid"]).Value != template789GuidVideo6)
@@ -1047,6 +1137,7 @@ namespace Drexel.VidUp.Test
                 }
             }
 
+            Assert.IsTrue(!foundAgain);
             Assert.IsTrue(found);
             Assert.IsTrue(!foundInWrongTemplate);
         }

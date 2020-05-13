@@ -112,6 +112,7 @@ namespace Drexel.VidUp.Youtube
             }
             set
             {
+                this.bufferPosition = 0;
                 this.baseStream.Position = value;
             }
         }
@@ -237,7 +238,8 @@ namespace Drexel.VidUp.Youtube
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotSupportedException("ThrottledStream doesn't support seeking.");
+            this.bufferPosition = 0;
+            return this.baseStream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)

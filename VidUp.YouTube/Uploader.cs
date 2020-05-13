@@ -8,19 +8,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.UI;
+using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.Youtube
 {
-    public class Uploader
+    public class Uploader : IDisposable
     {
         private UploadList uploadList;
         //will be updated during upload when files are added or removed
-        private long sessionTotalBytesToUplopad = 0;
+        private long sessionTotalBytesToUploadFullFilesize = 0;
         private long uploadedLength = 0;
 
         private UploadStats uploadStats;
 
         private Action notifyUploadProgress;
+        private bool stopUpload = false;
+        private bool resumeUploads;
 
         public long MaxUploadInBytesPerSecond
         {
@@ -45,35 +48,46 @@ namespace Drexel.VidUp.Youtube
         {
             if (e.PropertyName == "TotalBytesToUpload")
             {
-                this.uploadStats.Initialize(this.uploadList.TotalBytesToUpload);
+                this.uploadStats.CurrentTotalBytesToUpload = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumable : this.uploadList.TotalBytesToUpload;
             }
         }
 
-        public async Task<bool> Upload(Action<Upload> notifyUploadStart, Action<Upload> notifyUploadEnd, Action notifyUploadProgress, UploadStats uploadStats, long maxUploadInBytesPerSecond)
+        public async Task<bool> Upload(Action<Upload> notifyUploadStart, Action<Upload> notifyUploadEnd, Action notifyUploadProgress, UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
         {
             this.uploadStats = uploadStats;
             this.notifyUploadProgress = notifyUploadProgress;
+            this.resumeUploads = resumeUploads;
             bool oneUploadFinished = false;
 
-            Upload upload = this.uploadList.GetUpload(upload2 => upload2.UploadStatus == UplStatus.ReadyForUpload && File.Exists(upload2.FilePath));
-
-            this.sessionTotalBytesToUplopad = this.uploadList.TotalBytesToUpload;
+            this.sessionTotalBytesToUploadFullFilesize = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumable : this.uploadList.TotalBytesToUpload;
+            uploadStats.CurrentTotalBytesToUpload =      this.sessionTotalBytesToUploadFullFilesize;
             this.uploadedLength = 0;
 
-            uploadStats.Initialize(this.uploadList.TotalBytesToUpload); ;
+            List<Predicate<Upload>> predicates = new List<Predicate<Upload>>(2);
+            predicates.Add(upload2 => upload2.UploadStatus == UplStatus.ReadyForUpload && File.Exists(upload2.FilePath));
+            if (this.resumeUploads)
+            {
+                predicates.Add(upload2 => (upload2.UploadStatus == UplStatus.Failed || upload2.UploadStatus == UplStatus.Stopped) && File.Exists(upload2.FilePath));
+            }
+
+            List<Upload> uploadsOfSession = new List<Upload>();
+            Upload upload = this.uploadList.GetUpload(PredicateCombiner.Or(predicates.ToArray()));
+
             while (upload != null)
             {
+                uploadsOfSession.Add(upload);
                 upload.UploadErrorMessage = null;
-                this.uploadStats.InitializeNewUpload(DateTime.Now, upload.FileLength);
+                this.uploadStats.InitializeNewUpload(upload);
 
                 upload.UploadStatus = UplStatus.Uploading;
 
-                if(notifyUploadStart != null)
+                if (notifyUploadStart != null)
                 {
                     notifyUploadStart(upload);
                 }
 
-                UploadResult result = await YoutubeUpload.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress);
+                UploadResult result = await YoutubeUpload.Upload(upload, maxUploadInBytesPerSecond,
+                    updateUploadProgress, this.isStopped);
 
                 if (!string.IsNullOrWhiteSpace(result.VideoId))
                 {
@@ -82,7 +96,10 @@ namespace Drexel.VidUp.Youtube
                 }
                 else
                 {
-                    upload.UploadStatus = UplStatus.Failed;
+                    if (upload.UploadStatus != UplStatus.Stopped)
+                    {
+                        upload.UploadStatus = UplStatus.Failed;
+                    }
                 }
 
                 this.uploadedLength += upload.FileLength;
@@ -95,7 +112,13 @@ namespace Drexel.VidUp.Youtube
 
                 JsonSerialization.SerializeAllUploads();
 
-                upload = this.uploadList.GetUpload(upload2 => upload2.UploadStatus == UplStatus.ReadyForUpload);
+                upload = this.uploadList.GetUpload(
+                    PredicateCombiner.And(
+                        new Predicate<Upload>[]
+                        {
+                            PredicateCombiner.Or(predicates.ToArray()),
+                            upload2 => !uploadsOfSession.Contains(upload2)
+                        }));
             }
 
             if(oneUploadFinished)
@@ -114,18 +137,34 @@ namespace Drexel.VidUp.Youtube
         void updateUploadProgress(YoutubeUploadStats stats)
         {
             //upload has been added or removed
-            long delta = this.sessionTotalBytesToUplopad - (this.uploadList.TotalBytesToUpload + this.uploadedLength);
+            long totalBytesToUpload = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumable : this.uploadList.TotalBytesToUpload;
+            long delta = this.sessionTotalBytesToUploadFullFilesize - (totalBytesToUpload + this.uploadedLength);
             if (delta != 0)
             {
                 //delta is negative when files have been added
-                this.sessionTotalBytesToUplopad -= delta;
+                this.sessionTotalBytesToUploadFullFilesize -= delta;
             }
 
-            this.uploadStats.UpdateStats(stats.BytesSent, this.sessionTotalBytesToUplopad, stats.CurrentSpeedInBytesPerSecond);
+            this.uploadStats.UpdateStats(this.sessionTotalBytesToUploadFullFilesize, stats.CurrentSpeedInBytesPerSecond);
             if(this.notifyUploadProgress != null)
             {
                 this.notifyUploadProgress();
             }
+        }
+
+        public void StopUpload()
+        {
+            this.stopUpload = true;
+        }
+
+        private bool isStopped()
+        {
+            return this.stopUpload;
+        }
+
+        public void Dispose()
+        {
+            this.uploadList.PropertyChanged -= uploadListPropertyChanged;
         }
     }
 }

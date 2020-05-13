@@ -43,6 +43,10 @@ namespace Drexel.VidUp.Business
         private List<string> tags;
         [JsonProperty]
         private Visibility visibility;
+        [JsonProperty]
+        private string location;
+        [JsonProperty]
+        private long bytesSent;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -102,6 +106,11 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.uploadStatus = value;
+                if (value == UplStatus.ReadyForUpload)
+                {
+                    this.Location = null;
+                    this.BytesSent = 0;
+                }
 
                 if (value == UplStatus.Uploading)
                 {
@@ -246,6 +255,31 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public string Location
+        {
+            get
+            {
+                return this.location;
+            }
+            set
+            {
+                this.location = value;
+                this.raisePropertyChanged("Location");
+            }
+        }
+        public long BytesSent
+        {
+            get
+            {
+                return this.bytesSent;
+            }
+            set
+            {
+                this.bytesSent = value;
+                this.raisePropertyChanged("BytesSent");
+            }
+        }
+
         public Upload()
         {
             this.tags = new List<string>();
@@ -259,6 +293,7 @@ namespace Drexel.VidUp.Business
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
             this.tags = new List<string>();
+            this.visibility = Visibility.Private;
 
             //to ensure at least file name is set as title.
             this.Title = string.Empty;

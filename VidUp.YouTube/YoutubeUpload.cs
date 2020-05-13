@@ -34,7 +34,7 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        public static async Task<UploadResult> Upload(Upload upload, long maxUploadInBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress)
+        public static async Task<UploadResult> Upload(Upload upload, long maxUploadInBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, Func<bool> stopUpload)
         {
             UploadResult result = new UploadResult()
             {
@@ -44,10 +44,163 @@ namespace Drexel.VidUp.Youtube
 
             if(!File.Exists(upload.FilePath))
             {
-                upload.UploadErrorMessage = "File does not exist";
+                upload.UploadErrorMessage = "File does not exist.";
                 return result;
             }
 
+            try
+            {
+                string range = null;
+                if (string.IsNullOrWhiteSpace(upload.Location))
+                {
+                    await YoutubeUpload.requestNewUpload(upload);
+                }
+                else
+                {
+                    range = await YoutubeUpload.getRange(upload);
+                }
+
+                long uploadStartByteIndex = 0;
+                if (!string.IsNullOrWhiteSpace(range))
+                {
+                    string[] parts = range.Split('-');
+                    uploadStartByteIndex = Convert.ToInt64(parts[1]) + 1;
+                }
+
+                using (FileStream fileStream = new FileStream(upload.FilePath, FileMode.Open))
+                using (ThrottledBufferedStream inputStream = new ThrottledBufferedStream(fileStream, maxUploadInBytesPerSecond))
+                {
+                    inputStream.Position = uploadStartByteIndex;
+                    YoutubeUpload.stream = inputStream;
+                    HttpWebRequest request = null;
+                    if (uploadStartByteIndex > 0)
+                    {
+                        request = await HttpWebRequestCreator.CreateAuthenticatedResumeHttpWebRequest(upload.Location, "PUT", upload.FilePath, uploadStartByteIndex);
+                    }
+                    else
+                    {
+                        request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(upload.Location, "PUT", upload.FilePath);
+                    }
+
+
+                    using (Stream dataStream = await request.GetRequestStreamAsync())
+                    {
+                        //very small buffer increases CPU load >= 10kByte seems OK.
+                        byte[] buffer = new byte[10 * 1024];
+                        int bytesRead;
+                        long totalBytesRead = 0;
+                        YoutubeUploadStats stats = new YoutubeUploadStats();
+
+                        DateTime lastStatUpdate = DateTime.Now;
+                        TimeSpan twoSeconds = new TimeSpan(0, 0, 2);
+                        while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                        {
+                            if (stopUpload != null && stopUpload())
+                            {
+                                request.Abort();
+                                upload.UploadStatus = UplStatus.Stopped;
+                                break;
+                            }
+
+                            await dataStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+
+                            if (DateTime.Now - lastStatUpdate > twoSeconds)
+                            {
+                                stats.BytesSent = totalBytesRead;
+                                stats.CurrentSpeedInBytesPerSecond = inputStream.CurrentSpeedInBytesPerSecond;
+                                updateUploadProgress(stats);
+                                upload.BytesSent = uploadStartByteIndex + totalBytesRead;
+                                lastStatUpdate = DateTime.Now;
+                            }
+                        }
+                    }
+
+                    if (upload.UploadStatus != UplStatus.Stopped)
+                    {
+                        upload.BytesSent = upload.FileLength;
+                        YoutubeUpload.stream = null;
+
+                        using (HttpWebResponse httpResponse = (HttpWebResponse)await request.GetResponseAsync())
+                        {
+                            using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
+                            {
+                                var definition = new { Id = "" };
+                                var response = JsonConvert.DeserializeAnonymousType(await reader.ReadToEndAsync(), definition);
+                                result.VideoId = response.Id;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (WebException e)
+            {
+                if (upload.UploadStatus != UplStatus.Stopped)
+                {
+                    if (e.Response != null)
+                    {
+                        using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
+                        {
+                            upload.UploadErrorMessage =
+                                $"Video upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                            e.Response.Close();
+                        }
+                    }
+                    else
+                    {
+                        upload.UploadErrorMessage = $"Video upload failed: {e.ToString()}";
+                    }
+                }
+
+                return result;
+            }
+            catch(IOException e)
+            {
+                upload.UploadErrorMessage = $"Video upload failed: {e.ToString()}";
+                return result;
+            }
+
+            result.ThumbnailSuccessFull = await YoutubeUpload.addThumbnail(upload, result.VideoId);
+
+            return result;
+        }
+
+        private static async Task<string> getRange(Upload upload)
+        {
+            HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedResumeInformationHttpWebRequest(upload.Location, "PUT", upload.FilePath);
+
+            try
+            {
+                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                {
+                }
+            }
+            catch (WebException e)
+            {
+                if (e.Response == null)
+                {
+                    throw;
+                }
+
+                HttpWebResponse response = e.Response as HttpWebResponse;
+                if (response == null)
+                {
+                    throw;
+                }
+
+                if ((int)response.StatusCode != 308)
+                {
+                    throw;
+                }
+
+                return response.Headers["Range"];
+            }
+
+            throw new InvalidOperationException("Http status code 308 expected for ResumeInformationHttpWebRequest");
+        }
+
+        private static async Task requestNewUpload(Upload upload)
+        {
             YoutubeVideoRequest video = new YoutubeVideoRequest();
 
             video.Snippet = new YoutubeSnippet();
@@ -67,109 +220,36 @@ namespace Drexel.VidUp.Youtube
             var jsonBytes = Encoding.UTF8.GetBytes(content);
 
             FileInfo info = new FileInfo(upload.FilePath);
-
-            try
+            //request upload session/uri
+            HttpWebRequest request =
+                await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
+                    YoutubeUpload.uploadEndpoint, "POST", jsonBytes, "application/json; charset=utf-8");
+            //slug header adds original video file name to youtube studio, lambda filters to valid chars (ascii >=32 and <=255)
+            request.Headers.Add("Slug", new String(Path.GetFileName(upload.FilePath).Where(c =>
             {
-                //request upload session/uri
-                HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(YoutubeUpload.uploadEndpoint, "POST", jsonBytes, "application/json; charset=utf-8");
-                //slug header adds original video file name to youtube studio, lambda filters to valid chars (ascii >=32 and <=255)
-                request.Headers.Add("Slug", new String(Path.GetFileName(upload.FilePath).Where(c =>
+                char ch = (char) ((uint) byte.MaxValue & (uint) c);
+                if (ch >= ' ' || ch == '\t')
                 {
-                    char ch = (char)((uint)byte.MaxValue & c);
-                    if (ch >= ' ' || ch == '\t')
-                    {
-                        return true;
-                    }
-
-                    return false;
-                }).ToArray()));
-                request.Headers.Add("X-Upload-Content-Length", info.Length.ToString());
-                request.Headers.Add("X-Upload-Content-Type", "video/*");
-
-
-                using (Stream dataStream = await request.GetRequestStreamAsync())
-                {
-                    dataStream.Write(jsonBytes, 0, jsonBytes.Length);
+                    return true;
                 }
 
-                string location;
-                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                {
-                    location = response.Headers["Location"];
-                }
+                return false;
+            }).ToArray()));
+            request.Headers.Add("X-Upload-Content-Length", info.Length.ToString());
+            request.Headers.Add("X-Upload-Content-Type", "video/*");
 
-                using (FileStream fileStream = new FileStream(upload.FilePath, FileMode.Open))
-                using (ThrottledBufferedStream inputStream = new ThrottledBufferedStream(fileStream, maxUploadInBytesPerSecond))
-                {
-                    YoutubeUpload.stream = inputStream;
-                    request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(location, "PUT", upload.FilePath);
 
-                    using (Stream dataStream = await request.GetRequestStreamAsync())
-                    {
-                        //very small buffer increases CPU load >= 10kByte seems OK.
-                        byte[] buffer = new byte[10 * 1024];
-                        int bytesRead;
-                        long totalBytesRead = 0;
-                        YoutubeUploadStats stats = new YoutubeUploadStats();
-
-                        DateTime lastStatUpdate = DateTime.MinValue;
-                        TimeSpan twoSeconds = new TimeSpan(0, 0, 2);
-                        while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
-                        {
-                            await dataStream.WriteAsync(buffer, 0, bytesRead);
-                            totalBytesRead += bytesRead;
-
-                            if (DateTime.Now - lastStatUpdate > twoSeconds)
-                            {
-                                stats.BytesSent = totalBytesRead;
-                                stats.CurrentSpeedInBytesPerSecond = inputStream.CurrentSpeedInBytesPerSecond;
-                                updateUploadProgress(stats);
-                                lastStatUpdate = DateTime.Now;
-                            }
-                        }
-                    } 
-                }
-
-                YoutubeUpload.stream = null;
-
-                using (HttpWebResponse httpResponse = (HttpWebResponse)await request.GetResponseAsync())
-                {
-                    using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
-                    {
-                            var definition = new { Id = "" };
-                            var response = JsonConvert.DeserializeAnonymousType(await reader.ReadToEndAsync(), definition);
-                            result.VideoId = response.Id;
-                    }
-                }
-            }
-            catch (WebException e)
+            using (Stream dataStream = await request.GetRequestStreamAsync())
             {
-                if (e.Response != null)
-                {
-                    using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
-                    {
-                        upload.UploadErrorMessage = $"Video upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
-                        e.Response.Close();
-                    }
-                }
-                else
-                {
-                    upload.UploadErrorMessage = $"Video upload failed: {e.ToString()}";
-                }
-
-                return result;
-            }
-            catch(IOException e)
-            {
-                upload.UploadErrorMessage = $"Video upload failed: {e.ToString()}";
-                return result;
+                dataStream.Write(jsonBytes, 0, jsonBytes.Length);
             }
 
-            result.ThumbnailSuccessFull = await YoutubeUpload.addThumbnail(upload, result.VideoId);
-
-            return result;
+            using (HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync())
+            {
+                upload.Location = response.Headers["Location"];
+            }
         }
-        
+
 
         private static async Task<bool> addThumbnail(Upload upload, string videoId)
         {

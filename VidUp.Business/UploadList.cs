@@ -36,6 +36,67 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public long TotalBytesToUploadRemaining
+        {
+            get
+            {
+                long length = 0;
+                foreach (Upload upload in this.uploads.FindAll(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
+                {
+                    if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                    {
+                        length += upload.FileLength;
+                    }
+                    else
+                    {
+                        length += upload.FileLength - upload.BytesSent;
+                    }
+
+                }
+
+                return length;
+            }
+        }
+
+        public long TotalBytesToUploadIncludingResumable
+        {
+            get
+            {
+                long length = 0;
+                foreach (Upload upload in this.uploads.FindAll(
+                    upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
+                              upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed))
+                {
+                    length += upload.FileLength;
+                }
+
+                return length;
+            }
+        }
+
+        public long TotalBytesToUploadIncludingResumableRemaining
+        {
+            get
+            {
+                long length = 0;
+                foreach (Upload upload in this.uploads.FindAll(
+                    upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
+                    upload.UploadStatus == UplStatus.Stopped ||upload.UploadStatus== UplStatus.Failed))
+                {
+                    if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                    {
+                        length += upload.FileLength;
+                    }
+                    else
+                    {
+                        length += upload.FileLength - upload.BytesSent;
+                    }
+                }
+
+                return length;
+            }
+        }
+
         public CheckFileUsage CheckFileUsage
         {
             set
@@ -81,6 +142,9 @@ namespace Drexel.VidUp.Business
             this.uploads.AddRange(uploads);
 
             this.raiseNotifyPropertyChanged("TotalBytesToUpload");
+            this.raiseNotifyPropertyChanged("TotalBytesToUploadRemaining");
+            this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
+            this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, uploads));
         }
 
@@ -111,6 +175,9 @@ namespace Drexel.VidUp.Business
             }
 
             this.raiseNotifyPropertyChanged("TotalBytesToUpload");
+            this.raiseNotifyPropertyChanged("TotalBytesToUploadRemaining");
+            this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
+            this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldUploads));
         }
 
@@ -119,6 +186,9 @@ namespace Drexel.VidUp.Business
             if (e.PropertyName == "UploadStatus")
             {
                 this.raiseNotifyPropertyChanged("TotalBytesToUpload");
+                this.raiseNotifyPropertyChanged("TotalBytesToUploadRemaining");
+                this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
+                this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             }
 
             if (e.PropertyName == "ThumbnailFilePath")
@@ -128,6 +198,12 @@ namespace Drexel.VidUp.Business
                 string oldValue = (string)args.OldValue;
 
                 this.deleteThumbnailIfPossible(oldValue);
+            }
+
+            if (e.PropertyName == "BytesSent")
+            {
+                //triggers serialization of uploads in MainWindowViewModel
+                this.raiseNotifyPropertyChanged("BytesSent");
             }
         }
 

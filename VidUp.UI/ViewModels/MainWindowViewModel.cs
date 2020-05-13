@@ -15,13 +15,12 @@ using System.Windows.Forms;
 using Drexel.VidUp.UI.Definitions;
 using System.Security.Policy;
 using Drexel.VidUp.UI.Converters;
+using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private const int byteMegaByteFactor = 1048567;
-
         private int tabNo;
         private UploadListViewModel uploadListViewModel;
 
@@ -29,6 +28,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateViewModel templateViewModel;
         private GenericCommand addUploadCommand;
         private GenericCommand startUploadingCommand;
+        private GenericCommand stopUploadingCommand;
         private GenericCommand newTemplateCommand;
         private GenericCommand deleteTemplateCommand;
         private GenericCommand aboutCommand;
@@ -84,6 +84,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.addUploadCommand = new GenericCommand(this.openUploadDialog);
             this.startUploadingCommand = new GenericCommand(this.startUploading);
+            this.stopUploadingCommand = new GenericCommand(this.stopUploading);
             this.newTemplateCommand = new GenericCommand(this.openNewTemplateDialog);
             this.deleteTemplateCommand = new GenericCommand(this.RemoveTemplate);
             this.aboutCommand = new GenericCommand(this.openAboutDialog);
@@ -184,6 +185,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.startUploadingCommand;
+            }
+        }
+
+        public GenericCommand StopUploadingCommand
+        {
+            get
+            {
+                return this.stopUploadingCommand;
             }
         }
 
@@ -417,7 +426,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return this.uploadStats.TotalMbLeft.ToString("N0", CultureInfo.CurrentCulture);
                 }
 
-                return ((int)((float)this.uploadList.TotalBytesToUpload / MainWindowViewModel.byteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                return ((int)((float)this.uploadList.TotalBytesToUpload / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
             }
         }
 
@@ -654,7 +663,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 bool oneUploadFinished = false;
                 this.uploader = new Uploader(this.uploadList);
                 this.uploadStats = new UploadStats();
-                oneUploadFinished = await uploader.Upload(null, null, this.updateUploadProgress, this.uploadStats, this.maxUploadInBytesPerSecond);
+                oneUploadFinished = await uploader.Upload(null, null, this.updateUploadProgress, this.uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
+                this.uploader.Dispose();
                 this.uploader = null;
                 this.uploadStats = null;
 
@@ -662,13 +672,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 PowerSavingHelper.EnablePowerSaving();
                 this.raisePropertyChanged("AppStatus");
-
-                this.raisePropertyChanged("CurrentFilePercent");
-                this.raisePropertyChanged("CurrentFileTimeLeft");
-                this.raisePropertyChanged("CurrentFileMbLeft");
-                this.raisePropertyChanged("TotalMbLeft");
-                this.raisePropertyChanged("TotalTimeLeft");
-                this.raisePropertyChanged("CurrentUploadSpeedInKiloBytesPerSecond");
+                this.updateUploadProgress();
 
                 if (oneUploadFinished)
                 {
@@ -695,6 +699,18 @@ namespace Drexel.VidUp.UI.ViewModels
                             }
                             break;
                     }
+                }
+            }
+        }
+
+        private void stopUploading(object obj)
+        {
+            if (this.appStatus == AppStatus.Uploading)
+            {
+                Uploader uploader = this.uploader;
+                if (uploader != null)
+                {
+                    uploader.StopUpload();
                 }
             }
         }
@@ -797,6 +813,11 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.raisePropertyChanged("TotalMbLeft");
             }
+
+            if (e.PropertyName == "BytesSent")
+            {
+                JsonSerialization.SerializeAllUploads();
+            }
         }
 
         private void templateListPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -850,7 +871,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("RemoveTemplateViewModels");
         }
 
-        void updateUploadProgress()
+        private void updateUploadProgress()
         {
             this.raisePropertyChanged("ProgressPercentage");
             this.raisePropertyChanged("CurrentFilePercent");

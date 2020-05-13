@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Drexel.VidUp.UI
+namespace Drexel.VidUp.Utils
 {
     public class PredicateCombiner
     {

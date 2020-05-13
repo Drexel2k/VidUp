@@ -46,12 +46,12 @@
                     <Fluent:RibbonGroupBox Header="Upload">
                         <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload.png"  Command="{Binding StartUploadingCommand}" />
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding AppStatus, Converter={converters:AppStatusIsUploadingConverter}}">
                                 <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
                             </Fluent:CheckBox>
                             <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
-                        <Fluent:Button Header="Stop Uploading" IsEnabled="{Binding AppStatus}" SizeDefinition="Middle,Middle,Small" Icon="images/stop-upload.png"  Command="" />
+                        <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="images/stop-upload.png"  Command="{Binding StopUploadingCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
                         <Grid>

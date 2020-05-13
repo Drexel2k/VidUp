@@ -5,6 +5,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Reflection;
 
 namespace Drexel.VidUp.JSON
@@ -82,6 +83,15 @@ namespace Drexel.VidUp.JSON
                 DeSerializationRepository.AllUploads = serializer.Deserialize<List<Upload>>(reader);
             }
 
+            foreach (Upload upload in DeSerializationRepository.AllUploads)
+            {
+                if (upload.UploadStatus == UplStatus.Uploading)
+                {
+                    Type myType = typeof(Upload);
+                    FieldInfo myFieldInfo = myType.GetField("uploadStatus", BindingFlags.NonPublic | BindingFlags.Instance);
+                    myFieldInfo.SetValue(upload, UplStatus.Stopped);
+                }
+            }
         }
 
         public static void DeserializeTemplateList()
