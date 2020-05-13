@@ -199,6 +199,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Definitions\PostUploadAction.cs" />
+    <Content Include="Images\minus.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\resume-upload.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

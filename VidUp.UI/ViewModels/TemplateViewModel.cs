@@ -18,6 +18,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private QuarterHourViewModels quarterHourViewModels;
         private GenericCommand openFileDialogCommand;
+        private GenericCommand resetCommand;
+
         private string lastThumbnailFallbackFilePathAdded = null;
         private string lastImageFilePathAdded;
 
@@ -47,18 +49,29 @@ namespace Drexel.VidUp.UI.ViewModels
                 return this.openFileDialogCommand;
             }
         }
+
+        public GenericCommand ResetCommand
+        {
+            get
+            {
+                return this.resetCommand;
+            }
+        }
         public string Guid
         { 
             get => this.template != null ? this.template.Guid.ToString() : string.Empty; 
         }
+
         public DateTime Created
         { 
             get => this.template != null ? this.template.Created : DateTime.MinValue; 
         }
+
         public DateTime LastModified 
         { 
             get => this.template != null ? this.template.LastModified : DateTime.MinValue; 
         }
+
         public string Name 
         { 
             get => this.template != null ? this.template.Name : null;
@@ -233,7 +246,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public TemplateViewModel()
         {
-            this.openFileDialogCommand = new GenericCommand(openFileDialog);
+            this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
+            this.resetCommand = new GenericCommand(this.resetValue);
             this.quarterHourViewModels = new QuarterHourViewModels();
         }
 
@@ -296,6 +310,29 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.ThumbnailFallbackFilePath = fileDialog.FileName;
                 }
+            }
+        }
+
+        private void resetValue(object parameter)
+        {
+            if ((string)parameter == "pic")
+            {
+                this.ImageFilePathForEditing = null;
+            }
+
+            if ((string)parameter == "root")
+            {
+                this.RootFolderPath = null;
+            }
+
+            if ((string)parameter == "thumb")
+            {
+                this.ThumbnailFolderPath = null;
+            }
+
+            if ((string)parameter == "thumbfallback")
+            {
+                this.ThumbnailFallbackFilePath = null;
             }
         }
 

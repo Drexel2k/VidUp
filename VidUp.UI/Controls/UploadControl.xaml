@@ -87,10 +87,13 @@
                 <materialDesign:PackIcon Kind="Warning" ToolTip="Thumbnail does not exist!" ToolTipService.ShowDuration="60000" Visibility="{Binding ThumbnailFilePath, Mode=OneWay, Converter={converters:StringIsNullOrFileExistsCollapsedConverter}}" Margin="0 4 5 0" Background="Transparent" />
             </StackPanel>
             <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
-                <Label Padding="0 4 4 4" Width="440">
+                <Label Padding="0 4 4 4" Width="425">
                     <TextBlock Text="{Binding ThumbnailFilePath, Mode=OneWay}" TextWrapping="Wrap" />
                 </Label>
-                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10 0 0 0" Padding="0" Width="70" Height="25" IsEnabled="{Binding ControlsEnabled}" Content="Browse"/>
+                <Button Command="{Binding ResetThumbnailCommand }"  Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10 5 2 0" Width="12" Height="12" IsEnabled="{Binding ControlsEnabled}" Grid.Column="1" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear Setting." >
+                    <Image Source="../Images/minus.png" />
+                </Button>
+                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0 0 0 0" Padding="0" Width="70" Height="25" IsEnabled="{Binding ControlsEnabled}" Content="Browse"/>
             </StackPanel>
             <StackPanel  Grid.Row="5" Grid.ColumnSpan="3" Orientation="Vertical">
                 <StackPanel  Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal">

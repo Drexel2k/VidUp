@@ -30,12 +30,12 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Canvas Grid.Row="0" Grid.ColumnSpan="2" Margin="1,0,1,0">
                     <Canvas.Background>
@@ -60,15 +60,18 @@
                 </StackPanel>
                 <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                     <Label Content="Project Root Folder:" Width="115" />
-                    <Label Width="380" Margin="0 0 10 0">
+                    <Label Width="366" Margin="0 0 10 0">
                         <TextBlock Text="{Binding RootFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
                     </Label>
                     <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="To every file added from this folder or any subfolder this template is assigne automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <Button Command="{Binding ResetCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Grid.Column="1" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear Setting." >
+                        <Image Source="../Images/minus.png" />
+                    </Button>
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                 </StackPanel>
 
                 <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                    <DockPanel Width="505">
+                    <DockPanel Width="491">
                         <Label Content="Image: " Width="115" />
                         <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback template images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastImageFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.TemplateImageFolder}}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
                         <Label Margin="0 0 10 0">
@@ -76,18 +79,24 @@
                         </Label>
                     </DockPanel>
                     <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="For visualization of uploads in upload view. Recommended size: 620x50px." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <Button Command="{Binding ResetCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Grid.Column="1" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear Setting." >
+                        <Image Source="../Images/minus.png" />
+                    </Button>
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0 " Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                 </StackPanel>
                 <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                     <Label Content="Thumbnail Folder: " Width="115" />
-                    <Label Width="380" Margin="0 0 10 0">
+                    <Label Width="366" Margin="0 0 10 0">
                         <TextBlock Text="{Binding ThumbnailFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
                     </Label>
                     <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="VidUp will assign thumbnails automatically if the file names without extension are equal. Lookup location this folder, then in folder of video." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <Button Command="{Binding ResetCommand }" CommandParameter="thumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Grid.Column="1" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear Setting." >
+                        <Image Source="../Images/minus.png" />
+                    </Button>
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                 </StackPanel>
                 <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                    <DockPanel Width="505">
+                    <DockPanel Width="491">
                         <Label Content="Fallback Thumbnail: " Width="115" />
                         <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback thumbnail images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastThumbnailFallbackFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.ThumbnailFallbackImageFolder}}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
                         <Label Margin="0 0 10 0">
@@ -95,6 +104,9 @@
                         </Label>
                     </DockPanel>       
                     <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="If no thumbnail is found in the thumbnail or the video folder, this default thumbnail will be assigned." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <Button Command="{Binding ResetCommand }" CommandParameter="thumbfallback" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Grid.Column="1" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear Setting." >
+                        <Image Source="../Images/minus.png" />
+                    </Button>
                     <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumbfallback" Margin="0 4 0 0" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                 </StackPanel>
                 <StackPanel  Grid.Row="6" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
@@ -118,11 +130,11 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
+                    <RowDefinition MinHeight="30"></RowDefinition>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">

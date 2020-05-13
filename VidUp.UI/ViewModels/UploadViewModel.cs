@@ -21,6 +21,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand resetStateCommand;
         private GenericCommand noTemplateCommand;
         private GenericCommand openFileDialogCommand;
+        private GenericCommand resetThumbnailCommand;
         private GenericCommand resetToTemplateValueCommand;
 
         private ObservableTemplateViewModels observableTemplateViewModels;
@@ -61,6 +62,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.openFileDialogCommand;
+            }
+        }
+
+        public GenericCommand ResetThumbnailCommand
+        {
+            get
+            {
+                return this.resetThumbnailCommand;
             }
         }
 
@@ -398,17 +407,17 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.upload = upload;
             this.observableTemplateViewModels = observableTemplateViewModels;
-            this.upload.PropertyChanged += uploadPropertyChanged;
+            this.upload.PropertyChanged += this.uploadPropertyChanged;
 
             this.quarterHourViewModels = new QuarterHourViewModels();
 
-            this.resetStateCommand = new GenericCommand(resetUploadState);
-            this.pauseCommand = new GenericCommand(setPausedUploadState);
-            this.noTemplateCommand = new GenericCommand(setTemplateToNull);
-            this.openFileDialogCommand = new GenericCommand(openThumbnailDialog);
-            this.resetToTemplateValueCommand = new GenericCommand(resetToTemplateVuale);
+            this.resetStateCommand = new GenericCommand(this.resetUploadState);
+            this.pauseCommand = new GenericCommand(this.setPausedUploadState);
+            this.noTemplateCommand = new GenericCommand(this.setTemplateToNull);
+            this.openFileDialogCommand = new GenericCommand(this.openThumbnailDialog);
+            this.resetThumbnailCommand = new GenericCommand(this.resetThumbnail);
+            this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateVuale);
         }
-
         private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "UploadStatus")
@@ -487,6 +496,18 @@ namespace Drexel.VidUp.UI.ViewModels
                 JsonSerialization.SerializeAllUploads();
             }
         }
+
+        private void resetThumbnail(object obj)
+        {
+            if (this.UploadStatus == UplStatus.Finished)
+            {
+                MessageBox.Show("Thumbnail cannot be set if upload is finished. Please clear upload list from finished uploads.");
+                return;
+            }
+
+            this.ThumbnailFilePath = null;
+        }
+
 
         private void resetToTemplateVuale(object parameter)
         {
