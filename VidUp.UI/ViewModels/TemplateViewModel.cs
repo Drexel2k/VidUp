@@ -1,12 +1,15 @@
-﻿using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using Drexel.VidUp.Business;
+using Drexel.VidUp.JSON;
+
+#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {

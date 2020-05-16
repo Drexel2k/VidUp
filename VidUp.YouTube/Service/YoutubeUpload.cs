@@ -1,20 +1,17 @@
-﻿using Drexel.VidUp.Business;
-using Newtonsoft.Json;
+﻿#region
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
+using Drexel.VidUp.Business;
 using Drexel.VidUp.Youtube.Data;
+using Newtonsoft.Json;
+
+#endregion
 
 namespace Drexel.VidUp.Youtube.Service
 {

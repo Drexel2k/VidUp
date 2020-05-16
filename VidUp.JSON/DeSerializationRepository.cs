@@ -1,7 +1,9 @@
-﻿using Drexel.VidUp.Business;
-using System;
+﻿#region
+
 using System.Collections.Generic;
-using System.Text;
+using Drexel.VidUp.Business;
+
+#endregion
 
 namespace Drexel.VidUp.JSON
 {

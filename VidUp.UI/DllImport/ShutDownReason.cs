@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Drexel.VidUp.UI.DllImport
+﻿namespace Drexel.VidUp.UI.DllImport
 {
     public enum ShutdownReason : uint
     {

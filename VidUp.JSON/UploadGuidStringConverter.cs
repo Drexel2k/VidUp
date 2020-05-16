@@ -1,10 +1,10 @@
-﻿using Drexel.VidUp.Business;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿#region
+
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
+using Drexel.VidUp.Business;
+using Newtonsoft.Json;
+
+#endregion
 
 namespace Drexel.VidUp.JSON
 {

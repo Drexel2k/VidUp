@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
+using System;
 using System.IO;
-using System.Text;
+
+#endregion
 
 namespace Drexel.VidUp.Test
 {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Drexel.VidUp.Test
+﻿namespace Drexel.VidUp.Test
 {
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false)]
     public class ConfigSourceAttribute : System.Attribute

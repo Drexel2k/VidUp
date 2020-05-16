@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
+using System;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Markup;
+
+#endregion
 
 namespace Drexel.VidUp.UI.Converters
 {

@@ -1,7 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
+using Newtonsoft.Json;
+
+#endregion
 
 namespace Drexel.VidUp.Youtube.Data
 {

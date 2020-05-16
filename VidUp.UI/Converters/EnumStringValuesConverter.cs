@@ -1,12 +1,14 @@
-﻿using Drexel.VidUp.Business;
+﻿#region
+
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
-using System.Text;
 using System.Windows.Data;
 using System.Windows.Markup;
+using Drexel.VidUp.Business;
+
+#endregion
 
 namespace Drexel.VidUp.UI.Converters
 {

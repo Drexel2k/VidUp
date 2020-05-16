@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
+using System;
 using System.Windows.Input;
+
+#endregion
 
 namespace Drexel.VidUp.UI
 {

@@ -1,15 +1,15 @@
-﻿using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
-using Drexel.VidUp.Youtube;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI;
+using Drexel.VidUp.Business;
+using Drexel.VidUp.JSON;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Service;
+
+#endregion
 
 namespace Drexel.VidUp.Youtube
 {

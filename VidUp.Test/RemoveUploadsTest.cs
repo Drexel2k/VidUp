@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security;
 using Drexel.VidUp.UI.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+
+#endregion
 
 namespace Drexel.VidUp.Test
 {

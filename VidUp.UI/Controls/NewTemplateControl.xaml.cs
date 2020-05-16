@@ -1,9 +1,4 @@
-﻿using System.Reflection;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Forms;
-
-namespace Drexel.VidUp.UI.Controls
+﻿namespace Drexel.VidUp.UI.Controls
 {
     /// <summary>
     /// Interaktionslogik für NewTemplateControl.xaml

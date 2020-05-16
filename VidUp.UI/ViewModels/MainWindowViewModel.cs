@@ -1,22 +1,25 @@
-﻿using Drexel.VidUp.Business;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Drexel.VidUp.JSON;
-using System.IO;
-using Drexel.VidUp.UI.Controls;
-using MaterialDesignThemes.Wpf;
-using Drexel.VidUp.Youtube;
-using System.Reflection;
 using System.Globalization;
-using Drexel.VidUp.UI.DllImport;
-using System.Windows.Shell;
+using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
-using Drexel.VidUp.UI.Definitions;
-using System.Security.Policy;
+using System.Windows.Shell;
+using Drexel.VidUp.Business;
+using Drexel.VidUp.JSON;
+using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.Converters;
+using Drexel.VidUp.UI.Definitions;
+using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube;
 using Drexel.VidUp.Youtube.Service;
+using MaterialDesignThemes.Wpf;
+
+#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -487,6 +490,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.maxUploadInBytesPerSecond = 0;
                 }
 
+                Uploader uploader = this.uploader;
+                if (uploader != null)
+                {
+                    uploader.MaxUploadInBytesPerSecond = this.maxUploadInBytesPerSecond;
+                }
+
                 this.raisePropertyChanged("MaxUploadInKiloBytesPerSecond");
             }
         }
@@ -720,7 +729,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         case PostUploadAction.Shutdown:
                             ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
                             break;
-                        default:
+                        case PostUploadAction.FlashTaskbar:
                             this.notifyTaskbarItemInfo();
                             if (this.windowActive)
                             {
@@ -729,6 +738,8 @@ namespace Drexel.VidUp.UI.ViewModels
                                 timer.AutoReset = false;
                                 timer.Start();
                             }
+                            break;
+                        default:
                             break;
                     }
                 }

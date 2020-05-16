@@ -1,6 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {

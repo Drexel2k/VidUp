@@ -1,12 +1,14 @@
-﻿using Drexel.VidUp.Business;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using Drexel.VidUp.Business;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Collections.ObjectModel;
-using System.Net;
-using System.Reflection;
+
+#endregion
 
 namespace Drexel.VidUp.JSON
 {
