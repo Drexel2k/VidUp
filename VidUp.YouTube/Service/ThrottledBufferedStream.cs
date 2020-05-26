@@ -13,7 +13,7 @@ namespace Drexel.VidUp.Youtube.Service
     public class ThrottledBufferedStream : Stream, IDisposable
     {
         private const int historyForUploadInSeconds = 3;
-        private const int memoryBufferSizeInBytes = 20 * 1024 * 1024 ;
+        private const int memoryBufferSizeInBytes = 20 * 1024 * 1024 ; //20 MegaByte
         private const long tickMultiplierForSeconds = 10000000;
         private const int keepHistoryForInSeconds = 30;
         private const int historyForStatsInSeconds = 20;
@@ -156,6 +156,11 @@ namespace Drexel.VidUp.Youtube.Service
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (count <= 0)
+            {
+                return 0;
+            }
+
             if (buffer == null)
             {
                 throw new ArgumentNullException("buffer");

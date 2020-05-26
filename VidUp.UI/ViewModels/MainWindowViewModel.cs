@@ -463,7 +463,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return this.uploadStats.TotalMbLeft.ToString("N0", CultureInfo.CurrentCulture);
                 }
 
-                return ((int)((float)this.uploadList.TotalBytesToUpload / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                return ((int)((float)this.uploadList.TotalBytesToUploadIncludingResumableRemaining / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
             }
         }
 

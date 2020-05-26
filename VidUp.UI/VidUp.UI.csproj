@@ -237,7 +237,9 @@
     <Content Include="Images\handshake48.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Images\vidup.ico" />
+    <Content Include="Images\vidup.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VidUp.Business\VidUp.Business.csproj">

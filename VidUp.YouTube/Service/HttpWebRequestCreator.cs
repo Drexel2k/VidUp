@@ -31,7 +31,7 @@ namespace Drexel.VidUp.Youtube.Service
 
             FileInfo fileInfo = new FileInfo(file);
 
-            HttpWebRequest request =  await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod, fileInfo.Length);
+            HttpWebRequest request =  await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = fileInfo.Length;
             request.ContentType = MimeMapping.GetMimeMapping(file); ;
 
@@ -61,30 +61,22 @@ namespace Drexel.VidUp.Youtube.Service
             }
 
 
-            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod, bytes.Length);
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = bytes.Length;
             request.ContentType = contentType;
 
             return request;
         }
 
-        private static async Task<HttpWebRequest> createBasicUploadHttpWebRequest(string endpoint, string httpMethod, long length)
+        private static async Task<HttpWebRequest> createBasicUploadHttpWebRequest(string endpoint, string httpMethod)
         {
             string accessToken = await YoutubeAuthentication.GetAccessToken();
 
             Uri uri = new Uri(endpoint);
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-            request.KeepAlive = false; //http keep alive makes http requests to eon server use the same tcp connection. As we have few but long lasting requests we want a new connection every time to prevent connection closes, timeout issues etc.
             request.Method = httpMethod;
             request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + accessToken);
-
-            //raise limits for large uploads
-            if (length > 100 * 1024 * 1024)
-            {
-                request.Timeout = int.MaxValue;
-                request.AllowWriteStreamBuffering = false;
-                request.ServicePoint.SetTcpKeepAlive(true, 10000, 1000);
-            }
+            request.AllowWriteStreamBuffering = false;
 
             return request;
         }
@@ -108,14 +100,14 @@ namespace Drexel.VidUp.Youtube.Service
 
             FileInfo fileInfo = new FileInfo(file);
 
-            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod, 0);
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = 0;
             request.Headers.Add("Content-Range", string.Format("bytes */{0}",fileInfo.Length.ToString()));
 
             return request;
         }
 
-        public static async Task<HttpWebRequest> CreateAuthenticatedResumeHttpWebRequest(string endpoint, string httpMethod, string file, long startByteIndex)
+        public static async Task<HttpWebRequest> CreateAuthenticatedResumeHttpWebRequest(string endpoint, string httpMethod, long uploadFileSize, long startByteIndex, int chunkSize)
         {
             if (string.IsNullOrWhiteSpace(endpoint))
             {
@@ -127,16 +119,20 @@ namespace Drexel.VidUp.Youtube.Service
                 throw new ArgumentException("httpMethod");
             }
 
-            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
+            long lastByteIndex;
+            if (startByteIndex + chunkSize >= uploadFileSize)
             {
-                throw new ArgumentException("file");
+                lastByteIndex = uploadFileSize - 1;
+            }
+            else
+            {
+                lastByteIndex = startByteIndex + chunkSize - 1;
             }
 
-            FileInfo fileInfo = new FileInfo(file);
-            string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, fileInfo.Length - 1, fileInfo.Length);
+            string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, lastByteIndex, uploadFileSize);
 
-            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod, fileInfo.Length);
-            request.ContentLength = fileInfo.Length - startByteIndex;
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
+            request.ContentLength = lastByteIndex - startByteIndex + 1;
             request.Headers.Add("Content-Range", rangeString);
 
             return request;

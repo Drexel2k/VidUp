@@ -42,7 +42,7 @@ namespace Drexel.VidUp.Youtube
                 TimeSpan duration = DateTime.Now - this.currentUploadStart;
                 if ((this.upload.BytesSent - this.currentUploadBytesResumed) > 0)
                 {
-                    float factor = (float)(this.upload.BytesSent - this.currentUploadBytesResumed) / this.upload.FileLength;
+                    float factor = (float)(this.upload.BytesSent - this.currentUploadBytesResumed) / (this.upload.FileLength - this.currentUploadBytesResumed);
                     TimeSpan totalDuration = TimeSpan.FromMilliseconds(duration.TotalMilliseconds / factor);
                     return totalDuration - duration;
                 }
@@ -70,7 +70,7 @@ namespace Drexel.VidUp.Youtube
         { 
             get
             {
-                return (int)((float)(this.currentTotalBytesToUpload - this.upload.BytesSent) / Constants.ByteMegaByteFactor);
+                return (int)((float)(this.currentTotalBytesToUpload - (this.upload.BytesSent - this.currentUploadBytesResumed)) / Constants.ByteMegaByteFactor);
             }
         }
         public TimeSpan TotalTimeLeft
@@ -101,8 +101,8 @@ namespace Drexel.VidUp.Youtube
 
         public long CurrentTotalBytesToUpload
         {
-            get => currentTotalBytesToUpload;
-            set => currentTotalBytesToUpload = value;
+            get => this.currentTotalBytesToUpload;
+            set => this.currentTotalBytesToUpload = value;
         }
 
         public UploadStats()

@@ -49,7 +49,7 @@ namespace Drexel.VidUp.Youtube
         {
             if (e.PropertyName == "TotalBytesToUpload")
             {
-                this.uploadStats.CurrentTotalBytesToUpload = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumable : this.uploadList.TotalBytesToUpload;
+                this.uploadStats.CurrentTotalBytesToUpload = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumableRemaining : this.uploadList.TotalBytesToUploadRemaining;
             }
         }
 
@@ -61,7 +61,7 @@ namespace Drexel.VidUp.Youtube
             bool oneUploadFinished = false;
 
             this.sessionTotalBytesToUploadFullFilesize = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumable : this.uploadList.TotalBytesToUpload;
-            uploadStats.CurrentTotalBytesToUpload =      this.sessionTotalBytesToUploadFullFilesize;
+            uploadStats.CurrentTotalBytesToUpload = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumableRemaining : this.uploadList.TotalBytesToUploadRemaining;
             this.uploadedLength = 0;
 
             List<Predicate<Upload>> predicates = new List<Predicate<Upload>>(2);

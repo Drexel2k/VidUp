@@ -24,6 +24,9 @@ namespace Drexel.VidUp.Youtube.Service
 
         private static string uploadScope = "https://www.googleapis.com/auth/youtube.upload";
         private static string serializationFolder;
+        private static string accessToken;
+        private static DateTime accessTokenExpiry = DateTime.MinValue;
+        private static TimeSpan oneMinute = new TimeSpan(0, 1, 0);
 
         public static string SerializationFolder
         {
@@ -40,6 +43,16 @@ namespace Drexel.VidUp.Youtube.Service
         //get access token from API
         public static async Task<string> GetAccessToken()
         {
+            if (YoutubeAuthentication.accessTokenExpiry - DateTime.Now < oneMinute)
+            {
+                await setNewAccessToken();
+            }
+
+            return YoutubeAuthentication.accessToken;
+        }
+
+        private static async Task setNewAccessToken()
+        {
             //check for refresh token, if not there, get it
             if (string.IsNullOrWhiteSpace(YoutubeAuthentication.refreshToken))
             {
@@ -51,11 +64,12 @@ namespace Drexel.VidUp.Youtube.Service
 
             //here we should have the refresh token
             // builds the  request
-            string tokenRequestBody = string.Format("refresh_token={0}&client_id={1}&client_secret={2}&grant_type=refresh_token",
+            string tokenRequestBody = string.Format(
+                "refresh_token={0}&client_id={1}&client_secret={2}&grant_type=refresh_token",
                 YoutubeAuthentication.refreshToken,
                 Credentials.ClientId,
                 Credentials.ClientSecret
-                );
+            );
 
             // sends the request
             HttpWebRequest tokenRequest = (HttpWebRequest)WebRequest.Create(YoutubeAuthentication.tokenEndpoint);
@@ -76,9 +90,11 @@ namespace Drexel.VidUp.Youtube.Service
                 string responseText = reader.ReadToEnd();
 
                 // converts to dictionary
-                Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
+                Dictionary<string, string> tokenEndpointDecoded =
+                    JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
 
-                return tokenEndpointDecoded["access_token"];
+                YoutubeAuthentication.accessTokenExpiry = DateTime.Now.AddSeconds(Convert.ToInt32(tokenEndpointDecoded["expires_in"]));
+                YoutubeAuthentication.accessToken = tokenEndpointDecoded["access_token"];
             }
         }
 
