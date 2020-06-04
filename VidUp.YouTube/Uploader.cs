@@ -34,6 +34,12 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
+        public bool StopUpload
+        {
+            get => this.stopUpload;
+            set => this.stopUpload = value;
+        }
+
         public Uploader(UploadList uploadList)
         {
             if (uploadList == null)
@@ -74,7 +80,7 @@ namespace Drexel.VidUp.Youtube
             List<Upload> uploadsOfSession = new List<Upload>();
             Upload upload = this.uploadList.GetUpload(PredicateCombiner.Or(predicates.ToArray()));
 
-            while (upload != null)
+            while (upload != null && !this.stopUpload)
             {
                 uploadsOfSession.Add(upload);
                 upload.UploadErrorMessage = null;
@@ -151,11 +157,6 @@ namespace Drexel.VidUp.Youtube
             {
                 this.notifyUploadProgress();
             }
-        }
-
-        public void StopUpload()
-        {
-            this.stopUpload = true;
         }
 
         private bool isStopped()

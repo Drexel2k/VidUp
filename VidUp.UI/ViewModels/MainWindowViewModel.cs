@@ -753,7 +753,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 Uploader uploader = this.uploader;
                 if (uploader != null)
                 {
-                    uploader.StopUpload();
+                    uploader.StopUpload = true;
                 }
             }
         }
