@@ -29,8 +29,9 @@ namespace Drexel.VidUp.Youtube
                 {
                     return 1;
                 }
+                else
                 {
-                    return (this.uploadedLength + (this.upload.BytesSent - this.currentUploadBytesResumed)) / (float)sessionTotalBytesToUplopad;
+                    return (this.uploadedLength + (this.upload.BytesSent - this.currentUploadBytesResumed)) / (float)this.currentTotalBytesToUpload;
                 }
             } 
         }
@@ -80,7 +81,7 @@ namespace Drexel.VidUp.Youtube
                 TimeSpan duration2 = DateTime.Now - this.currentUploadStart;
                 if ((this.upload.BytesSent - this.currentUploadBytesResumed) > 0)
                 {
-                    float factor = (float)(this.upload.BytesSent - this.currentUploadBytesResumed) / currentTotalBytesToUpload;
+                    float factor = (float)(this.upload.BytesSent - this.currentUploadBytesResumed) / this.currentTotalBytesToUpload;
                     TimeSpan totalDuration = TimeSpan.FromMilliseconds(duration2.TotalMilliseconds / factor);
                     return totalDuration - duration2;
                 }
