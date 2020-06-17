@@ -3,11 +3,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
+using System.Runtime.Remoting.Messaging;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.JSON;
+using Drexel.VidUp.Utils;
 
 #endregion
 
@@ -245,6 +248,16 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string FileSizeInMegaByte
+        {
+            get => $"{((float)this.upload.FileLength / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
+        }
+
+        public string UploadedInMegaByte
+        {
+            get => $"{((float)this.upload.BytesSent / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
+        }
+
         public string ShowFileNotExistsIcon
         {
             get
@@ -431,6 +444,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("ControlsEnabled");
 
                 return;
+            }
+
+            if (e.PropertyName == "BytesSent")
+            {
+                this.raisePropertyChanged("UploadedInMegaByte");
             }
         }
 

@@ -51,6 +51,8 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private long bytesSent;
 
+        private long fileLength;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Guid Guid { get => this.guid; }
@@ -248,13 +250,16 @@ namespace Drexel.VidUp.Business
         {
             get
             {
-                FileInfo fileInfo = new FileInfo(this.filePath);
-                if (fileInfo.Exists)
+                if (this.fileLength <= 0)
                 {
-                    return fileInfo.Length;
+                    FileInfo fileInfo = new FileInfo(this.filePath);
+                    if (fileInfo.Exists)
+                    {
+                        this.fileLength = fileInfo.Length;
+                    }
                 }
 
-                return 0;
+                return this.fileLength;
             }
         }
 

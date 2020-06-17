@@ -34,6 +34,7 @@
                 <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
                 <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
                 <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
+                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
             </Grid.RowDefinitions>
             <Canvas Grid.Row="0" Grid.ColumnSpan="3" Margin="1 0 1 0">
                 <Canvas.Background>
@@ -145,7 +146,7 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
 
-            <StackPanel  Grid.Row="7" Grid.Column="3" Orientation="Horizontal">
+            <StackPanel  Grid.Row="7" Grid.Column="2" Orientation="Horizontal">
                 <CheckBox IsChecked="{Binding PublishAt}" VerticalAlignment="Top" Margin="0 3 0 0" IsEnabled="{Binding ControlsEnabled}" />
                 <Label Content="Publish At: " Width="96" />
                 <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" DisplayDateStart="{Binding PublishAtFirstDate, Mode=OneWay}" Margin="0 3 0 0" />
@@ -177,6 +178,12 @@
                 </StackPanel>
             </StackPanel>
 
+            <Label Grid.Row="10" Grid.Column="0" Content="File Size: " Width="110" />
+            <Label Grid.Row="10" Grid.Column="1"  Content="{Binding FileSizeInMegaByte}"  Width="190"  HorizontalAlignment="Left" />
+            <StackPanel  Grid.Row="10" Grid.Column="2" Orientation="Horizontal">
+                <Label Content="Uploaded: " Width="96" />
+                <Label Content="{Binding UploadedInMegaByte}" Width="96" />
+            </StackPanel>
 
         </Grid>
 

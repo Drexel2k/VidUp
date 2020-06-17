@@ -149,7 +149,7 @@
                         <Label Content="Current File MB left: " />
                         <Label Content="{Binding CurrentFileMbLeft, Mode=OneWay}" />
                         <Label Content="  |  " />
-                        <Label Content="Current Upload Speed (KByte/s): " />
+                        <Label Content="Current Upload Speed (KBytes/s): " />
                         <Label Content="{Binding CurrentUploadSpeedInKiloBytesPerSecond, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="right">
