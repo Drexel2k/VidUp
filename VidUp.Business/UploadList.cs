@@ -206,8 +206,8 @@ namespace Drexel.VidUp.Business
 
             if (e.PropertyName == "BytesSent")
             {
-                //triggers serialization of uploads in MainWindowViewModel
-                this.raiseNotifyPropertyChanged("BytesSent");
+                this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
+                this.raiseNotifyPropertyChanged("TotalBytesToUploadRemaining");
             }
         }
 

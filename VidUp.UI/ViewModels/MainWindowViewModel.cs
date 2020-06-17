@@ -391,16 +391,10 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    
-                    if (this.uploadStats.CurrentFileTimeLeft > TimeSpan.MinValue)
-                    {
-                        return string.Format("{0}h {1}m {2}s",
-                            (int)this.uploadStats.CurrentFileTimeLeft.TotalHours,
-                            this.uploadStats.CurrentFileTimeLeft.Minutes,
-                            this.uploadStats.CurrentFileTimeLeft.Seconds);
-                    }
-
-                    return "calclulating...";
+                    return string.Format("{0}h {1}m {2}s",
+                        (int)this.uploadStats.CurrentFileTimeLeft.TotalHours,
+                        this.uploadStats.CurrentFileTimeLeft.Minutes,
+                        this.uploadStats.CurrentFileTimeLeft.Seconds);
                 }
 
                 return "n/a";
@@ -439,15 +433,10 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    if (this.uploadStats.TotalTimeLeft > TimeSpan.MinValue)
-                    { 
-                        return string.Format("{0}h {1}m {2}s",
-                            (int)this.uploadStats.TotalTimeLeft.TotalHours,
-                            this.uploadStats.TotalTimeLeft.Minutes,
-                            this.uploadStats.TotalTimeLeft.Seconds);
-                    }
-
-                    return "calclulating...";
+                    return string.Format("{0}h {1}m {2}s",
+                        (int)this.uploadStats.TotalTimeLeft.TotalHours,
+                        this.uploadStats.TotalTimeLeft.Minutes,
+                        this.uploadStats.TotalTimeLeft.Seconds);
                 }
 
                 return "n/a";
@@ -458,12 +447,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.appStatus == AppStatus.Uploading)
+                if (this.resumeUploads)
                 {
-                    return this.uploadStats.TotalMbLeft.ToString("N0", CultureInfo.CurrentCulture);
+                    return ((int) ((float) this.uploadList.TotalBytesToUploadIncludingResumableRemaining /
+                                   Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
                 }
-
-                return ((int)((float)this.uploadList.TotalBytesToUploadIncludingResumableRemaining / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                else
+                {
+                    return ((int)((float)this.uploadList.TotalBytesToUploadRemaining /
+                                  Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                }
             }
         }
 
@@ -593,6 +586,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.resumeUploads = value;
                     this.raisePropertyChanged("ResumeUploads");
+                    this.raisePropertyChanged("TotalMbLeft");
                 }
             }
         }
@@ -706,7 +700,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.uploader = new Uploader(this.uploadList);
                 this.uploadStats = new UploadStats();
                 oneUploadFinished = await uploader.Upload(null, null, this.updateUploadProgress, this.uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
-                this.uploader.Dispose();
                 this.uploader = null;
                 this.uploadStats = null;
 
@@ -857,7 +850,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("TotalMbLeft");
             }
 
-            if (e.PropertyName == "BytesSent")
+            if (e.PropertyName == "TotalBytesToUploadIncludingResumableRemaining" || e.PropertyName == "TotalBytesToUploadRemaining")
             {
                 JsonSerialization.SerializeAllUploads();
             }
