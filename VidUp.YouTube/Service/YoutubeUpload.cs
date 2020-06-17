@@ -167,15 +167,17 @@ namespace Drexel.VidUp.Youtube.Service
                                     throw;
                                 }
 
-                                HttpWebResponse response = e.Response as HttpWebResponse;
-                                if (response == null)
+                                using (HttpWebResponse httpResponse = e.Response as HttpWebResponse)
                                 {
-                                    throw;
-                                }
+                                    if (httpResponse == null)
+                                    {
+                                        throw;
+                                    }
 
-                                if ((int)response.StatusCode != 308)
-                                {
-                                    throw;
+                                    if ((int) httpResponse.StatusCode != 308)
+                                    {
+                                        throw;
+                                    }
                                 }
                             }
                         }
@@ -188,11 +190,11 @@ namespace Drexel.VidUp.Youtube.Service
                 {
                     if (e.Response != null)
                     {
+                        using(e.Response)
                         using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
                         {
                             upload.UploadErrorMessage =
                                 $"Video upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
-                            e.Response.Close();
                         }
                     }
                     else
@@ -231,18 +233,20 @@ namespace Drexel.VidUp.Youtube.Service
                     throw;
                 }
 
-                HttpWebResponse response = e.Response as HttpWebResponse;
-                if (response == null)
+                using (HttpWebResponse httpResponse = e.Response as HttpWebResponse)
                 {
-                    throw;
-                }
+                    if (httpResponse == null)
+                    {
+                        throw;
+                    }
 
-                if ((int)response.StatusCode != 308)
-                {
-                    throw;
-                }
+                    if ((int) httpResponse.StatusCode != 308)
+                    {
+                        throw;
+                    }
 
-                return response.Headers["Range"];
+                    return httpResponse.Headers["Range"];
+                }
             }
 
             throw new InvalidOperationException("Http status code 308 expected for ResumeInformationHttpWebRequest");
@@ -331,10 +335,10 @@ namespace Drexel.VidUp.Youtube.Service
                 {
                     if (e.Response != null)
                     {
+                        using(e.Response)
                         using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
                         {
                             upload.UploadErrorMessage += $"Thumbnail upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
-                            e.Response.Close();
                         }
                     }
                     else
