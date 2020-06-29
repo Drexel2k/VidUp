@@ -11,15 +11,15 @@
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="UCUploads">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <ItemsControl ItemsSource="{Binding ObservableUploadViewModels}" Grid.Row="1">
+        <ItemsControl AllowDrop="True" ItemsSource="{Binding ObservableUploadViewModels}" Grid.Row="1">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="UploadViewModel">
-                    <controls:UploadControl/>
+                <DataTemplate DataType="models:UploadViewModel">
+                    <controls:UploadControl Drop="CUpload_Dropped" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

@@ -109,5 +109,18 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             return this.uploadViewModels.Find(uploadviewModel => uploadviewModel.Guid == guid.ToString());
         }
+
+        public void ReOrder(UploadList uploadList)
+        {
+            List <UploadViewModel> reOrderedViewModels = new List<UploadViewModel>();
+            foreach (Upload upload in uploadList)
+            {
+                reOrderedViewModels.Add(uploadViewModels.Find(vm => vm.Upload.Guid == upload.Guid));
+            }
+
+            this.uploadViewModels = reOrderedViewModels;
+
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
     }
 }

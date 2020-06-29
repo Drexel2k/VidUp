@@ -329,5 +329,35 @@ namespace Drexel.VidUp.Business
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
+        {
+            if (uploadToMove == uploadAtTargetPosition)
+            {
+                return;
+            }
+
+            int targetIndex = this.uploads.IndexOf(uploadAtTargetPosition);
+            int moveIndex = this.uploads.IndexOf(uploadToMove);
+
+            if (targetIndex > moveIndex)
+            {
+                for (int index = moveIndex; index < targetIndex - 1; index++)
+                {
+                    this.uploads[index] = this.uploads[index + 1];
+                }
+
+                this.uploads[targetIndex - 1] = uploadToMove;
+            }
+            else
+            {
+                for (int index = moveIndex; index > targetIndex; index--)
+                {
+                    this.uploads[index] = this.uploads[index - 1];
+                }
+
+                this.uploads[targetIndex] = uploadToMove;
+            }
+        }
     }
 }

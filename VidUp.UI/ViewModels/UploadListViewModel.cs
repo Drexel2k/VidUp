@@ -60,5 +60,12 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.SerializeUploadList();
             JsonSerialization.SerializeTemplateList();
         }
+
+        public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
+        {
+            this.uploadList.ReOrder(uploadToMove, uploadAtTargetPosition);
+            this.observableUploadViewModels.ReOrder(this.uploadList);
+            JsonSerialization.SerializeUploadList();
+        }
     }
 }

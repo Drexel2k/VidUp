@@ -3,6 +3,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Drexel.VidUp.UI.ViewModels;
 
 #endregion
@@ -79,6 +80,20 @@ namespace Drexel.VidUp.UI.Controls
             control.Description.MinHeight = 0;
             control.Tags.MinHeight = 0;
             control.Minimize.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        private void CUpload_MouseMoved(object sender, MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                // Package the data.
+                DataObject data = new DataObject();
+                data.SetData("UploadControl", this);
+
+                // Inititate the drag-and-drop operation.
+                DragDrop.DoDragDrop(this, data, DragDropEffects.Move);
+            }
         }
     }
 }
