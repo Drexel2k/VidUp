@@ -13,7 +13,6 @@ namespace Drexel.VidUp.UI.Controls
     /// </summary>
     /// 
 
-    //todo: make selection of image file path, root folder path and thumbnail folder path clearable
     public partial class TemplateControl : UserControl
     {
         public TemplateControl()

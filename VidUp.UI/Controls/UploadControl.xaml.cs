@@ -10,14 +10,12 @@ using Drexel.VidUp.UI.ViewModels;
 
 namespace Drexel.VidUp.UI.Controls
 {
-    //todo: mouse move event für drag & drop einfüpgen und fixen
     //tod: Bei Template Auwahl auch wieder kein Template zulassen, wenn schon ein Template ausgewählt ist
     /// <summary>
     /// Interaktionslogik für UploadControl.xaml
     /// </summary>
     public partial class UploadControl : UserControl
     {
-        //todo: make thumbnail file path clearable
         public UploadControl()
         {
             InitializeComponent();

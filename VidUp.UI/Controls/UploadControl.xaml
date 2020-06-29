@@ -9,7 +9,7 @@
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              xmlns:validators="clr-namespace:Drexel.VidUp.UI.Validators"
              x:Name="UCUpload"
-             
+             MouseDown="CUpload_MouseMoved"
              AllowDrop="True">
     <GroupBox Padding="0" x:Name="GroupBox" Margin="4" VerticalAlignment="Top" >
         <GroupBox.Header >
@@ -122,7 +122,7 @@
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Tags: " Width="35" />
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 3 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 </StackPanel>
                 <TextBox x:Name="Tags" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus">
                     <TextBox.Text>
@@ -163,13 +163,15 @@
                 <Label Content="Template: " Width="66" />
                 <!--Binding OneWay because setting is handled by event. -->
             </StackPanel>
+            <!-- Selected Template is clearable through burger menu. -->
             <ComboBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding SelectedTemplate, Mode=OneWay}" ItemsSource="{Binding DataContext.ObservableTemplateViewModels, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
             <StackPanel Grid.Row="8" Grid.Column="3" Grid.ColumnSpan="2" Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist ID to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
-                <Label Content="Playlist ID: " Width="66" />
-                <TextBox Width="206" IsEnabled="{Binding ControlsEnabled}" Text="{Binding PlaylistId}" TextWrapping="Wrap" Margin="0 0 5 0" />
+                <Label Content="Playlist ID: " Width="63" />
+                <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 3 10 0" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                <TextBox Width="185" IsEnabled="{Binding ControlsEnabled}" Text="{Binding PlaylistId}" TextWrapping="Wrap" Margin="0 0 5 0" />
             </StackPanel>
             <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />

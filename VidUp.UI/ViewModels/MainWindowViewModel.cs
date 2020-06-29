@@ -639,7 +639,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async void removeUploads(object obj)
         {
-            bool upload = true;
+            bool remove = true;
             if (this.removeUploadStatus == "All" || (UplStatus)Enum.Parse(typeof(UplStatus), this.removeUploadStatus) != UplStatus.Finished)
             {
                 ConfirmControl control = new ConfirmControl(string.Format(
@@ -648,10 +648,10 @@ namespace Drexel.VidUp.UI.ViewModels
                     new UplStatusStringValuesConverter().Convert(this.removeUploadStatus, typeof(string), null,
                         CultureInfo.CurrentCulture)));
 
-                upload = (bool) await DialogHost.Show(control, "RootDialog");
+                remove = (bool) await DialogHost.Show(control, "RootDialog");
             }
 
-            if (upload)
+            if (remove)
             {
                 this.RemoveUploads();
             }
