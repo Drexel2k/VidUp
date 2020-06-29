@@ -133,16 +133,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        /*public string GameTitle 
-        { 
-            get => this.template != null ? this.template.GameTitle : null;
-            set
-            {
-                this.template.GameTitle = value;
-                RaisePropertyChangedAndSerializeTemplateList("GameTitle");
-            }
-        }*/
-
         public QuarterHourViewModels QuarterHourViewModels
         {
             get
@@ -241,10 +231,21 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.template != null ? this.template.IsDefault : false;
             set
             {
-                this.template.IsDefault = true;
+                this.template.IsDefault = value;
                 raisePropertyChangedAndSerializeTemplateList("IsDefault");
             }
         }
+
+        public string PlaylistId
+        {
+            get => this.template != null ? this.template.PlaylistId : null;
+            set
+            {
+                this.template.PlaylistId = value;
+                raisePropertyChangedAndSerializeTemplateList("PlaylistId");
+            }
+        }
+
         #endregion properties
 
         public TemplateViewModel()

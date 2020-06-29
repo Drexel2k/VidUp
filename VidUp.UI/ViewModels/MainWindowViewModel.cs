@@ -447,6 +447,11 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return this.uploadStats.TotalMBLeft.ToString("N0", CultureInfo.CurrentCulture);
+                }
+
                 if (this.resumeUploads)
                 {
                     return ((int) ((float) this.uploadList.TotalBytesToUploadIncludingResumableRemaining /

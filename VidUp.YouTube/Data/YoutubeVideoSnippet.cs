@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Youtube.Data
 {
-	public class YoutubeSnippet
+	public class YoutubeVideoSnippet
 	{
 		[JsonProperty(PropertyName = "title")]
 		public string Title { get; set; }

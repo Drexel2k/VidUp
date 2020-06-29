@@ -30,6 +30,8 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string thumbnailFilePath;
         [JsonProperty]
+        private string playlistId;
+        [JsonProperty]
         private Template template;
         [JsonProperty]
         private UplStatus uploadStatus;
@@ -185,6 +187,16 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public string PlaylistId
+        {
+            get { return this.playlistId; }
+            set
+            {
+                this.playlistId = value;
+                this.raisePropertyChanged("PlaylistId");
+            }
+        }
+
         public string UploadErrorMessage
         { 
             get
@@ -314,6 +326,7 @@ namespace Drexel.VidUp.Business
             this.CopyDescriptionFromTemplate();
             this.CopyTagsFromtemplate();
             this.CopyVisbilityFromTemplate();
+            this.CopyPlaylistIdFromTemplate();
         }
 
         public void CopyVisbilityFromTemplate()
@@ -372,6 +385,18 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.raisePropertyChanged("Title");
+            }
+        }
+
+        public void CopyPlaylistIdFromTemplate()
+        {
+            if (this.template != null)
+            {
+                if (!string.IsNullOrWhiteSpace(this.template.PlaylistId))
+                {
+                    this.playlistId = this.template.PlaylistId;
+                    this.raisePropertyChanged("PlaylistId");
+                }
             }
         }
 

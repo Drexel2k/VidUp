@@ -9,7 +9,7 @@ namespace Drexel.VidUp.Youtube.Data
 	public class YoutubeVideoRequest
 	{
 		[JsonProperty(PropertyName = "snippet")]
-		public YoutubeSnippet Snippet { get; set; }
+		public YoutubeVideoSnippet VideoSnippet { get; set; }
 
 		[JsonProperty(PropertyName = "status")]
 		public YoutubeStatus Status { get; set; }

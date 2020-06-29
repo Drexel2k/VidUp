@@ -19,6 +19,8 @@ namespace Drexel.VidUp.Youtube.Service
     {
         private static string uploadEndpoint = "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status";
         private static string thumbnailEndpoint = "https://www.googleapis.com/upload/youtube/v3/thumbnails/set";
+        private static string playlistItemsEndpoint = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet";
+        
         private static ThrottledBufferedStream stream = null;
         private static int uploadChunkSizeInBytes = 40 * 262144; // 10 MegaByte, The chunk size must be a multiple of 256 KiloByte
         private static TimeSpan twoSeconds = new TimeSpan(0, 0, 2);
@@ -36,6 +38,8 @@ namespace Drexel.VidUp.Youtube.Service
 
         public static async Task<UploadResult> Upload(Upload upload, long maxUploadInBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, Func<bool> stopUpload)
         {
+            upload.UploadErrorMessage = string.Empty;
+
             UploadResult result = new UploadResult()
             {
                 ThumbnailSuccessFull = false,
@@ -212,6 +216,7 @@ namespace Drexel.VidUp.Youtube.Service
             }
 
             result.ThumbnailSuccessFull = await YoutubeUpload.addThumbnail(upload, result.VideoId);
+            result.PlaylistSuccessFull = await YoutubeUpload.addToPlaylist(upload, result.VideoId);
 
             return result;
         }
@@ -256,10 +261,10 @@ namespace Drexel.VidUp.Youtube.Service
         {
             YoutubeVideoRequest video = new YoutubeVideoRequest();
 
-            video.Snippet = new YoutubeSnippet();
-            video.Snippet.Title = upload.YtTitle;
-            video.Snippet.Description = upload.Description;
-            video.Snippet.Tags = (upload.Tags != null ? upload.Tags : new List<string>()).ToArray();
+            video.VideoSnippet = new YoutubeVideoSnippet();
+            video.VideoSnippet.Title = upload.YtTitle;
+            video.VideoSnippet.Description = upload.Description;
+            video.VideoSnippet.Tags = (upload.Tags != null ? upload.Tags : new List<string>()).ToArray();
 
             video.Status = new YoutubeStatus();
             video.Status.Privacy = upload.Visibility.ToString().ToLower(); // "unlisted", "private" or "public"
@@ -351,6 +356,68 @@ namespace Drexel.VidUp.Youtube.Service
                 catch (Exception e)
                 {
                     upload.UploadErrorMessage = $"Thumbnail upload failed: {e.ToString()}";
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static async Task<bool> addToPlaylist(Upload upload, string videoId)
+        {
+            if (!string.IsNullOrWhiteSpace(upload.PlaylistId))
+            {
+                try
+                {
+                    YoutubePlaylistItemRequest playlistItem = new YoutubePlaylistItemRequest();
+
+                    playlistItem.PlaylistSnippet = new YoutubePlaylistItemSnippet();
+                    playlistItem.PlaylistSnippet.PlaylistId = upload.PlaylistId;
+                    playlistItem.PlaylistSnippet.ResourceId = new VideoResource();
+                    playlistItem.PlaylistSnippet.ResourceId.VideoId = videoId;
+
+                    string content = JsonConvert.SerializeObject(playlistItem);
+                    var jsonBytes = Encoding.UTF8.GetBytes(content);
+
+                    FileInfo info = new FileInfo(upload.FilePath);
+                    //request upload session/uri
+                    HttpWebRequest request =
+                        await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
+                            YoutubeUpload.playlistItemsEndpoint, "POST", jsonBytes, "application/json; charset=utf-8");
+
+                    using (Stream dataStream = await request.GetRequestStreamAsync())
+                    {
+                        dataStream.Write(jsonBytes, 0, jsonBytes.Length);
+                    }
+
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                    {
+                    }
+                }
+                catch (WebException e)
+                {
+                    if (e.Response != null)
+                    {
+                        using (e.Response)
+                        using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
+                        {
+                            upload.UploadErrorMessage += $"Playlist addition failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                        }
+                    }
+                    else
+                    {
+                        upload.UploadErrorMessage += $"Playlist addition failed: {e.ToString()}";
+                    }
+
+                    return false;
+                }
+                catch (Exception e)
+                {
+                    upload.UploadErrorMessage = $"Playlist addition failed: {e.ToString()}";
                     return false;
                 }
             }

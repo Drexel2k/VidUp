@@ -248,6 +248,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string PlaylistId
+        {
+            get => this.upload.PlaylistId;
+            set
+            {
+                this.upload.PlaylistId = value;
+                this.SerializeAllUploads();
+
+                this.raisePropertyChanged("PlaylistId");
+            }
+        }
+
         public string FileSizeInMegaByte
         {
             get => $"{((float)this.upload.FileLength / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
@@ -573,6 +585,10 @@ namespace Drexel.VidUp.UI.ViewModels
                     case "visibility":
                         this.upload.CopyVisbilityFromTemplate();
                         raisePropertyChanged("Visibility");
+                        break;
+                    case "playlist":
+                        this.upload.CopyPlaylistIdFromTemplate();
+                        raisePropertyChanged("PlaylistId");
                         break;
                     default:
                         this.upload.CopyTemplateValues();

@@ -43,8 +43,11 @@ namespace Drexel.VidUp.Business
         private string thumbnailFallbackFilePath;
         [JsonProperty]
         private bool isDefault;
+        [JsonProperty]
+        private string playlistId;
 
         private TemplateList templateList;
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -251,6 +254,17 @@ namespace Drexel.VidUp.Business
             {
                 //todo: move to deseralization und remove property
                 this.templateList = value;
+            }
+        }
+
+        public string PlaylistId
+        {
+            get => this.playlistId;
+            set
+            {
+                this.playlistId = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("PlaylistId");
             }
         }
 

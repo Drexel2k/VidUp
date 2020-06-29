@@ -22,7 +22,7 @@ namespace Drexel.VidUp.Youtube.Service
         private static string authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
         private static string tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token";
 
-        private static string uploadScope = "https://www.googleapis.com/auth/youtube.upload";
+        private static string scopes = "https://www.googleapis.com/auth/youtube";
         private static string serializationFolder;
         private static string accessToken;
         private static DateTime accessTokenExpiry = DateTime.MinValue;
@@ -147,7 +147,7 @@ namespace Drexel.VidUp.Youtube.Service
                 state,
                 code_challenge,
                 code_challenge_method,
-                Uri.EscapeDataString(YoutubeAuthentication.uploadScope));
+                Uri.EscapeDataString(YoutubeAuthentication.scopes));
 
             var ps = new ProcessStartInfo(authorizationRequest)
             {

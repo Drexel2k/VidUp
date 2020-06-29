@@ -53,8 +53,13 @@ namespace Drexel.VidUp.Youtube
         { 
             get
             {
-                float seconds = (this.upload.FileLength - this.upload.BytesSent) / (float)this.currentUploadSpeedInBytesPerSecond;
-                return TimeSpan.FromSeconds(seconds);
+                if (this.currentUploadSpeedInBytesPerSecond > 0)
+                {
+                    float seconds = (this.upload.FileLength - this.upload.BytesSent) / (float) this.currentUploadSpeedInBytesPerSecond;
+                    return TimeSpan.FromSeconds(seconds);
+                }
+
+                return TimeSpan.MinValue;
             }
         }
         public int CurrentFileMbLeft
@@ -72,12 +77,26 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
+        public int TotalMBLeft
+        {
+            get
+            {
+                return (int)((float)this.sessionTotalBytesToUploadFullFilesize / Constants.ByteMegaByteFactor);
+            }
+
+        }
+
         public TimeSpan TotalTimeLeft
         {
             get
             {
-                float seconds = this.currentTotalBytesLeftRemaining / (float)this.currentUploadSpeedInBytesPerSecond;
-                return TimeSpan.FromSeconds(seconds);
+                if (this.currentUploadSpeedInBytesPerSecond > 0)
+                {
+                    float seconds = this.currentTotalBytesLeftRemaining / (float) this.currentUploadSpeedInBytesPerSecond;
+                    return TimeSpan.FromSeconds(seconds);
+                }
+
+                return TimeSpan.MinValue;
             }
                 
         }

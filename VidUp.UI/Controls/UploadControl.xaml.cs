@@ -10,6 +10,8 @@ using Drexel.VidUp.UI.ViewModels;
 
 namespace Drexel.VidUp.UI.Controls
 {
+    //todo: mouse move event für drag & drop einfüpgen und fixen
+    //tod: Bei Template Auwahl auch wieder kein Template zulassen, wenn schon ein Template ausgewählt ist
     /// <summary>
     /// Interaktionslogik für UploadControl.xaml
     /// </summary>
@@ -28,9 +30,13 @@ namespace Drexel.VidUp.UI.Controls
             ComboBox comboBox = (ComboBox)sender;
             UploadViewModel uploadViewModel = (UploadViewModel)comboBox.DataContext;
             TemplateComboboxViewModel selectedTemplate = (TemplateComboboxViewModel)comboBox.SelectedItem;
-            if (uploadViewModel.SelectedTemplate == null || uploadViewModel.SelectedTemplate.Template != selectedTemplate.Template)
+            if (selectedTemplate != null)
             {
-                uploadViewModel.SelectedTemplate = new TemplateComboboxViewModel(selectedTemplate.Template);
+                if (uploadViewModel.SelectedTemplate == null ||
+                    uploadViewModel.SelectedTemplate.Template != selectedTemplate.Template)
+                {
+                    uploadViewModel.SelectedTemplate = new TemplateComboboxViewModel(selectedTemplate.Template);
+                }
             }
         }
 

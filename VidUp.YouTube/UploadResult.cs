@@ -4,5 +4,7 @@
     {
         public string VideoId { get; set; }
         public bool ThumbnailSuccessFull { get; set; }
+
+        public bool PlaylistSuccessFull { get; set; }
     }
 }
