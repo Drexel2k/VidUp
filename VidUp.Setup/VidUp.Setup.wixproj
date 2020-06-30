@@ -58,7 +58,7 @@
   </Target>
   <Target Name="BeforeBuild">
     <Exec Command="rd /s /q  &quot;bin&quot;" />
-    <GetAssemblyIdentity AssemblyFiles="$(SolutionDir)VidUp.UI/bin/$(Configuration)/$(Platform)/VidUp.UI.exe">
+    <GetAssemblyIdentity AssemblyFiles="$(SolutionDir)VidUp.UI/bin/$(Configuration)/$(Platform)/VidUp.exe">
       <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
     </GetAssemblyIdentity>
     <PropertyGroup>

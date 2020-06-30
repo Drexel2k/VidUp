@@ -60,7 +60,7 @@
     <DirectoryRef Id="INSTALLFOLDER"  FileSource="$(var.SolutionDir)/VidUp.UI/bin/$(var.Configuration)/$(var.Platform)">
       <Component Id="MainAppShortcut" Guid="{9A1E7774-886A-47D9-ACCF-7E5AE3BC51F0}">
 
-        <Shortcut Id="MainAppShortcut" Name="VidUp" Target="[INSTALLFOLDER]VidUp.UI.exe" Directory="InstallProgramMenuFolder" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
+        <Shortcut Id="MainAppShortcut" Name="VidUp" Target="[INSTALLFOLDER]VidUp.exe" Directory="InstallProgramMenuFolder" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
         <!-- not really need, but the component section needs a key-->
         <RegistryValue Id="RegShortcutKey" Root="HKCU" Key="Software/VidUp" Name="Shortcut" Value="1" Type="integer" KeyPath="yes" />
         <RemoveFolder Id="RemoveStartMenu" Directory="InstallProgramMenuFolder" On="uninstall" />
