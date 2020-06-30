@@ -43,6 +43,7 @@ namespace Drexel.VidUp.Youtube.Service
             UploadResult result = new UploadResult()
             {
                 ThumbnailSuccessFull = false,
+                PlaylistSuccessFull = false,
                 VideoId = string.Empty
             };
 
