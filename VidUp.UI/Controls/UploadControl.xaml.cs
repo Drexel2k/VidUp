@@ -45,7 +45,7 @@ namespace Drexel.VidUp.UI.Controls
             QuarterHourViewModel selectedQuarterHour = (QuarterHourViewModel)comboBox.SelectedItem;
             if (uploadViewModel.Upload.PublishAtTime != selectedQuarterHour.QuarterHour)
             {
-                uploadViewModel.SetPublishAtTime(selectedQuarterHour.QuarterHour);
+                uploadViewModel.SetPublishAtTime(selectedQuarterHour.QuarterHour.Value);
             }
         }
         private void controlGotFocus(object sender, RoutedEventArgs e)

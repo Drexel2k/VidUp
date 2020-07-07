@@ -318,12 +318,11 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
 
-        public void SetPublishAtTime(DateTime quarterHour)
+        public void SetPublishAtTime(TimeSpan quarterHour)
         {
             this.upload.SetPublishAtTime(quarterHour);
 
             this.SerializeAllUploads();
-
             this.raisePropertyChanged("PublishAtTime");
         }
 
@@ -365,7 +364,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 else
                 {
                     this.upload.SetPublishAtDate(DateTime.MinValue);
-                    this.upload.SetPublishAtTime(DateTime.MinValue);
+                    this.upload.SetPublishAtTime(new TimeSpan());
                 }
 
                 this.SerializeAllUploads();
@@ -380,7 +379,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.quarterHourViewModels.GetQuarterHourViewModel(this.upload.PublishAt);
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.upload.PublishAt.TimeOfDay);
             }
         }
 
@@ -435,7 +434,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.upload.PropertyChanged += this.uploadPropertyChanged;
 
-            this.quarterHourViewModels = new QuarterHourViewModels();
+            this.quarterHourViewModels = new QuarterHourViewModels(false);
 
             this.resetStateCommand = new GenericCommand(this.resetUploadState);
             this.pauseCommand = new GenericCommand(this.setPausedUploadState);

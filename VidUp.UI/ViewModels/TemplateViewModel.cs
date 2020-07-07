@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.JSON;
+using Drexel.VidUp.UI.Controls;
+using MaterialDesignThemes.Wpf;
 
 #endregion
 
@@ -19,9 +21,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private Template template;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private QuarterHourViewModels quarterHourViewModels;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetCommand;
+        private GenericCommand openPublishAtCommand;
 
         private string lastThumbnailFallbackFilePathAdded = null;
         private string lastImageFilePathAdded;
@@ -53,6 +55,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public GenericCommand OpenPublishAtCommand
+        {
+            get
+            {
+                return this.openPublishAtCommand;
+            }
+        }
+
         public GenericCommand ResetCommand
         {
             get
@@ -81,7 +91,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Name = value;
-                raisePropertyChangedAndSerializeTemplateList("Name");
+                this.raisePropertyChangedAndSerializeTemplateList("Name");
             }
         }
 
@@ -91,7 +101,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Title = value;
-                raisePropertyChangedAndSerializeTemplateList("YtTitle");
+                this.raisePropertyChangedAndSerializeTemplateList("YtTitle");
 
             }
         }
@@ -101,7 +111,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Description = value;
-                raisePropertyChangedAndSerializeTemplateList("YtDescription");
+                this.raisePropertyChangedAndSerializeTemplateList("YtDescription");
 
             }
         }
@@ -112,7 +122,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Tags = new List<string>(value.Split(','));
-                raisePropertyChangedAndSerializeTemplateList("TagsAsString");
+                this.raisePropertyChangedAndSerializeTemplateList("TagsAsString");
             }
         }
         public Visibility Visibility 
@@ -121,7 +131,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.YtVisibility = value;
-                raisePropertyChangedAndSerializeTemplateList("YtVisibility");
+                this.raisePropertyChangedAndSerializeTemplateList("YtVisibility");
             }
         }
 
@@ -132,21 +142,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 return Enum.GetValues(typeof(Visibility));
             }
         }
-
-        public QuarterHourViewModels QuarterHourViewModels
-        {
-            get
-            {
-                return this.quarterHourViewModels;
-            }
-        }
-
-        public QuarterHourViewModel DefaultPublishAtTime
-        {
-            get => this.template != null ? this.quarterHourViewModels.GetQuarterHourViewModel(this.template.DefaultPublishAtTime) : this.quarterHourViewModels.GetQuarterHourViewModel(new DateTime(1, 1, 1, 0, 0, 0));
-        }
-
-
 
         public BitmapImage ImageBitmap
         {
@@ -174,12 +169,12 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 //care this RaisePropertyChanged must take place immediately to show rename hint correctly.
                 this.lastImageFilePathAdded = value;
-                raisePropertyChanged("LastImageFilePathAdded");
+                this.raisePropertyChanged("LastImageFilePathAdded");
 
                 this.template.ImageFilePathForEditing = value;
-                
-                raisePropertyChanged("ImageBitmap");
-                raisePropertyChangedAndSerializeTemplateList("ImageFilePathForEditing");
+
+                this.raisePropertyChanged("ImageBitmap");
+                this.raisePropertyChangedAndSerializeTemplateList("ImageFilePathForEditing");
             }
         }
 
@@ -193,7 +188,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.RootFolderPath = value;
-                raisePropertyChangedAndSerializeTemplateList("RootFolderPath");
+                this.raisePropertyChangedAndSerializeTemplateList("RootFolderPath");
             }
         }
 
@@ -203,7 +198,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.ThumbnailFolderPath = value;
-                raisePropertyChangedAndSerializeTemplateList("ThumbnailFolderPath");
+                this.raisePropertyChangedAndSerializeTemplateList("ThumbnailFolderPath");
             }
         }
 
@@ -214,7 +209,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 //care this RaisePropertyChanged must take place immediately to show rename hint correctly.
                 this.lastThumbnailFallbackFilePathAdded = value;
-                raisePropertyChanged("LastThumbnailFallbackFilePathAdded");
+                this.raisePropertyChanged("LastThumbnailFallbackFilePathAdded");
                 this.template.ThumbnailFallbackFilePath = value;
 
                 this.raisePropertyChangedAndSerializeTemplateList("ThumbnailFallbackFilePath");
@@ -232,7 +227,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.IsDefault = value;
-                raisePropertyChangedAndSerializeTemplateList("IsDefault");
+                this.raisePropertyChangedAndSerializeTemplateList("IsDefault");
             }
         }
 
@@ -242,7 +237,17 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.PlaylistId = value;
-                raisePropertyChangedAndSerializeTemplateList("PlaylistId");
+                this.raisePropertyChangedAndSerializeTemplateList("PlaylistId");
+            }
+        }
+
+        public bool UsePublishAtSchedule
+        {
+            get => this.template != null && this.template.UsePublishAtSchedule;
+            set
+            {
+                this.template.UsePublishAtSchedule = value;
+                this.raisePropertyChangedAndSerializeTemplateList("UsePublishAtSchedule");
             }
         }
 
@@ -252,14 +257,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
-            this.quarterHourViewModels = new QuarterHourViewModels();
+            this.openPublishAtCommand = new GenericCommand(this.openPublishAt);
         }
 
-        public void SetDefaultPublishAtTime(DateTime publishAtTime)
-        {
-            this.template.DefaultPublishAtTime = publishAtTime;
-            this.SerializeTemplateList();
-        }
         private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
@@ -337,6 +337,22 @@ namespace Drexel.VidUp.UI.ViewModels
             if ((string)parameter == "thumbfallback")
             {
                 this.ThumbnailFallbackFilePath = null;
+            }
+        }
+
+        private async void openPublishAt(object obj)
+        {
+            var view = new PublishAtScheduleControl
+            {
+                DataContext = new PublishAtScheduleViewModel(this.template.PublishAtSchedule)
+            };
+
+            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+            if (result)
+            {
+                PublishAtScheduleViewModel data = (PublishAtScheduleViewModel)view.DataContext;
+                this.template.PublishAtSchedule = data.Schedule;
+                JsonSerialization.SerializeTemplateList();
             }
         }
 

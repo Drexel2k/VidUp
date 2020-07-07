@@ -13,12 +13,15 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private List<QuarterHourViewModel> quaterHourViewModels;
 
-        public QuarterHourViewModels()
+        public QuarterHourViewModels(bool emptyValueAtBeginning)
         {
-            this.quaterHourViewModels = new List<QuarterHourViewModel>(96);
-            foreach (DateTime quarterHour in QuarterHoursSource.QuarterHours)
+            if (emptyValueAtBeginning)
             {
-                this.quaterHourViewModels.Add(new QuarterHourViewModel(quarterHour));
+                this.quaterHourViewModels = QuarterHoursSource.QuarterHoursEmptyStartValue;
+            }
+            else
+            {
+                this.quaterHourViewModels = QuarterHoursSource.QuarterHours;
             }
         }
 
@@ -32,15 +35,22 @@ namespace Drexel.VidUp.UI.ViewModels
             return this.GetEnumerator();
         }
 
-        public QuarterHourViewModel GetQuarterHourViewModel(DateTime publishAt)
+        public QuarterHourViewModel GetQuarterHourViewModel(TimeSpan? timeSpan)
         {
-            DateTime searchedQuarterHour = new DateTime(1, 1, 1, publishAt.Hour, publishAt.Minute, publishAt.Second);
-            return this.quaterHourViewModels.Find(quarterHourViewModel => quarterHourViewModel.QuarterHour == searchedQuarterHour);
-        }
+            if (timeSpan == null)
+            {
+                if (this.quaterHourViewModels.Count < 97)
+                {
+                    throw new ArgumentException("No empty quarter hour videw model in collection.");
+                }
 
-        internal QuarterHourViewModel GetQuarterHourViewModel(object defaultPublishAt)
-        {
-            throw new NotImplementedException();
+                return this.quaterHourViewModels.Find(quarterHourViewModel => quarterHourViewModel.QuarterHour == null);
+            }
+            else
+            {
+                TimeSpan searchedQuarterHour = new TimeSpan(timeSpan.Value.Hours, timeSpan.Value.Minutes, timeSpan.Value.Seconds);
+                return this.quaterHourViewModels.Find(quarterHourViewModel => quarterHourViewModel.QuarterHour == searchedQuarterHour);
+            }
         }
     }
 }

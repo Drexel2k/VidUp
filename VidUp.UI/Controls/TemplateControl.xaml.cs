@@ -19,18 +19,5 @@ namespace Drexel.VidUp.UI.Controls
         {
             InitializeComponent();
         }
-
-        private void ComboBoxQuarterHourSelect_DropDownClosed(object sender, EventArgs e)
-        {
-            ComboBox comboBox = (ComboBox)sender;
-            TemplateViewModel templateViewModel = (TemplateViewModel)comboBox.DataContext;
-            QuarterHourViewModel selectedQuarterHour = (QuarterHourViewModel)comboBox.SelectedItem;
-            if (templateViewModel.Template.DefaultPublishAtTime != selectedQuarterHour.QuarterHour)
-            {
-                templateViewModel.SetDefaultPublishAtTime(selectedQuarterHour.QuarterHour);
-            }
-        }
-
-
     }
 }

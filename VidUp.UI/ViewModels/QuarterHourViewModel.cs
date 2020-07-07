@@ -8,9 +8,9 @@ namespace Drexel.VidUp.UI.ViewModels
 {
     public class QuarterHourViewModel
     {
-        private DateTime quarterHour;
+        private TimeSpan? quarterHour;
 
-        public QuarterHourViewModel(DateTime quarterHour)
+        public QuarterHourViewModel(TimeSpan? quarterHour)
         {
             this.quarterHour = quarterHour;
         }
@@ -19,11 +19,11 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.quarterHour.ToString("HH:mm");
+                return this.quarterHour != null ? this.quarterHour.Value.ToString(@"hh\:mm") : string.Empty;
             }
         }
 
-        public DateTime QuarterHour
+        public TimeSpan? QuarterHour
         {
             get
             {

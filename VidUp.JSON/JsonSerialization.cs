@@ -108,12 +108,15 @@ namespace Drexel.VidUp.JSON
             serializer.Converters.Add(new StringEnumConverter());
             serializer.Converters.Add(new UploadGuidStringConverter());
 
+            //serializer.Converters.Add(new MonthRelativeCombinationConverter());
+
             using (StreamReader sr = new StreamReader(templateListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
             {
                 list = serializer.Deserialize<List<Template>>(reader);
             }
 
+            //todo: maybe move to ondeserializing attribute method on template or templatelist
             foreach (Template template in list)
             {
                 foreach (Upload upload in template.Uploads)

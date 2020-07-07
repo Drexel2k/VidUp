@@ -105,6 +105,9 @@
     <Compile Include="Controls\NewTemplateControl.xaml.cs">
       <DependentUpon>NewTemplateControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\PublishAtScheduleControl.xaml.cs">
+      <DependentUpon>PublishAtScheduleControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TemplateControl.xaml.cs">
       <DependentUpon>TemplateControl.xaml</DependentUpon>
     </Compile>
@@ -115,9 +118,13 @@
       <DependentUpon>UploadListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\AppStatusIsUploadingConverter.cs" />
+    <Compile Include="Converters\BoolTrueVisibilityConverter.cs" />
     <Compile Include="Converters\EnumStringValuesConverter.cs" />
     <Compile Include="Converters\EnumConverter.cs" />
     <Compile Include="Converters\FileExistsCollapsedConverter.cs" />
+    <Compile Include="Converters\FrequencyMonthlyVisibleConverter.cs" />
+    <Compile Include="Converters\FrequencyWeeklyVisibleConverter.cs" />
+    <Compile Include="Converters\FrequencyDailyVisibleConverter.cs" />
     <Compile Include="Converters\StringEmptyCollapsedConverter.cs" />
     <Compile Include="Converters\StringIsNullOrNotFileExistsCollapsedConverter.cs" />
     <Compile Include="Converters\StringIsNullOrFileExistsCollapsedConverter.cs" />
@@ -130,11 +137,15 @@
     <Compile Include="Definitions\QuarterHoursSource.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Definitions\TaskbarState.cs" />
+    <Compile Include="Validators\OnlyIntGreaterZeroRule.cs" />
     <Compile Include="ViewModels\AboutViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\MonthDayViewModel.cs" />
+    <Compile Include="ViewModels\MonthRelativeCombinationViewModel.cs" />
     <Compile Include="ViewModels\NewTemplateViewModel.cs" />
     <Compile Include="ViewModels\ObservableTemplateViewModels.cs" />
     <Compile Include="ViewModels\ObservableUploadViewModels.cs" />
+    <Compile Include="ViewModels\PublishAtScheduleViewModel.cs" />
     <Compile Include="ViewModels\QuarterHourViewModel.cs" />
     <Compile Include="ViewModels\QuarterHourViewModels.cs" />
     <Compile Include="ViewModels\TemplateComboboxViewModel.cs" />
@@ -155,6 +166,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\NewTemplateControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\PublishAtScheduleControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -192,6 +207,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Definitions\PostUploadAction.cs" />
+    <Content Include="Images\edit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\minus.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -259,6 +277,7 @@
       <Name>VidUp.Youtube</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MaterialDesignThemes.3.1.0\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.3.1.0\build\MaterialDesignThemes.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

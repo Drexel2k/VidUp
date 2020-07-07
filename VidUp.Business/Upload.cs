@@ -167,11 +167,11 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public DateTime PublishAtTime
+        public TimeSpan PublishAtTime
         {
             get
             {
-                return new DateTime(1, 1, 1, this.publishAt.Hour, this.publishAt.Minute, 0);
+                return new TimeSpan(this.publishAt.Hour, this.publishAt.Minute, 0);
             }
         }
 
@@ -400,9 +400,9 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void SetPublishAtTime(DateTime quarterHour)
+        public void SetPublishAtTime(TimeSpan quarterHour)
         {
-            this.publishAt = new DateTime(this.publishAt.Year, this.publishAt.Month, this.publishAt.Day, quarterHour.Hour, quarterHour.Minute, 0);
+            this.publishAt = new DateTime(this.publishAt.Year, this.publishAt.Month, this.publishAt.Day, quarterHour.Hours, quarterHour.Minutes, 0);
             this.lastModifiedInternal = DateTime.Now;
             this.raisePropertyChanged("PublishAtTime");
         }
@@ -413,7 +413,7 @@ namespace Drexel.VidUp.Business
             {
                 if (this.template != null)
                 {
-                    this.publishAt = new DateTime(1, 1, 1, this.template.DefaultPublishAtTime.Hour, this.template.DefaultPublishAtTime.Minute, 0);
+                    this.publishAt = new DateTime(1, 1, 1,0, 0, 0);
                 }
             }
 

@@ -36,8 +36,6 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string rootFolderPath;
         [JsonProperty]
-        private DateTime defaultPublishAtTime;
-        [JsonProperty]
         private string thumbnailFolderPath;
         [JsonProperty]
         private string thumbnailFallbackFilePath;
@@ -45,8 +43,13 @@ namespace Drexel.VidUp.Business
         private bool isDefault;
         [JsonProperty]
         private string playlistId;
+        [JsonProperty]
+        private bool usePublishAtSchedule;
+        [JsonProperty]
+        private Schedule publishAtSchedule;
 
         private TemplateList templateList;
+
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -234,19 +237,6 @@ namespace Drexel.VidUp.Business
         }
 
         public List<Upload> Uploads { get => this.uploads; }
-        public DateTime DefaultPublishAtTime
-        {
-            get
-            {
-                return this.defaultPublishAtTime;
-            }
-            set
-            {
-                this.defaultPublishAtTime = new DateTime(1, 1, 1, value.Hour, value.Minute, 0);
-                this.lastModifiedInternal = DateTime.Now;
-                this.raisePropertyChanged("DefaultPublishAtTime");
-            }
-        }
 
         public TemplateList TemplateList
         { 
@@ -265,6 +255,36 @@ namespace Drexel.VidUp.Business
                 this.playlistId = value;
                 this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("PlaylistId");
+            }
+        }
+
+        public bool UsePublishAtSchedule
+        {
+            get => this.usePublishAtSchedule;
+            set
+            {
+                if (value)
+                {
+                    if (this.publishAtSchedule == null)
+                    {
+                        this.PublishAtSchedule = new Schedule();
+                    }
+                }
+
+                this.usePublishAtSchedule = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("UsePublishAtSchedule");
+            }
+        }
+
+        public Schedule PublishAtSchedule
+        {
+            get => this.publishAtSchedule;
+            set
+            {
+                this.publishAtSchedule = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("PublishAtSchedule");
             }
         }
 

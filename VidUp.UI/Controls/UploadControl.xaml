@@ -83,7 +83,7 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 6 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
             </StackPanel>
             <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                 <Label Content="Thumbnail: " Width="68" />
@@ -122,7 +122,7 @@
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Tags: " Width="35" />
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 3 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 </StackPanel>
                 <TextBox x:Name="Tags" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus">
                     <TextBox.Text>
@@ -149,8 +149,8 @@
                 </ComboBox>
 
             <StackPanel  Grid.Row="7" Grid.Column="2" Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding PublishAt}" VerticalAlignment="Top" Margin="0 3 0 0" IsEnabled="{Binding ControlsEnabled}" />
-                <Label Content="Publish At: " Width="96" />
+                <ToggleButton IsChecked="{Binding PublishAt}" IsEnabled="{Binding ControlsEnabled}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
+                <Label Content="Publish At: " Width="77" />
                 <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" DisplayDateStart="{Binding PublishAtFirstDate, Mode=OneWay}" Margin="0 3 0 0" />
                 <!--Binding OneWay because setting is handled by event. -->
                 <ComboBox SelectedItem="{Binding PublishAtTime, Mode=OneWay}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" DropDownClosed="ComboBoxQuarterHourSelect_DropDownClosed" IsEnabled="{Binding PublishAt}" />
@@ -170,7 +170,7 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Playlist ID: " Width="63" />
-                <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 3 10 0" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 <TextBox Width="185" IsEnabled="{Binding ControlsEnabled}" Text="{Binding PlaylistId}" TextWrapping="Wrap" Margin="0 0 5 0" />
             </StackPanel>
             <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal">
