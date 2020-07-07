@@ -36,11 +36,12 @@
                     <Grid.RowDefinitions>
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
-                   <StackPanel  Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                   <DockPanel  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
                        <Label Content="Frequency: " Width="69" />
                        <ComboBox ItemsSource="{Binding ScheduleFrequencies}" SelectedItem="{Binding ScheduleFrequency}" Width="190" >
                        </ComboBox>
-                    </StackPanel>
+                       <Button Command="{Binding ResetCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 10 0" Width="80" Height="20" Padding="0" Content="Reset" />
+                    </DockPanel>
                 </Grid>
 
             </GroupBox>
@@ -260,7 +261,7 @@
                     <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton IsChecked="{Binding MonthlyHasAdvancedSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <Label Content="Advanced Schedule " Width="121" />
-                        <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Alternating, rotating publish times can be defined for up to 3 days, up to 3 a day." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Up to 3 publish times per day can be set." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
 

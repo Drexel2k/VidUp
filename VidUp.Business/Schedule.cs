@@ -289,6 +289,12 @@ namespace Drexel.VidUp.Business
             this.monthlyMonthRelativeBasedDayTimes = schedule.MonthlyMonthRelativeBasedDayTimes.ToDictionary(entry => entry.Key, entry => entry.Value.ToArray());
         }
 
+        public void Reset()
+        {
+            this.scheduleFrequency = ScheduleFrequency.Daily;
+            this.resetAllSchedules();
+        }
+
         private void resetAllSchedules()
         {
             this.resetDailySchedule();

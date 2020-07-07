@@ -12,6 +12,9 @@ namespace Drexel.VidUp.UI.ViewModels
     public class PublishAtScheduleViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private GenericCommand resetCommand;
+
         private bool validate = true;
         private bool initializing = true;
 
@@ -37,6 +40,14 @@ namespace Drexel.VidUp.UI.ViewModels
         private DayPosition monthlyMonthRelativeBasedDayPosition;
         private List<MonthRelativeCombination> monthlyMonthRelativeBasedCombinations;
         private Dictionary<MonthRelativeCombination, TimeSpan?[]> monthlyMonthRelativeBasedDayTimes;
+
+        public GenericCommand ResetCommand
+        {
+            get
+            {
+                return this.resetCommand;
+            }
+        }
 
         public bool Initializing
         {
@@ -1614,6 +1625,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public PublishAtScheduleViewModel(Schedule schedule)
         {
+            this.resetCommand = new GenericCommand(this.resetAllSchedules);
+
             if (schedule != null)
             {
                 this.schedule = new Schedule(schedule);
@@ -1731,12 +1744,110 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.monthlyMonthRelativeCombinationViewModels.Add(new MonthRelativeCombinationViewModel(monthRelativeCombinationInner));
 
                 TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimesFromSchedule(monthRelativeCombination.DayPosition, monthRelativeCombination.DayOfWeek);
-                this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationInner, timeSpans);
+
+                TimeSpan?[] newTimeSpans = new TimeSpan?[3];
+                for (int index = 0; index < 3; index++)
+                {
+                    if (timeSpans[index] != null)
+                    {
+                        newTimeSpans[index] = timeSpans[index];
+                    }
+                }
+
+                this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationInner, newTimeSpans);
             }
 
             this.monthlyMonthRelativeBasedCombination = this.monthlyMonthRelativeCombinationViewModels[0];
             this.monthlyMonthRelativeBasedDayPosition = this.monthlyMonthRelativeCombinationViewModels[0].DayPosition;
             this.monthlyMonthRelativeBasedDay = this.monthlyMonthRelativeCombinationViewModels[0].DayOfWeek;
+        }
+
+        private void resetAllSchedules(object obj)
+        {
+            this.validate = false;
+            this.schedule.Reset();
+            this.initializeDailyViewModels();
+            this.initializeWeeklyViewModels();
+            this.initializeMonthlyMonthDateBasedDayViewModels();
+            this.initializeMonthlyMonthRelativeViewModels();
+            this.dailyAdjustControlEnablement();
+            this.weeklyAdjustControlEnablement();
+            this.monthlyAdjustControlEnablement();
+
+            this.raisePropertyChanged("ScheduleFrequency");
+
+            this.raisePropertyChangedAllDaily();
+            this.raisePropertyChangedAllWeekly();
+            this.raisePropertyChangedAllMonthly();
+
+            this.validate = true;
+        }
+
+        private void raisePropertyChangedAllMonthly()
+        {
+            this.raisePropertyChanged("MonthlyMonthFrequency");
+            this.raisePropertyChanged("MonthlyDefaultTime");
+            this.raisePropertyChanged("MonthlyMonthDateBasedIndex");
+            this.raisePropertyChanged("MonthlyMonthDateBasedVisible");
+            this.raisePropertyChanged("MonthlyMonthRelativeBasedVisible"); 
+            this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
+            this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
+            this.raisePropertyChanged("MonthlyHasAdvancedSchedule");
+            this.raisePropertyChanged("MonthlyActive");
+            this.raisePropertyChanged("MonthlyTime1");
+            this.raisePropertyChanged("MonthlyTime2");
+            this.raisePropertyChanged("MonthlyTime3");
+        }
+
+        private void raisePropertyChangedAllWeekly()
+        {
+            this.raisePropertyChanged("WeeklyWeekFrequency");
+            this.raisePropertyChanged("WeeklyDefaultTime");
+            this.raisePropertyChanged("WeeklyHasAdvancedSchedule");
+            this.raisePropertyChanged("WeeklyMondayActive");
+            this.raisePropertyChanged("WeeklyTuesdayActive");
+            this.raisePropertyChanged("WeeklyWednesdayActive");
+            this.raisePropertyChanged("WeeklyThursdayActive");
+            this.raisePropertyChanged("WeeklyFridayActive");
+            this.raisePropertyChanged("WeeklySaturdayActive");
+            this.raisePropertyChanged("WeeklySundayActive");
+            this.raisePropertyChanged("WeeklyMondayTime1");
+            this.raisePropertyChanged("WeeklyMondayTime2");
+            this.raisePropertyChanged("WeeklyMondayTime3");
+            this.raisePropertyChanged("WeeklyTuesdayTime1");
+            this.raisePropertyChanged("WeeklyTuesdayTime2");
+            this.raisePropertyChanged("WeeklyTuesdayTime3");
+            this.raisePropertyChanged("WeeklyWednesdayTime1");
+            this.raisePropertyChanged("WeeklyWednesdayTime2");
+            this.raisePropertyChanged("WeeklyWednesdayTime3");
+            this.raisePropertyChanged("WeeklyThursdayTime1");
+            this.raisePropertyChanged("WeeklyThursdayTime2");
+            this.raisePropertyChanged("WeeklyThursdayTime3");
+            this.raisePropertyChanged("WeeklyFridayTime1");
+            this.raisePropertyChanged("WeeklyFridayTime2");
+            this.raisePropertyChanged("WeeklyFridayTime3");
+            this.raisePropertyChanged("WeeklySaturdayTime1");
+            this.raisePropertyChanged("WeeklySaturdayTime2");
+            this.raisePropertyChanged("WeeklySaturdayTime3");
+            this.raisePropertyChanged("WeeklySundayTime1");
+            this.raisePropertyChanged("WeeklySundayTime2");
+            this.raisePropertyChanged("WeeklySundayTime3");
+        }
+
+        private void raisePropertyChangedAllDaily()
+        {
+            this.raisePropertyChanged("DailyDayFrequency");
+            this.raisePropertyChanged("DailyDefaultTime");
+            this.raisePropertyChanged("DailyHasAdvancedSchedule");
+            this.raisePropertyChanged("DailyDay1Time1");
+            this.raisePropertyChanged("DailyDay1Time2");
+            this.raisePropertyChanged("DailyDay1Time3");
+            this.raisePropertyChanged("DailyDay2Time1");
+            this.raisePropertyChanged("DailyDay2Time2");
+            this.raisePropertyChanged("DailyDay2Time3");
+            this.raisePropertyChanged("DailyDay3Time1");
+            this.raisePropertyChanged("DailyDay3Time2");
+            this.raisePropertyChanged("DailyDay3Time3");
         }
 
         private void dailyAdjustControlEnablement()
