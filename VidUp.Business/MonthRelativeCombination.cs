@@ -15,13 +15,11 @@ namespace Drexel.VidUp.Business
         public DayPosition DayPosition
         {
             get => this.dayPosition;
-            set => this.dayPosition = value;
         }
 
         public DayOfWeek DayOfWeek
         {
             get => this.dayOfWeek;
-            set => this.dayOfWeek = value;
         }
 
         public MonthRelativeCombination(DayPosition dayPosition, DayOfWeek dayOfWeek)

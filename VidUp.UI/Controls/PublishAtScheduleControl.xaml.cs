@@ -24,7 +24,7 @@ namespace Drexel.VidUp.UI.Controls
         private void UCTemplate_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             PublishAtScheduleViewModel viewModel = (PublishAtScheduleViewModel) this.DataContext;
-            viewModel.Initializing = false;
+            viewModel.Validate = true;
         }
     }
 }

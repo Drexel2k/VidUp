@@ -55,7 +55,7 @@ namespace Drexel.VidUp.Business
         private bool[] monthlyMonthDateBasedDates;
 
         [JsonProperty]
-        private List<MonthRelativeCombination> monthlyMonthRelativeBasedCombinations;
+        private List<MonthRelativeCombination> monthlyMonthRelativeBasedBasedCombinations;
 
         [JsonProperty]
         private bool monthlyHasAdvancedSchedule;
@@ -83,7 +83,7 @@ namespace Drexel.VidUp.Business
                 foreach (KeyValuePair<MonthRelativeCombination, TimeSpan?[]> monthRelativeCombinationKeyValuePair in value)
                 {
                     MonthRelativeCombination monthRelativeCombination =
-                        this.monthlyMonthRelativeBasedCombinations.Find(mrc =>
+                        this.monthlyMonthRelativeBasedBasedCombinations.Find(mrc =>
                             mrc.DayPosition == monthRelativeCombinationKeyValuePair.Key.DayPosition &&
                             mrc.DayOfWeek == monthRelativeCombinationKeyValuePair.Key.DayOfWeek);
                     this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, new TimeSpan?[3]);
@@ -105,7 +105,7 @@ namespace Drexel.VidUp.Business
         private void OnDeserializingMethod(StreamingContext context)
         {
             this.monthlyMonthRelativeBasedDayTimes = null;
-            this.monthlyMonthRelativeBasedCombinations.Clear();
+            this.monthlyMonthRelativeBasedBasedCombinations.Clear();
         }
         public ScheduleFrequency ScheduleFrequency
         {
@@ -233,10 +233,10 @@ namespace Drexel.VidUp.Business
             set => this.monthlyMonthDateBasedDates = value;
         }
 
-        public List<MonthRelativeCombination> MonthlyMonthRelativeCombinations
+        public List<MonthRelativeCombination> MonthlyMonthRelativeBasedCombinations
         {
-            get => this.monthlyMonthRelativeBasedCombinations;
-            set => this.monthlyMonthRelativeBasedCombinations = value;
+            get => this.monthlyMonthRelativeBasedBasedCombinations;
+            set => this.monthlyMonthRelativeBasedBasedCombinations = value;
         }
 
         public Dictionary<int, TimeSpan?[]> MonthlyMonthDateBasedDayTimes
@@ -282,7 +282,7 @@ namespace Drexel.VidUp.Business
             this.monthlyDefaultTime = schedule.MonthlyDefaultTime;
             this.monthlyMonthDateBased = schedule.MonthlyDateBased;
             schedule.MonthlyMonthDateBasedDates.CopyTo(this.monthlyMonthDateBasedDates, 0);
-            this.monthlyMonthRelativeBasedCombinations = new List<MonthRelativeCombination>(schedule.MonthlyMonthRelativeCombinations.Select(
+            this.monthlyMonthRelativeBasedBasedCombinations = new List<MonthRelativeCombination>(schedule.MonthlyMonthRelativeBasedCombinations.Select(
                 combination => new MonthRelativeCombination(combination.DayPosition, combination.DayOfWeek)));
             this.monthlyHasAdvancedSchedule = schedule.MonthlyHasAdvancedSchedule;
             this.monthlyMonthDateBasedDayTimes = schedule.MonthlyMonthDateBasedDayTimes.ToDictionary(entry => entry.Key, entry => entry.Value.ToArray());
@@ -347,9 +347,9 @@ namespace Drexel.VidUp.Business
             this.monthlyMonthDateBasedDayTimes = new Dictionary<int, TimeSpan?[]>();
             this.monthlyMonthDateBasedDayTimes.Add(0, new TimeSpan?[3]);
             this.monthlyMonthDateBasedDayTimes[0][0] = new TimeSpan();
-            this.monthlyMonthRelativeBasedCombinations = new List<MonthRelativeCombination>();
+            this.monthlyMonthRelativeBasedBasedCombinations = new List<MonthRelativeCombination>();
             MonthRelativeCombination monthRelativeCombination = new MonthRelativeCombination(DayPosition.First, DayOfWeek.Monday);
-            this.monthlyMonthRelativeBasedCombinations.Add(monthRelativeCombination);
+            this.monthlyMonthRelativeBasedBasedCombinations.Add(monthRelativeCombination);
             this.monthlyMonthRelativeBasedDayTimes = new Dictionary<MonthRelativeCombination, TimeSpan?[]>();
             this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, new TimeSpan?[3]);
             this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][0] = new TimeSpan();
