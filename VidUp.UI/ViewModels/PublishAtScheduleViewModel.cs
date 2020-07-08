@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private MonthDayViewModel monthlyMonthDateBasedDay;
         private Dictionary<int, TimeSpan?[]> monthlyMonthDateBasedDayTimes;
 
-        private List<MonthRelativeCombinationViewModel> monthlyMonthRelativeBasedCombinationViewModels;
+        private ObservableCollection<MonthRelativeCombinationViewModel> monthlyMonthRelativeBasedCombinationViewModels;
         private MonthRelativeCombinationViewModel monthlyMonthRelativeBasedCombination;
         private DayOfWeek monthlyMonthRelativeBasedDay;
         private DayPosition monthlyMonthRelativeBasedDayPosition;
@@ -1459,6 +1460,48 @@ namespace Drexel.VidUp.UI.ViewModels
             return combinations[0];
         }
 
+        private MonthRelativeCombination getMonthRelativeBasedCombinationFromViewModelDayTimes(DayPosition dayPosition, DayOfWeek day)
+        {
+            MonthRelativeCombination[] combinations =
+                this.monthlyMonthRelativeBasedDayTimes.Keys.Where(key =>
+                    key.DayPosition == dayPosition &&
+                    key.DayOfWeek == day).ToArray();
+
+            int count = combinations.Length;
+            if (count > 1)
+            {
+                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
+            }
+
+            if (count <= 0)
+            {
+                return null;
+            }
+
+            return combinations[0];
+        }
+
+        private MonthRelativeCombination getMonthRelativeBasedCombinationFromScheduleDayTimes(DayPosition dayPosition, DayOfWeek day)
+        {
+            MonthRelativeCombination[] combinations =
+                this.schedule.MonthlyMonthRelativeBasedDayTimes.Keys.Where(key =>
+                    key.DayPosition == dayPosition &&
+                    key.DayOfWeek == day).ToArray();
+
+            int count = combinations.Length;
+            if (count > 1)
+            {
+                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
+            }
+
+            if (count <= 0)
+            {
+                return null;
+            }
+
+            return combinations[0];
+        }
+
         private MonthRelativeCombinationViewModel getMonthRelativeBasedCombinationViewModel(DayPosition dayPosition, DayOfWeek day)
         {
             MonthRelativeCombinationViewModel[] combinationViewModels =
@@ -1523,7 +1566,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public List<MonthRelativeCombinationViewModel> MonthlyMonthRelativeBasedCombinationViewModels
+        public ObservableCollection<MonthRelativeCombinationViewModel> MonthlyMonthRelativeBasedCombinationViewModels
         {
             get => this.monthlyMonthRelativeBasedCombinationViewModels;
         }
@@ -1536,6 +1579,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.monthlyMonthRelativeBasedCombination = value;
                 this.monthlyMonthRelativeBasedDayPosition = value.DayPosition;
                 this.monthlyMonthRelativeBasedDay = value.DayOfWeek;
+
                 this.validate = false;
                 this.raisePropertyChanged("MonthlyTime1");
                 this.raisePropertyChanged("MonthlyTime2");
@@ -1633,8 +1677,12 @@ namespace Drexel.VidUp.UI.ViewModels
                         if (!this.monthlyMonthRelativeBasedCombinations.Exists(
                             combi => combi.DayPosition == this.monthlyMonthRelativeBasedDayPosition && combi.DayOfWeek == this.monthlyMonthRelativeBasedDay))
                         {
-                            MonthRelativeCombination monthRelativeCombination = new MonthRelativeCombination(
-                                this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                            MonthRelativeCombination monthRelativeCombination = this.getMonthRelativeBasedCombinationFromViewModelDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                            if (monthRelativeCombination == null)
+                            {
+                                monthRelativeCombination = new MonthRelativeCombination(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                            }
+
                             this.monthlyMonthRelativeBasedCombinations.Add(monthRelativeCombination);
                             MonthRelativeCombinationViewModel monthRelativeCombinationViewModel = new MonthRelativeCombinationViewModel(monthRelativeCombination);
                             this.monthlyMonthRelativeBasedCombinationViewModels.Add(monthRelativeCombinationViewModel);
@@ -1827,26 +1875,35 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.monthlyMonthRelativeBasedCombinations = new List<MonthRelativeCombination>();
             this.monthlyMonthRelativeBasedDayTimes = new Dictionary<MonthRelativeCombination, TimeSpan?[]>();
-            this.monthlyMonthRelativeBasedCombinationViewModels = new List<MonthRelativeCombinationViewModel>();
+            this.monthlyMonthRelativeBasedCombinationViewModels = new ObservableCollection<MonthRelativeCombinationViewModel>();
             foreach (MonthRelativeCombination monthRelativeCombination in this.schedule.MonthlyMonthRelativeBasedCombinations)
             {
                 MonthRelativeCombination monthRelativeCombinationInner = new MonthRelativeCombination(
                     monthRelativeCombination.DayPosition, monthRelativeCombination.DayOfWeek);
                 this.monthlyMonthRelativeBasedCombinations.Add(monthRelativeCombinationInner);
                 this.monthlyMonthRelativeBasedCombinationViewModels.Add(new MonthRelativeCombinationViewModel(monthRelativeCombinationInner));
+            }
 
-                TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimesFromSchedule(monthRelativeCombination.DayPosition, monthRelativeCombination.DayOfWeek);
+            foreach (KeyValuePair<MonthRelativeCombination, TimeSpan?[]> scheduleMonthlyMonthRelativeBasedDayTime in this.schedule.MonthlyMonthRelativeBasedDayTimes)
+            {
+                MonthRelativeCombination monthRelativeCombination =
+                    this.getMonthRelativeBasedCombinationFromViewModel(scheduleMonthlyMonthRelativeBasedDayTime.Key.DayPosition, scheduleMonthlyMonthRelativeBasedDayTime.Key.DayOfWeek);
+
+                if (monthRelativeCombination == null)
+                {
+                    monthRelativeCombination = new MonthRelativeCombination(scheduleMonthlyMonthRelativeBasedDayTime.Key.DayPosition, scheduleMonthlyMonthRelativeBasedDayTime.Key.DayOfWeek);
+                }
 
                 TimeSpan?[] newTimeSpans = new TimeSpan?[3];
                 for (int index = 0; index < 3; index++)
                 {
-                    if (timeSpans[index] != null)
+                    if (scheduleMonthlyMonthRelativeBasedDayTime.Value[index] != null)
                     {
-                        newTimeSpans[index] = timeSpans[index];
+                        newTimeSpans[index] = scheduleMonthlyMonthRelativeBasedDayTime.Value[index];
                     }
                 }
 
-                this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationInner, newTimeSpans);
+                this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, newTimeSpans);
             }
 
             this.monthlyMonthRelativeBasedCombination = this.monthlyMonthRelativeBasedCombinationViewModels[0];
@@ -1883,7 +1940,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("MonthlyMonthDateBasedVisible");
             this.raisePropertyChanged("MonthlyMonthRelativeBasedVisible"); 
             this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
-            this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
+            //this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
             this.raisePropertyChanged("MonthlyHasAdvancedSchedule");
             this.raisePropertyChanged("MonthlyActive");
             this.raisePropertyChanged("MonthlyTime1");
@@ -2361,6 +2418,8 @@ namespace Drexel.VidUp.UI.ViewModels
                         dayActive == true);
                     if (this.schedule.MonthlyMonthDateBasedDates.Count(dayActive => dayActive == true) <= 1)
                     {
+                        //as MontlyActive state can be change by selection of other controls, we need to revert the change, to prevent inconsistent data.
+                        this.monthlyMonthDateBasedDates[dayIndex2] = true;
                         return $"{this.monthlyMonthDateBasedDay.Day}. is the last active day and can't be disabled.";
                     }
                 }
@@ -2396,12 +2455,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     if (this.schedule.MonthlyMonthRelativeBasedCombinations.Count <= 1)
                     {
+                        //as MontlyActive state can be change by selection of other controls, we need to revert the change, to prevent inconsistent data.
+                        MonthRelativeCombination monthRelativeCombination =
+                            this.getMonthRelativeBasedCombinationFromViewModelDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+
+                        this.monthlyMonthRelativeBasedCombinations.Add(monthRelativeCombination);
                         return "Cannot remove last relative day position.";
                     }
-
-                    MonthRelativeCombination monthRelativeCombinationFromViewModel = this.getMonthRelativeBasedCombinationFromViewModel(
-                        this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-                    this.monthlyMonthRelativeBasedCombinations.Remove(monthRelativeCombinationFromViewModel);
 
                     MonthRelativeCombination monthRelativeCombinationFromSchedule = this.getMonthRelativeBasedCombinationFromSchedule(
                         this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
@@ -2409,6 +2469,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     MonthRelativeCombinationViewModel monthRelativeCombinationViewModel = this.getMonthRelativeBasedCombinationViewModel(
                         this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+
+                    //to avoid to have an empty combobox selected item. change needs to be raised to view bevore item is removed.
                     if (this.monthlyMonthRelativeBasedCombination == monthRelativeCombinationViewModel)
                     {
                         if (this.monthlyMonthRelativeBasedCombinationViewModels[0] != monthlyMonthRelativeBasedCombination)
@@ -2421,29 +2483,48 @@ namespace Drexel.VidUp.UI.ViewModels
                         }
                     }
 
+                    this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
+
                     this.monthlyMonthRelativeBasedCombinationViewModels.Remove(monthRelativeCombinationViewModel);
                 }
                 else
                 {
                     MonthRelativeCombination monthRelativeCombinationFromViewModel = this.getMonthRelativeBasedCombinationFromViewModel(
                         this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+
+                    MonthRelativeCombination monthRelativeCombinationForSchedule =
+                        this.getMonthRelativeBasedCombinationFromScheduleDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+
+                    if (monthRelativeCombinationForSchedule == null)
+                    {
+                        monthRelativeCombinationForSchedule = new MonthRelativeCombination(
+                            this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                    }
+
+                    //schedule.MonthlyMonthRelativeBasedCombinations can already contain the combination
+                    //if this is reversion of trying to delete the last combination entry
+                    if (!this.schedule.MonthlyMonthRelativeBasedCombinations.Contains(monthRelativeCombinationForSchedule))
+                    {
+                        this.schedule.MonthlyMonthRelativeBasedCombinations.Add(monthRelativeCombinationForSchedule);
+                    }
+
                     if (!this.monthlyMonthRelativeBasedDayTimes.ContainsKey(monthRelativeCombinationFromViewModel))
                     {
-                        this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationFromViewModel, new TimeSpan?[3]);
-                        this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombinationFromViewModel][0] = new TimeSpan();
+                        if (!this.monthlyMonthRelativeBasedDayTimes.ContainsKey(monthRelativeCombinationFromViewModel))
+                        {
+                            this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationFromViewModel, new TimeSpan?[3]);
+                            this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombinationFromViewModel][0] = new TimeSpan();
 
-                        MonthRelativeCombination monthRelativeCombinationForSchedule =
-                            new MonthRelativeCombination(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-                        this.schedule.MonthlyMonthRelativeBasedCombinations.Add(monthRelativeCombinationForSchedule);
-                        this.schedule.MonthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationForSchedule, new TimeSpan?[3]);
-                        this.schedule.MonthlyMonthRelativeBasedDayTimes[monthRelativeCombinationForSchedule][0] = new TimeSpan();
+                            this.schedule.MonthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationForSchedule, new TimeSpan?[3]);
+                            this.schedule.MonthlyMonthRelativeBasedDayTimes[monthRelativeCombinationForSchedule][0] = new TimeSpan();
+                        }
                     }
                 }
 
                 this.validate = false;
                 this.raisePropertyChanged(propertyName);
-                this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
-                this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
+
+                //this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
                 this.raisePropertyChanged("MonthlyTime1");
                 this.raisePropertyChanged("MonthlyTime2");
                 this.raisePropertyChanged("MonthlyTime3");
@@ -2516,13 +2597,13 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 TimeSpan?[] timeSpansViewModel = this.getMonthRelativeBasedTimesFromViewModel(
                     this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-                TimeSpan?[] timeSpansModel = this.getMonthRelativeBasedTimesFromViewModel(
+                TimeSpan?[] timeSpansSchedule = this.getMonthRelativeBasedTimesFromSchedule(
                     this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
 
                 if (index2 == 0)
                 {
-                    if (timeSpansModel[index2 + 1] != null &&
-                        timeSpansViewModel[index2] >= timeSpansModel[index2 + 1])
+                    if (timeSpansSchedule[index2 + 1] != null &&
+                        timeSpansViewModel[index2] >= timeSpansSchedule[index2 + 1])
                     {
                         return $"Monthly Time 1 must be smaller than monthly Time 2.";
                     }
@@ -2532,7 +2613,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     if (timeSpansViewModel[index2] == null)
                     {
-                        if (timeSpansModel[index2 + 1] != null)
+                        if (timeSpansSchedule[index2 + 1] != null)
                         {
                             return
                                 $"Monthly Time 3 must not have a value if monthly Time 2 has no value.";
@@ -2540,8 +2621,8 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                     else
                     {
-                        if (timeSpansViewModel[index2] <= timeSpansModel[index2 - 1] ||
-                            (timeSpansModel[index2 + 1] != null && timeSpansViewModel[index2] >= timeSpansModel[index2 + 1]))
+                        if (timeSpansViewModel[index2] <= timeSpansSchedule[index2 - 1] ||
+                            (timeSpansSchedule[index2 + 1] != null && timeSpansViewModel[index2] >= timeSpansSchedule[index2 + 1]))
                         {
                             return
                                 $"Monthly Time 2 must be greater than monthly Time 1 and smaller than monthly Time 3.";
@@ -2552,13 +2633,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (index2 == 2)
                 {
                     if (timeSpansViewModel[index2] != null &&
-                        timeSpansViewModel[index2] <= timeSpansModel[index2 - 1])
+                        timeSpansViewModel[index2] <= timeSpansSchedule[index2 - 1])
                     {
                         return $"Monthly Time 3 must be greater than monthly Time 2.";
                     }
                 }
 
-                timeSpansModel[index2] = timeSpansViewModel[index2];
+                timeSpansSchedule[index2] = timeSpansViewModel[index2];
                 this.validate = false;
                 this.raisePropertyChanged(propertyName);
                 this.validate = true;
