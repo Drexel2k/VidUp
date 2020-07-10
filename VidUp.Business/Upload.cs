@@ -358,6 +358,22 @@ namespace Drexel.VidUp.Business
                 if (!string.IsNullOrWhiteSpace(this.template.Description))
                 {
                     this.description = this.template.Description;
+                    if (template.UsePlaceholdersForDescription)
+                    {
+                        Regex regex = new Regex(@"#([^#]+)#");
+                        int matchIndex = 0;
+                        string parseText = getPlaceholderContents();
+
+                        if(!string.IsNullOrEmpty(parseText)) { 
+                            foreach (Match match in regex.Matches(getPlaceholderContents()))
+                            {
+                                this.description = this.description.Replace("#" + matchIndex + "#", match.Groups[1].Value);
+
+                                matchIndex++;
+                            }
+                        }
+                    }
+
                     this.raisePropertyChanged("Description");
                 }
             }
@@ -372,7 +388,7 @@ namespace Drexel.VidUp.Business
                     this.title = this.Template.Title;
                     Regex regex = new Regex(@"#([^#]+)#");
                     int matchIndex = 0;
-                    foreach (Match match in regex.Matches(this.FilePath))
+                    foreach (Match match in regex.Matches(getPlaceholderContents()))
                     {
                         this.title = this.title.Replace("#" + matchIndex + "#", match.Groups[1].Value);
 
@@ -470,6 +486,44 @@ namespace Drexel.VidUp.Business
             }
 
             this.raisePropertyChanged("ThumbnailFilePath", oldFilePath, this.thumbnailFilePath);
+        }
+
+        private string getPlaceholderContents()
+        {
+            if (!template.UsePlaceholderFile) return Path.GetFileName(this.FilePath);
+
+            string extension = ".txt";
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();
+            // since we already know there's a template if this code is called, no need to null check the template
+            string thumbnailDirectory = this.template.ThumbnailFolderPath;
+            string uploadDirectory = Path.GetDirectoryName(this.filePath);
+
+            if(!string.IsNullOrWhiteSpace(thumbnailDirectory) && Directory.Exists(thumbnailDirectory))
+            {
+               foreach(string currentFile in Directory.GetFiles(thumbnailDirectory))
+                {
+                    if(fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower())
+                    {
+                        if(Path.GetExtension(currentFile).Equals(extension))
+                        {
+                            return File.ReadAllText(currentFile);
+                        }
+                    }
+                }
+
+                foreach (string currentFile in Directory.GetFiles(Path.GetDirectoryName(this.filePath)))
+                {
+                    if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower() && Path.GetFullPath(currentFile).ToLower() != Path.GetFullPath(this.filePath).ToLower())
+                    {
+                        if (Path.GetExtension(currentFile).Equals(extension))
+                        {
+                            return File.ReadAllText(currentFile);
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         private string getImagePath(Template template)

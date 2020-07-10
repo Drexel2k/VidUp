@@ -231,6 +231,26 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool UsePlaceholderFile
+        {
+            get => this.template != null ? this.template.UsePlaceholderFile : false;
+            set
+            {
+                this.template.UsePlaceholderFile = value;
+                this.raisePropertyChangedAndSerializeTemplateList("UsePlaceholderFile");
+            }
+        }
+
+        public bool UsePlaceholdersForDescription
+        {
+            get => this.template != null ? this.template.UsePlaceholdersForDescription : false;
+            set
+            {
+                this.template.UsePlaceholdersForDescription = value;
+                this.raisePropertyChangedAndSerializeTemplateList("UsePlaceholderFile");
+            }
+        }
+
         public string PlaylistId
         {
             get => this.template != null ? this.template.PlaylistId : null;

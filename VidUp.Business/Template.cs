@@ -42,6 +42,10 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private bool isDefault;
         [JsonProperty]
+        private bool usePlaceholderFile;
+        [JsonProperty]
+        private bool usePlaceholdersForDescription;
+        [JsonProperty]
         private string playlistId;
         [JsonProperty]
         private bool usePublishAtSchedule;
@@ -233,6 +237,28 @@ namespace Drexel.VidUp.Business
                 this.isDefault = value;
                 this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("IsDefault");
+            }
+        }
+
+        public bool UsePlaceholderFile
+        {
+            get => this.usePlaceholderFile;
+            set
+            {
+                this.usePlaceholderFile = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("UsePlaceholderFile");
+            }
+        }
+
+        public bool UsePlaceholdersForDescription
+        {
+            get => this.usePlaceholdersForDescription;
+            set
+            {
+                this.usePlaceholdersForDescription = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("UsePlaceholdersForDescription");
             }
         }
 
