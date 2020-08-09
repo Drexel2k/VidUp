@@ -30,7 +30,7 @@ namespace Drexel.VidUp.UI
 
         private void Image_Drop(object sender, DragEventArgs e)
         {
-            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
+            UploadListViewModel uploadListViewModel = (UploadListViewModel)((MainWindowViewModel)this.DataContext).CurrentViewModel;
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             List<Upload> uploads = new List<Upload>();
             foreach (string file in files)
@@ -38,7 +38,7 @@ namespace Drexel.VidUp.UI
                 uploads.Add(new Upload(file));
             }
 
-            mainWindowViewModel.AddUploads(uploads);
+            uploadListViewModel.AddUploads(uploads);
         }
 
         private void CMainWindow_Activated(object sender, EventArgs e)

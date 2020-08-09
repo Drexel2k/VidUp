@@ -25,6 +25,7 @@ namespace Drexel.VidUp.Business
         public event PropertyChangedEventHandler PropertyChanged;
         private CheckFileUsage checkFileUsage;
         private string thumbnailFallbackImageFolder;
+        private TemplateList templateList;
 
         public long TotalBytesToUpload
         {
@@ -117,23 +118,32 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public UploadList()
+
+        //for deserialiuzation
+        //todo: overwork deserialization process
+        public TemplateList TemplateList
         {
+            set => this.templateList = value;
+        }
+
+        public UploadList(TemplateList templateList)
+        {
+            this.templateList = templateList;
             this.uploads = new List<Upload>();
         }
 
-        public void AddUploads(List<Upload> uploads, TemplateList templateList)
+        public void AddUploads(List<Upload> uploads)
         {
             foreach(Upload upload in uploads)
             {
-                Template template = templateList.GetTemplateForUpload(upload);
+                Template template = this.templateList.GetTemplateForUpload(upload);
                 if (template != null)
                 {
                     upload.Template = template;
                 }
                 else
                 {
-                    template = templateList.GetDefaultTemplate();
+                    template = this.templateList.GetDefaultTemplate();
                     if (template != null)
                     {
                         upload.Template = template;

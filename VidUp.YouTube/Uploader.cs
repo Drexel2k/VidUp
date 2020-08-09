@@ -22,9 +22,10 @@ namespace Drexel.VidUp.Youtube
 
         private UploadStats uploadStats;
 
-        private Action notifyUploadProgress;
         private bool stopUpload = false;
         private bool resumeUploads;
+
+        public event EventHandler UploadStatsUpdated;
 
         public long MaxUploadInBytesPerSecond
         {
@@ -50,10 +51,19 @@ namespace Drexel.VidUp.Youtube
             this.uploadList = uploadList;
         }
 
-        public async Task<bool> Upload(Action<Upload> notifyUploadStart, Action<Upload> notifyUploadEnd, Action notifyUploadProgress, UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
+        private void onUploadStatsUpdated()
+        {
+            EventHandler handler = this.UploadStatsUpdated;
+
+            if (handler != null)
+            {
+                handler(this, null);
+            }
+        }
+
+        public async Task<bool> Upload(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
         {
             this.uploadStats = uploadStats;
-            this.notifyUploadProgress = notifyUploadProgress;
             this.resumeUploads = resumeUploads;
             bool oneUploadFinished = false;
 
@@ -79,11 +89,6 @@ namespace Drexel.VidUp.Youtube
 
                 upload.UploadStatus = UplStatus.Uploading;
 
-                if (notifyUploadStart != null)
-                {
-                    notifyUploadStart(upload);
-                }
-
                 UploadResult result = await YoutubeUpload.Upload(upload, maxUploadInBytesPerSecond,
                     updateUploadProgress, this.isStopped);
 
@@ -103,11 +108,6 @@ namespace Drexel.VidUp.Youtube
                 this.uploadedLength += upload.FileLength;
                 this.uploadStats.FinishUpload();
 
-                if (notifyUploadEnd != null)
-                {
-                    notifyUploadEnd(upload);
-                }
-
                 JsonSerialization.SerializeAllUploads();
 
                 upload = this.uploadList.GetUpload(
@@ -122,10 +122,7 @@ namespace Drexel.VidUp.Youtube
             if(oneUploadFinished)
             {
                 this.uploadStats.AllFinished();
-                if(this.notifyUploadProgress != null)
-                {
-                    this.notifyUploadProgress();
-                }
+                this.onUploadStatsUpdated();
             }
 
             this.uploadStats = null;
@@ -148,10 +145,7 @@ namespace Drexel.VidUp.Youtube
                 ? this.uploadList.TotalBytesToUploadIncludingResumableRemaining
                 : this.uploadList.TotalBytesToUploadRemaining;
             this.uploadStats.CurrentSpeedInBytesPerSecond = stats.CurrentSpeedInBytesPerSecond;
-            if(this.notifyUploadProgress != null)
-            {
-                this.notifyUploadProgress();
-            }
+            this.onUploadStatsUpdated();
         }
 
         private bool isStopped()

@@ -28,14 +28,6 @@ namespace Drexel.VidUp.Business
 
         public int TemplateCount { get => this.templates.Count; }
 
-        public string ThumbnailFallbackImageFolder
-        {
-            set
-            {
-                this.thumbnailFallbackImageFolder = value;
-            }
-        }
-
         public CheckFileUsage CheckFileUsage
         {
             set

@@ -25,6 +25,7 @@
         <DataTemplate DataType="{x:Type vm:TemplateViewModel}">
             <controls:TemplateControl />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:VidUpViewModel}"  />
     </Window.Resources>
 
     <materialDesign:DialogHost Identifier="RootDialog">
@@ -36,7 +37,7 @@
             </Grid.RowDefinitions>
             <Fluent:Ribbon VerticalAlignment="Center" SelectedTabIndex="{Binding TabNo, Mode=TwoWay}">
                 <!--Tabs-->
-                <Fluent:RibbonTabItem Header="Upload" >
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[0]}" Header="Upload" >
                     <Fluent:RibbonGroupBox Header="Add Uploads">
                         <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
                     </Fluent:RibbonGroupBox>
@@ -88,13 +89,13 @@
 
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem Header="Templates" >
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[1]}" Header="Templates" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
                         <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="NameWithDefaultIndicator"/>
                         <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="images/file-document-box-plus.png" Command="{Binding NewTemplateCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem Header="VidUp" >
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">
                         <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="images/handshake48.png" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
                     </Fluent:RibbonGroupBox>
@@ -110,9 +111,9 @@
             </Fluent:Ribbon>
 
             <Grid Grid.Row="1">
-                
-                <ContentControl Content="{Binding CurrentView}" />
+                <ContentControl Content="{Binding CurrentViewModel}" />
             </Grid>
+
             <StackPanel Grid.Row="2" Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="App Status: " />

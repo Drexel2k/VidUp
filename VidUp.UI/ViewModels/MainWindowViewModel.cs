@@ -1,54 +1,35 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.JSON;
 using Drexel.VidUp.UI.Controls;
-using Drexel.VidUp.UI.Converters;
 using Drexel.VidUp.UI.Definitions;
 using Drexel.VidUp.UI.DllImport;
+using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using Drexel.VidUp.Youtube.Service;
 using MaterialDesignThemes.Wpf;
-
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         private int tabNo;
-        private UploadListViewModel uploadListViewModel;
+        private List<object> viewModels = new List<object>(new object[4]);
 
-        //todo: rename delete command remove commands
-        private TemplateViewModel templateViewModel;
-        private GenericCommand addUploadCommand;
-        private GenericCommand startUploadingCommand;
-        private GenericCommand stopUploadingCommand;
-        private GenericCommand newTemplateCommand;
-        private GenericCommand deleteTemplateCommand;
-        private GenericCommand aboutCommand;
-        private GenericCommand removeUploadsCommand;
-        private GenericCommand donateCommand;
+        private AppStatus appStatus = AppStatus.Idle;
+        private ObservableTemplateViewModels observableTemplateViewModels;
 
-        private List<TemplateComboboxViewModel> removeTemplateViewModels;
-        private TemplateComboboxViewModel removeSelectedTemplate;
-        private string removeUploadStatus = "Finished";
-
-        private AppStatus appStatus;
         private PostUploadAction postUploadAction;
-
-        private long maxUploadInBytesPerSecond = 0;
-
-        private Uploader uploader;
         private UploadStats uploadStats;
 
         private TaskbarState taskbarState = TaskbarState.Normal;
@@ -57,13 +38,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private TemplateList templateList;
         private UploadList uploadList;
-
-        private ObservableTemplateViewModels observableTemplateViewModels;
-        private TemplateComboboxViewModel selectedTemplate;
-
-        private object currentView;
-        private bool resumeUploads = true;
-
 
         public MainWindowViewModel()
         {
@@ -83,31 +57,73 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void initialize(out TemplateList templateList)
         {
-            this.appStatus = AppStatus.Idle;
             this.checkAppDataFolder();
-
-            this.addUploadCommand = new GenericCommand(this.openUploadDialog);
-            this.startUploadingCommand = new GenericCommand(this.startUploading);
-            this.stopUploadingCommand = new GenericCommand(this.stopUploading);
-            this.newTemplateCommand = new GenericCommand(this.openNewTemplateDialog);
-            this.deleteTemplateCommand = new GenericCommand(this.RemoveTemplate);
-            this.aboutCommand = new GenericCommand(this.openAboutDialog);
-            this.removeUploadsCommand = new GenericCommand(this.removeUploads);
-            this.donateCommand = new GenericCommand(this.openDonateDialog);
-
             this.deserialize();
 
             templateList = this.templateList;
 
             this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList);
-            this.removeRefreshTemplateFilter();
-            this.uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels);
 
-            this.templateViewModel = new TemplateViewModel();
+            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels);
+            this.viewModels[0] = uploadListViewModel;
+            uploadListViewModel.PropertyChanged += uploadListViewModelOnPropertyChanged;
+            uploadListViewModel.UploadStarted += uploadListViewModelOnUploadStarted;
+            uploadListViewModel.UploadFinished += uploadListViewModelOnUploadFinished;
+            uploadListViewModel.UploadStatsUpdated += uploadListViewModelOnUploadStatsUpdated;
 
-            this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
+            this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, switchToUploadTab);
 
-            currentView = uploadListViewModel;
+            this.viewModels[3] = new VidUpViewModel();
+        }
+
+        private void uploadListViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "ResumeUploads")
+            {
+                this.raisePropertyChanged("TotalMbLeft");
+            }
+        }
+
+        private void uploadListViewModelOnUploadStarted(object sender, UploadStartedEventArgs e)
+        {
+            this.appStatus = AppStatus.Uploading;
+            this.uploadStats = e.UploadStats;
+            this.raisePropertyChanged("AppStatus");
+        }
+
+        private void uploadListViewModelOnUploadFinished(object sender, UploadFinishedEventArgs e)
+        {
+            this.appStatus = AppStatus.Idle;
+            this.uploadStats = null;
+            this.raisePropertyChanged("AppStatus");
+
+            if (e.OneUploadFinished)
+            {
+                switch (this.postUploadAction)
+                {
+                    case PostUploadAction.SleepMode:
+                        Application.SetSuspendState(PowerState.Suspend, false, false);
+                        break;
+                    case PostUploadAction.Hibernate:
+                        Application.SetSuspendState(PowerState.Hibernate, false, false);
+                        break;
+                    case PostUploadAction.Shutdown:
+                        ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
+                        break;
+                    case PostUploadAction.FlashTaskbar:
+                        this.notifyTaskbarItemInfo();
+                        if (this.windowActive)
+                        {
+                            System.Timers.Timer timer = new System.Timers.Timer(5000d);
+                            timer.Elapsed += stopFlashing;
+                            timer.AutoReset = false;
+                            timer.Start();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         private void deserialize()
@@ -117,12 +133,20 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.Initialize();
             JsonSerialization.Deserialize();
             this.templateList = new TemplateList(DeSerializationRepository.Templates, Settings.TemplateImageFolder, Settings.ThumbnailFallbackImageFolder);
-            this.templateList.PropertyChanged += templateListPropertyChanged;
-            this.templateList.ThumbnailFallbackImageFolder = Settings.ThumbnailFallbackImageFolder;
+            this.templateList.CollectionChanged += templateListCollectionChanged;
+
             //for serialization
             JsonSerialization.TemplateList = this.templateList;
 
-            this.uploadList = DeSerializationRepository.UploadList != null ? DeSerializationRepository.UploadList : new UploadList();
+            if (DeSerializationRepository.UploadList != null)
+            {
+                this.uploadList = DeSerializationRepository.UploadList;
+                this.uploadList.TemplateList = this.templateList;
+            }
+            else
+            {
+                this.uploadList = new UploadList(this.templateList);
+            }
             this.uploadList.PropertyChanged += uploadListPropertyChanged;
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.uploadList.ThumbnailFallbackImageFolder = Settings.ThumbnailFallbackImageFolder;
@@ -133,6 +157,16 @@ namespace Drexel.VidUp.UI.ViewModels
 
             DeSerializationRepository.ClearRepositories();
         }
+
+        private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if(e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                this.uploadList.RemoveTemplate((Template)e.OldItems[0]);
+            }
+        }
+
+
 
         private void checkAppDataFolder()
         {
@@ -152,138 +186,19 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public List<object> ViewModels
+        {
+            get => this.viewModels;
+        }
+
         //is bound to grid row 1 (main window content) MainWindow.Xaml
-        public object CurrentView
+        public object CurrentViewModel
         {
             get
             {
-                return currentView;
-            }
-            set
-            {
-                if (currentView != value)
-                {
-                    currentView = value;
-                    this.raisePropertyChanged("CurrentView");
-                    if(currentView is TemplateViewModel)
-                    {
-                        if(this.templateList.TemplateCount == 0)
-                        {
-                            openNewTemplateDialog(null);
-                        }
-                    }
-                }
+                return this.viewModels[this.tabNo];
             }
         }
-
-        public GenericCommand AddUploadCommand
-        {
-            get
-            {
-                return this.addUploadCommand;
-            }
-        }
-
-        public GenericCommand StartUploadingCommand
-        {
-            get
-            {
-                return this.startUploadingCommand;
-            }
-        }
-
-        public GenericCommand StopUploadingCommand
-        {
-            get
-            {
-                return this.stopUploadingCommand;
-            }
-        }
-
-        public GenericCommand NewTemplateCommand
-        {
-            get
-            {
-                return this.newTemplateCommand;
-            }
-        }
-
-        public GenericCommand AboutCommand
-        {
-            get
-            {
-                return this.aboutCommand;
-            }
-        }
-
-        public GenericCommand DonateCommand
-        {
-            get
-            {
-                return this.donateCommand;
-            }
-        }
-
-        public GenericCommand DeleteTemplateCommand
-        {
-            get
-            {
-                return this.deleteTemplateCommand;
-            }
-        }
-
-        public GenericCommand RemoveUploadsCommand
-        {
-            get
-            {
-                return this.removeUploadsCommand;
-            }
-        }
-
-        public string[] RemoveUploadStatuses
-        {
-            get
-            {
-                string[] values = Enum.GetNames(typeof(UplStatus));
-                string[] newValues = new string[values.Length + 1]; 
-                newValues[0] = "All";
-                Array.Copy(values, 0, newValues, 1, values.Length);
-                return newValues;
-            }
-        }
-
-        public TemplateComboboxViewModel RemoveSelectedTemplate
-        {
-            get
-            {
-                return this.removeSelectedTemplate;
-            }
-            set
-            {
-                if (this.removeSelectedTemplate != value)
-                {
-                    this.removeSelectedTemplate = value;
-                    this.raisePropertyChanged("RemoveSelectedTemplate");
-                }
-            }
-        }
-
-        public string RemoveUploadStatus
-        {
-            get
-            {
-                return this.removeUploadStatus;
-            }
-            set
-            {
-                if (this.removeUploadStatus != value)
-                {
-                    this.removeUploadStatus = value;
-                    this.raisePropertyChanged("RemoveUploadStatus");
-                }
-            }
-        }
-
 
         public AppStatus AppStatus
         {
@@ -452,7 +367,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return this.uploadStats.TotalMBLeft.ToString("N0", CultureInfo.CurrentCulture);
                 }
 
-                if (this.resumeUploads)
+                if (((UploadListViewModel)this.viewModels[0]).ResumeUploads)
                 {
                     return ((int) ((float) this.uploadList.TotalBytesToUploadIncludingResumableRemaining /
                                    Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
@@ -469,7 +384,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return (this.maxUploadInBytesPerSecond / 1024).ToString("N0", CultureInfo.CurrentCulture); ;
+                return (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond / 1024).ToString("N0", CultureInfo.CurrentCulture); ;
             }
 
             set
@@ -477,32 +392,18 @@ namespace Drexel.VidUp.UI.ViewModels
                 value = value.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator, string.Empty);
                 if (long.TryParse(value, out long kiloBytesPerSecond))
                 {
-                    this.maxUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
-                    if (this.maxUploadInBytesPerSecond < 262144) // minimum 256 KiloBytes per second
+                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
+                    if (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond < 262144) // minimum 256 KiloBytes per second
                     {
-                        this.maxUploadInBytesPerSecond = 0;
+                        ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
                     }
                 }
                 else
                 {
-                    this.maxUploadInBytesPerSecond = 0;
-                }
-
-                Uploader uploader = this.uploader;
-                if (uploader != null)
-                {
-                    uploader.MaxUploadInBytesPerSecond = this.maxUploadInBytesPerSecond;
+                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
                 }
 
                 this.raisePropertyChanged("MaxUploadInKiloBytesPerSecond");
-            }
-        }
-        
-        public TemplateViewModel TemplateViewModel
-        {
-            get
-            {
-                return this.templateViewModel;
             }
         }
 
@@ -517,84 +418,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.tabNo != value)
                 {
                     this.tabNo = value;
-                    switch(this.tabNo)
-                    {
-                        case 0:
-                            this.CurrentView = uploadListViewModel;
-                            break;
-                        case 1:
-                            this.CurrentView = templateViewModel;
-                            break;
-                        case 2:
-                            this.CurrentView = null;
-                            break;
-                        default:
-                            this.TabNo = 0;
-                            break;
-                    }
-
+                    this.raisePropertyChanged("CurrentViewModel");
                     this.raisePropertyChanged("TabNo");
                 }
             }
         }
 
-        public ObservableTemplateViewModels ObservableTemplateViewModels
-        {
-            get
-            {
-                return this.observableTemplateViewModels;
-            }
-        }
 
-        public List<TemplateComboboxViewModel> RemoveTemplateViewModels
-        {
-            get
-            {
-                return this.removeTemplateViewModels;
-            }
-        }
-
-        public TemplateComboboxViewModel SelectedTemplate
-        {
-            get
-            {
-                return this.selectedTemplate;
-            }
-            set
-            {
-                if (this.selectedTemplate != value)
-                {
-                    this.selectedTemplate = value;
-                    if (value != null)
-                    {
-                        this.TemplateViewModel.Template = value.Template;
-                    }
-                    else
-                    {
-                        this.TemplateViewModel.Template = null;
-                    }
-
-                    this.raisePropertyChanged("SelectedTemplate");
-                }
-            }
-        }
-
-        public bool ResumeUploads
-        {
-            get
-            {
-                return this.resumeUploads;
-            }
-            set
-            {
-                if (this.resumeUploads != value)
-                {
-                    this.resumeUploads = value;
-                    this.raisePropertyChanged("ResumeUploads");
-                    this.raisePropertyChanged("TotalMbLeft");
-                }
-            }
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -608,244 +438,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void openUploadDialog(object obj)
-        {
-            OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.Multiselect = true;
-
-            DialogResult result = fileDialog.ShowDialog();
-            
-
-            if (result == DialogResult.OK)
-            {
-                List<Upload> uploads = new List<Upload>();
-                foreach (string fileName in fileDialog.FileNames)
-                {
-                    uploads.Add(new Upload(fileName));
-                }
-
-                this.AddUploads(uploads);
-            }
-        }
-
-        public void AddUploads(List<Upload> uploads)
-        {
-            this.uploadList.AddUploads(uploads, this.templateList);
-
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeUploadList();
-            JsonSerialization.SerializeTemplateList();
-        }
-
-        private async void removeUploads(object obj)
-        {
-            bool remove = true;
-            if (this.removeUploadStatus == "All" || (UplStatus)Enum.Parse(typeof(UplStatus), this.removeUploadStatus) != UplStatus.Finished)
-            {
-                ConfirmControl control = new ConfirmControl(string.Format(
-                    "Do you really want to remove all uploads with template = {0} and status = {1}?",
-                    this.removeSelectedTemplate.Template.Name,
-                    new UplStatusStringValuesConverter().Convert(this.removeUploadStatus, typeof(string), null,
-                        CultureInfo.CurrentCulture)));
-
-                remove = (bool) await DialogHost.Show(control, "RootDialog");
-            }
-
-            if (remove)
-            {
-                this.RemoveUploads();
-            }
-        }
-
-        //exposed for testing
-        public void RemoveUploads()
-        {
-            Predicate<Upload>[] predicates = new Predicate<Upload>[2];
-
-            if (this.removeUploadStatus == "All")
-            {
-                predicates[0] = upload => true;
-            } 
-            else
-            {
-                UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.removeUploadStatus);
-                predicates[0] = upload => upload.UploadStatus == status;
-            }
-
-            if (this.removeSelectedTemplate.Template.Name == "All")
-            {
-                predicates[1] = upload => true;
-            }
-            else if (this.removeSelectedTemplate.Template.Name == "None")
-            {
-                predicates[1] = upload => upload.Template == null;
-            }
-            else
-            {
-                predicates[1] = upload => upload.Template == this.removeSelectedTemplate.Template;
-            }
-
-            this.uploadList.RemoveUploads(PredicateCombiner.And(predicates));
-
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeUploadList();
-            JsonSerialization.SerializeTemplateList();
-        }
-
-        private async void startUploading(object obj)
-        {
-            if (this.appStatus == AppStatus.Idle)
-            {
-                this.appStatus = AppStatus.Uploading;
-                //prevent sleep mode
-                PowerSavingHelper.DisablePowerSaving();
-                this.raisePropertyChanged("AppStatus");
-
-                bool oneUploadFinished = false;
-                this.uploader = new Uploader(this.uploadList);
-                this.uploadStats = new UploadStats();
-                oneUploadFinished = await uploader.Upload(null, null, this.updateUploadProgress, this.uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
-                this.uploader = null;
-                this.uploadStats = null;
-
-                this.appStatus = AppStatus.Idle;
-
-                PowerSavingHelper.EnablePowerSaving();
-                this.raisePropertyChanged("AppStatus");
-                this.updateUploadProgress();
-
-                if (oneUploadFinished)
-                {
-                    switch(this.postUploadAction)
-                    {
-                        case PostUploadAction.SleepMode:
-                            Application.SetSuspendState(PowerState.Suspend, false, false);
-                            break;
-                        case PostUploadAction.Hibernate:
-                            Application.SetSuspendState(PowerState.Hibernate, false, false);
-                            break;
-                        case PostUploadAction.Shutdown:
-                            ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
-                            break;
-                        case PostUploadAction.FlashTaskbar:
-                            this.notifyTaskbarItemInfo();
-                            if (this.windowActive)
-                            {
-                                System.Timers.Timer timer = new System.Timers.Timer(5000d);
-                                timer.Elapsed += stopFlashing;
-                                timer.AutoReset = false;
-                                timer.Start();
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void stopUploading(object obj)
-        {
-            if (this.appStatus == AppStatus.Uploading)
-            {
-                Uploader uploader = this.uploader;
-                if (uploader != null)
-                {
-                    uploader.StopUpload = true;
-                }
-            }
-        }
-
         private void stopFlashing(object sender, System.Timers.ElapsedEventArgs e)
         {
             this.resetTaskbarItemInfo();
-        }
-
-        private async void openNewTemplateDialog(object obj)
-        {
-            var view = new NewTemplateControl
-            {
-                DataContext = new NewTemplateViewModel(Settings.TemplateImageFolder)
-            };
-
-            bool result = (bool)await DialogHost.Show(view, "RootDialog");
-            if(result)
-            { 
-                NewTemplateViewModel data = (NewTemplateViewModel)view.DataContext;
-                Template template = new Template(data.Name, data.ImageFilePath, data.RootFolderPath, this.templateList);
-                this.AddTemplate(template);
-            }
-
-            if(!result && this.templateList.TemplateCount == 0)
-            {
-                this.CurrentView = this.uploadListViewModel;
-                this.TabNo = 0;
-            }
-        }
-
-        //exposed for testing purposes
-        public void AddTemplate(Template template)
-        {
-            List<Template> list = new List<Template>();
-            list.Add(template);
-            this.templateList.AddTemplates(list);
-            this.templateViewModel.SerializeTemplateList();
-
-            this.SelectedTemplate = new TemplateComboboxViewModel(template);
-        }
-
-        private async void openAboutDialog(object obj)
-        {
-            var view = new AboutControl
-            {
-                DataContext = new AboutViewModel()
-            };
-
-            bool result = (bool)await DialogHost.Show(view, "RootDialog");
-        }
-
-        private async void openDonateDialog(object obj)
-        {
-            var view = new DonateControl
-            {
-               // DataContext = new DonateViewModel()
-            };
-
-            bool result = (bool)await DialogHost.Show(view, "RootDialog");
-        }
-
-        //exposed for testing
-        public void RemoveTemplate(Object guid)
-        {
-            Template template = this.templateList.GetTemplate(Guid.Parse((string)guid));
-
-            //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
-            //will set the SelectedTemplate to null which causes problems if there are templates left
-            if (this.observableTemplateViewModels.TemplateCount > 1)
-            {
-                if (this.observableTemplateViewModels[0].Template == template)
-                {
-                    this.SelectedTemplate = this.observableTemplateViewModels[1];
-                }
-                else
-                {
-                    this.SelectedTemplate = this.observableTemplateViewModels[0];
-                }
-            }
-            else
-            {
-                this.SelectedTemplate = null;
-            }
-
-            this.uploadList.RemoveTemplate(template);
-            this.templateList.Remove(template);
-
-            JsonSerialization.SerializeTemplateList();
-            JsonSerialization.SerializeAllUploads();
-            if (this.ObservableTemplateViewModels.TemplateCount == 0)
-            {
-                this.NewTemplateCommand.Execute(null);
-            }
         }
 
         private void uploadListPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -861,58 +456,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void templateListPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "TemplateCount")
-            {
-                if (this.templateList.TemplateCount <= 0)
-                {
-                    this.SelectedTemplate = null;
-                    this.RemoveSelectedTemplate = null;
-                }
-
-                this.removeRefreshTemplateFilter();
-            }
-        }
-
-        private void removeRefreshTemplateFilter()
-        {
-            Template allTemplate = new Template();
-            allTemplate.Name = "All";
-            TemplateComboboxViewModel allViewModel = new TemplateComboboxViewModel(allTemplate);
-
-            List<TemplateComboboxViewModel> viewModels = new List<TemplateComboboxViewModel>();
-            viewModels.Add(allViewModel);
-
-            Template noTemplate = new Template();
-            noTemplate.Name = "None";
-            TemplateComboboxViewModel noViewModel = new TemplateComboboxViewModel(noTemplate);
-
-            viewModels.Add(noViewModel);
-
-            bool selectedFilterStillExits = false;
-            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModels)
-            {
-                if (this.removeSelectedTemplate == templateComboboxViewModel)
-                {
-                    selectedFilterStillExits = true;
-                }
-
-                viewModels.Add(templateComboboxViewModel);    
-            }
-
-            if (!selectedFilterStillExits)
-            {
-                this.removeSelectedTemplate = allViewModel;
-            }
-
-            this.removeTemplateViewModels = viewModels;
-
-            this.raisePropertyChanged("RemoveSelectedTemplate");
-            this.raisePropertyChanged("RemoveTemplateViewModels");
-        }
-
-        private void updateUploadProgress()
+        private void uploadListViewModelOnUploadStatsUpdated(object sender, EventArgs e)
         {
             this.raisePropertyChanged("ProgressPercentage");
             this.raisePropertyChanged("CurrentFilePercent");
@@ -948,10 +492,15 @@ namespace Drexel.VidUp.UI.ViewModels
             this.windowActive = false;
         }
 
+        private void switchToUploadTab()
+        {
+            this.TabNo = 0;
+        }
+
         //exposed for testing
         public void RemoveUpload(string guid)
         {
-            this.uploadListViewModel.RemoveUpload(guid);
+            ((UploadListViewModel)this.viewModels[0]).RemoveUpload(guid);
         }
     }
 }

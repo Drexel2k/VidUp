@@ -128,11 +128,14 @@
     <Compile Include="Converters\StringEmptyCollapsedConverter.cs" />
     <Compile Include="Converters\StringIsNullOrNotFileExistsCollapsedConverter.cs" />
     <Compile Include="Converters\StringIsNullOrFileExistsCollapsedConverter.cs" />
+    <Compile Include="Definitions\AppStatus.cs" />
     <Compile Include="DllImport\ExecutionState.cs" />
     <Compile Include="DllImport\ExitWindows.cs" />
     <Compile Include="DllImport\PowerSavingHelper.cs" />
     <Compile Include="DllImport\ShutDownHelper.cs" />
     <Compile Include="DllImport\ShutDownReason.cs" />
+    <Compile Include="Events\UploadFinishedEventArgs.cs" />
+    <Compile Include="Events\UploadStartedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Definitions\QuarterHoursSource.cs" />
     <Compile Include="Settings.cs" />
@@ -153,6 +156,7 @@
     <Compile Include="ViewModels\UploadListViewModel.cs" />
     <Compile Include="ViewModels\UploadViewModel.cs" />
     <Compile Include="Validators\YoutubeInvalidCharsRule.cs" />
+    <Compile Include="ViewModels\VidUpViewModel.cs" />
     <Page Include="Controls\AboutControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -193,7 +197,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Definitions\AppStatus.cs" />
+    <Compile Include="Definitions\UploadStatus.cs" />
     <Compile Include="CommonAssemblyInfo.cs" />
     <Compile Include="GenericCommand.cs" />
     <Compile Include="MainWindow.xaml.cs">

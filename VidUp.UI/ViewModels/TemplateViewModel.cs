@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -11,22 +9,27 @@ using Drexel.VidUp.JSON;
 using Drexel.VidUp.UI.Controls;
 using MaterialDesignThemes.Wpf;
 
-#endregion
-
 namespace Drexel.VidUp.UI.ViewModels
 {
 
     public class TemplateViewModel : INotifyPropertyChanged
     {
+        private TemplateList templateList;
         private Template template;
+        private ObservableTemplateViewModels observableTemplateViewModels;
+        private TemplateComboboxViewModel selectedTemplate;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private GenericCommand newTemplateCommand;
+        private GenericCommand removeTemplateCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetCommand;
         private GenericCommand openPublishAtCommand;
 
         private string lastThumbnailFallbackFilePathAdded = null;
         private string lastImageFilePathAdded;
+        private Action switchToUploadTab;
 
         #region properties
 
@@ -44,6 +47,55 @@ namespace Drexel.VidUp.UI.ViewModels
                     //all properties changed
                     this.raisePropertyChanged(null);
                 }
+            }
+        }
+
+        public ObservableTemplateViewModels ObservableTemplateViewModels
+        {
+            get
+            {
+                return this.observableTemplateViewModels;
+            }
+        }
+
+        public TemplateComboboxViewModel SelectedTemplate
+        {
+            get
+            {
+                return this.selectedTemplate;
+            }
+            set
+            {
+                if (this.selectedTemplate != value)
+                {
+                    this.selectedTemplate = value;
+                    if (value != null)
+                    {
+                        this.Template = value.Template;
+                    }
+                    else
+                    {
+                        this.Template = null;
+                    }
+
+                    this.raisePropertyChanged("SelectedTemplate");
+                }
+            }
+        }
+
+        public GenericCommand NewTemplateCommand
+        {
+            get
+            {
+                return this.newTemplateCommand;
+            }
+        }
+
+        public GenericCommand RemoveTemplateCommand
+        {
+            get
+            {
+                return this.removeTemplateCommand;
             }
         }
 
@@ -253,8 +305,31 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public TemplateViewModel()
+        public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, Action switchToUploadTab)
         {
+            if(templateList == null)
+            {
+                throw new ArgumentException("TemplateList must not be null.");
+            }
+
+            if(switchToUploadTab == null)
+            {
+                throw new ArgumentException("SwitchToUploadTab action must not be null.");
+            }
+
+            if(observableTemplateViewModels == null)
+            {
+                throw new ArgumentException("ObservableTemplateViewModels action must not be null.");
+            }
+
+            this.templateList = templateList;
+            this.switchToUploadTab = switchToUploadTab;
+            this.observableTemplateViewModels = observableTemplateViewModels;
+
+            this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
+
+            this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialog);
+            this.removeTemplateCommand = new GenericCommand(this.RemoveTemplate);
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
             this.openPublishAtCommand = new GenericCommand(this.openPublishAt);
@@ -267,6 +342,60 @@ namespace Drexel.VidUp.UI.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public async void OpenNewTemplateDialog(object obj)
+        {
+            var view = new NewTemplateControl
+            {
+                DataContext = new NewTemplateViewModel(Settings.TemplateImageFolder)
+            };
+
+            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+            if (result)
+            {
+                NewTemplateViewModel data = (NewTemplateViewModel)view.DataContext;
+                Template template = new Template(data.Name, data.ImageFilePath, data.RootFolderPath, this.templateList);
+                this.AddTemplate(template);
+            }
+
+            if (!result && this.templateList.TemplateCount == 0)
+            {
+                this.switchToUploadTab();
+            }
+        }
+
+        public void RemoveTemplate(Object guid)
+        {       
+            Template template = this.templateList.GetTemplate(System.Guid.Parse((string)guid));
+
+            //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
+            //will set the SelectedTemplate to null which causes problems if there are templates left
+            if (this.observableTemplateViewModels.TemplateCount > 1)
+            {
+                if (this.observableTemplateViewModels[0].Template == template)
+                {
+                    this.SelectedTemplate = this.observableTemplateViewModels[1];
+                }
+                else
+                {
+                    this.SelectedTemplate = this.observableTemplateViewModels[0];
+                }
+            }
+            else
+            {
+                this.SelectedTemplate = null;
+            }
+
+            this.templateList.Remove(template);
+
+            JsonSerialization.SerializeTemplateList();
+            JsonSerialization.SerializeAllUploads();
+            if (this.templateList.TemplateCount == 0)
+            {
+                this.SelectedTemplate = null;
+                this.NewTemplateCommand.Execute(null);
             }
         }
 
@@ -365,6 +494,17 @@ namespace Drexel.VidUp.UI.ViewModels
         public void SerializeTemplateList()
         {
             JsonSerialization.SerializeTemplateList();
+        }
+        
+        //exposed for testing
+        public void AddTemplate(Template template)
+        {
+            List<Template> list = new List<Template>();
+            list.Add(template);
+            this.templateList.AddTemplates(list);
+            this.SerializeTemplateList();
+
+            this.SelectedTemplate = new TemplateComboboxViewModel(template);
         }
     }
 }
