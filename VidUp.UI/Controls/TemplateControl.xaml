@@ -51,6 +51,8 @@
                     <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="3" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
                             <StackPanel>
+                                <Button Content="Remove Playlist" Command="{Binding NoPlaylistCommand}" CommandParameter="{Binding Guid}" />
+                                <Separator/>
                                 <Button Content="Delete" Command="{Binding RemoveTemplateCommand}" CommandParameter="{Binding Guid}"/>
                             </StackPanel>
                         </materialDesign:PopupBox>

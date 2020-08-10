@@ -26,6 +26,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private GenericCommand newTemplateCommand;
         private GenericCommand removeTemplateCommand;
+        private GenericCommand noPlaylistCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetCommand;
         private GenericCommand openPublishAtCommand;
@@ -106,14 +107,16 @@ namespace Drexel.VidUp.UI.ViewModels
             }
             set
             {
-                if (value != null)
+                if (value == null)
                 {
-                    if (this.template.Playlist != value.Playlist)
-                    {
-                        this.template.Playlist = value.Playlist;
-                        this.raisePropertyChangedAndSerializeTemplateList("SelectedPlaylist");
-                    }
+                    this.template.Playlist = null;
                 }
+                else
+                {
+                    this.template.Playlist = value.Playlist;
+                }
+
+                JsonSerialization.JsonSerializer.SerializeTemplateList();
             }
         }
 
@@ -130,6 +133,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.removeTemplateCommand;
+            }
+        }
+
+        public GenericCommand NoPlaylistCommand
+        {
+            get
+            {
+                return this.noPlaylistCommand;
             }
         }
 
@@ -356,6 +367,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialog);
             this.removeTemplateCommand = new GenericCommand(this.RemoveTemplate);
+            this.noPlaylistCommand = new GenericCommand(this.setPlaylistToNull);
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
             this.openPublishAtCommand = new GenericCommand(this.openPublishAt);
@@ -414,6 +426,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
             JsonSerialization.JsonSerializer.SerializeTemplateList();
             JsonSerialization.JsonSerializer.SerializeAllUploads();
+        }
+
+
+        private void setPlaylistToNull(object parameter)
+        {
+            this.SelectedPlaylist = null;
         }
 
         private void openFileDialog(object parameter)

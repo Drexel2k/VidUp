@@ -135,7 +135,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.Template = value.Template;
                 }
 
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
                 JsonSerialization.JsonSerializer.SerializeTemplateList();
 
                 //if template changes all values are set to template values
@@ -209,7 +209,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Title = value;
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("YtTitle");
                 this.raisePropertyChanged("Title");
@@ -222,7 +222,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Description = value;
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("Description");
             }
@@ -234,7 +234,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Tags = new List<string>(value.Split(','));
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("TagsAsString");
             }
@@ -246,7 +246,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Tags = value;
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("TagsAsString");
             }
@@ -275,7 +275,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.upload.Visibility = value;
 
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("Visibility");
             }
@@ -295,7 +295,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.Playlist = value.Playlist;
                 }
 
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedPlaylist");
             }
         }
@@ -362,7 +362,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.upload.SetPublishAtTime(quarterHour);
 
-            this.SerializeAllUploads();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
             this.raisePropertyChanged("PublishAtTime");
         }
 
@@ -407,7 +407,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.SetPublishAtTime(new TimeSpan());
                 }
 
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("PublishAt");
                 this.raisePropertyChanged("PublishAtTime");
@@ -446,7 +446,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.SetPublishAtDate(value);
-                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("PublishAtDate");
             }
@@ -533,11 +533,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public void SerializeAllUploads()
-        {
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
-        }
-
         private void resetUploadState(object parameter)
         {
             this.upload.UploadStatus = UplStatus.ReadyForUpload;
@@ -559,8 +554,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.SelectedTemplate = null;
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
         }
 
         private void setPlaylistToNull(object parameter)
@@ -572,7 +565,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.SelectedPlaylist = null;
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
         }
 
         private void openThumbnailDialog(object parameter)
