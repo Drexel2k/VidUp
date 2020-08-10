@@ -54,6 +54,7 @@
                         <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" />
                         <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" />
                         <Button Content="Remove Template" Command="{Binding NoTemplateCommand}" CommandParameter="{Binding Guid}" />
+                        <Button Content="Remove Playlist" Command="{Binding NoPlaylistCommand}" CommandParameter="{Binding Guid}" />
                         <Separator/>
                         <Button Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=UCUploads}" CommandParameter="{Binding Guid}"/>
                     </StackPanel>
@@ -153,7 +154,7 @@
                 <Label Content="Publish At: " Width="77" />
                 <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" DisplayDateStart="{Binding PublishAtFirstDate, Mode=OneWay}" Margin="0 3 0 0" />
                 <!--Binding OneWay because setting is handled by event. -->
-                <ComboBox SelectedItem="{Binding PublishAtTime, Mode=OneWay}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" DropDownClosed="ComboBoxQuarterHourSelect_DropDownClosed" IsEnabled="{Binding PublishAt}" />
+                <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" IsEnabled="{Binding PublishAt}" />
             </StackPanel>
 
             <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
@@ -164,14 +165,13 @@
                 <!--Binding OneWay because setting is handled by event. -->
             </StackPanel>
             <!-- Selected Template is clearable through burger menu. -->
-            <ComboBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding SelectedTemplate, Mode=OneWay}" ItemsSource="{Binding DataContext.ObservableTemplateViewModels, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+            <ComboBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
             <StackPanel Grid.Row="8" Grid.Column="3" Grid.ColumnSpan="2" Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist ID to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
-                <Label Content="Playlist ID: " Width="63" />
-                <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                <TextBox Width="185" IsEnabled="{Binding ControlsEnabled}" Text="{Binding PlaylistId}" TextWrapping="Wrap" Margin="0 0 5 0" />
+                <Label Content="Playlist: " Width="63" />
+                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="210" />
             </StackPanel>
             <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />

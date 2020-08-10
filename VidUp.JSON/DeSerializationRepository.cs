@@ -1,22 +1,21 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Drexel.VidUp.Business;
-
-#endregion
 
 namespace Drexel.VidUp.JSON
 {
-    public class DeSerializationRepository
+    public class DeserializationRepository
     {
-        public static List<Upload> AllUploads { get; set; }
-        public static List<Template> Templates { get; set; }
         public static UploadList UploadList { get; set; }
+
+        public static TemplateList TemplateList { get; set; }
+
+        public static PlaylistList PlaylistList { get; set; }
+
         public static void ClearRepositories()
         {
-            AllUploads = null;
-            Templates = null;
             UploadList = null;
+            TemplateList = null;
+            PlaylistList = null;
         }
     }
 }

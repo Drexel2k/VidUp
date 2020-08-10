@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 #endregion
@@ -42,15 +43,13 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private bool isDefault;
         [JsonProperty]
-        private string playlistId;
+        private Playlist playlist;
         [JsonProperty]
         private bool usePublishAtSchedule;
         [JsonProperty]
         private Schedule publishAtSchedule;
 
         private TemplateList templateList;
-
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -93,13 +92,9 @@ namespace Drexel.VidUp.Business
         }
 
         #region properties
-        public Guid Guid { get => guid; }
-        public DateTime Created { get => created; }
-
-        public DateTime LastModified
-        {
-            get => this.lastModified;
-        }
+        public Guid Guid { get => this.guid; }
+        public DateTime Created { get => this.created; }
+        public DateTime LastModified { get => this.lastModified; }
 
         private DateTime lastModifiedInternal
         {
@@ -238,23 +233,14 @@ namespace Drexel.VidUp.Business
 
         public List<Upload> Uploads { get => this.uploads; }
 
-        public TemplateList TemplateList
-        { 
-            set
-            {
-                //todo: move to deseralization und remove property
-                this.templateList = value;
-            }
-        }
-
-        public string PlaylistId
+        public Playlist Playlist
         {
-            get => this.playlistId;
+            get => this.playlist;
             set
             {
-                this.playlistId = value;
+                this.playlist = value;
                 this.lastModifiedInternal = DateTime.Now;
-                this.raisePropertyChanged("PlaylistId");
+                this.raisePropertyChanged("Playlist");
             }
         }
 

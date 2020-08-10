@@ -102,11 +102,17 @@
     <Compile Include="Controls\DonateControl.xaml.cs">
       <DependentUpon>DonateControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\NewPlaylistControl.xaml.cs">
+      <DependentUpon>NewPlaylistControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\NewTemplateControl.xaml.cs">
       <DependentUpon>NewTemplateControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\PublishAtScheduleControl.xaml.cs">
       <DependentUpon>PublishAtScheduleControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PlaylistControl.xaml.cs">
+      <DependentUpon>PlaylistControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TemplateControl.xaml.cs">
       <DependentUpon>TemplateControl.xaml</DependentUpon>
@@ -145,13 +151,17 @@
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\MonthDayViewModel.cs" />
     <Compile Include="ViewModels\MonthRelativeCombinationViewModel.cs" />
+    <Compile Include="ViewModels\NewPlaylistViewModel.cs" />
     <Compile Include="ViewModels\NewTemplateViewModel.cs" />
+    <Compile Include="ViewModels\ObservablePlaylistViewModels.cs" />
     <Compile Include="ViewModels\ObservableTemplateViewModels.cs" />
     <Compile Include="ViewModels\ObservableUploadViewModels.cs" />
     <Compile Include="ViewModels\PublishAtScheduleViewModel.cs" />
     <Compile Include="ViewModels\QuarterHourViewModel.cs" />
     <Compile Include="ViewModels\QuarterHourViewModels.cs" />
+    <Compile Include="ViewModels\PlaylistComboboxViewModel.cs" />
     <Compile Include="ViewModels\TemplateComboboxViewModel.cs" />
+    <Compile Include="ViewModels\PlaylistViewModel.cs" />
     <Compile Include="ViewModels\TemplateViewModel.cs" />
     <Compile Include="ViewModels\UploadListViewModel.cs" />
     <Compile Include="ViewModels\UploadViewModel.cs" />
@@ -169,11 +179,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\NewPlaylistControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\NewTemplateControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\PublishAtScheduleControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\PlaylistControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -212,6 +230,12 @@
   <ItemGroup>
     <Compile Include="Definitions\PostUploadAction.cs" />
     <Content Include="Images\edit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\list-edit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\list-plus.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\minus.png">

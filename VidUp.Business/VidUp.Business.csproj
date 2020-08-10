@@ -70,11 +70,13 @@
     <Compile Include="DayPosition.cs" />
     <Compile Include="MonthRelativeCombination.cs" />
     <Compile Include="MonthRelativeCombinationConverter.cs" />
+    <Compile Include="Playlist.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedEventArgsEx.cs" />
     <Compile Include="Schedule.cs" />
     <Compile Include="ScheduleFrequency.cs" />
     <Compile Include="Template.cs" />
+    <Compile Include="PlaylistListList.cs" />
     <Compile Include="TemplateList.cs" />
     <Compile Include="Upload.cs" />
     <Compile Include="UploadList.cs" />

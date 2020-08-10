@@ -6,7 +6,8 @@
              xmlns:ui="clr-namespace:Drexel.VidUp.UI"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              x:Name="UCTemplate"
-             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters">
+             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
+             IsEnabled="{Binding TemplateSet}">
     <ScrollViewer HorizontalScrollBarVisibility="Auto">
         <Grid Height="Auto" Width="Auto" Margin="4">
             <Grid.ColumnDefinitions>
@@ -192,9 +193,8 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="Playlist ID: " Width="115" />
-                        <TextBox Text="{Binding PlaylistId, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="480" TextWrapping="Wrap" />
-                        <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <Label Content="Playlist: " Width="115" />
+                        <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="195" />
                     </StackPanel>
                     
                 </Grid>

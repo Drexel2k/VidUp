@@ -110,26 +110,16 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string ThumbnailFallbackImageFolder
-        {
-            set
-            {
-                this.thumbnailFallbackImageFolder = value;
-            }
-        }
-
-
-        //for deserialiuzation
-        //todo: overwork deserialization process
-        public TemplateList TemplateList
-        {
-            set => this.templateList = value;
-        }
-
-        public UploadList(TemplateList templateList)
+        public UploadList(List<Upload> uploads, TemplateList templateList, string thumbnailFallbackImageFolder)
         {
             this.templateList = templateList;
-            this.uploads = new List<Upload>();
+            this.uploads = uploads;
+            foreach (Upload upload in this.uploads)
+            {
+                upload.PropertyChanged += uploadPropertyChanged;
+            }
+
+            this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
         public void AddUploads(List<Upload> uploads)
@@ -288,6 +278,17 @@ namespace Drexel.VidUp.Business
                 if (upload.Template == template)
                 {
                     upload.Template = null;
+                }
+            }
+        }
+
+        public void RemovePlaylist(Playlist playlist)
+        {
+            foreach (Upload upload in this.uploads)
+            {
+                if (upload.Playlist == playlist)
+                {
+                    upload.Playlist = null;
                 }
             }
         }

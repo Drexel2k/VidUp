@@ -370,14 +370,14 @@ namespace Drexel.VidUp.Youtube.Service
 
         private static async Task<bool> addToPlaylist(Upload upload, string videoId)
         {
-            if (!string.IsNullOrWhiteSpace(upload.PlaylistId))
+            if (upload.Playlist != null)
             {
                 try
                 {
                     YoutubePlaylistItemRequest playlistItem = new YoutubePlaylistItemRequest();
 
                     playlistItem.PlaylistSnippet = new YoutubePlaylistItemSnippet();
-                    playlistItem.PlaylistSnippet.PlaylistId = upload.PlaylistId;
+                    playlistItem.PlaylistSnippet.PlaylistId = upload.Playlist.PlaylistId;
                     playlistItem.PlaylistSnippet.ResourceId = new VideoResource();
                     playlistItem.PlaylistSnippet.ResourceId.VideoId = videoId;
 

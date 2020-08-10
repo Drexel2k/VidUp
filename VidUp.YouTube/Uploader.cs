@@ -1,15 +1,12 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
+using Drexel.VidUp.Json;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Service;
 
-#endregion
 
 namespace Drexel.VidUp.Youtube
 {
@@ -108,7 +105,7 @@ namespace Drexel.VidUp.Youtube
                 this.uploadedLength += upload.FileLength;
                 this.uploadStats.FinishUpload();
 
-                JsonSerialization.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
 
                 upload = this.uploadList.GetUpload(
                     PredicateCombiner.And(

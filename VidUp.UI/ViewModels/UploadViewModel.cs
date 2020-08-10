@@ -9,7 +9,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
+using Drexel.VidUp.Json;
 using Drexel.VidUp.Utils;
 
 #endregion
@@ -24,13 +24,31 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand pauseCommand;
         private GenericCommand resetStateCommand;
         private GenericCommand noTemplateCommand;
+        private GenericCommand noPlaylistCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetThumbnailCommand;
         private GenericCommand resetToTemplateValueCommand;
 
         private ObservableTemplateViewModels observableTemplateViewModels;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public ObservableTemplateViewModels ObservableTemplateViewModels
+        {
+            get
+            {
+                return this.observableTemplateViewModels;
+            }
+        }
+
+        public ObservablePlaylistViewModels ObservablePlaylistViewModels
+        {
+            get
+            {
+                return this.observablePlaylistViewModels;
+            }
+        }
 
         public string Guid
         {
@@ -58,6 +76,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.noTemplateCommand;
+            }
+        }
+
+        public GenericCommand NoPlaylistCommand
+        {
+            get
+            {
+                return this.noPlaylistCommand;
             }
         }
 
@@ -100,12 +126,19 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.observableTemplateViewModels.GetViewModel(this.upload.Template);
             set
             {
-                //combobox handling initiated in code behind
-                this.upload.Template = value.Template;
-                
-                this.SerializeAllUploads();
-                this.SerializeTemplateList();
+                if (value == null)
+                {
+                    this.upload.Template = null;
+                }
+                else
+                {
+                    this.upload.Template = value.Template;
+                }
 
+                this.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeTemplateList();
+
+                //if template changes all values are set to template values
                 this.raisePropertyChanged(null);
             }
         }
@@ -248,15 +281,22 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string PlaylistId
+        public PlaylistComboboxViewModel SelectedPlaylist
         {
-            get => this.upload.PlaylistId;
+            get => this.observablePlaylistViewModels.GetViewModel(this.upload.Playlist);
             set
             {
-                this.upload.PlaylistId = value;
-                this.SerializeAllUploads();
+                if (value == null)
+                {
+                    this.upload.Playlist = null;
+                }
+                else
+                {
+                    this.upload.Playlist = value.Playlist;
+                }
 
-                this.raisePropertyChanged("PlaylistId");
+                this.SerializeAllUploads();
+                this.raisePropertyChanged("SelectedPlaylist");
             }
         }
 
@@ -381,6 +421,13 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 return this.quarterHourViewModels.GetQuarterHourViewModel(this.upload.PublishAt.TimeOfDay);
             }
+            set
+            {
+                if (this.Upload.PublishAtTime != value.QuarterHour)
+                {
+                    this.SetPublishAtTime(value.QuarterHour.Value);
+                }
+            }
         }
 
         public DateTime PublishAtDate
@@ -428,17 +475,30 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels)
+        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
+            if (observableTemplateViewModels == null)
+            {
+                throw new ArgumentException("ObservableTemplateViewModels must not be null.");
+            }
+
+            if (observablePlaylistViewModels == null)
+            {
+                throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
+            }
+
             this.upload = upload;
-            this.observableTemplateViewModels = observableTemplateViewModels;
             this.upload.PropertyChanged += this.uploadPropertyChanged;
+
+            this.observableTemplateViewModels = observableTemplateViewModels;
+            this.observablePlaylistViewModels = observablePlaylistViewModels;
 
             this.quarterHourViewModels = new QuarterHourViewModels(false);
 
             this.resetStateCommand = new GenericCommand(this.resetUploadState);
             this.pauseCommand = new GenericCommand(this.setPausedUploadState);
             this.noTemplateCommand = new GenericCommand(this.setTemplateToNull);
+            this.noPlaylistCommand = new GenericCommand(this.setPlaylistToNull);
             this.openFileDialogCommand = new GenericCommand(this.openThumbnailDialog);
             this.resetThumbnailCommand = new GenericCommand(this.resetThumbnail);
             this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateVuale);
@@ -475,24 +535,19 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public void SerializeAllUploads()
         {
-            JsonSerialization.SerializeAllUploads();
-        }
-
-        public void SerializeTemplateList()
-        {
-            JsonSerialization.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
         }
 
         private void resetUploadState(object parameter)
         {
             this.upload.UploadStatus = UplStatus.ReadyForUpload;
-            JsonSerialization.SerializeAllUploads();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
         }
 
         private void setPausedUploadState(object parameter)
         {
             this.upload.UploadStatus = UplStatus.Paused;
-            JsonSerialization.SerializeAllUploads();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
         }
 
         private void setTemplateToNull(object parameter)
@@ -504,8 +559,20 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.SelectedTemplate = null;
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
+            JsonSerialization.JsonSerializer.SerializeTemplateList();
+        }
+
+        private void setPlaylistToNull(object parameter)
+        {
+            if (this.UploadStatus == UplStatus.Finished)
+            {
+                MessageBox.Show("Template cannot be removed if upload is finished. Please clear upload list from finished uploads.");
+                return;
+            }
+
+            this.SelectedPlaylist = null;
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
         }
 
         private void openThumbnailDialog(object parameter)
@@ -546,7 +613,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (result == DialogResult.OK)
             {
                 this.ThumbnailFilePath = fileDialog.FileName;
-                JsonSerialization.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
             }
         }
 
@@ -586,7 +653,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         raisePropertyChanged("Visibility");
                         break;
                     case "playlist":
-                        this.upload.CopyPlaylistIdFromTemplate();
+                        this.upload.CopyPlaylistFromTemplate();
                         raisePropertyChanged("PlaylistId");
                         break;
                     default:
@@ -595,7 +662,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                 }
 
-                JsonSerialization.SerializeAllUploads();
+                JsonSerialization.JsonSerializer.SerializeAllUploads();
             }
         }
     }

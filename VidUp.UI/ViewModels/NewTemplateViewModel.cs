@@ -35,7 +35,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         this.FormValid = false;
                     }
 
-                    raisePropertyChanged("Name");
+                    this.raisePropertyChanged("Name");
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.imageFilePath != value)
                 {
                     this.imageFilePath = value;
-                    raisePropertyChanged("ImageFilePath");
+                    this.raisePropertyChanged("ImageFilePath");
                 }
             }
         }
@@ -65,7 +65,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.rootFolderPath != value)
                 {
                     this.rootFolderPath = value;
-                    raisePropertyChanged("RootFolderPath");
+                    this.raisePropertyChanged("RootFolderPath");
                 }
             }
         }

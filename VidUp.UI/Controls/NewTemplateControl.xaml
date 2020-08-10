@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0">New Template</TextBlock>
         <TextBlock FontSize="9" Margin="0, 12, 0, 0" Grid.Row="1">VidUp Display Information:</TextBlock>
-        <TextBox wpf:HintAssist.Hint="Template Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Grid.Row="2" IsManipulationEnabled="True"/>
+        <TextBox wpf:HintAssist.Hint="Template Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Grid.Row="2"/>
         <Grid  Grid.Row="3" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />

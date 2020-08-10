@@ -15,7 +15,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateList templateList;
         private List<TemplateComboboxViewModel> templateComboboxViewModels;
 
-        public int TemplateCount { get => templateComboboxViewModels.Count;  }
+        public int TemplateCount { get => this.templateComboboxViewModels.Count;  }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 

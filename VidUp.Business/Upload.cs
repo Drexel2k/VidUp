@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
@@ -30,7 +31,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string thumbnailFilePath;
         [JsonProperty]
-        private string playlistId;
+        private Playlist playlist;
         [JsonProperty]
         private Template template;
         [JsonProperty]
@@ -187,13 +188,13 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string PlaylistId
+        public Playlist Playlist
         {
-            get { return this.playlistId; }
+            get { return this.playlist; }
             set
             {
-                this.playlistId = value;
-                this.raisePropertyChanged("PlaylistId");
+                this.playlist = value;
+                this.raisePropertyChanged("Playlist");
             }
         }
 
@@ -320,13 +321,22 @@ namespace Drexel.VidUp.Business
             this.autoSetThumbnail();
         }
 
+        [OnDeserialized()]
+        private void OnDeserializingMethod(StreamingContext context)
+        {
+            if (this.uploadStatus == UplStatus.Uploading)
+            {
+                this.uploadStatus = UplStatus.Stopped;
+            }
+        }
+
         public void CopyTemplateValues()
         {
             this.CopyTitleFromTemplate();
             this.CopyDescriptionFromTemplate();
             this.CopyTagsFromtemplate();
             this.CopyVisbilityFromTemplate();
-            this.CopyPlaylistIdFromTemplate();
+            this.CopyPlaylistFromTemplate();
         }
 
         public void CopyVisbilityFromTemplate()
@@ -388,15 +398,11 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void CopyPlaylistIdFromTemplate()
+        public void CopyPlaylistFromTemplate()
         {
             if (this.template != null)
             {
-                if (!string.IsNullOrWhiteSpace(this.template.PlaylistId))
-                {
-                    this.playlistId = this.template.PlaylistId;
-                    this.raisePropertyChanged("PlaylistId");
-                }
+                this.Playlist = this.template.Playlist;
             }
         }
 
@@ -413,7 +419,7 @@ namespace Drexel.VidUp.Business
             {
                 if (this.template != null)
                 {
-                    this.publishAt = new DateTime(1, 1, 1,0, 0, 0);
+                    this.publishAt = new DateTime(1, 1, 1, 0, 0, 0);
                 }
             }
 

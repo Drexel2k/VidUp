@@ -5,18 +5,21 @@ using System.IO;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
+using Drexel.VidUp.Json;
 using Drexel.VidUp.UI.Controls;
 using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-
+    //todo: move ribbon properties to separate view model
     public class TemplateViewModel : INotifyPropertyChanged
     {
         private TemplateList templateList;
         private Template template;
+
         private ObservableTemplateViewModels observableTemplateViewModels;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
+
         private TemplateComboboxViewModel selectedTemplate;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -29,7 +32,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private string lastThumbnailFallbackFilePathAdded = null;
         private string lastImageFilePathAdded;
-        private Action switchToUploadTab;
 
         #region properties
 
@@ -50,11 +52,24 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool TemplateSet
+        {
+            get => this.template != null;
+        }
+
         public ObservableTemplateViewModels ObservableTemplateViewModels
         {
             get
             {
                 return this.observableTemplateViewModels;
+            }
+        }
+
+        public ObservablePlaylistViewModels ObservablePlaylistViewModels
+        {
+            get
+            {
+                return this.observablePlaylistViewModels;
             }
         }
 
@@ -79,6 +94,25 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
 
                     this.raisePropertyChanged("SelectedTemplate");
+                }
+            }
+        }
+
+        public PlaylistComboboxViewModel SelectedPlaylist
+        {
+            get
+            {
+                return this.observablePlaylistViewModels.GetViewModel(this.template.Playlist);
+            }
+            set
+            {
+                if (value != null)
+                {
+                    if (this.template.Playlist != value.Playlist)
+                    {
+                        this.template.Playlist = value.Playlist;
+                        this.raisePropertyChangedAndSerializeTemplateList("SelectedPlaylist");
+                    }
                 }
             }
         }
@@ -153,7 +187,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Title = value;
-                this.raisePropertyChangedAndSerializeTemplateList("YtTitle");
+                this.raisePropertyChangedAndSerializeTemplateList("Title");
 
             }
         }
@@ -163,7 +197,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Description = value;
-                this.raisePropertyChangedAndSerializeTemplateList("YtDescription");
+                this.raisePropertyChangedAndSerializeTemplateList("Description");
 
             }
         }
@@ -183,7 +217,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.YtVisibility = value;
-                this.raisePropertyChangedAndSerializeTemplateList("YtVisibility");
+                this.raisePropertyChangedAndSerializeTemplateList("Visibility");
             }
         }
 
@@ -283,16 +317,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string PlaylistId
-        {
-            get => this.template != null ? this.template.PlaylistId : null;
-            set
-            {
-                this.template.PlaylistId = value;
-                this.raisePropertyChangedAndSerializeTemplateList("PlaylistId");
-            }
-        }
-
         public bool UsePublishAtSchedule
         {
             get => this.template != null && this.template.UsePublishAtSchedule;
@@ -305,28 +329,30 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, Action switchToUploadTab)
+        public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             if(templateList == null)
             {
                 throw new ArgumentException("TemplateList must not be null.");
             }
 
-            if(switchToUploadTab == null)
-            {
-                throw new ArgumentException("SwitchToUploadTab action must not be null.");
-            }
-
             if(observableTemplateViewModels == null)
             {
-                throw new ArgumentException("ObservableTemplateViewModels action must not be null.");
+                throw new ArgumentException("ObservableTemplateViewModels must not be null.");
+            }
+
+            if (observablePlaylistViewModels == null)
+            {
+                throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
             }
 
             this.templateList = templateList;
-            this.switchToUploadTab = switchToUploadTab;
+
             this.observableTemplateViewModels = observableTemplateViewModels;
+            this.observablePlaylistViewModels = observablePlaylistViewModels;
 
             this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
+            this.SelectedPlaylist = this.observablePlaylistViewModels.GetViewModel(this.template.Playlist);
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialog);
             this.removeTemplateCommand = new GenericCommand(this.RemoveTemplate);
@@ -355,14 +381,10 @@ namespace Drexel.VidUp.UI.ViewModels
             bool result = (bool)await DialogHost.Show(view, "RootDialog");
             if (result)
             {
-                NewTemplateViewModel data = (NewTemplateViewModel)view.DataContext;
-                Template template = new Template(data.Name, data.ImageFilePath, data.RootFolderPath, this.templateList);
+                NewTemplateViewModel data = (NewTemplateViewModel) view.DataContext;
+                Template template = new Template(data.Name, data.ImageFilePath, data.RootFolderPath, this.templateList); 
                 this.AddTemplate(template);
-            }
 
-            if (!result && this.templateList.TemplateCount == 0)
-            {
-                this.switchToUploadTab();
             }
         }
 
@@ -390,13 +412,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.templateList.Remove(template);
 
-            JsonSerialization.SerializeTemplateList();
-            JsonSerialization.SerializeAllUploads();
-            if (this.templateList.TemplateCount == 0)
-            {
-                this.SelectedTemplate = null;
-                this.NewTemplateCommand.Execute(null);
-            }
+            JsonSerialization.JsonSerializer.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
         }
 
         private void openFileDialog(object parameter)
@@ -481,28 +498,23 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 PublishAtScheduleViewModel data = (PublishAtScheduleViewModel)view.DataContext;
                 this.template.PublishAtSchedule = data.Schedule;
-                JsonSerialization.SerializeTemplateList();
+                JsonSerialization.JsonSerializer.SerializeTemplateList();
             }
         }
 
         private void raisePropertyChangedAndSerializeTemplateList(string propertyName)
         {
             this.raisePropertyChanged(propertyName);
-            this.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeTemplateList();
         }
 
-        public void SerializeTemplateList()
-        {
-            JsonSerialization.SerializeTemplateList();
-        }
-        
         //exposed for testing
         public void AddTemplate(Template template)
         {
             List<Template> list = new List<Template>();
             list.Add(template);
             this.templateList.AddTemplates(list);
-            this.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeTemplateList();
 
             this.SelectedTemplate = new TemplateComboboxViewModel(template);
         }

@@ -14,18 +14,22 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private List<UploadViewModel> uploadViewModels;
         public event NotifyCollectionChangedEventHandler CollectionChanged;
-        private ObservableTemplateViewModels observableTemplateViewModels;
 
-        public ObservableUploadViewModels(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels)
+        private ObservableTemplateViewModels observableTemplateViewModels;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
+
+        public ObservableUploadViewModels(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             this.observableTemplateViewModels = observableTemplateViewModels;
+            this.observablePlaylistViewModels = observablePlaylistViewModels;
+
             this.uploadViewModels = new List<UploadViewModel>();
             
             if (uploadList != null)
             {
                 foreach (Upload upload in uploadList)
                 {
-                    this.uploadViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels));
+                    this.uploadViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels));
                 }
 
                 uploadList.CollectionChanged += uploadListCollectionChanged;
@@ -39,7 +43,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 List<UploadViewModel> newViewModels = new List<UploadViewModel>();
                 foreach (Upload upload in e.NewItems)
                 {
-                    newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels));
+                    newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels));
                 }
 
                 this.uploadViewModels.AddRange(newViewModels);
@@ -90,7 +94,7 @@ namespace Drexel.VidUp.UI.ViewModels
             List<UploadViewModel> newViewModels = new List<UploadViewModel>();
             foreach(Upload upload in uploads)
             {
-                newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels));
+                newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels));
             }
 
             this.uploadViewModels.AddRange(newViewModels);

@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
+using Drexel.VidUp.Json;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.Converters;
 using Drexel.VidUp.UI.Definitions;
@@ -24,8 +24,10 @@ namespace Drexel.VidUp.UI.ViewModels
     class UploadListViewModel : INotifyPropertyChanged
     {
         private UploadList uploadList;
-        //needed for template combobox in upload control
+
+        //needed for template and playlist combobox in upload control
         private ObservableTemplateViewModels observableTemplateViewModels;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
 
         private GenericCommand deleteCommand;
         private ObservableUploadViewModels observableUploadViewModels;
@@ -192,12 +194,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels)
+        public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             this.uploadList = uploadList;
+
             this.observableTemplateViewModels = observableTemplateViewModels;
-            
-            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels);
+            this.observablePlaylistViewModels = observablePlaylistViewModels;
+
+            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
             this.observableTemplateViewModels.CollectionChanged += observableTemplateViewModelsCollectionChanged;
             this.removeRefreshTemplateFilter();
 
@@ -244,16 +248,16 @@ namespace Drexel.VidUp.UI.ViewModels
             Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
             this.uploadList.RemoveUploads(upload2 => upload2 == upload);
 
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeUploadList();
-            JsonSerialization.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
+            JsonSerialization.JsonSerializer.SerializeUploadList();
+            JsonSerialization.JsonSerializer.SerializeTemplateList();
         }
 
         public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
         {
             this.uploadList.ReOrder(uploadToMove, uploadAtTargetPosition);
             this.observableUploadViewModels.ReOrder(this.uploadList);
-            JsonSerialization.SerializeUploadList();
+            JsonSerialization.JsonSerializer.SerializeUploadList();
         }
 
         private void openUploadDialog(object obj)
@@ -280,9 +284,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.uploadList.AddUploads(uploads);
 
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeUploadList();
-            JsonSerialization.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
+            JsonSerialization.JsonSerializer.SerializeUploadList();
+            JsonSerialization.JsonSerializer.SerializeTemplateList();
         }
 
         private async void startUploading(object obj)
@@ -373,9 +377,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.uploadList.RemoveUploads(PredicateCombiner.And(predicates));
 
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeUploadList();
-            JsonSerialization.SerializeTemplateList();
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
+            JsonSerialization.JsonSerializer.SerializeUploadList();
+            JsonSerialization.JsonSerializer.SerializeTemplateList();
         }
 
         //reinitializes filters for upload removals

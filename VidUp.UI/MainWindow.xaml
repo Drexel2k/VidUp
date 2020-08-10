@@ -9,6 +9,7 @@
                      xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
                      xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
                      xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
+                     xmlns:local="clr-namespace:Drexel.VidUp.UI"
                      x:Name="CMainWindow"
                      Icon="images/vidup.ico" Activated="CMainWindow_Activated" Deactivated="CMainWindow_Deactivated">
     <Window.TaskbarItemInfo>
@@ -24,6 +25,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:TemplateViewModel}">
             <controls:TemplateControl />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PlaylistViewModel}">
+            <controls:PlaylistControl />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:VidUpViewModel}"  />
     </Window.Resources>
@@ -47,7 +51,7 @@
                     <Fluent:RibbonGroupBox Header="Upload">
                         <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload.png"  Command="{Binding StartUploadingCommand}" />
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding AppStatus, Converter={converters:AppStatusIsUploadingConverter}}">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding DataContext.AppStatus, Converter={converters:AppStatusIsUploadingConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                                 <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
                             </Fluent:CheckBox>
                             <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
@@ -91,8 +95,14 @@
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[1]}" Header="Templates" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
-                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="NameWithDefaultIndicator"/>
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="NameWithDefaultIndicator" IsEditable="False" />
                         <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="images/file-document-box-plus.png" Command="{Binding NewTemplateCommand}" />
+                    </Fluent:RibbonGroupBox>
+                </Fluent:RibbonTabItem>
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[2]}" Header="Playlists" >
+                    <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/list-edit.png" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" IsEditable="False" />
+                        <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="images/list-plus.png" Command="{Binding NewPlaylistCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="VidUp" >

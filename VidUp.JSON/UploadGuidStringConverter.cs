@@ -1,12 +1,9 @@
-﻿#region
-
-using System;
+﻿using System;
 using Drexel.VidUp.Business;
 using Newtonsoft.Json;
 
-#endregion
 
-namespace Drexel.VidUp.JSON
+namespace Drexel.VidUp.Json
 {
     public class UploadGuidStringConverter : JsonConverter<Upload>
     {
@@ -19,7 +16,7 @@ namespace Drexel.VidUp.JSON
                 return null;
             }
 
-            return DeSerializationRepository.AllUploads.Find(upload => upload.Guid == Guid.Parse(guidString));
+            return JsonDeserialization.AllUploads.Find(upload => upload.Guid == Guid.Parse(guidString));
         }
 
         public override void WriteJson(JsonWriter writer, Upload value, JsonSerializer serializer)
