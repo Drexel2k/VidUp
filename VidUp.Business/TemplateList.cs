@@ -185,7 +185,7 @@ namespace Drexel.VidUp.Business
 
         public string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
         {
-            return this.CopyImageToStorageFolder(thumbnailFallbackFilePath, this.templateImageFolder);
+            return this.CopyImageToStorageFolder(thumbnailFallbackFilePath, this.thumbnailFallbackImageFolder);
         }
 
         public string CopyTemplateImageToStorageFolder(string templateImageFilePath)

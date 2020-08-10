@@ -51,6 +51,7 @@ namespace Drexel.VidUp.Json
         {
             if (!File.Exists(this.playlistListFilePath))
             {
+                DeserializationRepository.PlaylistList = new PlaylistList(null);
                 return;
             }
 
@@ -145,9 +146,12 @@ namespace Drexel.VidUp.Json
         private void createUploadListToRepository()
         {
             List<Upload> uploads = new List<Upload>();
-            foreach (Guid guid in this.uploadListGuids)
+            if (this.uploadListGuids != null && this.uploadListGuids.Count > 0)
             {
-                uploads.Add(JsonDeserialization.AllUploads.Find(upload => upload.Guid == guid));    
+                foreach (Guid guid in this.uploadListGuids)
+                {
+                    uploads.Add(JsonDeserialization.AllUploads.Find(upload => upload.Guid == guid));
+                }
             }
 
             DeserializationRepository.UploadList = new UploadList(uploads, DeserializationRepository.TemplateList, this.thumbnailFallbackImageFolder);

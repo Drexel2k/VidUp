@@ -21,7 +21,7 @@ using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    class UploadListViewModel : INotifyPropertyChanged
+    public class UploadListViewModel : INotifyPropertyChanged
     {
         private UploadList uploadList;
 

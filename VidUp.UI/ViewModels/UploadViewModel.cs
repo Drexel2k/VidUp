@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -12,11 +10,9 @@ using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
 using Drexel.VidUp.Utils;
 
-#endregion
-
 namespace Drexel.VidUp.UI.ViewModels
 {
-    class UploadViewModel : INotifyPropertyChanged
+    public class UploadViewModel : INotifyPropertyChanged
     {
         private Upload upload;
         private QuarterHourViewModels quarterHourViewModels;

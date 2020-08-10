@@ -363,7 +363,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observablePlaylistViewModels = observablePlaylistViewModels;
 
             this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
-            this.SelectedPlaylist = this.observablePlaylistViewModels.GetViewModel(this.template.Playlist);
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialog);
             this.removeTemplateCommand = new GenericCommand(this.RemoveTemplate);

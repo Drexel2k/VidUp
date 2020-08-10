@@ -1,16 +1,12 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Drexel.VidUp.Business;
 
-#endregion
-
 namespace Drexel.VidUp.UI.ViewModels
 {
-    class ObservableUploadViewModels : INotifyCollectionChanged, IEnumerable<UploadViewModel>
+    public class ObservableUploadViewModels : INotifyCollectionChanged, IEnumerable<UploadViewModel>
     {
         private List<UploadViewModel> uploadViewModels;
         public event NotifyCollectionChangedEventHandler CollectionChanged;

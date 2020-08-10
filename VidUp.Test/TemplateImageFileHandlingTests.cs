@@ -11,7 +11,7 @@ namespace Drexel.VidUp.Test
 {
     public class TemplateImageFileHandlingTests
     {
-        private static MainWindowViewModel mainWindowViewModel;
+        private static TemplateViewModel templateViewModel;
         private static string t1RootFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, "T1Root");
         private static string templateImage1SourceFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestAssets", "image1.png");
         private static string templateImage1TargetFilePath;
@@ -43,21 +43,23 @@ namespace Drexel.VidUp.Test
             TemplateImageFileHandlingTests.templateImage1TargetFilePath = Path.Combine(CurrentSettings.TemplateImageFolder, "image1.png");
             TemplateImageFileHandlingTests.templateImageFileExistedImage12TargetFilePath = Path.Combine(CurrentSettings.TemplateImageFolder, "image12.png");
 
-            TemplateImageFileHandlingTests.mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out TemplateImageFileHandlingTests.templateList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out TemplateImageFileHandlingTests.templateList);
+            mainWindowViewModel.TabNo = 1;
+            TemplateImageFileHandlingTests.templateViewModel = (TemplateViewModel) mainWindowViewModel.CurrentViewModel;
 
             TemplateImageFileHandlingTests.t1 = new Template("T1", null, TemplateImageFileHandlingTests.t1RootFolder, TemplateImageFileHandlingTests.templateList);
             TemplateImageFileHandlingTests.t2 = new Template("T2", null, null, TemplateImageFileHandlingTests.templateList);
             TemplateImageFileHandlingTests.t3 = new Template("T3", null, null, TemplateImageFileHandlingTests.templateList);
 
-            TemplateImageFileHandlingTests.mainWindowViewModel.AddTemplate(t1);
-            TemplateImageFileHandlingTests.mainWindowViewModel.AddTemplate(t2);
-            TemplateImageFileHandlingTests.mainWindowViewModel.AddTemplate(t3);
+            TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t1);
+            TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t2);
+            TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t3);
         }
 
         [OneTimeTearDown]
         public static void CleanUp()
         {
-            TemplateImageFileHandlingTests.mainWindowViewModel = null;
+            TemplateImageFileHandlingTests.templateViewModel = null;
             if (Directory.Exists(BaseSettings.StorageFolder))
             {
                 Directory.Delete(BaseSettings.StorageFolder, true);
@@ -120,14 +122,14 @@ namespace Drexel.VidUp.Test
         [Test, Order(7)]
         public static void TestRemoveT1()
         {
-            TemplateImageFileHandlingTests.mainWindowViewModel.RemoveTemplate(TemplateImageFileHandlingTests.t1.Guid.ToString());
+            TemplateImageFileHandlingTests.templateViewModel.RemoveTemplate(TemplateImageFileHandlingTests.t1.Guid.ToString());
             Assert.IsTrue(File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
 
         [Test, Order(8)]
         public static void TestRemoveT2()
         {
-            TemplateImageFileHandlingTests.mainWindowViewModel.RemoveTemplate(TemplateImageFileHandlingTests.t2.Guid.ToString());
+            TemplateImageFileHandlingTests.templateViewModel.RemoveTemplate(TemplateImageFileHandlingTests.t2.Guid.ToString());
             Assert.IsTrue(!File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
     }
