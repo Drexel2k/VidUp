@@ -112,6 +112,8 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public ReadOnlyCollection<Upload> Uploads { get => this.uploads.AsReadOnly(); }
+
         public UploadList(List<Upload> uploads, TemplateList templateList, string thumbnailFallbackImageFolder)
         {
             this.templateList = templateList;

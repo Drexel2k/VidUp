@@ -314,5 +314,60 @@ namespace Drexel.VidUp.Business
                 handler(this, new PropertyChangedEventArgsEx(propertyName, oldValue, newValue));
             }
         }
+
+        public void SetScheduleProgress()
+        {
+            if (this.UsePublishAtSchedule && this.uploads.Count > 0)
+            {
+                List<Upload> relevantUploads = this.uploads.FindAll(upload => (upload.UploadStart == null || upload.UploadStart > this.PublishAtSchedule.IgnoreUploadsBefore) && (upload.UploadStatus == UplStatus.Finished || upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Uploading));
+                if (this.publishAtSchedule.ScheduleFrequency == ScheduleFrequency.Daily)
+                {
+                    relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.DailyUploadedUntil);
+                    relevantUploads.Sort(Template.compareUploadPublishAtDates);
+
+                    DateTime nextDate = this.publishAtSchedule.GetNextDate(DateTime.MinValue);
+                    foreach (Upload upload in relevantUploads)
+                    {
+                        if (upload.PublishAt == nextDate)
+                        {
+                            this.publishAtSchedule.DailyUploadedUntil = nextDate;
+                            nextDate = this.publishAtSchedule.GetNextDate(DateTime.MinValue);
+                        }
+
+                        if (upload.PublishAt > nextDate)
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                if (this.publishAtSchedule.ScheduleFrequency == ScheduleFrequency.Weekly)
+                {
+                    relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.WeeklyUploadedUntil);
+                    //todo:...
+                }
+
+                if (this.publishAtSchedule.ScheduleFrequency == ScheduleFrequency.Monthly)
+                {
+                    relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.MonthlyUploadedUntil);
+                    //todo:...
+                }
+            }
+        }
+
+        private static int compareUploadPublishAtDates(Upload upload1, Upload upload2)
+        {
+            if (upload1.PublishAt > upload2.PublishAt)
+            {
+                return 1;
+            }
+
+            if (upload1.PublishAt < upload2.PublishAt)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
     }
 }

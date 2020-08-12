@@ -103,7 +103,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.observablePlaylistViewModels.GetViewModel(this.template.Playlist);
+                return this.template != null ? this.observablePlaylistViewModels.GetViewModel(this.template.Playlist) : null;
             }
             set
             {

@@ -130,7 +130,7 @@ namespace Drexel.VidUp.Json
                     Guid templateGuid = (Guid) templateGuidFieldInfo.GetValue(upload);
 
                     FieldInfo templateFieldInfo = uploadType.GetField("template", BindingFlags.NonPublic | BindingFlags.Instance);
-                    templateFieldInfo.SetValue(upload, this.templates.Find(templateInternal => templateInternal.Guid == templateGuid));
+                    templateFieldInfo.SetValue(upload, this.templates.Find(template => template.Guid == templateGuid));
                 }
             }
         }

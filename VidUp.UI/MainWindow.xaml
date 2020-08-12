@@ -58,6 +58,32 @@
                         </StackPanel>
                         <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="images/stop-upload.png"  Command="{Binding StopUploadingCommand}" />
                     </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Recalculate Publish At Dates">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RecalculatePublishAtCommand}" />
+                            <Grid Grid.Row="1" Grid.Column="0" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28*" />
+                                    <ColumnDefinition Width="8*" />
+                                    <ColumnDefinition Width="67*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="22" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">Template:</TextBlock>
+                                <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding RecalculatePublishAtSelectedTemplate}" DisplayMemberPath="Name" Width="150" Grid.ColumnSpan="2"/>
+                            </Grid>
+                        </Grid>
+
+                    </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -87,7 +113,7 @@
                                     </Fluent:ComboBox.ItemTemplate>
                                 </Fluent:ComboBox>
                                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="5 2 0 0">Template:</TextBlock>
-                                <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding RemoveTemplateViewModels}" SelectedItem="{Binding RemoveSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
+                                <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding RemoveSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
                             </Grid>
                         </Grid>
 

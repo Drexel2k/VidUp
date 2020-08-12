@@ -55,7 +55,6 @@ namespace Drexel.VidUp.Business
 
         private void templatePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-
             if (e.PropertyName == "IsDefault")
             {
                 Template template = (Template)sender;
@@ -63,11 +62,11 @@ namespace Drexel.VidUp.Business
                 {
                     if (template.IsDefault == true)
                     {
-                        foreach (Template templateInternal in this.templates)
+                        foreach (Template template2 in this.templates)
                         {
-                            if (templateInternal != template && templateInternal.IsDefault)
+                            if (template2 != template && template2.IsDefault)
                             {
-                                templateInternal.IsDefault = false;
+                                template2.IsDefault = false;
                             }
                         }
                     }

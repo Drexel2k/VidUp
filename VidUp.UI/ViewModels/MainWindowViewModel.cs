@@ -30,6 +30,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private AppStatus appStatus = AppStatus.Idle;
         private ObservableTemplateViewModels observableTemplateViewModels;
+        private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
 
         private PostUploadAction postUploadAction;
@@ -42,6 +43,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateList templateList;
         private UploadList uploadList;
         private PlaylistList playlistList;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWindowViewModel()
         {
@@ -69,10 +72,11 @@ namespace Drexel.VidUp.UI.ViewModels
             templateList = this.templateList;
             playlistList = this.playlistList;
 
-            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList);
+            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, false);
+            this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true);
             this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList);
 
-            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
+            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels);
             this.viewModels[0] = uploadListViewModel;
             uploadListViewModel.PropertyChanged += uploadListViewModelOnPropertyChanged;
             uploadListViewModel.UploadStarted += uploadListViewModelOnUploadStarted;
@@ -201,16 +205,6 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                //if (this.tabNo == 1)
-                //{
-                //    ((TemplateViewModel)this.viewModels[1]).Activated();
-                //}
-
-                //if (this.tabNo == 2)
-                //{
-                //    ((PlaylistViewModel)this.viewModels[2]).Activated();
-                //}
-
                 return this.viewModels[this.tabNo];
             }
         }
@@ -439,10 +433,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
@@ -505,17 +495,6 @@ namespace Drexel.VidUp.UI.ViewModels
         public void WindowDeactivated()
         {
             this.windowActive = false;
-        }
-
-        private void switchToUploadTab()
-        {
-            this.TabNo = 0;
-        }
-
-        //exposed for testing
-        public void RemoveUpload(string guid)
-        {
-            ((UploadListViewModel)this.viewModels[0]).RemoveUpload(guid);
         }
     }
 }

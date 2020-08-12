@@ -270,9 +270,9 @@ namespace Drexel.VidUp.Youtube.Service
             video.Status = new YoutubeStatus();
             video.Status.Privacy = upload.Visibility.ToString().ToLower(); // "unlisted", "private" or "public"
 
-            if (upload.PublishAt.Date != DateTime.MinValue.Date)
+            if (upload.PublishAt != null)
             {
-                video.Status.PublishAt = upload.PublishAt.ToString("yyyy-MM-ddTHH:mm:ss.ffffzzz");
+                video.Status.PublishAt = upload.PublishAt.Value.ToString("yyyy-MM-ddTHH:mm:ss.ffffzzz");
             }
 
             string content = JsonConvert.SerializeObject(video);

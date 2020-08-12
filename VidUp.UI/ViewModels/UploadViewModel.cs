@@ -153,9 +153,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.UploadStart > DateTime.MinValue)
+                if (this.upload.UploadStart != null)
                 {
-                    return this.upload.UploadStart.ToString("g");
+                    return this.upload.UploadStart.Value.ToString("g");
                 }
 
                 return null;
@@ -166,9 +166,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.UploadEnd > DateTime.MinValue)
+                if (this.upload.UploadEnd != null)
                 {
-                    return this.upload.UploadEnd.ToString("g");
+                    return this.upload.UploadEnd.Value.ToString("g");
                 }
 
                 return null;
@@ -373,7 +373,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.PublishAt.Date == DateTime.MinValue)
+                if (this.upload.PublishAt == null)
                 {
                     return false;
                 }
@@ -393,9 +393,9 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                 }
 
-                if (this.upload.PublishAt.Date == DateTime.MinValue)
+                if (this.upload.PublishAt == null)
                 {
-                    this.upload.SetPublishAtDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1));
+                    this.upload.SetPublishAtDate(DateTime.Now.Date.AddDays(1));
                 }
                 else
                 {
@@ -415,11 +415,11 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.quarterHourViewModels.GetQuarterHourViewModel(this.upload.PublishAt.TimeOfDay);
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.upload.PublishAt != null ? this.upload.PublishAt.Value.TimeOfDay : TimeSpan.MinValue);
             }
             set
             {
-                if (this.Upload.PublishAtTime != value.QuarterHour)
+                if (this.Upload.PublishAt.Value.TimeOfDay != value.QuarterHour)
                 {
                     this.SetPublishAtTime(value.QuarterHour.Value);
                 }
@@ -430,13 +430,13 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.PublishAt.Date == DateTime.MinValue)
+                if (this.upload.PublishAt == null)
                 {
                     return DateTime.Now.AddDays(1);
                 }
                 else
                 {
-                    return this.upload.PublishAt;
+                    return this.upload.PublishAt.Value;
                 }
             }
             set
@@ -516,6 +516,13 @@ namespace Drexel.VidUp.UI.ViewModels
             if (e.PropertyName == "BytesSent")
             {
                 this.raisePropertyChanged("UploadedInMegaByte");
+            }
+
+            if (e.PropertyName == "PublishAt")
+            {
+                this.raisePropertyChanged("PublishAt");
+                this.raisePropertyChanged("PublishAtTime");
+                this.raisePropertyChanged("PublishAtDate");
             }
         }
 

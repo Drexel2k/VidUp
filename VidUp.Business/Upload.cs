@@ -23,9 +23,9 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private DateTime lastModified;
         [JsonProperty]
-        private DateTime uploadStart;
+        private DateTime? uploadStart;
         [JsonProperty]
-        private DateTime uploadEnd;
+        private DateTime? uploadEnd;
         [JsonProperty]
         private string filePath;
         [JsonProperty]
@@ -40,7 +40,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private UplStatus uploadStatus;
         [JsonProperty]
-        private DateTime publishAt;
+        private DateTime? publishAt;
         [JsonProperty]
         private string uploadErrorMessage;
 
@@ -85,8 +85,8 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public DateTime UploadStart { get => this.uploadStart; }
-        public DateTime UploadEnd { get => this.uploadEnd; }
+        public DateTime? UploadStart { get => this.uploadStart; }
+        public DateTime? UploadEnd { get => this.uploadEnd; }
         public string FilePath { get => this.filePath; }
         public Template Template
         {
@@ -107,6 +107,7 @@ namespace Drexel.VidUp.Business
                     this.template = value;
                     this.CopyTemplateValues();
                     this.autoSetThumbnail();
+                    this.AutoSetPublishAtDateTime();
                 }
                 else
                 {
@@ -147,9 +148,15 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public DateTime PublishAt
+        public DateTime? PublishAt
         {
             get { return this.publishAt; }
+            set
+            {
+                this.publishAt = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("PublishAt");
+            }
         }
 
         public List<string> Tags
@@ -176,14 +183,6 @@ namespace Drexel.VidUp.Business
                 {
                     return title.Substring(0, 100);
                 }
-            }
-        }
-
-        public TimeSpan PublishAtTime
-        {
-            get
-            {
-                return new TimeSpan(this.publishAt.Hour, this.publishAt.Minute, 0);
             }
         }
 
@@ -416,27 +415,50 @@ namespace Drexel.VidUp.Business
                 this.Playlist = this.template.Playlist;
             }
         }
+        public void AutoSetPublishAtDateTime()
+        {
+            if (this.template == null)
+            {
+                return;
+            }
+
+            if (!this.template.UsePublishAtSchedule)
+            {
+                return;
+            }
+
+            bool isFree = false;
+            DateTime plannedUntil = DateTime.MinValue;
+            DateTime nextPossibleDateTime = DateTime.MinValue;
+            while (!isFree)
+            {
+                nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDate(plannedUntil);
+                plannedUntil = nextPossibleDateTime;
+
+                IEnumerable<Upload> relevantUploads = this.template.Uploads.Where(upload => upload.UploadStart == null || upload.UploadStart > upload.Template.PublishAtSchedule.IgnoreUploadsBefore);
+                if (!relevantUploads.Any(upload => (upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
+                                                    upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Finished) 
+                                                   && upload.PublishAt == nextPossibleDateTime))
+                {
+                    isFree = true;
+                }
+            }
+
+            this.PublishAt = nextPossibleDateTime;
+        }
 
         public void SetPublishAtTime(TimeSpan quarterHour)
         {
-            this.publishAt = new DateTime(this.publishAt.Year, this.publishAt.Month, this.publishAt.Day, quarterHour.Hours, quarterHour.Minutes, 0);
+            this.publishAt = new DateTime(this.publishAt.Value.Year, this.publishAt.Value.Month, this.publishAt.Value.Day, quarterHour.Hours, quarterHour.Minutes, 0);
             this.lastModifiedInternal = DateTime.Now;
-            this.raisePropertyChanged("PublishAtTime");
+            this.raisePropertyChanged("PublishAt");
         }
 
         public void SetPublishAtDate(DateTime publishDate)
         {
-            if (this.publishAt.Date == DateTime.MinValue.Date)
-            {
-                if (this.template != null)
-                {
-                    this.publishAt = new DateTime(1, 1, 1, 0, 0, 0);
-                }
-            }
-
-            this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, this.publishAt.Hour, this.publishAt.Minute, 0);
+            this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, this.publishAt.Value.Hour, this.publishAt.Value.Minute, 0);
             this.lastModifiedInternal = DateTime.Now;
-            this.raisePropertyChanged("PublishAtDate");
+            this.raisePropertyChanged("PublishAt");
         }
 
         private void autoSetThumbnail()

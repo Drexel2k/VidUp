@@ -2281,7 +2281,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     {
                         if (this.DailyDay3Time2.QuarterHour != null)
                         {
-                            return "Day 3 Time 1 must not have a value if Day 3 Time 2 has no value.";
+                            return "Day 3 Time 2 must not have a value if Day 3 Time 1 has no value.";
                         }
 
                         this.schedule.DailyDayTimes.Remove(2);

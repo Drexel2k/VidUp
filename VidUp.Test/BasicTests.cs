@@ -1065,8 +1065,8 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadList.UploadCount == 2);
             Assert.IsTrue(templateList.TemplateCount == 1);
 
-            Upload uploadWithTemplate = uploadList.GetUpload(uploadInternal => uploadInternal.Guid == uploadWithTemplateGuid);
-            Upload uploadWithoutTemplate = uploadList.GetUpload(uploadInternal => uploadInternal.Guid == uploadWithoutTemplateGuid);
+            Upload uploadWithTemplate = uploadList.GetUpload(upload => upload.Guid == uploadWithTemplateGuid);
+            Upload uploadWithoutTemplate = uploadList.GetUpload(upload => upload.Guid == uploadWithoutTemplateGuid);
 
             Template template = templateList.GetTemplate(0);
 

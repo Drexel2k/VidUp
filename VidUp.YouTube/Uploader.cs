@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
@@ -116,14 +117,26 @@ namespace Drexel.VidUp.Youtube
                         }));
             }
 
-            if(oneUploadFinished)
+            if (oneUploadFinished)
             {
                 this.uploadStats.AllFinished();
                 this.onUploadStatsUpdated();
+                this.updateSchedules(uploadsOfSession.FindAll(upload2 => upload2.UploadStatus == UplStatus.Finished));
+                JsonSerialization.JsonSerializer.SerializeTemplateList();
             }
 
             this.uploadStats = null;
             return oneUploadFinished;
+        }
+
+        private void updateSchedules(List<Upload> finishedUploads)
+        {
+            IEnumerable<Template> templates = finishedUploads.Select(upload => upload.Template).Distinct();
+
+            foreach (Template template in templates)
+            {
+                template.SetScheduleProgress();
+            }
         }
 
         void updateUploadProgress(YoutubeUploadStats stats)

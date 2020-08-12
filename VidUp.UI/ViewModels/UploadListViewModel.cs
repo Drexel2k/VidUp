@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
@@ -29,12 +30,15 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableTemplateViewModels observableTemplateViewModels;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
 
+        private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
+
         private GenericCommand deleteCommand;
         private ObservableUploadViewModels observableUploadViewModels;
 
         private GenericCommand addUploadCommand;
         private GenericCommand startUploadingCommand;
         private GenericCommand stopUploadingCommand;
+        private GenericCommand recalculatePublishAtCommand;
         private GenericCommand removeUploadsCommand;
 
         private UploadStatus uploadStatus = UploadStatus.NotUploading;
@@ -42,14 +46,16 @@ namespace Drexel.VidUp.UI.ViewModels
         private bool resumeUploads = true;
         private long maxUploadInBytesPerSecond = 0;
 
-        //todo: convert to observable collection to remove dependency on observableTemplateViewModels
-        private List<TemplateComboboxViewModel> removeTemplateViewModels;
         private TemplateComboboxViewModel removeSelectedTemplate;
         private string removeUploadStatus = "Finished";
+
+        private TemplateComboboxViewModel recalculatePublishAtSelectedTemplate;
+
 
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
         public event EventHandler<UploadFinishedEventArgs> UploadFinished;
         public event EventHandler UploadStatsUpdated;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public GenericCommand DeleteCommand
         {
@@ -80,6 +86,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.stopUploadingCommand;
+            }
+        }
+
+        public GenericCommand RecalculatePublishAtCommand
+        {
+            get
+            {
+                return this.recalculatePublishAtCommand;
             }
         }
 
@@ -134,11 +148,26 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public List<TemplateComboboxViewModel> RemoveTemplateViewModels
+        public ObservableTemplateViewModels ObservableTemplateViewModelsInclAllNone
         {
             get
             {
-                return this.removeTemplateViewModels;
+                return this.observableTemplateViewModelsInclAllNone;
+            }
+        }
+        public TemplateComboboxViewModel RecalculatePublishAtSelectedTemplate
+        {
+            get
+            {
+                return this.recalculatePublishAtSelectedTemplate;
+            }
+            set
+            {
+                if (this.recalculatePublishAtSelectedTemplate != value)
+                {
+                    this.recalculatePublishAtSelectedTemplate = value;
+                    this.raisePropertyChanged("RecalculatePublishAtSelectedTemplate");
+                }
             }
         }
 
@@ -187,22 +216,45 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
+        public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels,
+            ObservableTemplateViewModels observableTemplateViewModelsInclAllNone, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             this.uploadList = uploadList;
 
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
 
+            this.observableTemplateViewModelsInclAllNone = observableTemplateViewModelsInclAllNone;
+            this.observableTemplateViewModelsInclAllNone.CollectionChanged+= this.observableTemplateViewModelsInclAllNoneCollectionChanged;
+            this.recalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAllNone[1];
+            this.removeSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
+
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
-            this.observableTemplateViewModels.CollectionChanged += observableTemplateViewModelsCollectionChanged;
-            this.removeRefreshTemplateFilter();
 
             this.deleteCommand = new GenericCommand(this.RemoveUpload);
             this.addUploadCommand = new GenericCommand(this.openUploadDialog);
             this.startUploadingCommand = new GenericCommand(this.startUploading);
             this.stopUploadingCommand = new GenericCommand(this.stopUploading);
+            this.recalculatePublishAtCommand = new GenericCommand(this.recalculatePublishAt);
             this.removeUploadsCommand = new GenericCommand(this.removeUploads);
+        }
+
+        //need to change the remove uploads template filter combobox selected item, if this template is deleted. So the selected
+        //item isn't set to null by the GUI which prevents updating it to an existing item in the same call.
+        private void observableTemplateViewModelsInclAllNoneCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                if ((TemplateComboboxViewModel) e.OldItems[0] == this.removeSelectedTemplate)
+                {
+                    this.RemoveSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
+                }
+
+                if ((TemplateComboboxViewModel)e.OldItems[0] == this.recalculatePublishAtSelectedTemplate)
+                {
+                    this.RecalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAllNone[1];
+                }
+            }
         }
 
         private void onUploadStarted(UploadStartedEventArgs e)
@@ -336,12 +388,72 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (remove)
             {
-                this.RemoveUploads();
+                this.removeUploads();
             }
         }
 
-        //exposed for testing
-        public void RemoveUploads()
+        private void recalculatePublishAt(object obj)
+        {
+            if (this.recalculatePublishAtSelectedTemplate.Name == "None")
+            {
+                return;
+            }
+
+            if (this.recalculatePublishAtSelectedTemplate.Name == "All")
+            {
+                foreach (Upload upload in this.uploadList)
+                {
+                    if (upload.Template != null && upload.Template.UsePublishAtSchedule)
+                    {
+                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            upload.PublishAt = null;
+                        }
+                    }
+                }
+
+                foreach (Upload upload in this.uploadList)
+                {
+                    if (upload.Template != null && upload.Template.UsePublishAtSchedule)
+                    {
+                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            upload.AutoSetPublishAtDateTime();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (Upload upload in this.uploadList)
+                {
+                    if (upload.Template != null &&
+                        upload.Template == this.recalculatePublishAtSelectedTemplate.Template &&  upload.Template.UsePublishAtSchedule)
+                    {
+                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            upload.PublishAt = null;
+                        }
+                    }
+                }
+
+                foreach (Upload upload in this.uploadList)
+                {
+                    if (upload.Template != null &&
+                        upload.Template == this.recalculatePublishAtSelectedTemplate.Template && upload.Template.UsePublishAtSchedule)
+                    {
+                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            upload.AutoSetPublishAtDateTime();
+                        }
+                    }
+                }
+            }
+
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
+        }
+
+        private void removeUploads()
         {
             Predicate<Upload>[] predicates = new Predicate<Upload>[2];
 
@@ -374,56 +486,6 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.JsonSerializer.SerializeUploadList();
             JsonSerialization.JsonSerializer.SerializeTemplateList();
         }
-
-        //reinitializes filters for upload removals
-        private void removeRefreshTemplateFilter()
-        {
-            Template allTemplate = new Template();
-            allTemplate.Name = "All";
-            TemplateComboboxViewModel allViewModel = new TemplateComboboxViewModel(allTemplate);
-
-            List<TemplateComboboxViewModel> viewModels = new List<TemplateComboboxViewModel>();
-            viewModels.Add(allViewModel);
-
-            Template noTemplate = new Template();
-            noTemplate.Name = "None";
-            TemplateComboboxViewModel noViewModel = new TemplateComboboxViewModel(noTemplate);
-
-            viewModels.Add(noViewModel);
-
-            bool selectedFilterStillExits = false;
-            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModels)
-            {
-                if (this.removeSelectedTemplate == templateComboboxViewModel)
-                {
-                    selectedFilterStillExits = true;
-                }
-
-                viewModels.Add(templateComboboxViewModel);
-            }
-
-            if (!selectedFilterStillExits)
-            {
-                this.removeSelectedTemplate = allViewModel;
-            }
-
-            this.removeTemplateViewModels = viewModels;
-
-            this.raisePropertyChanged("RemoveSelectedTemplate");
-            this.raisePropertyChanged("RemoveTemplateViewModels");
-        }
-
-        //Template filter for upload removal is based on observableTemplateViewModels
-        //so the template list for this filter must be updated after observableTemplateViewModels
-        //is updated. templateListCollectionChanged may be triggered before observableTemplateViewModels
-        //is updated.
-        private void observableTemplateViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            this.RemoveSelectedTemplate = null;
-            this.removeRefreshTemplateFilter();
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         private void raisePropertyChanged(string propertyName)
         {

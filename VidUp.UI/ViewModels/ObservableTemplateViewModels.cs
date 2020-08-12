@@ -19,11 +19,27 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public ObservableTemplateViewModels(TemplateList templateList)
+        public ObservableTemplateViewModels(TemplateList templateList, bool addAllAndNone)
         {
             this.templateList = templateList;
 
             this.templateComboboxViewModels = new List<TemplateComboboxViewModel>();
+
+            if (addAllAndNone)
+            {
+                Template allTemplate = new Template();
+                allTemplate.Name = "All";
+                TemplateComboboxViewModel allViewModel = new TemplateComboboxViewModel(allTemplate);
+
+                this.templateComboboxViewModels.Add(allViewModel);
+
+                Template noTemplate = new Template();
+                noTemplate.Name = "None";
+                TemplateComboboxViewModel noViewModel = new TemplateComboboxViewModel(noTemplate);
+
+                this.templateComboboxViewModels.Add(noViewModel);
+            }
+
             foreach (Template template in templateList)
             {
                 TemplateComboboxViewModel templateViewModel = new TemplateComboboxViewModel(template);
