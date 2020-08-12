@@ -45,27 +45,29 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public MainWindowViewModel()
         {
-            this.initialize(out _);
+            this.initialize(out _, out _, out _);
         }
 
         //for testing purposes
-        public MainWindowViewModel(string userSuffix, string storageFolder, string templateImageFolder, string thumbnailFallbackImageFolder, out TemplateList templateList)
+        public MainWindowViewModel(string userSuffix, string storageFolder, string templateImageFolder, string thumbnailFallbackImageFolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
             Settings.UserSuffix = userSuffix;
             Settings.StorageFolder = storageFolder;
             Settings.TemplateImageFolder = templateImageFolder;
             Settings.ThumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
 
-            this.initialize(out templateList);
+            this.initialize(out uploadList, out templateList, out playlistList);
         }
 
-        private void initialize(out TemplateList templateList)
+        private void initialize(out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
             this.checkAppDataFolder();
             this.deserialize();
             JsonSerialization.JsonSerializer = new JsonSerialization(Settings.StorageFolder, this.uploadList, this.templateList, this.playlistList);
 
+            uploadList = this.uploadList;
             templateList = this.templateList;
+            playlistList = this.playlistList;
 
             this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList);
             this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList);

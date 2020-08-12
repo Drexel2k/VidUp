@@ -43,7 +43,7 @@ namespace Drexel.VidUp.Test
             TemplateImageFileHandlingTests.templateImage1TargetFilePath = Path.Combine(CurrentSettings.TemplateImageFolder, "image1.png");
             TemplateImageFileHandlingTests.templateImageFileExistedImage12TargetFilePath = Path.Combine(CurrentSettings.TemplateImageFolder, "image12.png");
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out TemplateImageFileHandlingTests.templateList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out _, out TemplateImageFileHandlingTests.templateList, out _);
             mainWindowViewModel.TabNo = 1;
             TemplateImageFileHandlingTests.templateViewModel = (TemplateViewModel) mainWindowViewModel.CurrentViewModel;
 

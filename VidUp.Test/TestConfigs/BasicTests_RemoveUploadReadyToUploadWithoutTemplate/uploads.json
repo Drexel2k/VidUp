@@ -1,0 +1,45 @@
+[
+  {
+    "guid": "0f179547-8981-4509-b167-b84d1fdbc2e6",
+    "created": "2020-08-12T08:49:11.5899076+02:00",
+    "lastModified": "2020-08-12T08:49:11.5899076+02:00",
+    "uploadStart": "0001-01-01T00:00:00",
+    "uploadEnd": "0001-01-01T00:00:00",
+    "filePath": "{BaseDir}\\T2Root\\videos\\video2.mkv",
+    "thumbnailFilePath": null,
+    "playlist": null,
+    "template": null,
+    "uploadStatus": "ReadyForUpload",
+    "publishAt": "0001-01-01T00:00:00",
+    "uploadErrorMessage": null,
+    "title": "video2",
+    "description": null,
+    "tags": [],
+    "visibility": "Private",
+    "resumableSessionUri": null,
+    "bytesSent": 0
+  },
+  {
+    "guid": "e1957955-c88b-4185-90f5-ce1c9fbfe08d",
+    "created": "2020-08-12T08:49:11.5909057+02:00",
+    "lastModified": "2020-08-12T08:49:11.6357847+02:00",
+    "uploadStart": "0001-01-01T00:00:00",
+    "uploadEnd": "0001-01-01T00:00:00",
+    "filePath": "{BaseDir}\\T1Root\\videos\\video1.mkv",
+    "thumbnailFilePath": null,
+    "playlist": "FirstPlaylistId",
+    "template": "61ed37cf-2e7c-4f98-8348-9b469a76fc66",
+    "uploadStatus": "ReadyForUpload",
+    "publishAt": "0001-01-01T00:00:00",
+    "uploadErrorMessage": null,
+    "title": "First Template Title",
+    "description": "First Template Description",
+    "tags": [
+      "Tag 1",
+      "Tag2"
+    ],
+    "visibility": "Private",
+    "resumableSessionUri": null,
+    "bytesSent": 0
+  }
+]

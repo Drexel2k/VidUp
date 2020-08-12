@@ -25,6 +25,7 @@ namespace Drexel.VidUp.Test
             TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "templatelist.json");
             TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "uploadlist.json");
             TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "uploads.json");
+            TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "playlistlist.json");
         }
 
         private static void copyFile(string fullTestName, string testStorageFolder, string fileName)

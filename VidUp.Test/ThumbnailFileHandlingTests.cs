@@ -48,7 +48,7 @@ namespace Drexel.VidUp.Test
             ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath = Path.Combine(CurrentSettings.ThumbnailFallbackImageFolder, "image1.png");
             ThumbnailFileHandlingTests.thumbNailFallbackFileExistedImage12TargetFilePath = Path.Combine(CurrentSettings.ThumbnailFallbackImageFolder, "image12.png");
             
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out ThumbnailFileHandlingTests.templateList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out _, out ThumbnailFileHandlingTests.templateList, out _);
             ThumbnailFileHandlingTests.uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             mainWindowViewModel.TabNo = 1;
             ThumbnailFileHandlingTests.templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;

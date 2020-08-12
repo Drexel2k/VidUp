@@ -50,13 +50,6 @@ namespace Drexel.VidUp.UI.ViewModels
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
         public event EventHandler<UploadFinishedEventArgs> UploadFinished;
         public event EventHandler UploadStatsUpdated;
-        public ObservableTemplateViewModels ObservableTemplateViewModels
-        {
-            get
-            {
-                return this.observableTemplateViewModels;
-            }
-        }
 
         public GenericCommand DeleteCommand
         {

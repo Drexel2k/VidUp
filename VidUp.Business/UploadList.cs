@@ -27,6 +27,8 @@ namespace Drexel.VidUp.Business
         private string thumbnailFallbackImageFolder;
         private TemplateList templateList;
 
+        public int UploadCount { get => this.uploads.Count; }
+
         public long TotalBytesToUpload
         {
             get
@@ -113,10 +115,15 @@ namespace Drexel.VidUp.Business
         public UploadList(List<Upload> uploads, TemplateList templateList, string thumbnailFallbackImageFolder)
         {
             this.templateList = templateList;
-            this.uploads = uploads;
-            foreach (Upload upload in this.uploads)
+
+            this.uploads = new List<Upload>();
+            if (uploads != null)
             {
-                upload.PropertyChanged += uploadPropertyChanged;
+                this.uploads = uploads;
+                foreach (Upload upload in this.uploads)
+                {
+                    upload.PropertyChanged += uploadPropertyChanged;
+                }
             }
 
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
@@ -306,11 +313,6 @@ namespace Drexel.VidUp.Business
         public int FindIndex(Predicate<Upload> predicate)
         {
             return this.uploads.FindIndex(predicate);
-        }
-
-        public ReadOnlyCollection<Upload> GetReadyOnlyUploadList()
-        {
-            return this.uploads.AsReadOnly();
         }
 
         public IEnumerator<Upload> GetEnumerator()
