@@ -71,6 +71,7 @@
     <Compile Include="JsonSerialization.cs" />
     <Compile Include="JsonDeserialization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="GuidNullConverter.cs" />
     <Compile Include="TemplateGuidStringConverter.cs" />
     <Compile Include="PlaylistPlaylistIdConverter.cs" />
     <Compile Include="UploadGuidStringConverter.cs" />

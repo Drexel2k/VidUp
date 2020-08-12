@@ -32,8 +32,11 @@ namespace Drexel.VidUp.Business
         private string thumbnailFilePath;
         [JsonProperty]
         private Playlist playlist;
-        [JsonProperty]
         private Template template;
+
+        [JsonProperty]
+        private Guid templateGuid;
+
         [JsonProperty]
         private UplStatus uploadStatus;
         [JsonProperty]
@@ -57,6 +60,14 @@ namespace Drexel.VidUp.Business
         private long fileLength;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        //only for serialization
+        [JsonProperty(PropertyName = "template")]
+        public Guid TemplateGuid
+        {
+            get => this.template != null ? this.template.Guid : Guid.Empty;
+            set => this.templateGuid = value;
+        }
 
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
@@ -86,10 +97,10 @@ namespace Drexel.VidUp.Business
                 {
                     if (this.template != null)
                     {
-                        this.template.Uploads.Remove(this);
+                        this.template.RemoveUpload(this);
                     }
 
-                    value.Uploads.Add(this);
+                    value.AddUpload(this);
 
                     //must be set before AutoSetTemplate but AutoSetTemplate
                     //shall no be called when template is set to null
@@ -99,7 +110,7 @@ namespace Drexel.VidUp.Business
                 }
                 else
                 {
-                    this.template.Uploads.Remove(this);
+                    this.template.RemoveUpload(this);
                     this.template = value;
                 }
 

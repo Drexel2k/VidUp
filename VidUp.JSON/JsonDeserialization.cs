@@ -42,9 +42,11 @@ namespace Drexel.VidUp.Json
             this.deserializePlaylistList();
             this.deserializeAllUploads();
             this.deserializeTemplateList();
+            this.setTemplateOnUploads();
             this.deserializeUploadListGuids();
             this.createTemplateListToRepository();
             this.createUploadListToRepository();
+            this.checkConsistency();
         }
 
         private void deserializePlaylistList()
@@ -73,8 +75,7 @@ namespace Drexel.VidUp.Json
 
             JsonSerializer serializer = new JsonSerializer();
             serializer.Converters.Add(new StringEnumConverter());
-            //This converter nulls the template. Templates are added vie reflection after deserialization of templates
-            serializer.Converters.Add(new TemplateGuidStringConverter());
+            serializer.Converters.Add(new GuidNullConverter());
             //This converters returns existing Playlist objects from deserialization repository.
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
 
@@ -111,14 +112,25 @@ namespace Drexel.VidUp.Json
 
             this.templates = new List<Template>(templateList.TemplateCount);
 
+            //Desrialized template list does not contain all information, e.g. folder paths, so this only temporary
             foreach (Template template in templateList)
             {
                 this.templates.Add(template);
-                foreach (Upload upload in template.Uploads)
+            }
+        }
+
+        private void setTemplateOnUploads()
+        {
+            if (JsonDeserialization.AllUploads != null && this.templates != null)
+            {
+                foreach (Upload upload in JsonDeserialization.AllUploads)
                 {
-                    Type myType = typeof(Upload);
-                    FieldInfo myFieldInfo = myType.GetField("template", BindingFlags.NonPublic | BindingFlags.Instance);
-                    myFieldInfo.SetValue(upload, template);
+                    Type uploadType = typeof(Upload);
+                    FieldInfo templateGuidFieldInfo = uploadType.GetField("templateGuid", BindingFlags.NonPublic | BindingFlags.Instance);
+                    Guid templateGuid = (Guid) templateGuidFieldInfo.GetValue(upload);
+
+                    FieldInfo templateFieldInfo = uploadType.GetField("template", BindingFlags.NonPublic | BindingFlags.Instance);
+                    templateFieldInfo.SetValue(upload, this.templates.Find(templateInternal => templateInternal.Guid == templateGuid));
                 }
             }
         }
@@ -142,7 +154,6 @@ namespace Drexel.VidUp.Json
             this.uploadListGuids = guids.Guids; 
         }
 
-
         private void createUploadListToRepository()
         {
             List<Upload> uploads = new List<Upload>();
@@ -160,6 +171,31 @@ namespace Drexel.VidUp.Json
         private void createTemplateListToRepository()
         {
             DeserializationRepository.TemplateList = new TemplateList(this.templates, this.templateImageFolder, this.thumbnailFallbackImageFolder);
+        }
+
+        private void checkConsistency()
+        {
+            foreach (Upload upload in DeserializationRepository.UploadList)
+            {
+                if (upload.Template != null)
+                {
+                    if (!upload.Template.Uploads.Contains(upload))
+                    {
+                        throw new InvalidOperationException("Upload is not contained in template uploads.");
+                    }
+                }
+            }
+
+            foreach (Template template in DeserializationRepository.TemplateList)
+            {
+                foreach (Upload upload in template.Uploads)
+                {
+                    if (upload.Template != template)
+                    {
+                        throw new InvalidOperationException("Wrong upload in template.");
+                    }
+                }
+            }
         }
     }
 }

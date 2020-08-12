@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization;
@@ -231,7 +232,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public List<Upload> Uploads { get => this.uploads; }
+        public ReadOnlyCollection<Upload> Uploads { get => this.uploads.AsReadOnly(); }
 
         public Playlist Playlist
         {
@@ -288,7 +289,11 @@ namespace Drexel.VidUp.Business
         public void AddUpload(Upload upload)
         {
             this.uploads.Add(upload);
-            this.raisePropertyChanged("Uploads");
+        }
+
+        public void RemoveUpload(Upload upload)
+        {
+            this.uploads.Remove(upload);
         }
 
         private void raisePropertyChanged(string propertyName)

@@ -16,7 +16,13 @@ namespace Drexel.VidUp.Json
                 return null;
             }
 
-            return JsonDeserialization.AllUploads.Find(upload => upload.Guid == Guid.Parse(guidString));
+            Upload upload = JsonDeserialization.AllUploads.Find(uploadInternal => uploadInternal.Guid == Guid.Parse(guidString));
+            if (upload == null)
+            {
+                throw new InvalidOperationException("Upload not found in all uploads.");
+            }
+
+            return upload;
         }
 
         public override void WriteJson(JsonWriter writer, Upload value, JsonSerializer serializer)

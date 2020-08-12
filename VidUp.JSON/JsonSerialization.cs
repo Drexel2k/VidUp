@@ -60,7 +60,7 @@ namespace Drexel.VidUp.Json
 
             JsonSerializer serializer = new JsonSerializer();
             serializer.Converters.Add(new StringEnumConverter());
-            serializer.Converters.Add(new TemplateGuidStringConverter());
+            serializer.Converters.Add(new GuidNullConverter());
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Formatting = Formatting.Indented;
 
