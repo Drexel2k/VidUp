@@ -466,12 +466,19 @@ namespace Drexel.VidUp.Business
                         if ((dateTimeAfter - DateTime.Now).TotalHours > 24)
                         {
                             potentialNextDate = dateTimeAfter.Date;
-                            this.dailyPotentialNextDate(ref potentialNextDate, ref timeOfDay, dayIndexes, dateTimeAfter.TimeOfDay);
+                            int remainder = (potentialNextDate.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
+                            if (remainder > 0)
+                            {
+                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency - remainder);
+                            }
+
+                            this.dailyGetPotentialNextDate(ref potentialNextDate, ref timeOfDay, dayIndexes, dateTimeAfter);
                         }
                         else
                         {
-                            potentialNextDate = DateTime.Now.Date.AddDays(1).Date;
-                            this.dailyPotentialNextDate(ref potentialNextDate, ref timeOfDay, dayIndexes, DateTime.Now.TimeOfDay);
+                            int remainder = (DateTime.Now.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
+                            potentialNextDate = DateTime.Now.Date.AddDays(this.DailyDayFrequency - remainder).Date;
+                            this.dailyGetPotentialNextDate(ref potentialNextDate, ref timeOfDay, dayIndexes, dateTimeAfter);
                         }
 
                         potentialNextDate = potentialNextDate.Add(timeOfDay.Value);
@@ -485,17 +492,25 @@ namespace Drexel.VidUp.Business
                         if ((dateTimeAfter - DateTime.Now).TotalHours > 24)
                         {
                             potentialNextDate = dateTimeAfter.Date;
-                            if (dateTimeAfter.TimeOfDay >= this.dailyDefaultTime)
+                            int remainder = (potentialNextDate.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
+                            if (remainder > 0)
                             {
-                                potentialNextDate = potentialNextDate.AddDays(1);
+                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency - remainder);
+                            }
+
+                            if (potentialNextDate.Add(this.dailyDefaultTime) <= dateTimeAfter)
+                            {
+                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency);
                             }
                         }
                         else
                         {
-                            potentialNextDate = DateTime.Now.Date.AddDays(1).Date;
-                            if (DateTime.Now.TimeOfDay >= this.dailyDefaultTime)
+                            int remainder = (DateTime.Now.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
+                            potentialNextDate = DateTime.Now.Date.AddDays(this.DailyDayFrequency - remainder).Date;
+                            //at least 24 hours in the future
+                            if ((potentialNextDate.Add(this.dailyDefaultTime)-DateTime.Now).TotalHours < 24 || potentialNextDate.Add(this.dailyDefaultTime) <= dateTimeAfter)
                             {
-                                potentialNextDate = potentialNextDate.AddDays(1);
+                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency);
                             }
                         }
 
@@ -529,29 +544,29 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        private void dailyPotentialNextDate(ref DateTime potentialNextDate, ref TimeSpan? timeOfDay, int dayIndexes, TimeSpan referenceTime)
+        private void dailyGetPotentialNextDate(ref DateTime potentialNextDate, ref TimeSpan? timeOfDay, int dayIndexes, DateTime dateTimeAfter)
         {
-            int dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days % dayIndexes;
+            int dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days / this.dailyDayFrequency % dayIndexes;
 
-            if (this.dailyDayTimes[dayIndex][2] != null && referenceTime < this.dailyDayTimes[dayIndex][2])
+            if (this.dailyDayTimes[dayIndex][2] != null && dateTimeAfter < potentialNextDate.Add(this.dailyDayTimes[dayIndex][2].Value))
             {
                 timeOfDay = this.dailyDayTimes[dayIndex][2].Value;
             }
 
-            if (this.dailyDayTimes[dayIndex][1] != null && referenceTime < this.dailyDayTimes[dayIndex][1])
+            if (this.dailyDayTimes[dayIndex][1] != null && dateTimeAfter < potentialNextDate.Add(this.dailyDayTimes[dayIndex][1].Value))
             {
                 timeOfDay = this.dailyDayTimes[dayIndex][1].Value;
             }
 
-            if (this.dailyDayTimes[dayIndex][0] != null && referenceTime < this.dailyDayTimes[dayIndex][0])
+            if (this.dailyDayTimes[dayIndex][0] != null && dateTimeAfter < potentialNextDate.Add(this.dailyDayTimes[dayIndex][0].Value))
             {
                 timeOfDay = this.dailyDayTimes[dayIndex][0].Value;
             }
 
             if (timeOfDay == null)
             {
-                potentialNextDate = potentialNextDate.AddDays(1);
-                dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days % dayIndexes;
+                potentialNextDate = potentialNextDate.AddDays(this.dailyDayFrequency);
+                dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days / this.dailyDayFrequency % dayIndexes;
                 timeOfDay = this.dailyDayTimes[dayIndex][0];
             }
         }
