@@ -441,92 +441,16 @@ namespace Drexel.VidUp.Business
             return combinations[0];
         }
 
-        public DateTime GetNextDate(DateTime plannedUntil)
+        //return next DateTime according to schedule after dateTimeAfter
+        public DateTime GetNextDateTime(DateTime dateTimeAfter)
         {
             switch (this.scheduleFrequency)
             {
                 case ScheduleFrequency.Daily:
-                    if (this.dailyHasAdvancedSchedule)
-                    {
-                        DateTime dateTimeAfter = this.dailyGetDateTimeAfter(plannedUntil);
-
-                        int dayIndexes = 1;
-                        if (this.DailyDayTimes[1] != null && this.DailyDayTimes[1][1] != null)
-                        {
-                            dayIndexes = 2;
-                        }
-
-                        if (this.DailyDayTimes[2] != null && this.DailyDayTimes[2][1] != null)
-                        {
-                            dayIndexes = 3;
-                        }
-
-                        DateTime potentialNextDate;
-                        TimeSpan? timeOfDay = null;
-                        if ((dateTimeAfter - DateTime.Now).TotalHours > 24)
-                        {
-                            potentialNextDate = dateTimeAfter.Date;
-                            int remainder = (potentialNextDate.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
-                            if (remainder > 0)
-                            {
-                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency - remainder);
-                            }
-
-                            this.dailyGetPotentialNextDate(ref potentialNextDate, ref timeOfDay, dayIndexes, dateTimeAfter);
-                        }
-                        else
-                        {
-                            int remainder = (DateTime.Now.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
-                            potentialNextDate = DateTime.Now.Date.AddDays(this.DailyDayFrequency - remainder).Date;
-                            this.dailyGetPotentialNextDate(ref potentialNextDate, ref timeOfDay, dayIndexes, dateTimeAfter);
-                        }
-
-                        potentialNextDate = potentialNextDate.Add(timeOfDay.Value);
-                        return potentialNextDate;
-                    }
-                    else
-                    {
-                        DateTime dateTimeAfter = this.dailyGetDateTimeAfter(plannedUntil);
-
-                        DateTime potentialNextDate;
-                        if ((dateTimeAfter - DateTime.Now).TotalHours > 24)
-                        {
-                            potentialNextDate = dateTimeAfter.Date;
-                            int remainder = (potentialNextDate.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
-                            if (remainder > 0)
-                            {
-                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency - remainder);
-                            }
-
-                            if (potentialNextDate.Add(this.dailyDefaultTime) <= dateTimeAfter)
-                            {
-                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency);
-                            }
-                        }
-                        else
-                        {
-                            int remainder = (DateTime.Now.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
-                            potentialNextDate = DateTime.Now.Date.AddDays(this.DailyDayFrequency - remainder).Date;
-                            //at least 24 hours in the future
-                            if ((potentialNextDate.Add(this.dailyDefaultTime)-DateTime.Now).TotalHours < 24 || potentialNextDate.Add(this.dailyDefaultTime) <= dateTimeAfter)
-                            {
-                                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency);
-                            }
-                        }
-
-                        potentialNextDate = potentialNextDate.Add(this.dailyDefaultTime);
-                        return potentialNextDate;
-                    }
+                    return this.dailyGetNextDateTime(dateTimeAfter);
                     break;
                 case ScheduleFrequency.Weekly:
-                    if (this.weeklyHasAdvancedSchedule)
-                    {
-                        throw new NotImplementedException();
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                    return this.weeklyGetNextDateTime(dateTimeAfter);
                     break;
                 case ScheduleFrequency.Monthly:
                     if (this.monthlyHasAdvancedSchedule)
@@ -544,36 +468,193 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        private void dailyGetPotentialNextDate(ref DateTime potentialNextDate, ref TimeSpan? timeOfDay, int dayIndexes, DateTime dateTimeAfter)
+        private DateTime dailyGetNextDateTime(DateTime dateTimeAfter)
         {
-            int dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days / this.dailyDayFrequency % dayIndexes;
-
-            if (this.dailyDayTimes[dayIndex][2] != null && dateTimeAfter < potentialNextDate.Add(this.dailyDayTimes[dayIndex][2].Value))
+            dateTimeAfter = this.getDateTimeAfter(dateTimeAfter);
+            if (this.dailyHasAdvancedSchedule)
             {
-                timeOfDay = this.dailyDayTimes[dayIndex][2].Value;
+                DateTime potentialNextDate = this.dailyGetNextDate(dateTimeAfter);
+                int dayIndex = this.dailyGetDayIndex(potentialNextDate);
+                if (potentialNextDate.Date > dateTimeAfter.Date)
+                {
+                    return potentialNextDate.Add(this.dailyDayTimes[dayIndex][0].Value);
+                }
+                else
+                {
+                    TimeSpan timeOfDay;
+                    if (this.dailyTryGetTimeSpanAfter(dayIndex, dateTimeAfter.TimeOfDay, out timeOfDay))
+                    {
+                        return potentialNextDate.Add(timeOfDay);
+                    }
+                    else
+                    {
+                        potentialNextDate = this.dailyGetNextDate(potentialNextDate.AddDays(1));
+                        dayIndex = this.dailyGetDayIndex(potentialNextDate);
+                        return potentialNextDate.Add(this.dailyDayTimes[dayIndex][0].Value);
+                    }
+                }
             }
-
-            if (this.dailyDayTimes[dayIndex][1] != null && dateTimeAfter < potentialNextDate.Add(this.dailyDayTimes[dayIndex][1].Value))
+            else
             {
-                timeOfDay = this.dailyDayTimes[dayIndex][1].Value;
-            }
+                DateTime potentialNextDate = this.dailyGetNextDate(dateTimeAfter);
+                if (this.dailyDefaultTime <= dateTimeAfter.TimeOfDay)
+                {
+                    potentialNextDate = this.dailyGetNextDate(potentialNextDate.AddDays(1));
+                }
 
-            if (this.dailyDayTimes[dayIndex][0] != null && dateTimeAfter < potentialNextDate.Add(this.dailyDayTimes[dayIndex][0].Value))
-            {
-                timeOfDay = this.dailyDayTimes[dayIndex][0].Value;
-            }
-
-            if (timeOfDay == null)
-            {
-                potentialNextDate = potentialNextDate.AddDays(this.dailyDayFrequency);
-                dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days / this.dailyDayFrequency % dayIndexes;
-                timeOfDay = this.dailyDayTimes[dayIndex][0];
+                potentialNextDate = potentialNextDate.Add(this.dailyDefaultTime);
+                return potentialNextDate;
             }
         }
 
-        private DateTime dailyGetDateTimeAfter(DateTime plannedUntil)
+        private DateTime weeklyGetNextDateTime(DateTime dateTimeAfter)
         {
-            DateTime dateAfter = this.dailyStartDate;
+            dateTimeAfter = this.getDateTimeAfter(dateTimeAfter);
+            if (this.weeklyHasAdvancedSchedule)
+            {
+                DateTime potentialNextDate = this.weeklyGetNextDate(dateTimeAfter);
+                if (potentialNextDate.Date > dateTimeAfter.Date)
+                {
+                    return potentialNextDate.Add(this.weeklyDayTimes[potentialNextDate.DayOfWeek][0].Value);
+                }
+                else
+                {
+                    TimeSpan timeOfDay;
+                    if (this.weeklyTryGetTimeSpanAfter(potentialNextDate.DayOfWeek, dateTimeAfter.TimeOfDay, out timeOfDay))
+                    {
+                        return potentialNextDate.Add(timeOfDay);
+                    }
+                    else
+                    {
+                        potentialNextDate = this.weeklyGetNextDate(potentialNextDate.AddDays(1));
+                        return potentialNextDate.Add(this.weeklyDayTimes[potentialNextDate.DayOfWeek][0].Value);
+                    }
+                }
+            }
+            else
+            {
+                DateTime potentialNextDate = this.weeklyGetNextDate(dateTimeAfter);
+                if (this.weeklyDefaultTime <= dateTimeAfter.TimeOfDay)
+                {
+                    potentialNextDate = this.weeklyGetNextDate(potentialNextDate.AddDays(1));
+                }
+
+                potentialNextDate = potentialNextDate.Add(this.weeklyDefaultTime);
+                return potentialNextDate;
+            }
+        }
+
+        private bool dailyTryGetTimeSpanAfter(int dayIndex, TimeSpan timeOfDayAfter, out TimeSpan timeOfDay)
+        {
+            TimeSpan? timeOfDayInternal = null;
+            if (this.dailyDayTimes[dayIndex][2] != null && this.dailyDayTimes[dayIndex][2].Value > timeOfDayAfter)
+            {
+                timeOfDayInternal = this.dailyDayTimes[dayIndex][2].Value;
+            }
+
+            if (this.dailyDayTimes[dayIndex][1] != null && this.dailyDayTimes[dayIndex][1].Value > timeOfDayAfter)
+            {
+                timeOfDayInternal = this.dailyDayTimes[dayIndex][1].Value;
+            }
+
+            if (this.dailyDayTimes[dayIndex][0] != null && this.dailyDayTimes[dayIndex][0].Value > timeOfDayAfter)
+            {
+                timeOfDayInternal = this.dailyDayTimes[dayIndex][0].Value;
+            }
+
+            if (timeOfDayInternal == null)
+            {
+                timeOfDay = TimeSpan.MinValue;
+                return false;
+            }
+            else
+            {
+                timeOfDay = timeOfDayInternal.Value;
+                return true;
+            }
+        }
+
+        private bool weeklyTryGetTimeSpanAfter(DayOfWeek dayOfWeek, TimeSpan timeOfDayAfter, out TimeSpan timeOfDay)
+        {
+            TimeSpan? timeOfDayInternal = null;
+            if (this.weeklyDayTimes[dayOfWeek][2] != null && this.weeklyDayTimes[dayOfWeek][2].Value > timeOfDayAfter)
+            {
+                timeOfDayInternal = this.weeklyDayTimes[dayOfWeek][2].Value;
+            }
+
+            if (this.weeklyDayTimes[dayOfWeek][1] != null && this.weeklyDayTimes[dayOfWeek][1].Value > timeOfDayAfter)
+            {
+                timeOfDayInternal = this.weeklyDayTimes[dayOfWeek][1].Value;
+            }
+
+            if (this.weeklyDayTimes[dayOfWeek][0] != null && this.weeklyDayTimes[dayOfWeek][0].Value > timeOfDayAfter)
+            {
+                timeOfDayInternal = this.weeklyDayTimes[dayOfWeek][0].Value;
+            }
+
+            if (timeOfDayInternal == null)
+            {
+                timeOfDay = TimeSpan.MinValue;
+                return false;
+            }
+            else
+            {
+                timeOfDay = timeOfDayInternal.Value;
+                return true;
+            }
+        }
+
+        private DateTime dailyGetNextDate(DateTime dateTime)
+        {
+            DateTime potentialNextDate = dateTime.Date;
+            int remainder = (potentialNextDate.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
+            if (remainder > 0)
+            {
+                potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency - remainder);
+            }
+
+            return potentialNextDate;
+        }
+
+        private DateTime weeklyGetNextDate(DateTime dateTime)
+        {
+            int weekIndex = Schedule.weeklyGetWeekIndex(this.weeklyStartDate, dateTime);
+            int remainder = weekIndex % this.weeklyWeekFrequency;
+            if (remainder > 0)
+            {
+                weekIndex = weekIndex + (this.weeklyWeekFrequency - remainder);
+            }
+
+            int dayIndex = (int)dateTime.DayOfWeek - 1;
+            if (dayIndex < 0)
+            {
+                dayIndex = 6;
+            }
+
+            for (int index = dayIndex; index <= 6; index++)
+            {
+                if (this.weeklyDays[index])
+                {
+                    return Schedule.weeklyGetBeginningOfWeek(this.weeklyStartDate).AddDays(weekIndex * 7 + index);
+                }
+            }
+
+            //current day or no day after (in this week) are enabled in this schedule, so we take first valid day of next week
+            dayIndex = Array.IndexOf(this.weeklyDays, true);
+            weekIndex = weekIndex + this.weeklyWeekFrequency;
+            return Schedule.weeklyGetBeginningOfWeek(this.weeklyStartDate).AddDays(weekIndex * 7 + dayIndex);
+        }
+
+        private DateTime getDateTimeAfter(DateTime plannedUntil)
+        {
+            //Newly schedule upload shal be at least 24 hour in the future
+            DateTime dateAfter = DateTime.Now.AddHours(24);
+
+            if (this.dailyStartDate > dateAfter)
+            {
+                dateAfter = this.dailyStartDate;
+            }
+
             if (this.dailyUploadedUntil > dateAfter)
             {
                 dateAfter = this.dailyUploadedUntil;
@@ -585,6 +666,41 @@ namespace Drexel.VidUp.Business
             }
 
             return dateAfter;
+        }
+
+        private int dailyGetDayIndex(DateTime potentialNextDate)
+        {
+            int dayIndexes = 1;
+            if (this.DailyDayTimes[1] != null && this.DailyDayTimes[1][1] != null)
+            {
+                dayIndexes = 2;
+            }
+
+            if (this.DailyDayTimes[2] != null && this.DailyDayTimes[2][1] != null)
+            {
+                dayIndexes = 3;
+            }
+
+            int dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days / this.dailyDayFrequency % dayIndexes;
+            return dayIndex;
+        }
+
+        private static int weeklyGetWeekIndex(DateTime startDate, DateTime endDate)
+        {
+            if (endDate < startDate)
+                throw new ArgumentException("endDate cannot be less than startDate");
+
+            return (Schedule.weeklyGetBeginningOfWeek(endDate).Subtract(Schedule.weeklyGetBeginningOfWeek(startDate)).Days / 7);
+        }
+
+        private static DateTime weeklyGetBeginningOfWeek(DateTime date)
+        {
+            int dayIndex = (int) date.DayOfWeek - 1;
+            if (dayIndex < 0)
+            {
+                dayIndex = 6;
+            }
+            return date.AddDays(-1 * dayIndex).Date;
         }
     }
 }

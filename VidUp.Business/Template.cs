@@ -325,13 +325,13 @@ namespace Drexel.VidUp.Business
                     relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.DailyUploadedUntil);
                     relevantUploads.Sort(Template.compareUploadPublishAtDates);
 
-                    DateTime nextDate = this.publishAtSchedule.GetNextDate(DateTime.MinValue);
+                    DateTime nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
                     foreach (Upload upload in relevantUploads)
                     {
                         if (upload.PublishAt == nextDate)
                         {
                             this.publishAtSchedule.DailyUploadedUntil = nextDate;
-                            nextDate = this.publishAtSchedule.GetNextDate(DateTime.MinValue);
+                            nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
                         }
 
                         if (upload.PublishAt > nextDate)

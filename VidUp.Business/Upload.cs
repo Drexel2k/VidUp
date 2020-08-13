@@ -432,7 +432,7 @@ namespace Drexel.VidUp.Business
             DateTime nextPossibleDateTime = DateTime.MinValue;
             while (!isFree)
             {
-                nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDate(plannedUntil);
+                nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(plannedUntil);
                 plannedUntil = nextPossibleDateTime;
 
                 IEnumerable<Upload> relevantUploads = this.template.Uploads.Where(upload => upload.UploadStart == null || upload.UploadStart > upload.Template.PublishAtSchedule.IgnoreUploadsBefore);
