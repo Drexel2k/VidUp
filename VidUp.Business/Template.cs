@@ -315,42 +315,61 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        //sets new daily/weekly/monthly UploadedUntil on schedule
         public void SetScheduleProgress()
         {
             if (this.UsePublishAtSchedule && this.uploads.Count > 0)
             {
-                List<Upload> relevantUploads = this.uploads.FindAll(upload => (upload.UploadStart == null || upload.UploadStart > this.PublishAtSchedule.IgnoreUploadsBefore) && (upload.UploadStatus == UplStatus.Finished || upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Uploading));
-                if (this.publishAtSchedule.ScheduleFrequency == ScheduleFrequency.Daily)
-                {
-                    relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.DailyUploadedUntil);
-                    relevantUploads.Sort(Template.compareUploadPublishAtDates);
+                List<Upload> relevantUploads = this.uploads.FindAll(upload =>
+                    (upload.UploadStart == null || upload.UploadStart > this.PublishAtSchedule.IgnoreUploadsBefore) &&
+                    upload.UploadStatus == UplStatus.Finished);
 
-                    DateTime nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
-                    foreach (Upload upload in relevantUploads)
+                DateTime uploadedUntil;
+                switch (this.publishAtSchedule.ScheduleFrequency)
+                {
+                    case ScheduleFrequency.Daily:
+                        uploadedUntil = this.publishAtSchedule.DailyUploadedUntil;
+                        break;
+                    case ScheduleFrequency.Weekly:
+                        uploadedUntil = this.publishAtSchedule.WeeklyUploadedUntil;
+                        break;
+                    case ScheduleFrequency.Monthly:
+                        uploadedUntil = this.publishAtSchedule.MonthlyUploadedUntil;
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unexpected schedule frequency");
+                }
+
+                relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > uploadedUntil);
+                relevantUploads.Sort(Template.compareUploadPublishAtDates);
+
+                DateTime nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
+                foreach (Upload upload in relevantUploads)
+                {
+                    if (upload.PublishAt == nextDate)
                     {
-                        if (upload.PublishAt == nextDate)
+                        switch (this.publishAtSchedule.ScheduleFrequency)
                         {
-                            this.publishAtSchedule.DailyUploadedUntil = nextDate;
-                            nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
+                            case ScheduleFrequency.Daily:
+                                this.publishAtSchedule.DailyUploadedUntil = nextDate;
+                                break;
+                            case ScheduleFrequency.Weekly:
+                                this.publishAtSchedule.WeeklyUploadedUntil = nextDate;
+                                break;
+                            case ScheduleFrequency.Monthly:
+                                this.publishAtSchedule.MonthlyUploadedUntil = nextDate;
+                                break;
+                            default:
+                                throw new InvalidOperationException("Unexpected schedule frequency");
                         }
 
-                        if (upload.PublishAt > nextDate)
-                        {
-                            return;
-                        }
+                        nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
                     }
-                }
 
-                if (this.publishAtSchedule.ScheduleFrequency == ScheduleFrequency.Weekly)
-                {
-                    relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.WeeklyUploadedUntil);
-                    //todo:...
-                }
-
-                if (this.publishAtSchedule.ScheduleFrequency == ScheduleFrequency.Monthly)
-                {
-                    relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.MonthlyUploadedUntil);
-                    //todo:...
+                    if (upload.PublishAt > nextDate)
+                    {
+                        return;
+                    }
                 }
             }
         }

@@ -1862,6 +1862,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.monthlyMonthDateBasedDates[day])
                 {
                     monthDayViewModel.Active = true;
+                }
+
+                if (this.schedule.MonthlyMonthDateBasedDayTimes.ContainsKey(day))
+                {
                     this.monthlyMonthDateBasedDayTimes.Add(day, this.schedule.MonthlyMonthDateBasedDayTimes[day].ToArray());
                 }
 
