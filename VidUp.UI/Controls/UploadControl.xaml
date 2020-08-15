@@ -51,12 +51,12 @@
             <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="0,5,6,5"  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                 <materialDesign:PopupBox  StaysOpen="False" >
                     <StackPanel>
-                        <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" />
-                        <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" />
+                        <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
+                        <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
                         <Button Content="Remove Template" Command="{Binding NoTemplateCommand}" CommandParameter="{Binding Guid}" />
                         <Button Content="Remove Playlist" Command="{Binding NoPlaylistCommand}" CommandParameter="{Binding Guid}" />
                         <Separator/>
-                        <Button Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=UCUploads}" CommandParameter="{Binding Guid}"/>
+                        <Button Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=UCUploads}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
                     </StackPanel>
                 </materialDesign:PopupBox>
             </Button>

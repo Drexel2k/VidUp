@@ -26,7 +26,7 @@ namespace Drexel.VidUp.Youtube
         //total file size in bytes of uploads to be uploaded of upload list, either with or without uploads to resume, depending on setting. Changes when upload list (add or remove uploads or change status of upload) changes.
         private long sessionTotalBytesToUploadFullFilesize;
 
-        //total bytes to upload left
+        //total bytes to upload left, either with or without uploads to resume, depending on setting, change on bytes bytes sent.
         private long currentTotalBytesLeftRemaining;
 
         private long currentUploadSpeedInBytesPerSecond;
@@ -77,11 +77,11 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        public int TotalMBLeft
+        public int TotalMbLeft
         {
             get
             {
-                return (int)((float)this.sessionTotalBytesToUploadFullFilesize / Constants.ByteMegaByteFactor);
+                return (int)((float)this.currentTotalBytesLeftRemaining / Constants.ByteMegaByteFactor);
             }
 
         }

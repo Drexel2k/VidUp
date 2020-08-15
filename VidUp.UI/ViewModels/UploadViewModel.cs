@@ -118,6 +118,19 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.FilePath;
         }
 
+        public bool StateCommandsEnabled
+        {
+            get
+            {
+                if (this.UploadStatus != UplStatus.Uploading)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         public TemplateComboboxViewModel SelectedTemplate
         {
             get => this.observableTemplateViewModels.GetViewModel(this.upload.Template);
@@ -503,8 +516,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadStart");
                 this.raisePropertyChanged("UploadEnd");
                 this.raisePropertyChanged("ControlsEnabled");
-
-                return;
+                this.raisePropertyChanged("StateCommandsEnabled");
             }
 
             if (e.PropertyName == "BytesSent")

@@ -102,7 +102,7 @@ namespace Drexel.VidUp.Youtube.Service
                             }
 
                             //give a little time on IOException, e.g. to await router redial in on 24h disconnect
-                            await Task.Delay(TimeSpan.FromSeconds(1));
+                            await Task.Delay(TimeSpan.FromSeconds(2));
 
                             range = await YoutubeUpload.getRange(upload);
                             uploadByteIndex = 0;

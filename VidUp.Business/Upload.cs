@@ -392,7 +392,7 @@ namespace Drexel.VidUp.Business
                     this.title = this.Template.Title;
                     Regex regex = new Regex(@"#([^#]+)#");
                     int matchIndex = 0;
-                    foreach (Match match in regex.Matches(this.FilePath))
+                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
                     {
                         this.title = this.title.Replace("#" + matchIndex + "#", match.Groups[1].Value);
 
