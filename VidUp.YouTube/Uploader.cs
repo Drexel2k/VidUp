@@ -131,11 +131,14 @@ namespace Drexel.VidUp.Youtube
 
         private void updateSchedules(List<Upload> finishedUploads)
         {
-            IEnumerable<Template> templates = finishedUploads.Select(upload => upload.Template).Distinct();
+            IEnumerable<Template> templates = finishedUploads.Select(upload => upload.Template).Distinct().Where(template => template != null);
 
-            foreach (Template template in templates)
+            if (templates.Any())
             {
-                template.SetScheduleProgress();
+                foreach (Template template in templates)
+                {
+                    template.SetScheduleProgress();
+                }
             }
         }
 

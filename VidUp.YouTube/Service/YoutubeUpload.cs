@@ -20,7 +20,7 @@ namespace Drexel.VidUp.Youtube.Service
         private static string uploadEndpoint = "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status";
         private static string thumbnailEndpoint = "https://www.googleapis.com/upload/youtube/v3/thumbnails/set";
         private static string playlistItemsEndpoint = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet";
-        
+
         private static ThrottledBufferedStream stream = null;
         private static int uploadChunkSizeInBytes = 40 * 262144; // 10 MegaByte, The chunk size must be a multiple of 256 KiloByte
         private static TimeSpan twoSeconds = new TimeSpan(0, 0, 2);
@@ -47,7 +47,7 @@ namespace Drexel.VidUp.Youtube.Service
                 VideoId = string.Empty
             };
 
-            if(!File.Exists(upload.FilePath))
+            if (!File.Exists(upload.FilePath))
             {
                 upload.UploadErrorMessage = "File does not exist.";
                 return result;
@@ -80,15 +80,42 @@ namespace Drexel.VidUp.Youtube.Service
                 {
                     inputStream.Position = uploadByteIndex;
                     YoutubeUpload.stream = inputStream;
-                    long totalBytesRead = 0;
+                    long totalBytesSent = 0;
 
                     long fileLength = upload.FileLength;
                     HttpWebRequest request = null;
 
                     DateTime lastStatUpdate = DateTime.Now;
 
-                    while (fileLength > totalBytesRead + initialBytesSent)
+                    //on IOExceptions try 2 times more to uppload the chunk.
+                    //no response from the server shall be requested on IOException.
+                    int uploadTry = 1;
+                    bool getResponse;
+                    while (fileLength > totalBytesSent + initialBytesSent)
                     {
+                        getResponse = true;
+                        if (uploadTry > 1)
+                        {
+                            if (uploadTry > 3)
+                            {
+                                throw new IOException("Upload after 3 retries not successful.");
+                            }
+
+                            //give a little time on IOException, e.g. to await router redial in on 24h disconnect
+                            await Task.Delay(TimeSpan.FromSeconds(1));
+
+                            range = await YoutubeUpload.getRange(upload);
+                            uploadByteIndex = 0;
+                            if (!string.IsNullOrWhiteSpace(range))
+                            {
+                                string[] parts = range.Split('-');
+                                uploadByteIndex = Convert.ToInt64(parts[1]) + 1;
+                            }
+
+                            inputStream.Position = uploadByteIndex;
+                            upload.BytesSent = uploadByteIndex;
+                            totalBytesSent = uploadByteIndex - initialBytesSent;
+                        }
                         request = null;
                         if (uploadByteIndex > 0 || fileLength > YoutubeUpload.uploadChunkSizeInBytes)
                         {
@@ -119,42 +146,61 @@ namespace Drexel.VidUp.Youtube.Service
                                     break;
                                 }
 
-                                await dataStream.WriteAsync(buffer, 0, bytesRead);
-                                
-                                totalBytesRead += bytesRead;
-                                chunkBytesSent += bytesRead;
-
-                                if (chunkBytesSent + buffer.Length > YoutubeUpload.uploadChunkSizeInBytes)
+                                try
                                 {
-                                    readLength = YoutubeUpload.uploadChunkSizeInBytes - chunkBytesSent;
+                                    await dataStream.WriteAsync(buffer, 0, bytesRead);
 
-                                    if (readLength == 0)
+                                    totalBytesSent += bytesRead;
+                                    chunkBytesSent += bytesRead;
+
+                                    if (chunkBytesSent + buffer.Length > YoutubeUpload.uploadChunkSizeInBytes)
                                     {
-                                        uploadByteIndex += YoutubeUpload.uploadChunkSizeInBytes;
+                                        readLength = YoutubeUpload.uploadChunkSizeInBytes - chunkBytesSent;
+
+                                        if (readLength == 0)
+                                        {
+                                            uploadByteIndex += YoutubeUpload.uploadChunkSizeInBytes;
+                                        }
+                                    }
+
+                                    if (DateTime.Now - lastStatUpdate > YoutubeUpload.twoSeconds)
+                                    {
+                                        stats.BytesSent = totalBytesSent;
+                                        stats.CurrentSpeedInBytesPerSecond = inputStream.CurrentSpeedInBytesPerSecond;
+                                        upload.BytesSent = initialBytesSent + totalBytesSent;
+                                        updateUploadProgress(stats);
+                                        lastStatUpdate = DateTime.Now;
                                     }
                                 }
-
-                                if (DateTime.Now - lastStatUpdate > YoutubeUpload.twoSeconds)
+                                catch (IOException e)
                                 {
-                                    stats.BytesSent = totalBytesRead;
-                                    stats.CurrentSpeedInBytesPerSecond = inputStream.CurrentSpeedInBytesPerSecond;
-                                    upload.BytesSent = initialBytesSent + totalBytesRead;
-                                    updateUploadProgress(stats);
-                                    lastStatUpdate = DateTime.Now;
+                                    uploadTry++;
+                                    getResponse = false;
+                                    break;
                                 }
                             }
+
+                            if (!getResponse)
+                            { 
+                                continue;
+                            }
+
+                            uploadTry = 1;
 
                             try
                             {
                                 if (upload.UploadStatus != UplStatus.Stopped)
                                 {
+                                    //if only chunk of video is finished, but video is not completed
+                                    //this will throw WebException with http status 308.
                                     using (HttpWebResponse httpResponse =
                                         (HttpWebResponse) await request.GetResponseAsync())
                                     {
                                         upload.BytesSent = upload.FileLength;
                                         YoutubeUpload.stream = null;
 
-                                        using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
+                                        using (StreamReader reader =
+                                            new StreamReader(httpResponse.GetResponseStream()))
                                         {
                                             var definition = new {Id = ""};
                                             var response =
@@ -195,10 +241,10 @@ namespace Drexel.VidUp.Youtube.Service
                 {
                     if (e.Response != null)
                     {
-                        using(e.Response)
+                        using (e.Response)
                         using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
                         {
-                            upload.UploadErrorMessage =
+                            upload.UploadErrorMessage = 
                                 $"Video upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
                         }
                     }
@@ -210,7 +256,7 @@ namespace Drexel.VidUp.Youtube.Service
 
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 upload.UploadErrorMessage = $"Video upload failed: {e.ToString()}";
                 return result;
@@ -246,7 +292,7 @@ namespace Drexel.VidUp.Youtube.Service
                         throw;
                     }
 
-                    if ((int) httpResponse.StatusCode != 308)
+                    if ((int)httpResponse.StatusCode != 308)
                     {
                         throw;
                     }
@@ -287,7 +333,7 @@ namespace Drexel.VidUp.Youtube.Service
             //slug header adds original video file name to youtube studio, lambda filters to valid chars (ascii >=32 and <=255)
             string httpHeaderCompatibleString = new String(Path.GetFileName(upload.FilePath).Where(c =>
             {
-                char ch = (char) ((uint) byte.MaxValue & (uint) c);
+                char ch = (char)((uint)byte.MaxValue & (uint)c);
                 if ((ch >= ' ' || ch == '\t') && ch != '\x007F')
                 {
                     return true;
@@ -322,26 +368,26 @@ namespace Drexel.VidUp.Youtube.Service
                     HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
                             string.Format("{0}?videoId={1}", YoutubeUpload.thumbnailEndpoint, videoId), "POST", upload.ThumbnailFilePath);
 
-                        using (FileStream inputStream = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
-                        using (Stream dataStream = await request.GetRequestStreamAsync())
+                    using (FileStream inputStream = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
+                    using (Stream dataStream = await request.GetRequestStreamAsync())
+                    {
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
                         {
-                            byte[] buffer = new byte[1024];
-                            int bytesRead;
-                            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
-                            {
-                                await dataStream.WriteAsync(buffer, 0, bytesRead);
-                            }
+                            await dataStream.WriteAsync(buffer, 0, bytesRead);
                         }
+                    }
 
-                        using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                        {
-                        }
+                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                    {
+                    }
                 }
                 catch (WebException e)
                 {
                     if (e.Response != null)
                     {
-                        using(e.Response)
+                        using (e.Response)
                         using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
                         {
                             upload.UploadErrorMessage += $"Thumbnail upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
