@@ -1078,9 +1078,9 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.Count() == 2);
             Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithTemplateGuid).Upload == uploadWithTemplate);
             Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithoutTemplateGuid).Upload == uploadWithoutTemplate);
-            Assert.IsTrue(uploadListViewModel.RemoveTemplateViewModels[2].Template == template);
-            Assert.IsTrue(uploadListViewModel.RemoveTemplateViewModels[0].Template == uploadListViewModel.RemoveSelectedTemplate.Template);
-            Assert.IsTrue(uploadListViewModel.RemoveTemplateViewModels[0] == uploadListViewModel.RemoveSelectedTemplate);
+            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[2].Template == template);
+            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0].Template == uploadListViewModel.RemoveSelectedTemplate.Template);
+            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0] == uploadListViewModel.RemoveSelectedTemplate);
             Assert.IsTrue(uploadListViewModel.RemoveUploadStatuses[5] == uploadListViewModel.RemoveUploadStatus);
 
             Assert.IsTrue(templateViewModel.Template == template);

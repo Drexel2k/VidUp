@@ -1,11 +1,9 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using NUnit.Framework;
 
-#endregion
+//todo: genereal: add tests for uploading and publish at schedule
 
 namespace Drexel.VidUp.Test
 {
