@@ -11,13 +11,13 @@ namespace Drexel.VidUp.Business
     {
         [JsonProperty]
         private ScheduleFrequency scheduleFrequency;
-
         [JsonProperty]
         private DateTime? ignoreUploadsBefore;
         [JsonProperty]
-        private DateTime dailyStartDate;
+        private DateTime startDate;
         [JsonProperty]
-        private DateTime dailyUploadedUntil;
+        private DateTime uploadedUntil;
+
         [JsonProperty]
         private int dailyDayFrequency;
         [JsonProperty]
@@ -27,10 +27,6 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private Dictionary<int, TimeSpan?[]> dailyDayTimes;
 
-        [JsonProperty]
-        private DateTime weeklyStartDate;
-        [JsonProperty]
-        private DateTime weeklyUploadedUntil;
         [JsonProperty]
         private int weeklyWeekFrequency;
         [JsonProperty]
@@ -42,10 +38,6 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private Dictionary<DayOfWeek, TimeSpan?[]> weeklyDayTimes;
 
-        [JsonProperty]
-        private DateTime monthlyStartDate;
-        [JsonProperty]
-        private DateTime monthlyUploadedUntil;
         [JsonProperty]
         private int monthlyMonthFrequency;
         [JsonProperty]
@@ -126,20 +118,20 @@ namespace Drexel.VidUp.Business
             set => this.ignoreUploadsBefore = value;
         }
 
-        public DateTime DailyStartDate
+        public DateTime StartDate
         {
-            get => this.dailyStartDate;
+            get => this.startDate;
             set
             {
-                this.dailyStartDate = value;
-                this.dailyUploadedUntil = DateTime.MinValue;
+                this.startDate = value;
+                this.uploadedUntil = DateTime.MinValue;
             }
         }
 
-        public DateTime DailyUploadedUntil
+        public DateTime UploadedUntil
         {
-            get => this.dailyUploadedUntil;
-            set => this.dailyUploadedUntil = value;
+            get => this.uploadedUntil;
+            set => this.uploadedUntil = value;
         }
 
         public int DailyDayFrequency
@@ -164,22 +156,6 @@ namespace Drexel.VidUp.Business
         {
             get => this.dailyDayTimes;
             set => this.dailyDayTimes = value;
-        }
-
-        public DateTime WeeklyStartDate
-        {
-            get => this.weeklyStartDate;
-            set
-            {
-                this.weeklyStartDate = value;
-                this.weeklyUploadedUntil = DateTime.MinValue;
-            }
-        }
-
-        public DateTime WeeklyUploadedUntil
-        {
-            get => this.weeklyUploadedUntil;
-            set => this.weeklyUploadedUntil = value;
         }
 
         public int WeeklyWeekFrequency
@@ -210,22 +186,6 @@ namespace Drexel.VidUp.Business
         {
             get => this.weeklyDayTimes;
             set => this.weeklyDayTimes = value;
-        }
-
-        public DateTime MonthlyStartDate
-        {
-            get => this.monthlyStartDate;
-            set
-            {
-                this.monthlyStartDate = value;
-                this.monthlyUploadedUntil = DateTime.MinValue;
-            }
-        }
-
-        public DateTime MonthlyUploadedUntil
-        {
-            get => this.monthlyUploadedUntil;
-            set => this.monthlyUploadedUntil = value;
         }
 
         public int MonthlyMonthFrequency
@@ -285,21 +245,19 @@ namespace Drexel.VidUp.Business
         public Schedule(Schedule schedule) :this()
         {
             this.scheduleFrequency = schedule.ScheduleFrequency;
+            this.startDate = schedule.StartDate;
 
-            this.dailyStartDate = schedule.DailyStartDate;
             this.dailyDayFrequency = schedule.DailyDayFrequency;
             this.dailyDefaultTime = schedule.DailyDefaultTime;
             this.dailyHasAdvancedSchedule = schedule.DailyHasAdvancedSchedule;
             this.dailyDayTimes = schedule.DailyDayTimes.ToDictionary(entry => entry.Key, entry => entry.Value.ToArray());
 
-            this.weeklyStartDate = schedule.weeklyStartDate;
             this.weeklyWeekFrequency = schedule.WeeklyWeekFrequency;
             this.weeklyDefaultTime = schedule.WeeklyDefaultTime;
             schedule.WeeklyDays.CopyTo(this.weeklyDays, 0);
             this.weeklyHasAdvancedSchedule = schedule.WeeklyHasAdvancedSchedule;
             this.weeklyDayTimes = schedule.WeeklyDayTimes.ToDictionary(entry => entry.Key, entry => entry.Value.ToArray());
 
-            this.monthlyStartDate = schedule.monthlyStartDate;
             this.monthlyMonthFrequency = schedule.MonthlyMonthFrequency;
             this.monthlyDefaultTime = schedule.MonthlyDefaultTime;
             this.monthlyMonthDateBased = schedule.MonthlyDateBased;
@@ -339,7 +297,7 @@ namespace Drexel.VidUp.Business
 
         private void resetDailySchedule()
         {
-            this.dailyStartDate = DateTime.Now;
+            this.startDate = DateTime.Now;
             this.dailyDayFrequency = 1;
             this.dailyHasAdvancedSchedule = false;
             this.dailyDefaultTime = new TimeSpan(0, 0, 0);
@@ -350,7 +308,7 @@ namespace Drexel.VidUp.Business
 
         private void resetWeeklySchedule()
         {
-            this.weeklyStartDate = DateTime.Now;
+            this.startDate = DateTime.Now;
             this.weeklyWeekFrequency = 1;
             this.weeklyDays = new bool[7];
             this.weeklyDays[0] = true;
@@ -375,7 +333,7 @@ namespace Drexel.VidUp.Business
 
         private void resetMonthlySchedule()
         {
-            this.monthlyStartDate = DateTime.Now;
+            this.startDate = DateTime.Now;
             this.monthlyMonthFrequency = 1;
             this.monthlyDefaultTime = new TimeSpan(0, 0, 0);
             this.monthlyMonthDateBased = true;
@@ -760,7 +718,7 @@ namespace Drexel.VidUp.Business
         private DateTime dailyGetNextDate(DateTime dateTime)
         {
             DateTime potentialNextDate = dateTime.Date;
-            int remainder = (potentialNextDate.Date - this.dailyStartDate.Date).Days % this.DailyDayFrequency;
+            int remainder = (potentialNextDate.Date - this.StartDate.Date).Days % this.DailyDayFrequency;
             if (remainder > 0)
             {
                 potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency - remainder);
@@ -771,7 +729,7 @@ namespace Drexel.VidUp.Business
 
         private DateTime weeklyGetNextDate(DateTime dateTime)
         {
-            int weekIndex = Schedule.weeklyGetWeekIndex(this.weeklyStartDate, dateTime);
+            int weekIndex = Schedule.weeklyGetWeekIndex(this.StartDate, dateTime);
             int remainder = weekIndex % this.weeklyWeekFrequency;
             if (remainder > 0)
             {
@@ -788,14 +746,14 @@ namespace Drexel.VidUp.Business
             {
                 if (this.weeklyDays[index])
                 {
-                    return Schedule.weeklyGetBeginningOfWeek(this.weeklyStartDate).AddDays(weekIndex * 7 + index);
+                    return Schedule.weeklyGetBeginningOfWeek(this.StartDate).AddDays(weekIndex * 7 + index);
                 }
             }
 
             //current day or no day after (in this week) are enabled in this schedule, so we take first valid day of next week
             dayIndex = Array.IndexOf(this.weeklyDays, true);
             weekIndex = weekIndex + this.weeklyWeekFrequency;
-            return Schedule.weeklyGetBeginningOfWeek(this.weeklyStartDate).AddDays(weekIndex * 7 + dayIndex);
+            return Schedule.weeklyGetBeginningOfWeek(this.StartDate).AddDays(weekIndex * 7 + dayIndex);
         }
 
         //slightly different signature as for daily and weekly, as we need the original date
@@ -804,7 +762,7 @@ namespace Drexel.VidUp.Business
         private bool monthlyGetNextDateMonthDateBased(DateTime dateTime, out DateTime nextDate, out int originalDay)
         {
             bool corrected = false;
-            int monthIndex = Schedule.monthlyGetMonthIndex(this.monthlyStartDate, dateTime);
+            int monthIndex = Schedule.monthlyGetMonthIndex(this.StartDate, dateTime);
             int remainder = monthIndex % this.monthlyMonthFrequency;
             if (remainder > 0)
             {
@@ -824,7 +782,7 @@ namespace Drexel.VidUp.Business
                         index = maxDays - 1;
                     }
 
-                    nextDate = Schedule.monthlyGetBeginningOfMonth(this.monthlyStartDate).AddMonths(monthIndex).AddDays(index);
+                    nextDate = Schedule.monthlyGetBeginningOfMonth(this.StartDate).AddMonths(monthIndex).AddDays(index);
                     originalDay = originalDayIndex + 1;
                     return corrected;
                 }
@@ -833,7 +791,7 @@ namespace Drexel.VidUp.Business
             //current day or no day after (in this month) are enabled in this schedule, so we take first valid day of next month
             int dayIndex = Array.IndexOf(this.monthlyMonthDateBasedDates, true);
             monthIndex = monthIndex + this.monthlyMonthFrequency;
-            nextDate = Schedule.monthlyGetBeginningOfMonth(this.monthlyStartDate).AddMonths(monthIndex).AddDays(dayIndex);
+            nextDate = Schedule.monthlyGetBeginningOfMonth(this.StartDate).AddMonths(monthIndex).AddDays(dayIndex);
             originalDay = dayIndex;
             return corrected;
         }
@@ -846,14 +804,14 @@ namespace Drexel.VidUp.Business
         private KeyValuePair<MonthRelativeCombination, DateTime> monthlyGetNextDateMonthRelativeBased(DateTime dateTime)
         {
             KeyValuePair<MonthRelativeCombination, DateTime> result;
-              int monthIndex = Schedule.monthlyGetMonthIndex(this.monthlyStartDate, dateTime);
+              int monthIndex = Schedule.monthlyGetMonthIndex(this.StartDate, dateTime);
             int remainder = monthIndex % this.monthlyMonthFrequency;
             if (remainder > 0)
             {
                 monthIndex = monthIndex + (this.monthlyMonthFrequency - remainder);
             }
 
-            DateTime monthStart = Schedule.monthlyGetBeginningOfMonth(this.monthlyStartDate).AddMonths(monthIndex);
+            DateTime monthStart = Schedule.monthlyGetBeginningOfMonth(this.StartDate).AddMonths(monthIndex);
 
             Dictionary<MonthRelativeCombination, DateTime> monthDates = new Dictionary<MonthRelativeCombination, DateTime>();
             foreach (MonthRelativeCombination monthlyMonthRelativeBasedCombination in this.monthlyMonthRelativeBasedCombinations)
@@ -921,46 +879,27 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        private DateTime getDateTimeAfter(DateTime plannedUntil)
+        private DateTime getDateTimeAfter(DateTime dateTimeAfter)
         {
-            //Newly schedule upload shal be at least 24 hour in the future
-            DateTime dateAfter = DateTime.Now.AddHours(24);
+            //Newly schedule upload shall be at least 24 hour in the future
+            DateTime dateTimeAfterResult = DateTime.Now.AddHours(24);
 
-            if (this.scheduleFrequency == ScheduleFrequency.Daily)
+            if (this.startDate > dateTimeAfterResult)
             {
-                if (this.dailyStartDate > dateAfter)
-                {
-                    dateAfter = this.dailyStartDate;
-                }
+                dateTimeAfterResult = this.startDate;
             }
 
-            if (this.scheduleFrequency == ScheduleFrequency.Weekly)
+            if (this.uploadedUntil > dateTimeAfterResult)
             {
-                if (this.weeklyStartDate > dateAfter)
-                {
-                    dateAfter = this.dailyStartDate;
-                }
+                dateTimeAfterResult = this.uploadedUntil;
             }
 
-            if (this.scheduleFrequency == ScheduleFrequency.Monthly)
+            if (dateTimeAfter > dateTimeAfterResult)
             {
-                if (this.monthlyStartDate > dateAfter)
-                {
-                    dateAfter = this.dailyStartDate;
-                }
+                dateTimeAfterResult = dateTimeAfter;
             }
 
-            if (this.dailyUploadedUntil > dateAfter)
-            {
-                dateAfter = this.dailyUploadedUntil;
-            }
-
-            if (plannedUntil > dateAfter)
-            {
-                dateAfter = plannedUntil;
-            }
-
-            return dateAfter;
+            return dateTimeAfterResult;
         }
 
         private int dailyGetDayIndex(DateTime potentialNextDate)
@@ -976,7 +915,7 @@ namespace Drexel.VidUp.Business
                 dayIndexes = 3;
             }
 
-            int dayIndex = (potentialNextDate.Date - this.dailyStartDate.Date).Days / this.dailyDayFrequency % dayIndexes;
+            int dayIndex = (potentialNextDate.Date - this.startDate.Date).Days / this.dailyDayFrequency % dayIndexes;
             return dayIndex;
         }
 

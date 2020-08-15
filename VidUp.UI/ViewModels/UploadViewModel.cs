@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.Remoting.Messaging;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
 using Drexel.VidUp.Utils;
@@ -373,6 +374,11 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
+                if (!this.ControlsEnabled)
+                {
+                    return false;
+                }
+
                 if (this.upload.PublishAt == null)
                 {
                     return false;
@@ -393,14 +399,13 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                 }
 
-                if (this.upload.PublishAt == null)
+                if (value)
                 {
                     this.upload.SetPublishAtDate(DateTime.Now.Date.AddDays(1));
                 }
                 else
                 {
-                    this.upload.SetPublishAtDate(DateTime.MinValue);
-                    this.upload.SetPublishAtTime(new TimeSpan());
+                    this.upload.PublishAt = null;
                 }
 
                 JsonSerialization.JsonSerializer.SerializeAllUploads();
@@ -426,34 +431,23 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public DateTime PublishAtDate
+        public DateTime? PublishAtDate
         {
             get
             {
-                if (this.upload.PublishAt == null)
-                {
-                    return DateTime.Now.AddDays(1);
-                }
-                else
-                {
-                    return this.upload.PublishAt.Value;
-                }
+                return this.upload.PublishAt;
             }
             set
             {
-                this.upload.SetPublishAtDate(value);
+                this.upload.SetPublishAtDate(value.Value);
                 JsonSerialization.JsonSerializer.SerializeAllUploads();
-
                 this.raisePropertyChanged("PublishAtDate");
             }
         }
 
         public DateTime PublishAtFirstDate
         {
-            get
-            {
-                return DateTime.Now.AddDays(1);
-            }
+            get => DateTime.Now.AddDays(1).Date;
         }
 
         public Upload Upload { get => this.upload;  }

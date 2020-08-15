@@ -456,7 +456,9 @@ namespace Drexel.VidUp.Business
 
         public void SetPublishAtDate(DateTime publishDate)
         {
-            this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, this.publishAt.Value.Hour, this.publishAt.Value.Minute, 0);
+            TimeSpan publishAtTime = this.publishAt != null ? this.publishAt.Value.TimeOfDay : new TimeSpan(0, 0, 0, 0);
+
+            this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, publishAtTime.Hours, publishAtTime.Minutes, 0);
             this.lastModifiedInternal = DateTime.Now;
             this.raisePropertyChanged("PublishAt");
         }

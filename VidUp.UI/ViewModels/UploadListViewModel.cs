@@ -31,6 +31,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableTemplateViewModels observableTemplateViewModels;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
 
+        private ObservableTemplateViewModels observableTemplateViewModelsInclAll;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
 
         private GenericCommand deleteCommand;
@@ -40,6 +41,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand startUploadingCommand;
         private GenericCommand stopUploadingCommand;
         private GenericCommand recalculatePublishAtCommand;
+        private GenericCommand resetRecalculatePublishAtStartDateCommand;
         private GenericCommand removeUploadsCommand;
 
         private UploadStatus uploadStatus = UploadStatus.NotUploading;
@@ -51,6 +53,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private string removeUploadStatus = "Finished";
 
         private TemplateComboboxViewModel recalculatePublishAtSelectedTemplate;
+        private DateTime? recalculatePublishAtStartDate;
+        private DateTime recalculatePublishAtFirstDate;
 
 
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
@@ -95,6 +99,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.recalculatePublishAtCommand;
+            }
+        }
+
+        public GenericCommand ResetRecalculatePublishAtStartDateCommand
+        {
+            get
+            {
+                return this.resetRecalculatePublishAtStartDateCommand;
             }
         }
 
@@ -156,6 +168,15 @@ namespace Drexel.VidUp.UI.ViewModels
                 return this.observableTemplateViewModelsInclAllNone;
             }
         }
+
+        public ObservableTemplateViewModels ObservableTemplateViewModelsInclAll
+        {
+            get
+            {
+                return this.observableTemplateViewModelsInclAll;
+            }
+        }
+
         public TemplateComboboxViewModel RecalculatePublishAtSelectedTemplate
         {
             get
@@ -170,6 +191,21 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.raisePropertyChanged("RecalculatePublishAtSelectedTemplate");
                 }
             }
+        }
+
+        public DateTime? RecalculatePublishAtStartDate
+        {
+            get => this.recalculatePublishAtStartDate;
+            set
+            {
+                this.recalculatePublishAtStartDate = value;
+                this.raisePropertyChanged("RecalculatePublishAtStartDate");
+            }
+        }
+
+        public DateTime RecalculatePublishAtFirstDate
+        {
+            get => DateTime.Now.AddDays(1).Date;
         }
 
         //Selected template for upload removal
@@ -217,7 +253,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels,
+        public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservableTemplateViewModels observableTemplateViewModelsInclAll,
             ObservableTemplateViewModels observableTemplateViewModelsInclAllNone, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             this.uploadList = uploadList;
@@ -226,8 +262,10 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observablePlaylistViewModels = observablePlaylistViewModels;
 
             this.observableTemplateViewModelsInclAllNone = observableTemplateViewModelsInclAllNone;
+            this.observableTemplateViewModelsInclAll = observableTemplateViewModelsInclAll;
             this.observableTemplateViewModelsInclAllNone.CollectionChanged+= this.observableTemplateViewModelsInclAllNoneCollectionChanged;
-            this.recalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAllNone[1];
+            this.observableTemplateViewModelsInclAll.CollectionChanged += this.observableTemplateViewModelsInclAllCollectionChanged;
+            this.recalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAll[0];
             this.removeSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
 
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
@@ -237,10 +275,24 @@ namespace Drexel.VidUp.UI.ViewModels
             this.startUploadingCommand = new GenericCommand(this.startUploading);
             this.stopUploadingCommand = new GenericCommand(this.stopUploading);
             this.recalculatePublishAtCommand = new GenericCommand(this.recalculatePublishAt);
+            this.resetRecalculatePublishAtStartDateCommand = new GenericCommand(this.resetRecalculatePublishAtStartDate);
             this.removeUploadsCommand = new GenericCommand(this.removeUploads);
         }
 
-        //need to change the remove uploads template filter combobox selected item, if this template is deleted. So the selected
+        //need to change the template filter combobox selected item, if this template is deleted. So the selected
+        //item isn't set to null by the GUI which prevents updating it to an existing item in the same call.
+        private void observableTemplateViewModelsInclAllCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                if ((TemplateComboboxViewModel)e.OldItems[0] == this.recalculatePublishAtSelectedTemplate)
+                {
+                    this.RecalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAllNone[1];
+                }
+            }
+        }
+
+        //need to change the template filter combobox selected item, if this template is deleted. So the selected
         //item isn't set to null by the GUI which prevents updating it to an existing item in the same call.
         private void observableTemplateViewModelsInclAllNoneCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -249,11 +301,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 if ((TemplateComboboxViewModel) e.OldItems[0] == this.removeSelectedTemplate)
                 {
                     this.RemoveSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
-                }
-
-                if ((TemplateComboboxViewModel)e.OldItems[0] == this.recalculatePublishAtSelectedTemplate)
-                {
-                    this.RecalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAllNone[1];
                 }
             }
         }
@@ -395,63 +442,63 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void recalculatePublishAt(object obj)
         {
-            if (this.recalculatePublishAtSelectedTemplate.Name == "None")
-            {
-                return;
-            }
-
             if (this.recalculatePublishAtSelectedTemplate.Name == "All")
             {
+                if (this.recalculatePublishAtStartDate != null)
+                {
+                    this.uploadList.SetStartDateOnAllTemplateSchedules(this.recalculatePublishAtStartDate.Value);
+                    JsonSerialization.JsonSerializer.SerializeTemplateList();
+                }
+
                 foreach (Upload upload in this.uploadList)
                 {
-                    if (upload.Template != null && upload.Template.UsePublishAtSchedule)
+                    if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                     {
-                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
-                        {
-                            upload.PublishAt = null;
-                        }
+                        upload.PublishAt = null;
                     }
                 }
 
                 foreach (Upload upload in this.uploadList)
                 {
-                    if (upload.Template != null && upload.Template.UsePublishAtSchedule)
+                    if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                     {
-                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
-                        {
-                            upload.AutoSetPublishAtDateTime();
-                        }
+                        upload.AutoSetPublishAtDateTime();
                     }
                 }
             }
             else
             {
+                if (this.recalculatePublishAtStartDate != null)
+                {
+                    this.uploadList.SetStartDateOnTemplateSchedule(this.recalculatePublishAtSelectedTemplate.Template, this.recalculatePublishAtStartDate.Value);
+                    JsonSerialization.JsonSerializer.SerializeTemplateList();
+                }
+
                 foreach (Upload upload in this.uploadList)
                 {
-                    if (upload.Template != null &&
-                        upload.Template == this.recalculatePublishAtSelectedTemplate.Template &&  upload.Template.UsePublishAtSchedule)
+                    if (upload.Template != null && upload.Template == this.recalculatePublishAtSelectedTemplate.Template &&
+                        upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                     {
-                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
-                        {
-                            upload.PublishAt = null;
-                        }
+                        upload.PublishAt = null;
                     }
                 }
 
                 foreach (Upload upload in this.uploadList)
                 {
-                    if (upload.Template != null &&
-                        upload.Template == this.recalculatePublishAtSelectedTemplate.Template && upload.Template.UsePublishAtSchedule)
+                    if (upload.Template != null && upload.Template == this.recalculatePublishAtSelectedTemplate.Template &&
+                        upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                     {
-                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
-                        {
-                            upload.AutoSetPublishAtDateTime();
-                        }
+                        upload.AutoSetPublishAtDateTime();
                     }
                 }
             }
 
             JsonSerialization.JsonSerializer.SerializeAllUploads();
+        }
+
+        private void resetRecalculatePublishAtStartDate(object obj)
+        {
+            this.RecalculatePublishAtStartDate = null;
         }
 
         private void removeUploads()

@@ -374,5 +374,22 @@ namespace Drexel.VidUp.Business
                 this.uploads[targetIndex] = uploadToMove;
             }
         }
+
+        public void SetStartDateOnTemplateSchedule(Template template, DateTime startDate)
+        {
+            if (template.PublishAtSchedule != null)
+            {
+                template.PublishAtSchedule.IgnoreUploadsBefore = DateTime.Now;
+                template.PublishAtSchedule.StartDate = startDate;
+            }
+        }
+
+        public void SetStartDateOnAllTemplateSchedules(DateTime startDate)
+        {
+            foreach (Template template in this.templateList)
+            {
+                this.SetStartDateOnTemplateSchedule(template, startDate);
+            }
+        }
     }
 }

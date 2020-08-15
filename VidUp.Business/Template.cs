@@ -324,23 +324,7 @@ namespace Drexel.VidUp.Business
                     (upload.UploadStart == null || upload.UploadStart > this.PublishAtSchedule.IgnoreUploadsBefore) &&
                     upload.UploadStatus == UplStatus.Finished);
 
-                DateTime uploadedUntil;
-                switch (this.publishAtSchedule.ScheduleFrequency)
-                {
-                    case ScheduleFrequency.Daily:
-                        uploadedUntil = this.publishAtSchedule.DailyUploadedUntil;
-                        break;
-                    case ScheduleFrequency.Weekly:
-                        uploadedUntil = this.publishAtSchedule.WeeklyUploadedUntil;
-                        break;
-                    case ScheduleFrequency.Monthly:
-                        uploadedUntil = this.publishAtSchedule.MonthlyUploadedUntil;
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unexpected schedule frequency");
-                }
-
-                relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > uploadedUntil);
+                relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.UploadedUntil);
                 relevantUploads.Sort(Template.compareUploadPublishAtDates);
 
                 DateTime nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
@@ -348,21 +332,7 @@ namespace Drexel.VidUp.Business
                 {
                     if (upload.PublishAt == nextDate)
                     {
-                        switch (this.publishAtSchedule.ScheduleFrequency)
-                        {
-                            case ScheduleFrequency.Daily:
-                                this.publishAtSchedule.DailyUploadedUntil = nextDate;
-                                break;
-                            case ScheduleFrequency.Weekly:
-                                this.publishAtSchedule.WeeklyUploadedUntil = nextDate;
-                                break;
-                            case ScheduleFrequency.Monthly:
-                                this.publishAtSchedule.MonthlyUploadedUntil = nextDate;
-                                break;
-                            default:
-                                throw new InvalidOperationException("Unexpected schedule frequency");
-                        }
-
+                        this.publishAtSchedule.UploadedUntil = nextDate;
                         nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
                     }
 

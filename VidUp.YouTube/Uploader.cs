@@ -121,7 +121,7 @@ namespace Drexel.VidUp.Youtube
             {
                 this.uploadStats.AllFinished();
                 this.onUploadStatsUpdated();
-                this.updateSchedules(uploadsOfSession.FindAll(upload2 => upload2.UploadStatus == UplStatus.Finished));
+                this.updateSchedules(uploadsOfSession);
                 JsonSerialization.JsonSerializer.SerializeTemplateList();
             }
 

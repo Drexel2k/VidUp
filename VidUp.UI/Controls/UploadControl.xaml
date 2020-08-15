@@ -152,7 +152,15 @@
             <StackPanel  Grid.Row="7" Grid.Column="2" Orientation="Horizontal">
                 <ToggleButton IsChecked="{Binding PublishAt}" IsEnabled="{Binding ControlsEnabled}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
                 <Label Content="Publish At: " Width="77" />
-                <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" DisplayDateStart="{Binding PublishAtFirstDate, Mode=OneWay}" Margin="0 3 0 0" />
+                <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" DisplayDateStart="{Binding PublishAtFirstDate, Mode=OneWay}" Margin="0 3 0 0">
+                    <DatePicker.Resources>
+                        <Style x:Key="MaterialDesignDatePickerTextBox"
+                               TargetType="DatePickerTextBox"
+                               BasedOn="{StaticResource MaterialDesignDatePickerTextBox}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </Style>
+                    </DatePicker.Resources>
+                </DatePicker>
                 <!--Binding OneWay because setting is handled by event. -->
                 <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" IsEnabled="{Binding PublishAt}" />
             </StackPanel>

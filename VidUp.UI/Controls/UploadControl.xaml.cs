@@ -1,16 +1,10 @@
-﻿#region
-
-using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Drexel.VidUp.UI.ViewModels;
 
-#endregion
 
 namespace Drexel.VidUp.UI.Controls
 {
-    //tod: Bei Template Auwahl auch wieder kein Template zulassen, wenn schon ein Template ausgewählt ist
     /// <summary>
     /// Interaktionslogik für UploadControl.xaml
     /// </summary>
@@ -69,6 +63,7 @@ namespace Drexel.VidUp.UI.Controls
 
                 // Inititate the drag-and-drop operation.
                 DragDrop.DoDragDrop(this, data, DragDropEffects.Move);
+                //continues in UploadListControl.xaml.cs
             }
         }
     }

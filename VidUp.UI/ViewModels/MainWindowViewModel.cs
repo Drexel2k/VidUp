@@ -31,6 +31,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private AppStatus appStatus = AppStatus.Idle;
         private ObservableTemplateViewModels observableTemplateViewModels;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
+        private ObservableTemplateViewModels observableTemplateViewModelsInclAll;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
 
         private PostUploadAction postUploadAction;
@@ -72,11 +73,12 @@ namespace Drexel.VidUp.UI.ViewModels
             templateList = this.templateList;
             playlistList = this.playlistList;
 
-            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, false);
-            this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true);
+            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, false, false);
+            this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true, true);
+            this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, true, false);
             this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList);
 
-            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels);
+            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll, this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels);
             this.viewModels[0] = uploadListViewModel;
             uploadListViewModel.PropertyChanged += uploadListViewModelOnPropertyChanged;
             uploadListViewModel.UploadStarted += uploadListViewModelOnUploadStarted;
