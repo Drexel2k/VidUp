@@ -40,8 +40,11 @@
                        <Label Content="Frequency: " Width="69" />
                        <ComboBox ItemsSource="{Binding ScheduleFrequencies}" SelectedItem="{Binding ScheduleFrequency}" Width="190" >
                        </ComboBox>
-                       <Button Command="{Binding ResetCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 10 0" Width="80" Height="20" Padding="0" Content="Reset" />
-                    </DockPanel>
+                       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                           <Button Command="{Binding ResetCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 3 0" Width="80" Height="20" Padding="0" Content="Reset" />
+                           <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 10 5" ToolTip="Resets all schedule setting, daily, weekly and monthly!" ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
+                   </DockPanel>
                 </Grid>
 
             </GroupBox>

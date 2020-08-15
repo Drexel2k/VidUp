@@ -1944,7 +1944,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("MonthlyMonthDateBasedVisible");
             this.raisePropertyChanged("MonthlyMonthRelativeBasedVisible"); 
             this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
-            //this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
+            this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
             this.raisePropertyChanged("MonthlyHasAdvancedSchedule");
             this.raisePropertyChanged("MonthlyActive");
             this.raisePropertyChanged("MonthlyTime1");
