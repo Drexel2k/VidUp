@@ -400,11 +400,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.uploader = null;
 
                 this.uploadStatus = UploadStatus.NotUploading;
-                this.onUploadFinished(new UploadFinishedEventArgs(oneUploadFinished));
 
                 this.onUploadStatsUpdated();
 
                 PowerSavingHelper.EnablePowerSaving();
+
+                //needs to be after PowerSavingHelper.EnablePowerSaving(); so that StandBy is not prevented.
+                this.onUploadFinished(new UploadFinishedEventArgs(oneUploadFinished));
             }
         }
 

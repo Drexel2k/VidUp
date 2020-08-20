@@ -49,7 +49,7 @@ namespace Drexel.VidUp.Youtube
             } 
         }
 
-        public TimeSpan CurrentFileTimeLeft 
+        public TimeSpan? CurrentFileTimeLeft 
         { 
             get
             {
@@ -59,7 +59,7 @@ namespace Drexel.VidUp.Youtube
                     return TimeSpan.FromSeconds(seconds);
                 }
 
-                return TimeSpan.MinValue;
+                return null;
             }
         }
         public int CurrentFileMbLeft
@@ -86,7 +86,7 @@ namespace Drexel.VidUp.Youtube
 
         }
 
-        public TimeSpan TotalTimeLeft
+        public TimeSpan? TotalTimeLeft
         {
             get
             {
@@ -96,7 +96,7 @@ namespace Drexel.VidUp.Youtube
                     return TimeSpan.FromSeconds(seconds);
                 }
 
-                return TimeSpan.MinValue;
+                return null;
             }
                 
         }

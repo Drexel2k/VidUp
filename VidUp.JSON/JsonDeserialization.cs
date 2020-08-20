@@ -45,6 +45,7 @@ namespace Drexel.VidUp.Json
             this.setTemplateOnUploads();
             this.deserializeUploadListGuids();
             this.createTemplateListToRepository();
+            this.setTemplateListOnTemplates();
             this.createUploadListToRepository();
             this.checkConsistency();
         }
@@ -98,24 +99,14 @@ namespace Drexel.VidUp.Json
             serializer.Converters.Add(new UploadGuidStringConverter());
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
 
-            TemplateList templateList;
             using (StreamReader sr = new StreamReader(templateListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                templateList = serializer.Deserialize<TemplateList>(reader);
-            }
-
-            if (templateList == null || templateList.TemplateCount <= 0)
-            {
-                return;
-            }
-
-            this.templates = new List<Template>(templateList.TemplateCount);
-
-            //Desrialized template list does not contain all information, e.g. folder paths, so this only temporary
-            foreach (Template template in templateList)
-            {
-                this.templates.Add(template);
+                //set reader to templateList to avoid creation of TemplateList which will cause addition of event listeners etc. in constructor
+                reader.Read();
+                reader.Read();
+                reader.Read();
+                this.templates = serializer.Deserialize<List<Template>>(reader);
             }
         }
 
@@ -171,6 +162,16 @@ namespace Drexel.VidUp.Json
         private void createTemplateListToRepository()
         {
             DeserializationRepository.TemplateList = new TemplateList(this.templates, this.templateImageFolder, this.thumbnailFallbackImageFolder);
+        }
+
+        private void setTemplateListOnTemplates()
+        {
+            foreach (Template template in DeserializationRepository.TemplateList)
+            {
+                Type templateType = typeof(Template);
+                FieldInfo templateListFieldInfo = templateType.GetField("templateList", BindingFlags.NonPublic | BindingFlags.Instance);
+                templateListFieldInfo.SetValue(template, DeserializationRepository.TemplateList);
+            }
         }
 
         private void checkConsistency()

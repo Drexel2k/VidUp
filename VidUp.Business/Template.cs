@@ -54,6 +54,7 @@ namespace Drexel.VidUp.Business
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        //fore deserialization and fake templates (e.g. All and None Templates for filter)
         public Template()
         {
             this.uploads = new List<Upload>();

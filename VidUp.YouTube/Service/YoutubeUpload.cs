@@ -218,18 +218,22 @@ namespace Drexel.VidUp.Youtube.Service
                                     throw;
                                 }
 
-                                using (HttpWebResponse httpResponse = e.Response as HttpWebResponse)
-                                {
-                                    if (httpResponse == null)
-                                    {
-                                        throw;
-                                    }
+                                HttpWebResponse httpResponse = e.Response as HttpWebResponse;
 
-                                    if ((int) httpResponse.StatusCode != 308)
-                                    {
-                                        throw;
-                                    }
+                                if (httpResponse == null)
+                                {
+
+                                    throw;
                                 }
+
+                                if ((int)httpResponse.StatusCode != 308)
+                                {
+                                    throw;
+                                }
+
+                                //continue on http status 308 which means resumable uplaod part was uploaded correctly.
+                                httpResponse.Dispose();
+                                e.Response.Dispose();
                             }
                         }
                     }
@@ -285,6 +289,7 @@ namespace Drexel.VidUp.Youtube.Service
                     throw;
                 }
 
+                using (e.Response)
                 using (HttpWebResponse httpResponse = e.Response as HttpWebResponse)
                 {
                     if (httpResponse == null)

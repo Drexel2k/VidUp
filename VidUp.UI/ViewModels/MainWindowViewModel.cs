@@ -315,12 +315,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.appStatus == AppStatus.Uploading)
+                if (this.appStatus == AppStatus.Uploading && this.uploadStats.CurrentFileTimeLeft != null)
                 {
                     return string.Format("{0}h {1}m {2}s",
-                        (int)this.uploadStats.CurrentFileTimeLeft.TotalHours,
-                        this.uploadStats.CurrentFileTimeLeft.Minutes,
-                        this.uploadStats.CurrentFileTimeLeft.Seconds);
+                        (int)this.uploadStats.CurrentFileTimeLeft.Value.TotalHours,
+                        this.uploadStats.CurrentFileTimeLeft.Value.Minutes,
+                        this.uploadStats.CurrentFileTimeLeft.Value.Seconds);
                 }
 
                 return "n/a";
@@ -357,12 +357,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.appStatus == AppStatus.Uploading)
+                if (this.appStatus == AppStatus.Uploading && this.uploadStats.TotalTimeLeft != null)
                 {
                     return string.Format("{0}h {1}m {2}s",
-                        (int)this.uploadStats.TotalTimeLeft.TotalHours,
-                        this.uploadStats.TotalTimeLeft.Minutes,
-                        this.uploadStats.TotalTimeLeft.Seconds);
+                        (int)this.uploadStats.TotalTimeLeft.Value.TotalHours,
+                        this.uploadStats.TotalTimeLeft.Value.Minutes,
+                        this.uploadStats.TotalTimeLeft.Value.Seconds);
                 }
 
                 return "n/a";
