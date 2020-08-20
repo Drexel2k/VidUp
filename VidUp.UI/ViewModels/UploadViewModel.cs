@@ -320,32 +320,6 @@ namespace Drexel.VidUp.UI.ViewModels
             get => $"{((float)this.upload.BytesSent / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
         }
 
-        public string ShowFileNotExistsIcon
-        {
-            get
-            {
-                if (File.Exists(this.upload.FilePath))
-                {
-                    return "Collapsed";
-                }
-
-                return "Visible";
-            }
-        }
-
-        public string ShowThumbnailNotExistsIcon
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(this.upload.ThumbnailFilePath) || File.Exists(this.upload.ThumbnailFilePath))
-                {
-                    return "Collapsed";
-                }
-
-                return "Visible";
-            }
-        } 
-
         public string UploadErrorMessage
         {
             get

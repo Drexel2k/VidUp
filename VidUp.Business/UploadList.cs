@@ -90,13 +90,16 @@ namespace Drexel.VidUp.Business
                     upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
                     upload.UploadStatus == UplStatus.Stopped ||upload.UploadStatus== UplStatus.Failed))
                 {
-                    if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                    if (File.Exists(upload.FilePath))
                     {
-                        length += upload.FileLength;
-                    }
-                    else
-                    {
-                        length += upload.FileLength - upload.BytesSent;
+                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            length += upload.FileLength;
+                        }
+                        else
+                        {
+                            length += upload.FileLength - upload.BytesSent;
+                        }
                     }
                 }
 
