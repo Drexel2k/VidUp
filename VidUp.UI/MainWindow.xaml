@@ -10,6 +10,7 @@
                      xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
                      xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
                      xmlns:local="clr-namespace:Drexel.VidUp.UI"
+                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                      x:Name="CMainWindow"
                      Icon="images/vidup.ico" Activated="CMainWindow_Activated" Deactivated="CMainWindow_Deactivated">
     <Window.TaskbarItemInfo>
@@ -30,6 +31,10 @@
             <controls:PlaylistControl />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:VidUpViewModel}"  />
+
+        <!-- booleans for command paramters-->
+        <system:Boolean x:Key="FalseValue">False</system:Boolean>
+        <system:Boolean x:Key="TrueValue">True</system:Boolean>
     </Window.Resources>
 
     <materialDesign:DialogHost Identifier="RootDialog">
@@ -86,11 +91,10 @@
                                 </DatePicker.Resources>
                             </DatePicker>
                         </Grid>
-
-
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
-                        <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Remove Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveUploadsCommand}" />
+                        <!-- CommandParamter is to enable testing -->
+                        <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Remove Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />

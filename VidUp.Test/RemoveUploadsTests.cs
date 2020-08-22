@@ -81,7 +81,7 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveUploadsCommand.Execute(null);
+            uploadListViewModel.RemoveUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -287,7 +287,7 @@ namespace Drexel.VidUp.Test
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.RemoveSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template789FilterGuid);
-            uploadListViewModel.RemoveUploadsCommand.Execute(null);
+            uploadListViewModel.RemoveUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -400,7 +400,7 @@ namespace Drexel.VidUp.Test
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.RemoveSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "None");
-            uploadListViewModel.RemoveUploadsCommand.Execute(null);
+            uploadListViewModel.RemoveUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -487,7 +487,7 @@ namespace Drexel.VidUp.Test
             uploadListViewModel.RemoveUploadStatus = uploadListViewModel.RemoveUploadStatuses[2];
             uploadListViewModel.RemoveSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template234FilterGuid);
-            uploadListViewModel.RemoveUploadsCommand.Execute(null);
+            uploadListViewModel.RemoveUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -587,7 +587,7 @@ namespace Drexel.VidUp.Test
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.RemoveUploadStatus = uploadListViewModel.RemoveUploadStatuses[1];
 
-            uploadListViewModel.RemoveUploadsCommand.Execute(null);
+            uploadListViewModel.RemoveUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -839,7 +839,7 @@ namespace Drexel.VidUp.Test
             uploadListViewModel.RemoveUploadStatus = uploadListViewModel.RemoveUploadStatuses[0];
             uploadListViewModel.RemoveSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template456Guid);
-            uploadListViewModel.RemoveUploadsCommand.Execute(null);
+            uploadListViewModel.RemoveUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -1009,7 +1009,7 @@ namespace Drexel.VidUp.Test
             uploadListViewModel.RemoveUploadStatus = uploadListViewModel.RemoveUploadStatuses[0];
             uploadListViewModel.RemoveSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "All");
-            uploadListViewModel.RemoveUploadsCommand.Execute(null);
+            uploadListViewModel.RemoveUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 

@@ -422,18 +422,26 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private async void removeUploads(object obj)
+        //parameter skips dialog for testing
+        private async void removeUploads(object parameter)
         {
+            bool skipDialog = (bool)parameter;
             bool remove = true;
-            if (this.removeUploadStatus == "All" || (UplStatus)Enum.Parse(typeof(UplStatus), this.removeUploadStatus) != UplStatus.Finished)
-            {
-                ConfirmControl control = new ConfirmControl(string.Format(
-                    "Do you really want to remove all uploads with template = {0} and status = {1}?",
-                    this.removeSelectedTemplate.Template.Name,
-                    new UplStatusStringValuesConverter().Convert(this.removeUploadStatus, typeof(string), null,
-                        CultureInfo.CurrentCulture)));
 
-                remove = (bool)await DialogHost.Show(control, "RootDialog");
+            //skip dialog on testing
+            if (!(bool)skipDialog)
+            {
+                if (this.removeUploadStatus == "All" ||
+                    (UplStatus) Enum.Parse(typeof(UplStatus), this.removeUploadStatus) != UplStatus.Finished)
+                {
+                    ConfirmControl control = new ConfirmControl(string.Format(
+                        "Do you really want to remove all uploads with template = {0} and status = {1}?",
+                        this.removeSelectedTemplate.Template.Name,
+                        new UplStatusStringValuesConverter().Convert(this.removeUploadStatus, typeof(string), null,
+                            CultureInfo.CurrentCulture)));
+
+                    remove = (bool) await DialogHost.Show(control, "RootDialog");
+                }
             }
 
             if (remove)
