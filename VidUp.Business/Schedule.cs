@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -24,6 +25,8 @@ namespace Drexel.VidUp.Business
         private TimeSpan dailyDefaultTime;
         [JsonProperty]
         private bool dailyHasAdvancedSchedule;
+        [JsonProperty]
+        private bool[] dailyDays;
         [JsonProperty]
         private Dictionary<int, TimeSpan?[]> dailyDayTimes;
 
@@ -152,40 +155,30 @@ namespace Drexel.VidUp.Business
             set => this.dailyDefaultTime = value;
         }
 
-        public Dictionary<int, TimeSpan?[]> DailyDayTimes
-        {
-            get => this.dailyDayTimes;
-            set => this.dailyDayTimes = value;
-        }
-
         public int WeeklyWeekFrequency
         {
             get => this.weeklyWeekFrequency;
             set => this.weeklyWeekFrequency = value;
         }
 
-        public bool[] WeeklyDays
-        {
-            get => this.weeklyDays;
-            set => this.weeklyDays = value;
-        }
-
         public bool WeeklyHasAdvancedSchedule
         {
             get => this.weeklyHasAdvancedSchedule;
-            set => this.weeklyHasAdvancedSchedule = value;
+            set
+            {
+                if (value)
+                {
+                    this.weeklyCheckDayTimes();
+                }
+
+                this.weeklyHasAdvancedSchedule = value;
+            }
         }
 
         public TimeSpan WeeklyDefaultTime
         {
             get => this.weeklyDefaultTime;
             set => this.weeklyDefaultTime = value;
-        }
-
-        public Dictionary<DayOfWeek, TimeSpan?[]> WeeklyDayTimes
-        {
-            get => this.weeklyDayTimes;
-            set => this.weeklyDayTimes = value;
         }
 
         public int MonthlyMonthFrequency
@@ -203,37 +196,68 @@ namespace Drexel.VidUp.Business
         public bool MonthlyDateBased
         {
             get => this.monthlyMonthDateBased;
-            set => this.monthlyMonthDateBased = value;
+            set
+            {
+                if (this.monthlyHasAdvancedSchedule)
+                {
+                    if (value)
+                    {
+                        this.monthlyMonthDateBasedCheckDayTimes();
+                    }
+                    else
+                    {
+                        this.monthlyMonthRelativeBasedCheckDayTimes();
+                    }
+                }
+
+                this.monthlyMonthDateBased = value;
+            }
         }
 
         public bool MonthlyHasAdvancedSchedule
         {
             get => this.monthlyHasAdvancedSchedule;
-            set => this.monthlyHasAdvancedSchedule = value;
+            set
+            {
+                if (value)
+                {
+                    if (this.monthlyMonthDateBased)
+                    {
+                        this.monthlyMonthDateBasedCheckDayTimes();
+                    }
+                    else
+                    {
+                        this.monthlyMonthRelativeBasedCheckDayTimes();
+                    }
+                }
+
+                this.monthlyHasAdvancedSchedule = value;
+            }
         }
 
-        public bool[] MonthlyMonthDateBasedDates
+        public int[] DailyDaysWithDayTimes
         {
-            get => this.monthlyMonthDateBasedDates;
-            set => this.monthlyMonthDateBasedDates = value;
+            get => this.dailyDayTimes.Keys.ToArray();
         }
 
-        public List<MonthRelativeCombination> MonthlyMonthRelativeBasedCombinations
+        public DayOfWeek[] WeeklyDaysWithDayTimes
         {
-            get => this.monthlyMonthRelativeBasedCombinations;
-            set => this.monthlyMonthRelativeBasedCombinations = value;
+            get => this.weeklyDayTimes.Keys.ToArray();
         }
 
-        public Dictionary<int, TimeSpan?[]> MonthlyMonthDateBasedDayTimes
+        public ReadOnlyCollection<MonthRelativeCombination> MonthlyMonthRelativeBasedCombinations
         {
-            get => this.monthlyMonthDateBasedDayTimes;
-            set => this.monthlyMonthDateBasedDayTimes = value;
+            get => this.monthlyMonthRelativeBasedCombinations.AsReadOnly();
         }
 
-        public Dictionary<MonthRelativeCombination, TimeSpan?[]> MonthlyMonthRelativeBasedDayTimes
+        public MonthRelativeCombination[] MonthlyMonthRelativeBasedCombinationsWithDayTimes
         {
-            get => this.monthlyMonthRelativeBasedDayTimes;
-            set => this.monthlyMonthRelativeBasedDayTimes = value;
+            get => this.monthlyMonthRelativeBasedDayTimes.Keys.ToArray();
+        }
+
+        public int[] MonthlyMonthDateBasedDaysWithDayTimes
+        {
+            get => this.monthlyMonthDateBasedDayTimes.Keys.ToArray();
         }
 
         public Schedule()
@@ -250,36 +274,152 @@ namespace Drexel.VidUp.Business
             this.dailyDayFrequency = schedule.DailyDayFrequency;
             this.dailyDefaultTime = schedule.DailyDefaultTime;
             this.dailyHasAdvancedSchedule = schedule.DailyHasAdvancedSchedule;
-            this.dailyDayTimes = schedule.DailyDayTimes.ToDictionary(entry => entry.Key, entry => entry.Value.ToArray());
+            this.dailyDays = schedule.DailyGetCopyOfDays(schedule);
+            this.dailyDayTimes = schedule.DailyGetCopyOfDayTimes(schedule);
 
             this.weeklyWeekFrequency = schedule.WeeklyWeekFrequency;
             this.weeklyDefaultTime = schedule.WeeklyDefaultTime;
-            schedule.WeeklyDays.CopyTo(this.weeklyDays, 0);
+            this.weeklyDays = schedule.WeeklyGetCopyOfWeekDays(schedule);
             this.weeklyHasAdvancedSchedule = schedule.WeeklyHasAdvancedSchedule;
-            this.weeklyDayTimes = schedule.WeeklyDayTimes.ToDictionary(entry => entry.Key, entry => entry.Value.ToArray());
+            this.weeklyDayTimes = schedule.WeeklyGetCopyOfDayTimes(schedule);
 
             this.monthlyMonthFrequency = schedule.MonthlyMonthFrequency;
             this.monthlyDefaultTime = schedule.MonthlyDefaultTime;
             this.monthlyMonthDateBased = schedule.MonthlyDateBased;
-            schedule.MonthlyMonthDateBasedDates.CopyTo(this.monthlyMonthDateBasedDates, 0);
+            this.monthlyMonthDateBasedDates = schedule.monthlyMonthDateBasedGetCopyOfDates();
             this.monthlyMonthRelativeBasedCombinations = new List<MonthRelativeCombination>(schedule.MonthlyMonthRelativeBasedCombinations.Select(
                 combination => new MonthRelativeCombination(combination.DayPosition, combination.DayOfWeek)));
+
             this.monthlyHasAdvancedSchedule = schedule.MonthlyHasAdvancedSchedule;
-            this.monthlyMonthDateBasedDayTimes = schedule.MonthlyMonthDateBasedDayTimes.ToDictionary(entry => entry.Key, entry => entry.Value.ToArray());
+            this.monthlyMonthDateBasedDayTimes = schedule.MonthlyMonthDateBasedGetCopyOfDayTimes();
 
-            this.monthlyMonthRelativeBasedDayTimes = new Dictionary<MonthRelativeCombination, TimeSpan?[]>();
-            foreach (KeyValuePair<MonthRelativeCombination, TimeSpan?[]> scheduleMonthlyMonthRelativeBasedDayTime in schedule.MonthlyMonthRelativeBasedDayTimes)
+            this.monthlyMonthRelativeBasedDayTimes = schedule.MonthlyMonthRelativeBasedGetCopyOfDayTimes(this.monthlyMonthRelativeBasedCombinations);
+        }
+
+        public Dictionary<int, TimeSpan?[]> DailyGetCopyOfDayTimes(Schedule schedule)
+        {
+            Dictionary<int, TimeSpan?[]> result = new Dictionary<int, TimeSpan?[]>();
+
+            foreach (int dayIndex in schedule.DailyDaysWithDayTimes)
             {
-                MonthRelativeCombination monthRelativeCombination = this.getMonthRelativeBasedCombination(
-                    scheduleMonthlyMonthRelativeBasedDayTime.Key.DayPosition, scheduleMonthlyMonthRelativeBasedDayTime.Key.DayOfWeek);
+                result.Add(dayIndex, new TimeSpan?[3]);
 
-                if (monthRelativeCombination == null)
+                for (int index = 0; index < 3; index++)
                 {
-                    monthRelativeCombination = new MonthRelativeCombination(scheduleMonthlyMonthRelativeBasedDayTime.Key.DayPosition, scheduleMonthlyMonthRelativeBasedDayTime.Key.DayOfWeek);
+                    result[dayIndex][index] = schedule.DailyGetDayTime(dayIndex, index);
+                }
+            }
+
+            return result;
+        }
+
+        public bool[] DailyGetCopyOfDays(Schedule schedule)
+        {
+            bool[] daysActive = new bool[3];
+
+            for (int index = 0; index < 3; index++)
+            {
+                daysActive[index] = schedule.DailyGetDayActive(index);
+            }
+
+            return daysActive;
+        }
+
+        public bool[] WeeklyGetCopyOfWeekDays(Schedule schedule)
+        {
+            bool[] daysActive = new bool[7];
+
+            for (int index = 0; index <= 6; index++)
+            {
+                daysActive[index] = schedule.WeeklyGetWeekDayActive(index);
+            }
+
+            return daysActive;
+        }
+
+        private Dictionary<DayOfWeek, TimeSpan?[]> WeeklyGetCopyOfDayTimes(Schedule schedule)
+        {
+            Dictionary<DayOfWeek, TimeSpan?[]> result = new Dictionary<DayOfWeek, TimeSpan?[]>();
+
+            foreach (DayOfWeek dayOfWeek in schedule.WeeklyDaysWithDayTimes)
+            {
+                TimeSpan?[] times = new TimeSpan?[3];
+                for (int slot = 0; slot < 3; slot++)
+                {
+                    times[slot] = schedule.WeeklyGetDayTime(dayOfWeek, slot);
                 }
 
-                this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, scheduleMonthlyMonthRelativeBasedDayTime.Value.ToArray());
+                result.Add(dayOfWeek, times);
             }
+
+            return result;
+        }
+
+        private bool[] monthlyMonthDateBasedGetCopyOfDates()
+        {
+            bool[] days = new bool[31];
+
+            for (int dayIndex = 0; dayIndex <= 30; dayIndex++)
+            {
+                days[dayIndex] = this.monthlyMonthDateBasedDates[dayIndex];
+            }
+
+            return days;
+        }
+
+        private Dictionary<MonthRelativeCombination, TimeSpan?[]> MonthlyMonthRelativeBasedGetCopyOfDayTimes(List<MonthRelativeCombination> existingMonthRelativeCombinations)
+        {
+            Dictionary<MonthRelativeCombination, TimeSpan?[]> result = new Dictionary<MonthRelativeCombination, TimeSpan?[]>();
+
+            foreach (KeyValuePair<MonthRelativeCombination, TimeSpan?[]> dayTimes in this.monthlyMonthRelativeBasedDayTimes)
+            {
+                MonthRelativeCombination[] combinations =
+                    existingMonthRelativeCombinations.Where(key =>
+                        key.DayPosition == dayTimes.Key.DayPosition &&
+                        key.DayOfWeek == dayTimes.Key.DayOfWeek).ToArray();
+
+                if (combinations.Length < 0 || combinations.Length > 1)
+                {
+                    throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
+                }
+
+                MonthRelativeCombination monthRelativeCombination;
+                if (combinations.Length > 0)
+                {
+                    monthRelativeCombination = combinations[0];
+
+                }
+                else
+                {
+                    monthRelativeCombination = new MonthRelativeCombination(dayTimes.Key.DayPosition, dayTimes.Key.DayOfWeek);
+                }
+
+                result.Add(monthRelativeCombination, new TimeSpan?[3]);
+
+                for (int index = 0; index < 3; index++)
+                {
+                    result[monthRelativeCombination][index] = dayTimes.Value[index];
+                }
+            }
+
+            return result;
+        }
+
+        private Dictionary<int, TimeSpan?[]> MonthlyMonthDateBasedGetCopyOfDayTimes()
+        {
+            Dictionary<int, TimeSpan?[]> result = new Dictionary<int, TimeSpan?[]>();
+
+            foreach (KeyValuePair<int, TimeSpan?[]> dayTimes in this.monthlyMonthDateBasedDayTimes)
+            {
+                result.Add(dayTimes.Key, new TimeSpan?[3]);
+
+                for (int index = 0; index < 3; index++)
+                {
+                    result[dayTimes.Key][index] = dayTimes.Value[index];
+                }
+            }
+
+            return result;
         }
 
         public void Reset()
@@ -299,6 +439,8 @@ namespace Drexel.VidUp.Business
         {
             this.startDate = DateTime.Now;
             this.dailyDayFrequency = 1;
+            this.dailyDays = new bool[3];
+            this.dailyDays[0] = true;
             this.dailyHasAdvancedSchedule = false;
             this.dailyDefaultTime = new TimeSpan(0, 0, 0);
             this.dailyDayTimes = new Dictionary<int, TimeSpan?[]>();
@@ -317,18 +459,6 @@ namespace Drexel.VidUp.Business
             this.weeklyDayTimes = new Dictionary<DayOfWeek, TimeSpan?[]>();
             this.weeklyDayTimes.Add(DayOfWeek.Monday, new TimeSpan?[3]);
             this.weeklyDayTimes[DayOfWeek.Monday][0] = new TimeSpan();
-            this.weeklyDayTimes.Add(DayOfWeek.Tuesday, new TimeSpan?[3]);
-            this.weeklyDayTimes[DayOfWeek.Tuesday][0] = new TimeSpan();
-            this.weeklyDayTimes.Add(DayOfWeek.Wednesday, new TimeSpan?[3]);
-            this.weeklyDayTimes[DayOfWeek.Wednesday][0] = new TimeSpan();
-            this.weeklyDayTimes.Add(DayOfWeek.Thursday, new TimeSpan?[3]);
-            this.weeklyDayTimes[DayOfWeek.Thursday][0] = new TimeSpan();
-            this.weeklyDayTimes.Add(DayOfWeek.Friday, new TimeSpan?[3]);
-            this.weeklyDayTimes[DayOfWeek.Friday][0] = new TimeSpan();
-            this.weeklyDayTimes.Add(DayOfWeek.Saturday, new TimeSpan?[3]);
-            this.weeklyDayTimes[DayOfWeek.Saturday][0] = new TimeSpan();
-            this.weeklyDayTimes.Add(DayOfWeek.Sunday, new TimeSpan?[3]);
-            this.weeklyDayTimes[DayOfWeek.Sunday][0] = new TimeSpan();
         }
 
         private void resetMonthlySchedule()
@@ -351,10 +481,478 @@ namespace Drexel.VidUp.Business
             this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][0] = new TimeSpan();
         }
 
-        private MonthRelativeCombination getMonthRelativeBasedCombination(DayPosition dayPosition, DayOfWeek day)
+        public void DailySetDayTime(int dayIndex, int timeIndex, TimeSpan? time)
+        {
+            if (dayIndex < 0 || dayIndex > 2)
+            {
+                throw new InvalidOperationException("dayIndex must be between 0 and 2.");
+            }
+
+            if (timeIndex < 0 || timeIndex > 2)
+            {
+                throw new InvalidOperationException("timeIndex must be between 0 and 2.");
+            }
+
+            if (timeIndex == 0)
+            {
+                if (time == null)
+                {
+                    throw new InvalidScheduleException($"Day {dayIndex + 1} Time 1 must not be unset.");
+                }
+                else
+                {
+                    TimeSpan?[] timeSpans;
+                    if (this.dailyDayTimes.TryGetValue(dayIndex, out timeSpans))
+                    {
+                        if (timeSpans[1] != null && time >= timeSpans[1])
+                        {
+                            throw new InvalidScheduleException($"Day {dayIndex + 1} Time 1 must be smaller than Day {dayIndex + 1} Time 2.");
+                        }
+                    }
+                    else
+                    {
+                        timeSpans = new TimeSpan?[3];
+                        this.dailyDayTimes.Add(dayIndex, timeSpans);
+                    }
+                }
+            }
+
+            if (timeIndex == 1)
+            {
+                if (time == null)
+                {
+                    if (this.dailyDayTimes[dayIndex][timeIndex + 1] != null)
+                    {
+                        throw new InvalidScheduleException($"Day {dayIndex + 1} Time 2 can't be unset if Day {dayIndex + 1} Time 3 has a value.");
+                    }
+                }
+                else
+                {
+                    if (time <= this.dailyDayTimes[dayIndex][timeIndex - 1] ||
+                        this.dailyDayTimes[dayIndex][timeIndex + 1] != null && time >= this.dailyDayTimes[dayIndex][timeIndex + 1])
+                    {
+                        throw new InvalidScheduleException($"Day {dayIndex + 1} Time 2 must be greater than Day {dayIndex + 1} Time 1 and smaller than Day {dayIndex + 1} Time 3.");
+                    }
+                }
+            }
+
+            if (timeIndex == 2)
+            {
+                if (time != null)
+                {
+                    if (this.dailyDayTimes[dayIndex][timeIndex - 1] == null)
+                    {
+                        throw new InvalidScheduleException($"Day {dayIndex + 1} Time 3 can't be set if Day {dayIndex + 1} Time 2 has no value.");
+                    }
+
+                    if (time <= this.dailyDayTimes[dayIndex][timeIndex - 1])
+                    {
+                        throw new InvalidScheduleException($"Day {dayIndex + 1} Time 3 must be greater than Day {dayIndex + 1} Time 2.");
+                    }
+                }
+            }
+
+            this.dailyDayTimes[dayIndex][timeIndex] = time;
+        }
+
+        public void WeeklySetDayTime(DayOfWeek dayOfWeek, int timeIndex, TimeSpan? time)
+        {
+            if (timeIndex == 0)
+            {
+                if (time == null)
+                {
+                    throw new InvalidScheduleException("Weekly Time 1 must not be unset.");
+                }
+                else
+                {
+                    TimeSpan?[] timeSpans;
+                    if (this.weeklyDayTimes.TryGetValue(dayOfWeek, out timeSpans))
+                    {
+                        if (timeSpans[1] != null && time >= timeSpans[1])
+                        {
+                            throw new InvalidScheduleException($"{dayOfWeek} Time 1 must be smaller than {dayOfWeek} Time 2.");
+                        }
+                    }
+                    else
+                    {
+                        timeSpans = new TimeSpan?[3];
+                        this.weeklyDayTimes.Add(dayOfWeek, timeSpans);
+                    }
+                }
+
+                this.weeklyDayTimes[dayOfWeek][0] = time;
+            }
+
+            if (timeIndex == 1)
+            {
+                if (time == null)
+                {
+                    if (this.weeklyDayTimes[dayOfWeek][timeIndex + 1] != null)
+                    {
+                        throw new InvalidScheduleException($"{dayOfWeek} Time 2 can't be unset if {dayOfWeek} Time 3 has a value.");
+                    }
+                }
+                else
+                {
+                    if (time <= this.weeklyDayTimes[dayOfWeek][timeIndex - 1] ||
+                        this.weeklyDayTimes[dayOfWeek][timeIndex + 1] != null && time >= this.weeklyDayTimes[dayOfWeek][timeIndex + 1])
+                    {
+                        throw new InvalidScheduleException($"{dayOfWeek} Time 2 must be greater than {dayOfWeek} Time 1 and smaller than {dayOfWeek} Time 3.");
+                    }
+                }
+            }
+
+            if (timeIndex == 2)
+            {
+                if (time != null)
+                {
+                    if (this.weeklyDayTimes[dayOfWeek][timeIndex - 1] == null)
+                    {
+                        throw new InvalidScheduleException($"{dayOfWeek} Time 3 can't be set if {dayOfWeek} Time 2 has no value.");
+                    }
+
+                    if (time <= this.weeklyDayTimes[dayOfWeek][timeIndex - 1])
+                    {
+                        throw new InvalidScheduleException($"{dayOfWeek} Time 3 must be greater than {dayOfWeek} Time 2.");
+                    }
+                }
+            }
+
+            this.weeklyDayTimes[dayOfWeek][timeIndex] = time;
+        }
+
+        public void MonthlyMonthDateBasedSetDayTime(int dayIndex, int timeIndex, TimeSpan? time)
+        {
+            if (timeIndex == 0)
+            {
+                if (time == null)
+                {
+                    throw new InvalidScheduleException("Monthly Time 1 must not be unset.");
+                }
+                else
+                {
+                    TimeSpan?[] timeSpans;
+                    if (this.monthlyMonthDateBasedDayTimes.TryGetValue(dayIndex, out timeSpans))
+                    {
+                        if (timeSpans[1] != null && time >= timeSpans[1])
+                        {
+                            throw new InvalidScheduleException("Monthly Time 1 must be smaller than monthly Time 2.");
+                        }
+                    }
+                    else
+                    {
+                        timeSpans = new TimeSpan?[3];
+                        this.monthlyMonthDateBasedDayTimes.Add(dayIndex, timeSpans);
+                    }
+                }
+
+                this.monthlyMonthDateBasedDayTimes[dayIndex][0] = time;
+            }
+
+            if (timeIndex == 1)
+            {
+                if (time == null)
+                {
+                    if (this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex + 1] != null)
+                    {
+                        throw new InvalidScheduleException("Monthly Time 2 can't be unset if Monthly Time 3 has a value.");
+                    }
+                }
+                else
+                {
+                    if (time <= this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex - 1] ||
+                        this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex + 1] != null && time >= this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex + 1])
+                    {
+                        throw new InvalidScheduleException("Monthly Time 2 must be greater than monthly Time 1 and smaller than monthly Time 3.");
+                    }
+                }
+            }
+
+            if (timeIndex == 2)
+            {
+                if (time != null)
+                {
+                    if (this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex - 1] == null)
+                    {
+                        throw new InvalidScheduleException("Monthly Time 3 can't be set if Monthly Time 2 has no value.");
+                    }
+
+                    if (time <= this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex - 1])
+                    {
+                        throw new InvalidScheduleException("Monthly Time 3 must be greater than Monthly Time 2.");
+                    }
+                }
+            }
+
+            this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex] = time;
+        }
+
+        public void MonthlyMonthRelativeBasedSetDayTime(DayPosition dayPosition, DayOfWeek dayOfWeek, int timeIndex, TimeSpan? time)
+        {
+            MonthRelativeCombination monthRelativeCombination = this.monthlyMonthRelativeBasedGetKeyFromDayTimes(dayPosition, dayOfWeek);
+
+            if (timeIndex == 0)
+            {
+                if (time == null)
+                {
+                    throw new InvalidScheduleException("Monthly Time 1 must not be unset.");
+                }
+                else
+                {
+                    TimeSpan?[] timeSpans;
+                    if (this.monthlyMonthRelativeBasedDayTimes.TryGetValue(monthRelativeCombination, out timeSpans))
+                    {
+                        if (timeSpans[1] != null && time >= timeSpans[1])
+                        {
+                            throw new InvalidScheduleException("Monthly Time 1 must be smaller than monthly Time 2.");
+                        }
+                    }
+                    else
+                    {
+                        timeSpans = new TimeSpan?[3];
+                        this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, timeSpans);
+                    }
+                }
+
+                this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][0] = time;
+            }
+
+            if (timeIndex == 1)
+            {
+                if (time == null)
+                {
+                    if (this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][timeIndex + 1] != null)
+                    {
+                        throw new InvalidScheduleException("Monthly Time 2 can't be unset if Monthly Time 3 has a value.");
+                    }
+                }
+                else
+                {
+                    if (time <= this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][timeIndex - 1] ||
+                        this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][timeIndex + 1] != null && time >= this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][timeIndex + 1])
+                    {
+                        throw new InvalidScheduleException("Monthly Time 2 must be greater than monthly Time 1 and smaller than monthly Time 3.");
+                    }
+                }
+            }
+
+            if (timeIndex == 2)
+            {
+                if (time != null)
+                {
+                    if (this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][timeIndex - 1] == null)
+                    {
+                        throw new InvalidScheduleException("Monthly Time 3 can't be set if Monthly Time 2 has no value.");
+                    }
+
+                    if (time <= this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][timeIndex - 1])
+                    {
+                        throw new InvalidScheduleException("Monthly Time 3 must be greater than Monthly Time 2.");
+                    }
+                }
+            }
+
+            this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][timeIndex] = time;
+        }
+
+        public void DailySetDayActive(int dayIndex, bool active)
+        {
+            if (dayIndex < 1 || dayIndex > 2)
+            {
+                throw new InvalidOperationException("dayIndex must be between 1 and 2.");
+            }
+
+            if (active)
+            {
+                if (dayIndex == 2 && !this.dailyDays[1])
+                {
+                    throw new InvalidScheduleException("Day 3 can't be activated if day 2 isn't active.");
+                }
+
+            }
+
+            if (!active)
+            {
+                if (dayIndex == 1 && this.dailyDays[2])
+                {
+                    throw new InvalidScheduleException("Day 2 can't be deactivated if day 3 is active.");
+                }
+            }
+
+            if (active)
+            {
+                if (!this.dailyDayTimes.ContainsKey(dayIndex))
+                {
+                    this.dailyDayTimes.Add(dayIndex, new TimeSpan?[3]);
+                    this.dailyDayTimes[dayIndex][0] = new TimeSpan();
+                }
+            }
+
+            this.dailyDays[dayIndex] = active;
+        }
+
+        public void WeeklySetDayActive(int dayIndex, bool active)
+        {
+            if (dayIndex < 0 || dayIndex > 6)
+            {
+                throw new InvalidOperationException("dayIndex must be between 0 and 6.");
+            }
+
+            if (!active)
+            {
+                int count = this.weeklyDays.Count(dayActive => dayActive == true);
+                if (count < 2)
+                {
+                    throw new InvalidScheduleException($"{Schedule.GetDayOfWeekFromDayIndex(dayIndex)} is the last active day and can't be disabled.");
+                }
+            }
+
+            if (this.weeklyHasAdvancedSchedule)
+            {
+                DayOfWeek dayOfWeek = Schedule.GetDayOfWeekFromDayIndex(dayIndex);
+                if (!this.weeklyDayTimes.ContainsKey(dayOfWeek))
+                {
+                    this.weeklyDayTimes.Add(dayOfWeek, new TimeSpan?[3]);
+                    this.weeklyDayTimes[dayOfWeek][0] = new TimeSpan();
+                }
+            }
+
+            this.weeklyDays[dayIndex] = active;
+        }
+
+        private void weeklyCheckDayTimes()
+        {
+            for (int dayIndex = 0; dayIndex <= 6; dayIndex++)
+            {
+                if (this.WeeklyGetWeekDayActive(dayIndex))
+                {
+                    DayOfWeek dayOfWeek = Schedule.GetDayOfWeekFromDayIndex(dayIndex);
+                    if (!this.weeklyDayTimes.ContainsKey(dayOfWeek))
+                    {
+                        this.weeklyDayTimes.Add(dayOfWeek, new TimeSpan?[3]);
+                        this.weeklyDayTimes[dayOfWeek][0] = new TimeSpan();
+                    }
+                }
+            }
+        }
+
+        private void monthlyMonthRelativeBasedCheckDayTimes()
+        {
+            foreach (MonthRelativeCombination monthlyMonthRelativeBasedCombination in this.monthlyMonthRelativeBasedCombinations)
+            {
+                if (!this.monthlyMonthRelativeBasedDayTimes.ContainsKey(monthlyMonthRelativeBasedCombination))
+                {
+                    this.monthlyMonthRelativeBasedDayTimes.Add(monthlyMonthRelativeBasedCombination, new TimeSpan?[3]);
+                    this.monthlyMonthRelativeBasedDayTimes[monthlyMonthRelativeBasedCombination][0] = new TimeSpan();
+                }
+            }
+        }
+
+        private void monthlyMonthDateBasedCheckDayTimes()
+        {
+            for (int dayIndex = 0; dayIndex <= 30; dayIndex++)
+            {
+                if (this.MonthlyMonthDateBasedGetDayActive(dayIndex))
+                {
+                    if (!this.monthlyMonthDateBasedDayTimes.ContainsKey(dayIndex))
+                    {
+                        this.monthlyMonthDateBasedDayTimes.Add(dayIndex, new TimeSpan?[3]);
+                        this.monthlyMonthDateBasedDayTimes[dayIndex][0] = new TimeSpan();
+                    }
+                }
+            }
+        }
+
+        public void MonthlyMonthDateBasedSetDayActive(int dayIndex, bool active)
+        {
+            if (!active)
+            {
+                if (this.monthlyMonthDateBasedDates.Count(dayActive => dayActive == true) < 2)
+                {
+                    throw new InvalidScheduleException($"{dayIndex + 1}. is the last active day and can't be disabled.");
+                }
+            }
+            else
+            {
+                if (this.monthlyHasAdvancedSchedule)
+                {
+                    if (!this.monthlyMonthDateBasedDayTimes.ContainsKey(dayIndex))
+                    {
+                        this.monthlyMonthDateBasedDayTimes.Add(dayIndex, new TimeSpan?[3]);
+                        this.monthlyMonthDateBasedDayTimes[dayIndex][0] = new TimeSpan();
+                    }
+                }
+            }
+
+            this.monthlyMonthDateBasedDates[dayIndex] = active;
+        }
+
+        public void MonthlyMonthRelativeBasedSetDayActive(DayPosition dayPosition, DayOfWeek dayOfWeek, bool active)
+        {
+            if (!active)
+            {
+                if (this.monthlyMonthRelativeBasedCombinations.Count < 2)
+                {
+                    throw new InvalidScheduleException("Cannot remove last relative day position.");
+                }
+            }
+
+            this.monthlyMonthRelativeBasedSetDayActiveInternal(dayPosition, dayOfWeek, active);
+            
+            if (active)
+            {
+                if (this.monthlyHasAdvancedSchedule)
+                {
+                    MonthRelativeCombination monthRelativeCombination =
+                        this.monthlyMonthRelativeBasedGetCombination(dayPosition, dayOfWeek);
+                    if (!this.monthlyMonthRelativeBasedDayTimes.ContainsKey(monthRelativeCombination))
+                    {
+                        this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, new TimeSpan?[3]);
+                        this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][0] = new TimeSpan();
+                    }
+                }
+            }
+        }
+
+        private void monthlyMonthRelativeBasedSetDayActiveInternal(DayPosition dayPosition, DayOfWeek dayOfWeek, bool value)
         {
             MonthRelativeCombination[] combinations =
                 this.monthlyMonthRelativeBasedCombinations.Where(key =>
+                    key.DayPosition == dayPosition &&
+                    key.DayOfWeek == dayOfWeek).ToArray();
+
+            int count = combinations.Length;
+            if (count > 1)
+            {
+                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
+            }
+
+            if (value)
+            {
+                if (count < 1)
+                {
+                    MonthRelativeCombination monthRelativeCombination = this.monthlyMonthRelativeBasedGetKeyFromDayTimes(dayPosition, dayOfWeek);
+                    if (monthRelativeCombination == null)
+                    {
+                        monthRelativeCombination = new MonthRelativeCombination(dayPosition, dayOfWeek);
+                    }
+
+                    this.monthlyMonthRelativeBasedCombinations.Add(monthRelativeCombination);
+                }
+            }
+            else
+            {
+                if (count > 0)
+                {
+                    this.monthlyMonthRelativeBasedCombinations.Remove(combinations[0]);
+                }
+            }
+        }
+
+        private MonthRelativeCombination monthlyMonthRelativeBasedGetKeyFromDayTimes(DayPosition dayPosition, DayOfWeek day)
+        {
+            MonthRelativeCombination[] combinations =
+                this.monthlyMonthRelativeBasedDayTimes.Keys.Where(key =>
                     key.DayPosition == dayPosition &&
                     key.DayOfWeek == day).ToArray();
 
@@ -370,6 +968,75 @@ namespace Drexel.VidUp.Business
             }
 
             return combinations[0];
+        }
+
+        private MonthRelativeCombination monthlyMonthRelativeBasedGetCombination(DayPosition dayPosition, DayOfWeek dayOfWeek)
+        {
+            MonthRelativeCombination[] combinations =
+                this.monthlyMonthRelativeBasedCombinations.Where(key =>
+                    key.DayPosition == dayPosition &&
+                    key.DayOfWeek == dayOfWeek).ToArray();
+
+            int count = combinations.Length;
+            if (count != 1)
+            {
+                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
+            }
+
+            return combinations[0];
+        }
+
+        public TimeSpan? DailyGetDayTime(int dayIndex, int timeIndex)
+        {
+            if (this.dailyDayTimes.ContainsKey(dayIndex))
+            {
+                return this.dailyDayTimes[dayIndex][timeIndex];
+            }
+
+            return null;
+        }
+
+        public TimeSpan? WeeklyGetDayTime(DayOfWeek dayOfWeek, int timeIndex)
+        {
+            return this.weeklyDayTimes[dayOfWeek][timeIndex];
+        }
+
+        public TimeSpan? MonthlyMonthDateBasedGetDayTime(int dayIndex, int timeIndex)
+        {
+            if (!this.monthlyMonthDateBasedDayTimes.ContainsKey(dayIndex))
+            {
+                return null;
+            }
+
+            return this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex];
+        }
+
+        public TimeSpan? MonthlyMonthRelativeBasedGetDayTime(DayPosition dayPosition, DayOfWeek dayOfWeek, int index)
+        {
+            MonthRelativeCombination monthRelativeCombination = this.monthlyMonthRelativeBasedGetKeyFromDayTimes(dayPosition, dayOfWeek);
+            if (monthRelativeCombination == null)
+            {
+                return null;
+            }
+            else
+            {
+                return this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][index];
+            }
+        }
+
+        public bool DailyGetDayActive(int dayIndex)
+        {
+            return this.dailyDays[dayIndex];
+        }
+
+        public bool WeeklyGetWeekDayActive(int dayIndex)
+        {
+            return this.weeklyDays[dayIndex];
+        }
+
+        public bool MonthlyMonthDateBasedGetDayActive(int dayIndex)
+        {
+            return this.monthlyMonthDateBasedDates[dayIndex];
         }
 
         //return next DateTime according to schedule after dateTimeAfter
@@ -736,11 +1403,7 @@ namespace Drexel.VidUp.Business
                 weekIndex = weekIndex + (this.weeklyWeekFrequency - remainder);
             }
 
-            int dayIndex = (int)dateTime.DayOfWeek - 1;
-            if (dayIndex < 0)
-            {
-                dayIndex = 6;
-            }
+            int dayIndex = Schedule.GetCorrectedDayIndex(dateTime.DayOfWeek);
 
             for (int index = dayIndex; index <= 6; index++)
             {
@@ -905,12 +1568,12 @@ namespace Drexel.VidUp.Business
         private int dailyGetDayIndex(DateTime potentialNextDate)
         {
             int dayIndexes = 1;
-            if (this.DailyDayTimes[1] != null && this.DailyDayTimes[1][1] != null)
+            if (this.dailyDays[1])
             {
                 dayIndexes = 2;
             }
 
-            if (this.DailyDayTimes[2] != null && this.DailyDayTimes[2][1] != null)
+            if (this.dailyDays[2])
             {
                 dayIndexes = 3;
             }
@@ -943,6 +1606,29 @@ namespace Drexel.VidUp.Business
                 throw new ArgumentException("endDate cannot be less than startDate");
 
             return ((endDate.Year - startDate.Year) * 12) + endDate.Month - startDate.Month;
+        }
+
+        //corrects day index to start with monday and not with sunday
+        public static int GetCorrectedDayIndex(DayOfWeek dayOfWeek)
+        {
+            int dayIndex = (int)dayOfWeek - 1;
+            if (dayIndex < 0)
+            {
+                dayIndex = 6;
+            }
+
+            return dayIndex;
+        }
+
+        public static DayOfWeek GetDayOfWeekFromDayIndex(int dayIndex)
+        {
+            dayIndex = dayIndex + 1;
+            if (dayIndex > 6)
+            {
+                dayIndex = 0;
+            }
+
+            return (DayOfWeek)dayIndex;
         }
     }
 }
