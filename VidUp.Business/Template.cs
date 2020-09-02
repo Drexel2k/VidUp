@@ -54,11 +54,15 @@ namespace Drexel.VidUp.Business
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //fore deserialization and fake templates (e.g. All and None Templates for filter)
-        public Template()
+        [JsonConstructor]
+        private Template()
         {
-            this.uploads = new List<Upload>();
-            this.tags = new List<string>();
+        }
+
+        //for fake templates(e.g. All and None Templates for filter)
+        public Template(string name)
+        {
+            this.name = name;
         }
 
         public Template(string name, string imagefilePath, string rootFolderPath, TemplateList templateList)

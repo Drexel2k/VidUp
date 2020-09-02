@@ -24,6 +24,12 @@ namespace Drexel.VidUp.Business
 
         public int PlaylistCount { get => this.playlists.Count; }
 
+        [JsonConstructor]
+        private PlaylistList()
+        {
+
+        }
+
         public PlaylistList(List<Playlist> playlists)
         {
             this.playlists = new List<Playlist>();

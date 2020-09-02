@@ -52,6 +52,12 @@ namespace Drexel.VidUp.Business
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        [JsonConstructor]
+        private Playlist()
+        {
+
+        }
+
         public Playlist(string name, string playlistId)
         {
             this.playlistId = playlistId;

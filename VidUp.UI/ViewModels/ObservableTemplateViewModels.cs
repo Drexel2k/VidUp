@@ -27,8 +27,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (addAll)
             {
-                Template allTemplate = new Template();
-                allTemplate.Name = "All";
+                Template allTemplate = new Template("All");
                 TemplateComboboxViewModel allViewModel = new TemplateComboboxViewModel(allTemplate);
 
                 this.templateComboboxViewModels.Add(allViewModel);
@@ -36,8 +35,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if(addNone)
             {
-                Template noneTemplate = new Template();
-                noneTemplate.Name = "None";
+                Template noneTemplate = new Template("None");
                 TemplateComboboxViewModel noViewModel = new TemplateComboboxViewModel(noneTemplate);
 
                 this.templateComboboxViewModels.Add(noViewModel);

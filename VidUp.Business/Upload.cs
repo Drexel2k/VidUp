@@ -310,9 +310,10 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public Upload()
+        [JsonConstructor]
+        private Upload()
         {
-            this.tags = new List<string>();
+            
         }
 
         public Upload(string filePath)
