@@ -58,6 +58,7 @@
     <Compile Include="..\VidUp.UI\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="QuarterHourCalculator.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="PredicateCombiner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

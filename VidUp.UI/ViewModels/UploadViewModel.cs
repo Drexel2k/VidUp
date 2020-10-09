@@ -388,7 +388,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (value)
                 {
-                    this.upload.SetPublishAtDate(DateTime.Now.Date.AddDays(1));
+                    //default publish at is 24 hour in the future
+                    this.upload.PublishAt = QuarterHourCalculator.GetRoundedToNextQuarterHour
+                        (new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0).AddHours(24));
                 }
                 else
                 {
@@ -430,11 +432,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 JsonSerialization.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("PublishAtDate");
             }
-        }
-
-        public DateTime PublishAtFirstDate
-        {
-            get => DateTime.Now.AddDays(1).Date;
         }
 
         public Upload Upload { get => this.upload;  }

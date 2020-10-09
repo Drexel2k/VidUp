@@ -454,6 +454,12 @@ namespace Drexel.VidUp.Business
 
         public void SetPublishAtTime(TimeSpan quarterHour)
         {
+            DateTime publishAtInternal = new DateTime(this.publishAt.Value.Year, this.publishAt.Value.Month, this.publishAt.Value.Day, quarterHour.Hours, quarterHour.Minutes, 0);
+            if (publishAtInternal <= DateTime.Now)
+            {
+
+            }
+
             this.publishAt = new DateTime(this.publishAt.Value.Year, this.publishAt.Value.Month, this.publishAt.Value.Day, quarterHour.Hours, quarterHour.Minutes, 0);
             this.lastModifiedInternal = DateTime.Now;
             this.raisePropertyChanged("PublishAt");
