@@ -624,7 +624,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         raisePropertyChanged("TagsAsString");
                         break;
                     case "visibility":
-                        this.upload.CopyVisbilityFromTemplate();
+                        this.upload.CopyVisibilityFromTemplate();
                         raisePropertyChanged("Visibility");
                         break;
                     case "playlist":

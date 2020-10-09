@@ -345,11 +345,11 @@ namespace Drexel.VidUp.Business
             this.CopyTitleFromTemplate();
             this.CopyDescriptionFromTemplate();
             this.CopyTagsFromtemplate();
-            this.CopyVisbilityFromTemplate();
+            this.CopyVisibilityFromTemplate();
             this.CopyPlaylistFromTemplate();
         }
 
-        public void CopyVisbilityFromTemplate()
+        public void CopyVisibilityFromTemplate()
         {
             if (this.template != null)
             {
@@ -427,6 +427,8 @@ namespace Drexel.VidUp.Business
                 return;
             }
 
+            this.visibility = Visibility.Private;
+
             bool isFree = false;
             DateTime plannedUntil = DateTime.MinValue;
             DateTime nextPossibleDateTime = DateTime.MinValue;
@@ -445,6 +447,9 @@ namespace Drexel.VidUp.Business
             }
 
             this.PublishAt = nextPossibleDateTime;
+
+            this.raisePropertyChanged("Visibility");
+            this.raisePropertyChanged("PublishAt");
         }
 
         public void SetPublishAtTime(TimeSpan quarterHour)

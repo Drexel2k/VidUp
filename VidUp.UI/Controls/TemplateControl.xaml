@@ -158,7 +158,7 @@
                         <TextBox Text="{Binding TagsAsString, UpdateSourceTrigger=PropertyChanged, Delay=500}" TextWrapping="Wrap" Width="615" MinHeight="100" MaxHeight ="100" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                     </StackPanel>
                     <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
-                        <Label Content="Visbility: " Width="110" />
+                        <Label Content="Visibility: " Width="110" />
                     </StackPanel>
                     <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
                         <ComboBox  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding Visibility}" Width="100">

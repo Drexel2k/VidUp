@@ -227,7 +227,16 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.template != null ? this.template.YtVisibility : Visibility.Private;
             set
             {
+                if (value != Visibility.Private && this.template.YtVisibility == Visibility.Private)
+                {
+                    if (this.template.UsePublishAtSchedule)
+                    {
+                        this.template.UsePublishAtSchedule = false;
+                    }
+                }
+
                 this.template.YtVisibility = value;
+                this.raisePropertyChanged("UsePublishAtSchedule");
                 this.raisePropertyChangedAndSerializeTemplateList("Visibility");
             }
         }
@@ -333,7 +342,17 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.template != null && this.template.UsePublishAtSchedule;
             set
             {
+                if (value && !this.template.UsePublishAtSchedule)
+                {
+                    if (this.template.YtVisibility != Visibility.Private)
+                    {
+                        this.template.YtVisibility = Visibility.Private;
+                    }
+                }
+
                 this.template.UsePublishAtSchedule = value;
+
+                this.raisePropertyChanged("Visibility");
                 this.raisePropertyChangedAndSerializeTemplateList("UsePublishAtSchedule");
             }
         }

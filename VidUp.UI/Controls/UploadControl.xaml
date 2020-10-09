@@ -139,7 +139,7 @@
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset visibility to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="visibility" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
-                <Label Content="Visbility: " Width="110" />
+                <Label Content="Visibility: " Width="110" />
             </StackPanel>
             <ComboBox Grid.Row="7" Grid.Column="1"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding Visibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left">
                     <ComboBox.ItemTemplate>
