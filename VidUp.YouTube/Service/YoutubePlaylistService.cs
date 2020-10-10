@@ -87,50 +87,77 @@ namespace Drexel.VidUp.Youtube.Service
                 string[] playlistIdsInternal = playlistIds as string[] ?? playlistIds.ToArray();
                 foreach (string playlistId in playlistIdsInternal)
                 {
-                    List<string> videoIds;
-                    if (!result.TryGetValue(playlistId, out videoIds))
+                    try
                     {
-                        videoIds = new List<string>();
-                        result.Add(playlistId, videoIds);
-                    }
 
-                    HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedHttpWebRequest(
-                        $"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}", "GET");
+                        HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedHttpWebRequest(
+                            $"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}", "GET");
 
-                    using (HttpWebResponse httpResponse =
-                        (HttpWebResponse) await request.GetResponseAsync())
-                    {
-                        using (StreamReader reader =
-                            new StreamReader(httpResponse.GetResponseStream()))
+                        using (HttpWebResponse httpResponse = (HttpWebResponse) await request.GetResponseAsync())
                         {
-                            var definition = new
+                            List<string> videoIds;
+                            if (!result.TryGetValue(playlistId, out videoIds))
                             {
-                                Items = new[]
+                                videoIds = new List<string>();
+                                result.Add(playlistId, videoIds);
+                            }
+
+                            using (StreamReader reader =
+                                new StreamReader(httpResponse.GetResponseStream()))
+                            {
+                                var definition = new
                                 {
-                                    new
+                                    Items = new[]
                                     {
-                                        Snippet = new
+                                        new
                                         {
-                                            ResourceId = new
+                                            Snippet = new
                                             {
-                                                VideoId = ""
+                                                ResourceId = new
+                                                {
+                                                    VideoId = ""
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            };
+                                };
 
-                            var response =
-                                JsonConvert.DeserializeAnonymousType(await reader.ReadToEndAsync(), definition);
+                                var response =
+                                    JsonConvert.DeserializeAnonymousType(await reader.ReadToEndAsync(), definition);
 
-                            if (response.Items.Length > 0)
-                            {
-                                foreach (var item in response.Items)
+                                if (response.Items.Length > 0)
                                 {
-                                    videoIds.Add(item.Snippet.ResourceId.VideoId);
+                                    foreach (var item in response.Items)
+                                    {
+                                        videoIds.Add(item.Snippet.ResourceId.VideoId);
+                                    }
                                 }
                             }
                         }
+
+                    }
+                    catch (WebException e)
+                    {
+                        if (e.Response == null)
+                        {
+                            throw;
+                        }
+
+                        HttpWebResponse httpResponse = e.Response as HttpWebResponse;
+
+                        if (httpResponse == null)
+                        {
+                            throw;
+                        }
+
+                        if ((int)httpResponse.StatusCode != 404)
+                        {
+                            throw;
+                        }
+
+                        //continue on http status 404 which means playlist does not exist on Youtube anymore, so it isn't added to result list.
+                        httpResponse.Dispose();
+                        e.Response.Dispose();
                     }
                 }
             }

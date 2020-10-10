@@ -128,6 +128,8 @@
     <Compile Include="Converters\EnumStringValuesConverter.cs" />
     <Compile Include="Converters\EnumConverter.cs" />
     <Compile Include="Converters\FileExistsCollapsedConverter.cs" />
+    <Compile Include="Converters\TemplateModeFolderBasedVisibleConverter.cs" />
+    <Compile Include="Converters\TemplateModeFileNameBasedVisibleConverter.cs" />
     <Compile Include="Converters\FrequencyMonthlyVisibleConverter.cs" />
     <Compile Include="Converters\FrequencyWeeklyVisibleConverter.cs" />
     <Compile Include="Converters\FrequencyDailyVisibleConverter.cs" />

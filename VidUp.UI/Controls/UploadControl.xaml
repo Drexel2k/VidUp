@@ -142,12 +142,12 @@
                 <Label Content="Visibility: " Width="110" />
             </StackPanel>
             <ComboBox Grid.Row="7" Grid.Column="1"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding Visibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
 
             <StackPanel  Grid.Row="7" Grid.Column="2" Orientation="Horizontal">
                 <ToggleButton IsChecked="{Binding PublishAt}" IsEnabled="{Binding ControlsEnabled}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />

@@ -79,6 +79,7 @@
     <Compile Include="Template.cs" />
     <Compile Include="PlaylistListList.cs" />
     <Compile Include="TemplateList.cs" />
+    <Compile Include="TemplateMode.cs" />
     <Compile Include="Upload.cs" />
     <Compile Include="UploadList.cs" />
     <Compile Include="UplStatus.cs" />

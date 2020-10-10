@@ -131,18 +131,31 @@ namespace Drexel.VidUp.Business
         {
             foreach (Template template in this.templates)
             {
-                if (template.RootFolderPath != null)
+                if (template.TemplateMode == TemplateMode.FolderBased)
                 {
-                    DirectoryInfo templateRootDirectory = new DirectoryInfo(template.RootFolderPath);
-                    DirectoryInfo uploadDirectory = new DirectoryInfo(upload.FilePath);
-
-                    while (uploadDirectory.Parent != null)
+                    if (!string.IsNullOrWhiteSpace(template.RootFolderPath))
                     {
-                        if (uploadDirectory.Parent.FullName == templateRootDirectory.FullName)
+                        DirectoryInfo templateRootDirectory = new DirectoryInfo(template.RootFolderPath);
+                        DirectoryInfo uploadDirectory = new DirectoryInfo(upload.FilePath);
+
+                        while (uploadDirectory.Parent != null)
+                        {
+                            if (uploadDirectory.Parent.FullName == templateRootDirectory.FullName)
+                            {
+                                return template;
+                            }
+                            else uploadDirectory = uploadDirectory.Parent;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(template.PartOfFileName))
+                    {
+                        if (Path.GetFileName(upload.FilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
                         {
                             return template;
                         }
-                        else uploadDirectory = uploadDirectory.Parent;
                     }
                 }
             }

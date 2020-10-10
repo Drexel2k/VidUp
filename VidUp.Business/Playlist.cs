@@ -15,6 +15,8 @@ namespace Drexel.VidUp.Business
         private DateTime created;
         [JsonProperty]
         private DateTime lastModified;
+        [JsonProperty]
+        private bool notExistsOnYoutube;
 
         private DateTime lastModifiedInternal
         {
@@ -49,6 +51,16 @@ namespace Drexel.VidUp.Business
 
         public DateTime Created { get => this.created; }
         public DateTime LastModified { get => this.lastModified; }
+
+        public bool NotExistsOnYoutube
+        {
+            get => this.notExistsOnYoutube;
+            set
+            {
+                this.notExistsOnYoutube = value;
+                this.lastModifiedInternal = DateTime.Now;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

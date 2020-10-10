@@ -58,6 +58,8 @@ namespace Drexel.VidUp.Business
         private long bytesSent;
         [JsonProperty]
         private string videoId;
+        [JsonProperty]
+        private bool notExistsOnYoutube;
 
         private long fileLength;
 
@@ -205,6 +207,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.playlist = value;
+                this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("Playlist");
             }
         }
@@ -218,6 +221,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.uploadErrorMessage = value;
+                this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("UploadErrorMessage");
             }
         }
@@ -296,6 +300,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.resumableSessionUri = value;
+                this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("ResumableSessionUri");
             }
         }
@@ -308,6 +313,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.bytesSent = value;
+                this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("BytesSent");
             }
         }
@@ -320,7 +326,21 @@ namespace Drexel.VidUp.Business
             }
             set
             {
+                this.lastModifiedInternal = DateTime.Now;
                 this.videoId = value;
+            }
+        }
+
+        public bool NotExistsOnYoutube
+        {
+            get
+            {
+                return this.notExistsOnYoutube;
+            }
+            set
+            {
+                this.lastModifiedInternal = DateTime.Now;
+                this.notExistsOnYoutube = value;
             }
         }
 

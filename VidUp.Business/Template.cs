@@ -36,7 +36,11 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string imageFilePath;
         [JsonProperty]
+        private TemplateMode templateMode;
+        [JsonProperty]
         private string rootFolderPath;
+        [JsonProperty]
+        private string partOfFileName;
         [JsonProperty]
         private string thumbnailFolderPath;
         [JsonProperty]
@@ -67,7 +71,7 @@ namespace Drexel.VidUp.Business
             this.name = name;
         }
 
-        public Template(string name, string imagefilePath, string rootFolderPath, TemplateList templateList)
+        public Template(string name, string imagefilePath, TemplateMode templateMode, string rootFolderPath, string partOfFileName, TemplateList templateList)
         {
             if(templateList == null)
             {
@@ -78,7 +82,9 @@ namespace Drexel.VidUp.Business
             this.Name = name;
             this.templateList = templateList;
             this.ImageFilePathForEditing = imagefilePath;
+            this.templateMode = templateMode;
             this.rootFolderPath = rootFolderPath;
+            this.partOfFileName = partOfFileName;
             this.uploads = new List<Upload>();
             this.tags = new List<string>();
             this.created = DateTime.Now;
@@ -193,6 +199,17 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public TemplateMode TemplateMode
+        {
+            get => this.templateMode;
+            set
+            {
+                this.templateMode = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("TemplateMode");
+            }
+        }
+
         public string RootFolderPath
         {
             get => this.rootFolderPath;
@@ -201,6 +218,17 @@ namespace Drexel.VidUp.Business
                 this.rootFolderPath = value;
                 this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("RootFolderPath");
+            }
+        }
+
+        public string PartOfFileName
+        {
+            get => this.partOfFileName;
+            set
+            {
+                this.partOfFileName = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("PartOfFileName");
             }
         }
 

@@ -231,7 +231,7 @@ namespace Drexel.VidUp.Youtube.Service
                                     throw;
                                 }
 
-                                //continue on http status 308 which means resumable uplaod part was uploaded correctly.
+                                //continue on http status 308 which means resumable upload part was uploaded correctly.
                                 httpResponse.Dispose();
                                 e.Response.Dispose();
                             }

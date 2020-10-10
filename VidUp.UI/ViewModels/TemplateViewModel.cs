@@ -288,6 +288,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get => this.lastImageFilePathAdded;
         }
+
         public string RootFolderPath 
         { 
             get => this.template != null ? this.template.RootFolderPath : null;
@@ -295,6 +296,16 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.template.RootFolderPath = value;
                 this.raisePropertyChangedAndSerializeTemplateList("RootFolderPath");
+            }
+        }
+
+        public string PartOfFileName
+        {
+            get => this.template != null ? this.template.PartOfFileName : null;
+            set
+            {
+                this.template.PartOfFileName = value;
+                this.raisePropertyChangedAndSerializeTemplateList("PartOfFileName");
             }
         }
 
@@ -367,6 +378,24 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public Array TemplateModes
+        {
+            get
+            {
+                return Enum.GetValues(typeof(TemplateMode));
+            }
+        }
+
+        public TemplateMode TemplateMode
+        {
+            get => this.template != null ? this.template.TemplateMode : TemplateMode.FolderBased;
+            set
+            {
+                this.template.TemplateMode = value;
+                this.raisePropertyChangedAndSerializeTemplateList("TemplateMode");
+            }
+        }
+
         #endregion properties
 
         public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
@@ -422,7 +451,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (result)
             {
                 NewTemplateViewModel data = (NewTemplateViewModel) view.DataContext;
-                Template template = new Template(data.Name, data.ImageFilePath, data.RootFolderPath, this.templateList); 
+                Template template = new Template(data.Name, data.ImageFilePath, data.TemplateMode, data.RootFolderPath, data.PartOfFileName, this.templateList); 
                 this.AddTemplate(template);
 
             }

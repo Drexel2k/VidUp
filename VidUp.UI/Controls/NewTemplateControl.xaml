@@ -22,7 +22,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0">New Template</TextBlock>
-        <TextBlock FontSize="9" Margin="0, 12, 0, 0" Grid.Row="1">VidUp Display Information:</TextBlock>
+        <TextBlock FontSize="9" Margin="0, 24, 0, 0" Grid.Row="1">VidUp Display Information:</TextBlock>
         <TextBox wpf:HintAssist.Hint="Template Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Grid.Row="2"/>
         <Grid  Grid.Row="3" >
             <Grid.ColumnDefinitions>
@@ -39,19 +39,37 @@
                 Browse
             </Button>
         </Grid>
-        <TextBlock FontSize="9" Margin="0, 12, 0, 0" Grid.Row="4">Automated Template Assigment:</TextBlock>
+        <TextBlock FontSize="9" Margin="0, 24, 0, 0" Grid.Row="4">Automated Template Assignment:</TextBlock>
         <Grid  Grid.Row="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="20" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBox wpf:HintAssist.Hint="Root Folder" Text="{Binding RootFolderPath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" />
-            <!-- without background moseover is not triggered and tooltip doesn't open on backgrund...-->
-            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file added from this folder or any subfolder this template is assigned automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />
-            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80"  Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
+                <Label Margin="0 2 4 0">Mode: </Label>
+                <ComboBox ItemsSource="{Binding TemplateModes}" SelectedItem="{Binding TemplateMode}" Width="120" Margin="0 0 4 0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="Sets how the template is set automatically to a new upload, by folder path or by part of the file name." ToolTipService.ShowDuration="60000" Background="Transparent" />
+            </StackPanel>
+            <TextBox wpf:HintAssist.Hint="Root Folder" Text="{Binding RootFolderPath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False" Grid.Column="0" Grid.Row="1" Visibility="{Binding TemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}" />
+            <!-- without background mouseover is not triggered and tooltip doesn't open on backgrund...-->
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" Grid.Row="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file added from this folder or any subfolder this template is assigned automatically." ToolTipService.ShowDuration="60000" Background="Transparent" Visibility="{Binding TemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}" />
+            <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0" Width="80" Grid.Column="2"  Grid.Row="1" Visibility="{Binding TemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}">
                 Browse
             </Button>
+            <TextBox wpf:HintAssist.Hint="Part of File Name" Text="{Binding PartOfFileName}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" Grid.Column="0" Grid.Row="1" Visibility="{Binding TemplateMode, Mode=OneWay, Converter={converters:TemplateModeFileNameBasedVisibleConverter}}" />
+            <!-- without background mouseover is not triggered and tooltip doesn't open on backgrund...-->
+            <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" Grid.Row="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="To every file which is added with this text as part of its file name this template is assigned automatically." ToolTipService.ShowDuration="60000" Background="Transparent" Visibility="{Binding TemplateMode, Mode=OneWay, Converter={converters:TemplateModeFileNameBasedVisibleConverter}}" />
         </Grid>
         <StackPanel Orientation="Horizontal" Grid.Row="6"
                     Margin="0 16 0 0">

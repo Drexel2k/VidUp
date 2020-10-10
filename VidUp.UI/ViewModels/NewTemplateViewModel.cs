@@ -1,9 +1,7 @@
-﻿#region
-
+﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-
-#endregion
+using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -12,7 +10,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand openFileDialogCommand;
         private string name;
         private string imageFilePath;
+        private TemplateMode templateMode;
         private string rootFolderPath;
+        private string partOfFileName;
         private bool formVaild = false;
 
         public string Name
@@ -54,6 +54,31 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
         }
+
+        public TemplateMode TemplateMode
+        {
+            get
+            {
+                return this.templateMode;
+            }
+            set
+            {
+                if (this.templateMode != value)
+                {
+                    this.templateMode = value;
+                    this.raisePropertyChanged("TemplateMode");
+                }
+            }
+        }
+
+        public Array TemplateModes
+        {
+            get
+            {
+                return Enum.GetValues(typeof(TemplateMode));
+            }
+        }
+
         public string RootFolderPath
         {
             get
@@ -66,6 +91,22 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.rootFolderPath = value;
                     this.raisePropertyChanged("RootFolderPath");
+                }
+            }
+        }
+
+        public string PartOfFileName
+        {
+            get
+            {
+                return this.partOfFileName;
+            }
+            set
+            {
+                if (this.partOfFileName != value)
+                {
+                    this.partOfFileName = value;
+                    this.raisePropertyChanged("PartOfFileName");
                 }
             }
         }
