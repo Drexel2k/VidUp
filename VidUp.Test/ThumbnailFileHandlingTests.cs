@@ -57,9 +57,9 @@ namespace Drexel.VidUp.Test
             Directory.CreateDirectory(Path.Combine(ThumbnailFileHandlingTests.t1RootFolder, "videos"));
             File.Copy(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestAssets", "video1.mkv"), ThumbnailFileHandlingTests.t1RootVideo1FilePath);
 
-            ThumbnailFileHandlingTests.t1 = new Template("T1", null, ThumbnailFileHandlingTests.t1RootFolder, ThumbnailFileHandlingTests.templateList);
-            ThumbnailFileHandlingTests.t2 = new Template("T2", null, null, ThumbnailFileHandlingTests.templateList);
-            ThumbnailFileHandlingTests.t3 = new Template("T3", null, null, ThumbnailFileHandlingTests.templateList);
+            ThumbnailFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, ThumbnailFileHandlingTests.t1RootFolder, null, ThumbnailFileHandlingTests.templateList);
+            ThumbnailFileHandlingTests.t2 = new Template("T2", null, TemplateMode.FolderBased, null, null, ThumbnailFileHandlingTests.templateList);
+            ThumbnailFileHandlingTests.t3 = new Template("T3", null, TemplateMode.FolderBased, null, null, ThumbnailFileHandlingTests.templateList);
 
             ThumbnailFileHandlingTests.templateViewModel.AddTemplate(t1);
             ThumbnailFileHandlingTests.templateViewModel.AddTemplate(t2);
@@ -218,7 +218,7 @@ namespace Drexel.VidUp.Test
         [Test, Order(18)]
         public void ReAddT1AndU1()
         {
-            ThumbnailFileHandlingTests.t1 = new Template("T1", null, ThumbnailFileHandlingTests.t1RootFolder, templateList);
+            ThumbnailFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, ThumbnailFileHandlingTests.t1RootFolder, null, templateList);
             ThumbnailFileHandlingTests.templateViewModel.AddTemplate(t1);
 
             ThumbnailFileHandlingTests.t1.ThumbnailFallbackFilePath = ThumbnailFileHandlingTests.thumbNailFallbackImage1SourceFilePath;

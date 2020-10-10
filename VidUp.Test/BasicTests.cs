@@ -189,7 +189,7 @@ namespace Drexel.VidUp.Test
 
             mainWindowViewModel.TabNo = 1;
             TemplateViewModel templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;
-            templateViewModel.AddTemplate(new Template(BasicTests.testTemplateName, null, BasicTests.t1RootFolder, templateList));
+            templateViewModel.AddTemplate(new Template(BasicTests.testTemplateName, null, TemplateMode.FolderBased, BasicTests.t1RootFolder, null, templateList));
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 1);
