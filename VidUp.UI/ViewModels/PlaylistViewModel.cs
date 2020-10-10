@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
 using Drexel.VidUp.UI.Controls;
+using Drexel.VidUp.Youtube.Service;
 using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -19,10 +21,16 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservablePlaylistViewModels observablePlaylistViewModels;
         private PlaylistComboboxViewModel selectedPlaylist;
 
+        private TemplateList templateList;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private GenericCommand newPlaylistCommand;
         private GenericCommand removePlaylistCommand;
+        private GenericCommand autoSetPlaylistsCommand;
+
+        private bool autoSettingPlaylists;
+
 
         #region properties
         public Playlist Playlist
@@ -96,6 +104,22 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public GenericCommand AutoSetPlaylistsCommand
+        {
+            get
+            {
+                return this.autoSetPlaylistsCommand;
+            }
+        }
+
+        public bool AutoSettingPlaylists
+        {
+            get
+            {
+                return this.autoSettingPlaylists;
+            }
+        }
+
         public string PlaylistId
         { 
             get => this.playlist != null ? this.playlist.PlaylistId : string.Empty;
@@ -129,7 +153,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public PlaylistViewModel(PlaylistList playlistList, ObservablePlaylistViewModels observablePlaylistViewModels)
+        public PlaylistViewModel(PlaylistList playlistList, ObservablePlaylistViewModels observablePlaylistViewModels, TemplateList templateList)
         {
             if(playlistList == null)
             {
@@ -141,13 +165,20 @@ namespace Drexel.VidUp.UI.ViewModels
                 throw new ArgumentException("ObservablePlaylistViewModels action must not be null.");
             }
 
+            if (templateList == null)
+            {
+                throw new ArgumentException("TemplateList action must not be null.");
+            }
+
             this.playlistList = playlistList;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.templateList = templateList;
 
             this.SelectedPlaylist = this.observablePlaylistViewModels.PlaylistCount > 0 ? this.observablePlaylistViewModels[0] : null;
 
             this.newPlaylistCommand = new GenericCommand(this.OpenNewPlaylistDialog);
             this.removePlaylistCommand = new GenericCommand(this.RemovePlaylist);
+            this.autoSetPlaylistsCommand = new GenericCommand(this.autoSetPlaylists);
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -220,6 +251,70 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerialization.JsonSerializer.SerializePlaylistList();
 
             this.SelectedPlaylist = new PlaylistComboboxViewModel(playlist);
+        }
+
+        private async void autoSetPlaylists(object obj)
+        {
+            this.autoSettingPlaylists = true;
+            this.raisePropertyChanged("AutoSettingPlaylists");
+
+            Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap = new Dictionary<string, List<Upload>>();
+            foreach (Template template in this.templateList)
+            {
+                if (template.Playlist != null && template.SetPlaylistAfterPublication)
+                {
+                    Upload[] uploads = template.Uploads.Where(upload1 => upload1.UploadStatus == UplStatus.Finished && 
+                        !string.IsNullOrWhiteSpace(upload1.VideoId) && upload1.Playlist == null).ToArray();
+
+                    if (uploads.Length > 1)
+                    {
+                        List<Upload> uploadsFromMap;
+                        if (!playlistUploadsWithoutPlaylistMap.TryGetValue(template.Playlist.PlaylistId, out uploadsFromMap))
+                        {
+                            uploadsFromMap = new List<Upload>();
+                            playlistUploadsWithoutPlaylistMap.Add(template.Playlist.PlaylistId, uploadsFromMap);
+                        }
+
+                        uploadsFromMap.AddRange(uploads);
+                    }
+                }
+            }
+
+            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistService.GetPlaylists(playlistUploadsWithoutPlaylistMap.Keys);
+
+            //check if videos are already in playlist on YT.
+            foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
+            {
+                foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
+                {
+                    if (playlistVideos[playlistVideosWithoutPlaylist.Key].Contains(upload.VideoId))
+                    {
+                        upload.Playlist = this.playlistList.GetPlaylist(playlistVideosWithoutPlaylist.Key);
+                        playlistVideosWithoutPlaylist.Value.Remove(upload);
+                    }
+                }
+            }
+
+            Dictionary<string, bool> videosPublicMap = await YoutubeVideoService.IsPublic(
+                playlistUploadsWithoutPlaylistMap.SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList());
+
+            //set playlist on YT if video is public.
+            foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
+            {
+                foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
+                {
+                    if (videosPublicMap[upload.VideoId])
+                    {
+                        upload.Playlist = this.playlistList.GetPlaylist(playlistVideosWithoutPlaylist.Key);
+                        YoutubePlaylistService.AddToPlaylist(upload);
+                    }
+                }
+            }
+
+            JsonSerialization.JsonSerializer.SerializeAllUploads();
+
+            this.autoSettingPlaylists = false;
+            this.raisePropertyChanged("AutoSettingPlaylists");
         }
     }
 }

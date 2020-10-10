@@ -56,6 +56,8 @@ namespace Drexel.VidUp.Business
         private string resumableSessionUri;
         [JsonProperty]
         private long bytesSent;
+        [JsonProperty]
+        private string videoId;
 
         private long fileLength;
 
@@ -310,6 +312,20 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public string VideoId
+        {
+            get
+            {
+                return this.videoId;
+            }
+            set
+            {
+                this.videoId = value;
+            }
+        }
+
+
+
         [JsonConstructor]
         private Upload()
         {
@@ -410,7 +426,7 @@ namespace Drexel.VidUp.Business
 
         public void CopyPlaylistFromTemplate()
         {
-            if (this.template != null)
+            if (this.template != null && !this.template.SetPlaylistAfterPublication)
             {
                 this.Playlist = this.template.Playlist;
             }
@@ -454,12 +470,6 @@ namespace Drexel.VidUp.Business
 
         public void SetPublishAtTime(TimeSpan quarterHour)
         {
-            DateTime publishAtInternal = new DateTime(this.publishAt.Value.Year, this.publishAt.Value.Month, this.publishAt.Value.Day, quarterHour.Hours, quarterHour.Minutes, 0);
-            if (publishAtInternal <= DateTime.Now)
-            {
-
-            }
-
             this.publishAt = new DateTime(this.publishAt.Value.Year, this.publishAt.Value.Month, this.publishAt.Value.Day, quarterHour.Hours, quarterHour.Minutes, 0);
             this.lastModifiedInternal = DateTime.Now;
             this.raisePropertyChanged("PublishAt");

@@ -49,6 +49,8 @@ namespace Drexel.VidUp.Business
         private bool usePublishAtSchedule;
         [JsonProperty]
         private Schedule publishAtSchedule;
+        [JsonProperty] 
+        private bool setPlaylistAfterPublication;
 
         private TemplateList templateList;
 
@@ -277,6 +279,17 @@ namespace Drexel.VidUp.Business
                 this.publishAtSchedule = value;
                 this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("PublishAtSchedule");
+            }
+        }
+
+        public bool SetPlaylistAfterPublication
+        {
+            get => this.setPlaylistAfterPublication;
+            set
+            {
+                this.setPlaylistAfterPublication = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("SetPlaylistAfterPublication");
             }
         }
 

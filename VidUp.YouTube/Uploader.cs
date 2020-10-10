@@ -29,7 +29,7 @@ namespace Drexel.VidUp.Youtube
         {
             set
             {
-                YoutubeUpload.MaxUploadInBytesPerSecond = value;
+                YoutubeUploadService.MaxUploadInBytesPerSecond = value;
             }
         }
 
@@ -87,10 +87,10 @@ namespace Drexel.VidUp.Youtube
 
                 upload.UploadStatus = UplStatus.Uploading;
 
-                UploadResult result = await YoutubeUpload.Upload(upload, maxUploadInBytesPerSecond,
+                UploadResult result = await YoutubeUploadService.Upload(upload, maxUploadInBytesPerSecond,
                     updateUploadProgress, this.isStopped);
 
-                if (!string.IsNullOrWhiteSpace(result.VideoId))
+                if (result.UploadSuccessFull)
                 {
                     oneUploadFinished = true;
                     upload.UploadStatus = UplStatus.Finished;

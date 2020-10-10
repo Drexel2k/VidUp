@@ -128,6 +128,12 @@
                         <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/list-edit.png" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" IsEditable="False" />
                         <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="images/list-plus.png" Command="{Binding NewPlaylistCommand}" />
                     </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Update" VerticalContentAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <Fluent:Button Header="Autoset Paylists" SizeDefinition="Middle,Middle,Small" Icon="images/list-auto.png"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
+                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlist to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
+                    </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">

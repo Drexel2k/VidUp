@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
@@ -16,6 +17,7 @@ using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
+using Drexel.VidUp.Youtube.Service;
 using MaterialDesignThemes.Wpf;
 
 #endregion
@@ -39,6 +41,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private GenericCommand addUploadCommand;
         private GenericCommand startUploadingCommand;
+
         private GenericCommand stopUploadingCommand;
         private GenericCommand recalculatePublishAtCommand;
         private GenericCommand resetRecalculatePublishAtStartDateCommand;

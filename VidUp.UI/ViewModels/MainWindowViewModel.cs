@@ -86,7 +86,7 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.UploadStatsUpdated += uploadListViewModelOnUploadStatsUpdated;
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
-            this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels);
+            this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
             this.viewModels[3] = new VidUpViewModel();
         }
 

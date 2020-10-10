@@ -131,6 +131,7 @@
     <Compile Include="Converters\FrequencyMonthlyVisibleConverter.cs" />
     <Compile Include="Converters\FrequencyWeeklyVisibleConverter.cs" />
     <Compile Include="Converters\FrequencyDailyVisibleConverter.cs" />
+    <Compile Include="Converters\InvertBooleanConverter.cs" />
     <Compile Include="Converters\StringEmptyCollapsedConverter.cs" />
     <Compile Include="Converters\StringIsNullOrNotFileExistsCollapsedConverter.cs" />
     <Compile Include="Converters\StringIsNullOrFileExistsCollapsedConverter.cs" />
@@ -232,6 +233,7 @@
     <Content Include="Images\edit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Images\list-auto.png" />
     <Content Include="Images\list-edit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

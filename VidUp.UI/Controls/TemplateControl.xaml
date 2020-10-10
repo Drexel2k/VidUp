@@ -196,9 +196,17 @@
 
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Playlist: " Width="115" />
-                        <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="195" />
+                        <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="180" />
+
                     </StackPanel>
-                    
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
+
+                        <ToggleButton IsChecked="{Binding SetPlaylistAfterPublication}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="0 4 0 0" />
+                        <Label Content="Set After Publication" Width="116" HorizontalAlignment="Left" />
+                        <materialDesign:PackIcon Kind="HelpOutline" ToolTip="Don't set the template at upload time. Use button Autoset Playlist in Playlist Tab to set playlist to published videos." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
+                    </StackPanel>
+
                 </Grid>
             </GroupBox>
         </Grid>

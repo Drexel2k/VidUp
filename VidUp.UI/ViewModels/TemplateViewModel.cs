@@ -357,6 +357,16 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool SetPlaylistAfterPublication
+        {
+            get => this.template != null && this.template.SetPlaylistAfterPublication;
+            set
+            {
+                this.template.SetPlaylistAfterPublication = value;
+                this.raisePropertyChangedAndSerializeTemplateList("SetPlaylistAfterPublication");
+            }
+        }
+
         #endregion properties
 
         public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)

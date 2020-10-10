@@ -1,12 +1,8 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
-
-#endregion
 
 namespace Drexel.VidUp.Youtube.Service
 {
@@ -31,7 +27,7 @@ namespace Drexel.VidUp.Youtube.Service
 
             FileInfo fileInfo = new FileInfo(file);
 
-            HttpWebRequest request =  await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
+            HttpWebRequest request =  await HttpWebRequestCreator.createBasicHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = fileInfo.Length;
             request.ContentType = MimeMapping.GetMimeMapping(file); ;
 
@@ -61,14 +57,14 @@ namespace Drexel.VidUp.Youtube.Service
             }
 
 
-            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = bytes.Length;
             request.ContentType = contentType;
 
             return request;
         }
 
-        private static async Task<HttpWebRequest> createBasicUploadHttpWebRequest(string endpoint, string httpMethod)
+        private static async Task<HttpWebRequest> createBasicHttpWebRequest(string endpoint, string httpMethod)
         {
             string accessToken = await YoutubeAuthentication.GetAccessToken();
 
@@ -100,7 +96,7 @@ namespace Drexel.VidUp.Youtube.Service
 
             FileInfo fileInfo = new FileInfo(file);
 
-            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = 0;
             request.Headers.Add("Content-Range", string.Format("bytes */{0}",fileInfo.Length.ToString()));
 
@@ -131,9 +127,27 @@ namespace Drexel.VidUp.Youtube.Service
 
             string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, lastByteIndex, uploadFileSize);
 
-            HttpWebRequest request = await HttpWebRequestCreator.createBasicUploadHttpWebRequest(endpoint, httpMethod);
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = lastByteIndex - startByteIndex + 1;
             request.Headers.Add("Content-Range", rangeString);
+
+            return request;
+        }
+
+        public static async Task<HttpWebRequest> CreateAuthenticatedHttpWebRequest(string endpoint, string httpMethod)
+        {
+            if (string.IsNullOrWhiteSpace(endpoint))
+            {
+                throw new ArgumentException("endpoint");
+            }
+
+            if (string.IsNullOrWhiteSpace(httpMethod))
+            {
+                throw new ArgumentException("httpMethod");
+            }
+
+            HttpWebRequest request = await HttpWebRequestCreator.createBasicHttpWebRequest(endpoint, httpMethod);
+            request.ContentLength = 0;
 
             return request;
         }
