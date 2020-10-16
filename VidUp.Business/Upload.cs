@@ -473,7 +473,11 @@ namespace Drexel.VidUp.Business
                 nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(plannedUntil);
                 plannedUntil = nextPossibleDateTime;
 
-                IEnumerable<Upload> relevantUploads = this.template.Uploads.Where(upload => upload.UploadStart == null || upload.UploadStart > upload.Template.PublishAtSchedule.IgnoreUploadsBefore);
+                IEnumerable<Upload> relevantUploads;
+                relevantUploads = this.Template.PublishAtSchedule.IgnoreUploadsBefore == null ? 
+                    this.template.Uploads.Where(upload => upload != this).ToArray() : 
+                    this.template.Uploads.Where(upload => upload != this && (upload.UploadStart == null || upload.UploadStart > upload.Template.PublishAtSchedule.IgnoreUploadsBefore)).ToArray();
+                
                 if (!relevantUploads.Any(upload => (upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
                                                     upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Finished) 
                                                    && upload.PublishAt == nextPossibleDateTime))
