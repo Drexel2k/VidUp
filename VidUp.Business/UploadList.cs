@@ -29,7 +29,7 @@ namespace Drexel.VidUp.Business
 
         public int UploadCount { get => this.uploads.Count; }
 
-        public long TotalBytesToUpload
+        public long TotalBytesOfFilesToUpload
         {
             get
             {
@@ -43,7 +43,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public long TotalBytesToUploadRemaining
+        public long RemainingBytesOfFilesToUpload
         {
             get
             {
@@ -65,7 +65,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public long TotalBytesToUploadIncludingResumable
+        public long TotalBytesOfFilesToUploadIncludingResumable
         {
             get
             {
@@ -81,7 +81,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public long TotalBytesToUploadIncludingResumableRemaining
+        public long RemainingBytesOfFilesToUploadIncludingResumable
         {
             get
             {

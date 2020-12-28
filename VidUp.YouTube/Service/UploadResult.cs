@@ -1,4 +1,4 @@
-﻿namespace Drexel.VidUp.Youtube
+﻿namespace Drexel.VidUp.Youtube.Service
 {
     public class UploadResult
     {

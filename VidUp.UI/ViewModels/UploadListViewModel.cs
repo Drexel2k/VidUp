@@ -1,12 +1,8 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
@@ -17,10 +13,7 @@ using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
-using Drexel.VidUp.Youtube.Service;
 using MaterialDesignThemes.Wpf;
-
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -57,8 +50,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private TemplateComboboxViewModel recalculatePublishAtSelectedTemplate;
         private DateTime? recalculatePublishAtStartDate;
-        private DateTime recalculatePublishAtFirstDate;
-
 
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
         public event EventHandler<UploadFinishedEventArgs> UploadFinished;
@@ -396,20 +387,23 @@ namespace Drexel.VidUp.UI.ViewModels
                 UploadStats uploadStats = new UploadStats();
                 this.onUploadStarted(new UploadStartedEventArgs(uploadStats));
 
-                bool oneUploadFinished = false;
                 this.uploader = new Uploader(this.uploadList);
                 this.uploader.UploadStatsUpdated += (sender, args) => this.onUploadStatsUpdated();
-                oneUploadFinished = await uploader.Upload(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
+                UploaderResult uploadResult = await uploader.Upload(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
+                bool uploadStopped = uploader.StopUpload;
                 this.uploader = null;
 
                 this.uploadStatus = UploadStatus.NotUploading;
 
-                this.onUploadStatsUpdated();
+                if (uploadResult != UploaderResult.NothingDone)
+                {
+                    this.onUploadStatsUpdated();
+                }
 
                 PowerSavingHelper.EnablePowerSaving();
 
                 //needs to be after PowerSavingHelper.EnablePowerSaving(); so that StandBy is not prevented.
-                this.onUploadFinished(new UploadFinishedEventArgs(oneUploadFinished));
+                this.onUploadFinished(new UploadFinishedEventArgs(uploadResult == UploaderResult.OneUploadFinished, uploadStopped));
             }
         }
 

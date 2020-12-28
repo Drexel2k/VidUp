@@ -1,8 +1,5 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -11,8 +8,6 @@ using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Youtube.Data;
 using Newtonsoft.Json;
-
-#endregion
 
 namespace Drexel.VidUp.Youtube.Service
 {
@@ -164,7 +159,6 @@ namespace Drexel.VidUp.Youtube.Service
 
                                     if (DateTime.Now - lastStatUpdate > YoutubeUploadService.twoSeconds)
                                     {
-                                        stats.BytesSent = totalBytesSent;
                                         stats.CurrentSpeedInBytesPerSecond = inputStream.CurrentSpeedInBytesPerSecond;
                                         upload.BytesSent = initialBytesSent + totalBytesSent;
                                         updateUploadProgress(stats);
@@ -195,7 +189,11 @@ namespace Drexel.VidUp.Youtube.Service
                                     using (HttpWebResponse httpResponse =
                                         (HttpWebResponse) await request.GetResponseAsync())
                                     {
+                                        stats.CurrentSpeedInBytesPerSecond = inputStream.CurrentSpeedInBytesPerSecond;
                                         upload.BytesSent = upload.FileLength;
+                                        updateUploadProgress(stats);
+                                        lastStatUpdate = DateTime.Now;
+
                                         YoutubeUploadService.stream = null;
 
                                         using (StreamReader reader =

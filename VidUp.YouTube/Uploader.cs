@@ -15,7 +15,7 @@ namespace Drexel.VidUp.Youtube
     {
         private UploadList uploadList;
         //will be updated during upload when files are added or removed
-        private long sessionTotalBytesToUploadFullFilesize = 0;
+        private long sessionTotalBytesOfFilesToUpload = 0;
         private long uploadedLength = 0;
 
         private UploadStats uploadStats;
@@ -59,15 +59,10 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        public async Task<bool> Upload(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
+        public async Task<UploaderResult> Upload(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
         {
             this.uploadStats = uploadStats;
             this.resumeUploads = resumeUploads;
-            bool oneUploadFinished = false;
-
-            this.sessionTotalBytesToUploadFullFilesize = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumable : this.uploadList.TotalBytesToUpload;
-            this.uploadStats.UploadsChanged(this.sessionTotalBytesToUploadFullFilesize, this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumableRemaining : this.uploadList.TotalBytesToUploadRemaining);
-            this.uploadedLength = 0;
 
             List<Predicate<Upload>> predicates = new List<Predicate<Upload>>(2);
             predicates.Add(upload2 => upload2.UploadStatus == UplStatus.ReadyForUpload && File.Exists(upload2.FilePath));
@@ -76,14 +71,25 @@ namespace Drexel.VidUp.Youtube
                 predicates.Add(upload2 => (upload2.UploadStatus == UplStatus.Failed || upload2.UploadStatus == UplStatus.Stopped) && File.Exists(upload2.FilePath));
             }
 
-            List<Upload> uploadsOfSession = new List<Upload>();
             Upload upload = this.uploadList.GetUpload(PredicateCombiner.Or(predicates.ToArray()));
+            if (upload == null)
+            {
+                return UploaderResult.NothingDone;
+            }
+
+            bool oneUploadFinished = false;
+
+            this.sessionTotalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
+            this.uploadStats.UploadsChanged(this.sessionTotalBytesOfFilesToUpload, this.resumeUploads ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable : this.uploadList.RemainingBytesOfFilesToUpload);
+            this.uploadedLength = 0;
+
+            List<Upload> uploadsOfSession = new List<Upload>();
 
             while (upload != null && !this.stopUpload)
             {
                 uploadsOfSession.Add(upload);
                 upload.UploadErrorMessage = null;
-                this.uploadStats.InitializeNewUpload(upload, this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumableRemaining : this.uploadList.TotalBytesToUploadRemaining);
+                this.uploadStats.InitializeNewUpload(upload, this.resumeUploads ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable : this.uploadList.RemainingBytesOfFilesToUpload);
 
                 upload.UploadStatus = UplStatus.Uploading;
 
@@ -119,14 +125,15 @@ namespace Drexel.VidUp.Youtube
 
             if (oneUploadFinished)
             {
-                this.uploadStats.AllFinished();
-                this.onUploadStatsUpdated();
                 this.updateSchedules(uploadsOfSession);
                 JsonSerialization.JsonSerializer.SerializeTemplateList();
             }
 
+            this.uploadStats.UploadFinished = true;
+
             this.uploadStats = null;
-            return oneUploadFinished;
+
+            return oneUploadFinished ? UploaderResult.OneUploadFinished : UploaderResult.NoUploadFinished;
         }
 
         private void updateSchedules(List<Upload> finishedUploads)
@@ -145,18 +152,18 @@ namespace Drexel.VidUp.Youtube
         void updateUploadProgress(YoutubeUploadStats stats)
         {
             //check if upload has been added or removed
-            long totalBytesToUpload = this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumable : this.uploadList.TotalBytesToUpload;
-            long delta = this.sessionTotalBytesToUploadFullFilesize - (totalBytesToUpload + this.uploadedLength);
+            long totalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
+            long delta = this.sessionTotalBytesOfFilesToUpload - (totalBytesOfFilesToUpload + this.uploadedLength);
             if (delta != 0)
             {
                 //delta is negative when files have been added
-                this.sessionTotalBytesToUploadFullFilesize -= delta;
-                this.uploadStats.UploadsChanged(this.sessionTotalBytesToUploadFullFilesize, this.resumeUploads ? this.uploadList.TotalBytesToUploadIncludingResumableRemaining : this.uploadList.TotalBytesToUploadRemaining);
+                this.sessionTotalBytesOfFilesToUpload -= delta;
+                this.uploadStats.UploadsChanged(this.sessionTotalBytesOfFilesToUpload, this.resumeUploads ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable : this.uploadList.RemainingBytesOfFilesToUpload);
             }
 
             this.uploadStats.CurrentTotalBytesLeftRemaining = this.resumeUploads
-                ? this.uploadList.TotalBytesToUploadIncludingResumableRemaining
-                : this.uploadList.TotalBytesToUploadRemaining;
+                ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable
+                : this.uploadList.RemainingBytesOfFilesToUpload;
             this.uploadStats.CurrentSpeedInBytesPerSecond = stats.CurrentSpeedInBytesPerSecond;
             this.onUploadStatsUpdated();
         }

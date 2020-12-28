@@ -40,17 +40,5 @@ namespace Drexel.VidUp.UI
 
             uploadListViewModel.AddUploads(uploads);
         }
-
-        private void CMainWindow_Activated(object sender, EventArgs e)
-        {
-            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
-            mainWindowViewModel.WindowActivated();
-        }
-
-        private void CMainWindow_Deactivated(object sender, EventArgs e)
-        {
-            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
-            mainWindowViewModel.WindowDeactivated();
-        }
     }
 }

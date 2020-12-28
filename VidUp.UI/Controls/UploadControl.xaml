@@ -53,8 +53,8 @@
                     <StackPanel>
                         <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
                         <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
-                        <Button Content="Remove Template" Command="{Binding NoTemplateCommand}" CommandParameter="{Binding Guid}" />
-                        <Button Content="Remove Playlist" Command="{Binding NoPlaylistCommand}" CommandParameter="{Binding Guid}" />
+                        <Button Content="Remove Template" Command="{Binding NoTemplateCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Playlist" Command="{Binding NoPlaylistCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding ControlsEnabled}" />
                         <Separator/>
                         <Button Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=UCUploads}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
                     </StackPanel>
@@ -181,7 +181,7 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Playlist: " Width="63" />
-                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="210" />
+                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="210" IsEnabled="{Binding ControlsEnabled}" />
             </StackPanel>
             <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />

@@ -10,11 +10,11 @@ namespace Drexel.VidUp.Youtube
 {
     public class UploadStats
     {
-        private bool finished;
+        private bool uploadFinished;
 
         private DateTime currentUploadStart = DateTime.MinValue;
 
-        //sum of uploaded bytes of all finished uploads in this session.
+        //sum of potentially bytes to upload of all uploads already handled in this session, independent form result.
         private long sessionBytesUploadedFinishedUploads;
 
         //bytes already sent of current upload when upload started.
@@ -24,21 +24,21 @@ namespace Drexel.VidUp.Youtube
         private long sessionTotalBytesToUploadRemaining;
 
         //total file size in bytes of uploads to be uploaded of upload list, either with or without uploads to resume, depending on setting. Changes when upload list (add or remove uploads or change status of upload) changes.
-        private long sessionTotalBytesToUploadFullFilesize;
+        private long sessionTotalBytesOfFilesToUpload;
 
-        //total bytes to upload left, either with or without uploads to resume, depending on setting, change on bytes bytes sent.
+        //total bytes to upload left, either with or without uploads to resume, depending on setting, change on bytes sent.
         private long currentTotalBytesLeftRemaining;
 
         private long currentUploadSpeedInBytesPerSecond;
 
         private Upload upload;
-        
 
-        public float ProgressPercentage
+
+        public float TotalProgressPercentage
         { 
             get
             {
-                if(finished)
+                if(uploadFinished)
                 {
                     return 1;
                 }
@@ -124,15 +124,23 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
+        public bool UploadFinished
+        {
+            set
+            {
+                this.uploadFinished = value;
+            }
+        }
+
         public UploadStats()
         {
         }
 
-        public void UploadsChanged(long sessionTotalBytesToUploadFullFileSize, long sessionTotalBytesToUploadRemaining)
+        public void UploadsChanged(long sessionTotalBytesOfFilesToUpload, long sessionTotalBytesToUploadRemaining)
         {
             this.sessionBytesUploadedFinishedUploads = 0;
             this.sessionTotalBytesToUploadRemaining = sessionTotalBytesToUploadRemaining;
-            this.sessionTotalBytesToUploadFullFilesize = sessionTotalBytesToUploadFullFileSize;
+            this.sessionTotalBytesOfFilesToUpload = sessionTotalBytesOfFilesToUpload;
             this.currentTotalBytesLeftRemaining = sessionTotalBytesToUploadRemaining;
         }
 
@@ -147,11 +155,6 @@ namespace Drexel.VidUp.Youtube
         public void FinishUpload()
         {
             this.sessionBytesUploadedFinishedUploads += this.upload.FileLength - this.currentUploadBytesResumed;
-        }
-
-        public void AllFinished()
-        {
-            this.finished = true;
         }
     }
 }

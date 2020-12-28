@@ -332,7 +332,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (!(this.upload.UploadStatus == UplStatus.Finished))
+                if (this.upload.UploadStatus == UplStatus.ReadyForUpload || this.upload.UploadStatus == UplStatus.Paused)
                 {
                     return true;
                 }

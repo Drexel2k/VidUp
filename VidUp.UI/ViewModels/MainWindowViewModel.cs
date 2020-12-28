@@ -5,21 +5,17 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
 using Drexel.VidUp.JSON;
-using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.Definitions;
 using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using Drexel.VidUp.Youtube.Service;
-using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -38,8 +34,6 @@ namespace Drexel.VidUp.UI.ViewModels
         private UploadStats uploadStats;
 
         private TaskbarState taskbarState = TaskbarState.Normal;
-
-        private bool windowActive = true;
 
         private TemplateList templateList;
         private UploadList uploadList;
@@ -80,10 +74,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
             UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll, this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels);
             this.viewModels[0] = uploadListViewModel;
-            uploadListViewModel.PropertyChanged += uploadListViewModelOnPropertyChanged;
-            uploadListViewModel.UploadStarted += uploadListViewModelOnUploadStarted;
-            uploadListViewModel.UploadFinished += uploadListViewModelOnUploadFinished;
-            uploadListViewModel.UploadStatsUpdated += uploadListViewModelOnUploadStatsUpdated;
+            uploadListViewModel.PropertyChanged += this.uploadListViewModelOnPropertyChanged;
+            uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
+            uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
+            uploadListViewModel.UploadStatsUpdated += this.uploadListViewModelOnUploadStatsUpdated;
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
@@ -111,7 +105,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadStats = null;
             this.raisePropertyChanged("AppStatus");
 
-            if (e.OneUploadFinished)
+            if (e.OneUploadFinished && !e.UploadStopped)
             {
                 switch (this.postUploadAction)
                 {
@@ -126,18 +120,16 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                     case PostUploadAction.FlashTaskbar:
                         this.notifyTaskbarItemInfo();
-                        if (this.windowActive)
-                        {
-                            System.Timers.Timer timer = new System.Timers.Timer(5000d);
-                            timer.Elapsed += stopFlashing;
-                            timer.AutoReset = false;
-                            timer.Start();
-                        }
                         break;
                     default:
                         break;
                 }
             }
+
+            System.Timers.Timer timer = new System.Timers.Timer(10000d);
+            timer.Elapsed += resetTaskBarAndStats;
+            timer.AutoReset = false;
+            timer.Start();
         }
 
         private void deserialize()
@@ -221,7 +213,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.taskbarState = value;
-                this.raisePropertyChanged("ProgressPercentage");
+                this.raisePropertyChanged("TotalProgressPercentage");
                 this.raisePropertyChanged("TaskbarItemProgressState");
             }
         }
@@ -255,13 +247,13 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-       public float ProgressPercentage
+       public float TotalProgressPercentage
        {
             get
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return this.uploadStats.ProgressPercentage;
+                    return this.uploadStats.TotalProgressPercentage;
                 }
                 else
                 {
@@ -380,12 +372,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (((UploadListViewModel)this.viewModels[0]).ResumeUploads)
                 {
-                    return ((int) ((float) this.uploadList.TotalBytesToUploadIncludingResumableRemaining /
+                    return ((int) ((float) this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable /
                                    Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
                 }
                 else
                 {
-                    return ((int)((float)this.uploadList.TotalBytesToUploadRemaining /
+                    return ((int)((float)this.uploadList.RemainingBytesOfFilesToUpload /
                                   Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
                 }
             }
@@ -445,9 +437,10 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void stopFlashing(object sender, System.Timers.ElapsedEventArgs e)
+        private void resetTaskBarAndStats(object sender, System.Timers.ElapsedEventArgs e)
         {
             this.resetTaskbarItemInfo();
+            this.updateStats();
         }
 
         private void uploadListPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -465,23 +458,18 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void uploadListViewModelOnUploadStatsUpdated(object sender, EventArgs e)
         {
-            this.raisePropertyChanged("ProgressPercentage");
+            this.updateStats();
+        }
+
+        private void updateStats()
+        {
+            this.raisePropertyChanged("TotalProgressPercentage");
             this.raisePropertyChanged("CurrentFilePercent");
             this.raisePropertyChanged("CurrentFileTimeLeft");
             this.raisePropertyChanged("CurrentFileMbLeft");
             this.raisePropertyChanged("TotalMbLeft");
             this.raisePropertyChanged("TotalTimeLeft");
             this.raisePropertyChanged("CurrentUploadSpeedInKiloBytesPerSecond");
-        }
-
-        public void WindowActivated()
-        {
-            this.windowActive = true;
-
-            if (this.taskbarState != TaskbarState.Normal)
-            {
-                this.resetTaskbarItemInfo();
-            }
         }
 
         private void notifyTaskbarItemInfo()
@@ -492,11 +480,6 @@ namespace Drexel.VidUp.UI.ViewModels
         private void resetTaskbarItemInfo()
         {
             this.taskbarStateInternal = TaskbarState.Normal;
-        }
-
-        public void WindowDeactivated()
-        {
-            this.windowActive = false;
         }
     }
 }

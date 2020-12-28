@@ -78,7 +78,8 @@
     <Compile Include="Service\YoutubeThumbnailService.cs" />
     <Compile Include="Service\YoutubeVideoService.cs" />
     <Compile Include="Uploader.cs" />
-    <Compile Include="UploadResult.cs" />
+    <Compile Include="Service\UploadResult.cs" />
+    <Compile Include="UploaderResult.cs" />
     <Compile Include="UploadStats.cs" />
     <Compile Include="Service\YoutubeUploadService.cs" />
     <Compile Include="Service\YoutubeAuthentication.cs" />
