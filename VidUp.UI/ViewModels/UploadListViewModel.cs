@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Json;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.Converters;
 using Drexel.VidUp.UI.Definitions;
@@ -335,16 +335,16 @@ namespace Drexel.VidUp.UI.ViewModels
             Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
             this.uploadList.RemoveUploads(upload2 => upload2 == upload);
 
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
-            JsonSerialization.JsonSerializer.SerializeUploadList();
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeUploadList();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
         {
             this.uploadList.ReOrder(uploadToMove, uploadAtTargetPosition);
             this.observableUploadViewModels.ReOrder(this.uploadList);
-            JsonSerialization.JsonSerializer.SerializeUploadList();
+            JsonSerializationContent.JsonSerializer.SerializeUploadList();
         }
 
         private void openUploadDialog(object obj)
@@ -371,9 +371,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.uploadList.AddUploads(uploads);
 
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
-            JsonSerialization.JsonSerializer.SerializeUploadList();
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeUploadList();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         private async void startUploading(object obj)
@@ -454,7 +454,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.recalculatePublishAtStartDate != null)
                 {
                     this.uploadList.SetStartDateOnAllTemplateSchedules(this.recalculatePublishAtStartDate.Value);
-                    JsonSerialization.JsonSerializer.SerializeTemplateList();
+                    JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 }
 
                 foreach (Upload upload in this.uploadList)
@@ -478,7 +478,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.recalculatePublishAtStartDate != null)
                 {
                     this.uploadList.SetStartDateOnTemplateSchedule(this.recalculatePublishAtSelectedTemplate.Template, this.recalculatePublishAtStartDate.Value);
-                    JsonSerialization.JsonSerializer.SerializeTemplateList();
+                    JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 }
 
                 foreach (Upload upload in this.uploadList)
@@ -500,7 +500,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void resetRecalculatePublishAtStartDate(object obj)
@@ -537,9 +537,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.uploadList.RemoveUploads(PredicateCombiner.And(predicates));
 
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
-            JsonSerialization.JsonSerializer.SerializeUploadList();
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeUploadList();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         private void raisePropertyChanged(string propertyName)

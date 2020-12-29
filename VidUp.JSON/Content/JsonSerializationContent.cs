@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Drexel.VidUp.Json
+namespace Drexel.VidUp.Json.Content
 {
-    public class JsonSerialization
+    public class JsonSerializationContent
     {
         private string playlistListFilePath;
         private string uploadListFilePath;
@@ -23,9 +17,9 @@ namespace Drexel.VidUp.Json
         private TemplateList templateList;
         private PlaylistList playlistList;
 
-        public static JsonSerialization JsonSerializer;
+        public static JsonSerializationContent JsonSerializer;
 
-        public JsonSerialization(string serializationFolder, UploadList uploadList, TemplateList templateList, PlaylistList playlistList)
+        public JsonSerializationContent(string serializationFolder, UploadList uploadList, TemplateList templateList, PlaylistList playlistList)
         {
             this.playlistListFilePath = Path.Combine(serializationFolder, "playlistlist.json");
             this.uploadListFilePath = Path.Combine(serializationFolder, "uploadlist.json");

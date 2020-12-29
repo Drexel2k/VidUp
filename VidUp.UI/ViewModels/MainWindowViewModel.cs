@@ -9,13 +9,15 @@ using System.Windows.Forms;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json;
-using Drexel.VidUp.JSON;
+using Drexel.VidUp.Json.Content;
+using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Definitions;
 using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using Drexel.VidUp.Youtube.Service;
+using Newtonsoft.Json;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -59,9 +61,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void initialize(out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
+            this.deserializeUser();
             this.checkAppDataFolder();
-            this.deserialize();
-            JsonSerialization.JsonSerializer = new JsonSerialization(Settings.StorageFolder, this.uploadList, this.templateList, this.playlistList);
+            this.deserializeContent();
+            JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.StorageFolder, this.uploadList, this.templateList, this.playlistList);
 
             uploadList = this.uploadList;
             templateList = this.templateList;
@@ -132,9 +135,9 @@ namespace Drexel.VidUp.UI.ViewModels
             timer.Start();
         }
 
-        private void deserialize()
+        private void deserializeContent()
         {
-            JsonDeserialization deserializer = new JsonDeserialization(Settings.StorageFolder, Settings.TemplateImageFolder, Settings.ThumbnailFallbackImageFolder);
+            JsonDeserializationContent deserializer = new JsonDeserializationContent(Settings.StorageFolder, Settings.TemplateImageFolder, Settings.ThumbnailFallbackImageFolder);
             YoutubeAuthentication.SerializationFolder = Settings.StorageFolder;
             deserializer.Deserialize();
             this.templateList = DeserializationRepository.TemplateList;
@@ -150,6 +153,13 @@ namespace Drexel.VidUp.UI.ViewModels
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
 
             DeserializationRepository.ClearRepositories();
+        }
+
+        private void deserializeUser()
+        {
+            JsonDeserializationSettings deserializer = new JsonDeserializationSettings();
+            Settings.UserSuffix = deserializer.DeserializeUser();
+            Settings.ReInitializeFolders();
         }
 
         private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -452,7 +462,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (e.PropertyName == "TotalBytesToUploadIncludingResumableRemaining" || e.PropertyName == "TotalBytesToUploadRemaining")
             {
-                JsonSerialization.JsonSerializer.SerializeAllUploads();
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             }
         }
 

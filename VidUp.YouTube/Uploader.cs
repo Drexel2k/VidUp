@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Json;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Service;
 
@@ -112,7 +112,7 @@ namespace Drexel.VidUp.Youtube
                 this.uploadedLength += upload.FileLength;
                 this.uploadStats.FinishUpload();
 
-                JsonSerialization.JsonSerializer.SerializeAllUploads();
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
                 upload = this.uploadList.GetUpload(
                     PredicateCombiner.And(
@@ -126,7 +126,7 @@ namespace Drexel.VidUp.Youtube
             if (oneUploadFinished)
             {
                 this.updateSchedules(uploadsOfSession);
-                JsonSerialization.JsonSerializer.SerializeTemplateList();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
 
             this.uploadStats.UploadFinished = true;

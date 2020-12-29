@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using Drexel.VidUp.Business;
+﻿using Drexel.VidUp.Business;
 
-namespace Drexel.VidUp.JSON
+namespace Drexel.VidUp.Json.Content
 {
     public class DeserializationRepository
     {

@@ -1,12 +1,8 @@
-﻿#region
-
-using System;
+﻿using System;
 using Drexel.VidUp.Business;
 using Newtonsoft.Json;
 
-#endregion
-
-namespace Drexel.VidUp.JSON
+namespace Drexel.VidUp.Json.Content
 {
     public class TemplateGuidStringConverter : JsonConverter<Template>
     {

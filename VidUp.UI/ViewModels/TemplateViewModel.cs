@@ -5,7 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Json;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
 using MaterialDesignThemes.Wpf;
 
@@ -116,7 +116,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.template.Playlist = value.Playlist;
                 }
 
-                JsonSerialization.JsonSerializer.SerializeTemplateList();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
         }
 
@@ -481,8 +481,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.templateList.Remove(template);
 
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
 
@@ -573,14 +573,14 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 PublishAtScheduleViewModel data = (PublishAtScheduleViewModel)view.DataContext;
                 this.template.PublishAtSchedule = data.Schedule;
-                JsonSerialization.JsonSerializer.SerializeTemplateList();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
         }
 
         private void raisePropertyChangedAndSerializeTemplateList(string propertyName)
         {
             this.raisePropertyChanged(propertyName);
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         //exposed for testing
@@ -589,7 +589,7 @@ namespace Drexel.VidUp.UI.ViewModels
             List<Template> list = new List<Template>();
             list.Add(template);
             this.templateList.AddTemplates(list);
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
 
             this.SelectedTemplate = new TemplateComboboxViewModel(template);
         }

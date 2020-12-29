@@ -1,13 +1,7 @@
-﻿#region
-
-using System;
-using System.Runtime.Remoting.Messaging;
-using Drexel.VidUp.Business;
+﻿using System;
 using Newtonsoft.Json;
 
-#endregion
-
-namespace Drexel.VidUp.JSON
+namespace Drexel.VidUp.Json.Content
 {
     public class GuidNullConverter : JsonConverter<Guid>
     {

@@ -1,9 +1,8 @@
 ﻿using System;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
 using Newtonsoft.Json;
 
-namespace Drexel.VidUp.Json
+namespace Drexel.VidUp.Json.Content
 {
     public class PlaylistPlaylistIdConverter : JsonConverter<Playlist>
     {

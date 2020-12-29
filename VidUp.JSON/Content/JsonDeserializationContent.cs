@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Drexel.VidUp.Json
+namespace Drexel.VidUp.Json.Content
 {
-    public class JsonDeserialization
+    public class JsonDeserializationContent
     {
         private string playlistListFilePath;
         private string uploadListFilePath;
@@ -26,7 +22,7 @@ namespace Drexel.VidUp.Json
         private List<Template> templates { get; set; }
         private List<Guid> uploadListGuids { get; set; }
 
-        public JsonDeserialization(string serializationFolder, string templateImageFolder, string thumbnailFallbackImageFolder)
+        public JsonDeserializationContent(string serializationFolder, string templateImageFolder, string thumbnailFallbackImageFolder)
         {
             this.playlistListFilePath = Path.Combine(serializationFolder, "playlistlist.json");
             this.uploadListFilePath = Path.Combine(serializationFolder, "uploadlist.json");
@@ -83,7 +79,7 @@ namespace Drexel.VidUp.Json
             using (StreamReader sr = new StreamReader(this.allUploadsFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                JsonDeserialization.AllUploads = serializer.Deserialize<List<Upload>>(reader);
+                JsonDeserializationContent.AllUploads = serializer.Deserialize<List<Upload>>(reader);
             }
         }
 
@@ -112,9 +108,9 @@ namespace Drexel.VidUp.Json
 
         private void setTemplateOnUploads()
         {
-            if (JsonDeserialization.AllUploads != null && this.templates != null)
+            if (JsonDeserializationContent.AllUploads != null && this.templates != null)
             {
-                foreach (Upload upload in JsonDeserialization.AllUploads)
+                foreach (Upload upload in JsonDeserializationContent.AllUploads)
                 {
                     Type uploadType = typeof(Upload);
                     FieldInfo templateGuidFieldInfo = uploadType.GetField("templateGuid", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -152,7 +148,7 @@ namespace Drexel.VidUp.Json
             {
                 foreach (Guid guid in this.uploadListGuids)
                 {
-                    uploads.Add(JsonDeserialization.AllUploads.Find(upload => upload.Guid == guid));
+                    uploads.Add(JsonDeserializationContent.AllUploads.Find(upload => upload.Guid == guid));
                 }
             }
 

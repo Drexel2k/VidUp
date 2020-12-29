@@ -2,8 +2,7 @@
 using Drexel.VidUp.Business;
 using Newtonsoft.Json;
 
-
-namespace Drexel.VidUp.Json
+namespace Drexel.VidUp.Json.Content
 {
     public class UploadGuidStringConverter : JsonConverter<Upload>
     {
@@ -16,7 +15,7 @@ namespace Drexel.VidUp.Json
                 return null;
             }
 
-            Upload upload = JsonDeserialization.AllUploads.Find(upload2 => upload2.Guid == Guid.Parse(guidString));
+            Upload upload = JsonDeserializationContent.AllUploads.Find(upload2 => upload2.Guid == Guid.Parse(guidString));
             if (upload == null)
             {
                 throw new InvalidOperationException("Upload not found in all uploads.");

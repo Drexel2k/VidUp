@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Json;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.Youtube.Service;
 using MaterialDesignThemes.Wpf;
@@ -232,15 +228,15 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.playlistList.Remove(playlist);
 
-            JsonSerialization.JsonSerializer.SerializePlaylistList();
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
-            JsonSerialization.JsonSerializer.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         private void raisePropertyChangedAndSerializePlaylistList(string propertyName)
         {
             this.raisePropertyChanged(propertyName);
-            JsonSerialization.JsonSerializer.SerializePlaylistList();
+            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
         }
 
         //exposed for testing
@@ -249,7 +245,7 @@ namespace Drexel.VidUp.UI.ViewModels
             List<Playlist> list = new List<Playlist>();
             list.Add(playlist);
             this.playlistList.AddPlaylists(list);
-            JsonSerialization.JsonSerializer.SerializePlaylistList();
+            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
 
             this.SelectedPlaylist = new PlaylistComboboxViewModel(playlist);
         }
@@ -295,7 +291,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     playlistUploadsWithoutPlaylistMap.Remove(playlistUploadsMap.Key);
                 }
 
-                JsonSerialization.JsonSerializer.SerializePlaylistList();
+                JsonSerializationContent.JsonSerializer.SerializePlaylistList();
             }
 
 
@@ -339,7 +335,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            JsonSerialization.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
             this.autoSettingPlaylists = false;
             this.raisePropertyChanged("AutoSettingPlaylists");

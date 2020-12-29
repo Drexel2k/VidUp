@@ -1,21 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using Newtonsoft.Json;
 
 namespace Drexel.VidUp.UI
 {
-    class Settings
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+    public static class Settings
     {
         public static string UserSuffix { get; set; }
         public static string StorageFolder { get; set; }
         public static string TemplateImageFolder { get; set; }
         public static string ThumbnailFallbackImageFolder { get; set; }
+
+        [JsonConstructor]
         static Settings()
         {
-            Settings.UserSuffix = "Dev";
-            //Settings.UserSuffix = string.Empty;
+            Settings.UserSuffix = "";
+            Settings.StorageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), string.Format("VidUp{0}", Settings.UserSuffix));
+            Settings.TemplateImageFolder = Path.Combine(Settings.StorageFolder, "TemplateImages");
+            Settings.ThumbnailFallbackImageFolder = Path.Combine(Settings.StorageFolder, "FallbackThumbnailImages");
+        }
 
+        public static void ReInitializeFolders()
+        {
             Settings.StorageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), string.Format("VidUp{0}", Settings.UserSuffix));
             Settings.TemplateImageFolder = Path.Combine(Settings.StorageFolder, "TemplateImages");
             Settings.ThumbnailFallbackImageFolder = Path.Combine(Settings.StorageFolder, "FallbackThumbnailImages");
