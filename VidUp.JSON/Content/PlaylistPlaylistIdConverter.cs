@@ -15,7 +15,7 @@ namespace Drexel.VidUp.Json.Content
                 return null;
             }
 
-            return DeserializationRepository.PlaylistList.Find(playlist => playlist.PlaylistId == playlistId);
+            return DeserializationRepositoryContent.PlaylistList.Find(playlist => playlist.PlaylistId == playlistId);
         }
 
         public override void WriteJson(JsonWriter writer, Playlist value, JsonSerializer serializer)

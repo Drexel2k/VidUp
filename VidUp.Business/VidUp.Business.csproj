@@ -76,6 +76,7 @@
     <Compile Include="Schedule.cs" />
     <Compile Include="InvalidScheduleException.cs" />
     <Compile Include="ScheduleFrequency.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Template.cs" />
     <Compile Include="PlaylistListList.cs" />
     <Compile Include="TemplateList.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Upload.cs" />
     <Compile Include="UploadList.cs" />
     <Compile Include="UplStatus.cs" />
+    <Compile Include="UserSettings.cs" />
     <Compile Include="Visibility.cs" />
   </ItemGroup>
   <ItemGroup>

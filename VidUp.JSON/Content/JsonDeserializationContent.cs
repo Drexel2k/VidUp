@@ -50,7 +50,7 @@ namespace Drexel.VidUp.Json.Content
         {
             if (!File.Exists(this.playlistListFilePath))
             {
-                DeserializationRepository.PlaylistList = new PlaylistList(null);
+                DeserializationRepositoryContent.PlaylistList = new PlaylistList(null);
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace Drexel.VidUp.Json.Content
             using (StreamReader sr = new StreamReader(this.playlistListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                DeserializationRepository.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
+                DeserializationRepositoryContent.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
             }
         }
 
@@ -152,27 +152,27 @@ namespace Drexel.VidUp.Json.Content
                 }
             }
 
-            DeserializationRepository.UploadList = new UploadList(uploads, DeserializationRepository.TemplateList, this.thumbnailFallbackImageFolder);
+            DeserializationRepositoryContent.UploadList = new UploadList(uploads, DeserializationRepositoryContent.TemplateList, this.thumbnailFallbackImageFolder);
         }
 
         private void createTemplateListToRepository()
         {
-            DeserializationRepository.TemplateList = new TemplateList(this.templates, this.templateImageFolder, this.thumbnailFallbackImageFolder);
+            DeserializationRepositoryContent.TemplateList = new TemplateList(this.templates, this.templateImageFolder, this.thumbnailFallbackImageFolder);
         }
 
         private void setTemplateListOnTemplates()
         {
-            foreach (Template template in DeserializationRepository.TemplateList)
+            foreach (Template template in DeserializationRepositoryContent.TemplateList)
             {
                 Type templateType = typeof(Template);
                 FieldInfo templateListFieldInfo = templateType.GetField("templateList", BindingFlags.NonPublic | BindingFlags.Instance);
-                templateListFieldInfo.SetValue(template, DeserializationRepository.TemplateList);
+                templateListFieldInfo.SetValue(template, DeserializationRepositoryContent.TemplateList);
             }
         }
 
         private void checkConsistency()
         {
-            foreach (Upload upload in DeserializationRepository.UploadList)
+            foreach (Upload upload in DeserializationRepositoryContent.UploadList)
             {
                 if (upload.Template != null)
                 {
@@ -183,7 +183,7 @@ namespace Drexel.VidUp.Json.Content
                 }
             }
 
-            foreach (Template template in DeserializationRepository.TemplateList)
+            foreach (Template template in DeserializationRepositoryContent.TemplateList)
             {
                 foreach (Upload upload in template.Uploads)
                 {

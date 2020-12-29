@@ -6,8 +6,8 @@
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
-             xmlns:ui="clr-namespace:Drexel.VidUp.UI"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:viewModels="clr-namespace:Drexel.VidUp.UI.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="330">
     <Grid Margin="16" Width="300">
@@ -31,7 +31,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Column="0" LastChildFill="True">
-                <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File does exist. Current file will be renamed in VidUp's template images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding ImageFilePath, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.TemplateImageFolder}}" Margin="0 0 0 4"  VerticalAlignment="Bottom" HorizontalAlignment="Left"  Background="Transparent" />
+                <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File does exist. Current file will be renamed in VidUp's template images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding ImageFilePath, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter=image}" Margin="0 0 0 4"  VerticalAlignment="Bottom" HorizontalAlignment="Left"  Background="Transparent" />
                 <TextBox wpf:HintAssist.Hint="Template Image" Text="{Binding ImageFilePath}" Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" IsEnabled="False"  />
             </DockPanel >
             <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For visualization of uploads in upload view. Recommended size: 618x50px." ToolTipService.ShowDuration="60000" Background="Transparent" />

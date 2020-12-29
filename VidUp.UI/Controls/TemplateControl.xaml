@@ -2,11 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:ui="clr-namespace:Drexel.VidUp.UI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              x:Name="UCTemplate"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
+             xmlns:viewModels="clr-namespace:Drexel.VidUp.UI.ViewModels"
              IsEnabled="{Binding TemplateSet}">
     <ScrollViewer HorizontalScrollBarVisibility="Auto">
         <Grid Height="Auto" Width="Auto" Margin="4">
@@ -97,7 +97,7 @@
                     <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <DockPanel Width="491">
                             <Label Content="Image: " Width="115" />
-                            <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback template images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastImageFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.TemplateImageFolder}}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
+                            <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback template images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastImageFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter=image}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
                             <Label Margin="0 0 10 0">
                                 <TextBlock Text="{Binding ImageFilePathForEditing, Mode=OneWay}" TextWrapping="Wrap" />
                             </Label>
@@ -122,7 +122,7 @@
                     <StackPanel  Grid.Row="6" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <DockPanel Width="491">
                             <Label Content="Fallback Thumbnail: " Width="115" />
-                            <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback thumbnail images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastThumbnailFallbackFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter={x:Static ui:Settings.ThumbnailFallbackImageFolder}}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
+                            <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback thumbnail images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastThumbnailFallbackFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter=fallbackthumb}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
                             <Label Margin="0 0 10 0">
                                 <TextBlock Text="{Binding ThumbnailFallbackFilePath, Mode=OneWay}" TextWrapping="Wrap" />
                             </Label>

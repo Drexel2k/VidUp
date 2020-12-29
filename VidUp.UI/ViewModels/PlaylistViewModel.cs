@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
+using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.Youtube.Service;
 using MaterialDesignThemes.Wpf;
@@ -254,6 +255,8 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.autoSettingPlaylists = true;
             this.raisePropertyChanged("AutoSettingPlaylists");
+            MainWindowViewModel.Settings.UserSettings.LastAutoAddToPlaylist = DateTime.Now;
+            JsonSerializationSettings.JsonSerializer.SerializeSettings();
 
             Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap = new Dictionary<string, List<Upload>>();
             foreach (Template template in this.templateList)

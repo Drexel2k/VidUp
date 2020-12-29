@@ -67,7 +67,7 @@
     <Compile Include="..\VidUp.UI\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Content\DeserializationRepository.cs" />
+    <Compile Include="Content\DeserializationRepositoryContent.cs" />
     <Compile Include="Content\JsonSerializationContent.cs" />
     <Compile Include="Content\JsonDeserializationContent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,6 +76,8 @@
     <Compile Include="Content\PlaylistPlaylistIdConverter.cs" />
     <Compile Include="Content\UploadGuidStringConverter.cs" />
     <Compile Include="Content\UploadListGuids.cs" />
+    <Compile Include="Settings\DeserializationRepositorySettings.cs" />
+    <Compile Include="Settings\JsonSerializationSettings.cs" />
     <Compile Include="Settings\JsonDeserializationSettings.cs" />
   </ItemGroup>
   <ItemGroup>

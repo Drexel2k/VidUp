@@ -2,7 +2,7 @@
 
 namespace Drexel.VidUp.Json.Content
 {
-    public class DeserializationRepository
+    public class DeserializationRepositoryContent
     {
         public static UploadList UploadList { get; set; }
 

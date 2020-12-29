@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Json;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Definitions;
@@ -17,12 +16,13 @@ using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using Drexel.VidUp.Youtube.Service;
-using Newtonsoft.Json;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
+        public static Settings Settings;
+
         private int tabNo;
         private List<object> viewModels = new List<object>(new object[4]);
 
@@ -45,26 +45,32 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public MainWindowViewModel()
         {
-            this.initialize(out _, out _, out _);
+            this.initialize(null, out _, out _, out _);
         }
 
         //for testing purposes
-        public MainWindowViewModel(string userSuffix, string storageFolder, string templateImageFolder, string thumbnailFallbackImageFolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        public MainWindowViewModel(string user, string storageFolder, string templateImageFolder, string thumbnailFallbackImageFolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
-            Settings.UserSuffix = userSuffix;
-            Settings.StorageFolder = storageFolder;
-            Settings.TemplateImageFolder = templateImageFolder;
-            Settings.ThumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
-
-            this.initialize(out uploadList, out templateList, out playlistList);
+            this.initialize(user, out uploadList, out templateList, out playlistList);
         }
 
-        private void initialize(out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        private void initialize(string user, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
-            this.deserializeUser();
+            MainWindowViewModel.Settings = new Settings();
+            if (user == null)
+            {
+                this.deserializeUser();
+            }
+            else
+            {
+                MainWindowViewModel.Settings.SetNewUser(user);
+            }
+
             this.checkAppDataFolder();
+            this.deserializeSettings();
             this.deserializeContent();
             JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.StorageFolder, this.uploadList, this.templateList, this.playlistList);
+            JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.StorageFolder, MainWindowViewModel.Settings.UserSettings);
 
             uploadList = this.uploadList;
             templateList = this.templateList;
@@ -137,29 +143,38 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void deserializeContent()
         {
-            JsonDeserializationContent deserializer = new JsonDeserializationContent(Settings.StorageFolder, Settings.TemplateImageFolder, Settings.ThumbnailFallbackImageFolder);
-            YoutubeAuthentication.SerializationFolder = Settings.StorageFolder;
+            JsonDeserializationContent deserializer = new JsonDeserializationContent(
+                MainWindowViewModel.Settings.StorageFolder, MainWindowViewModel.Settings.TemplateImageFolder, MainWindowViewModel.Settings.ThumbnailFallbackImageFolder);
+            YoutubeAuthentication.SerializationFolder = MainWindowViewModel.Settings.StorageFolder;
             deserializer.Deserialize();
-            this.templateList = DeserializationRepository.TemplateList;
+            this.templateList = DeserializationRepositoryContent.TemplateList;
             this.templateList.CollectionChanged += this.templateListCollectionChanged;
             
-            this.uploadList = DeserializationRepository.UploadList;
+            this.uploadList = DeserializationRepositoryContent.UploadList;
             this.uploadList.PropertyChanged += this.uploadListPropertyChanged;
 
-            this.playlistList = DeserializationRepository.PlaylistList;
+            this.playlistList = DeserializationRepositoryContent.PlaylistList;
             this.playlistList.CollectionChanged += playlistListCollectionChanged;
 
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
 
-            DeserializationRepository.ClearRepositories();
+            DeserializationRepositoryContent.ClearRepositories();
         }
 
         private void deserializeUser()
         {
-            JsonDeserializationSettings deserializer = new JsonDeserializationSettings();
-            Settings.UserSuffix = deserializer.DeserializeUser();
-            Settings.ReInitializeFolders();
+            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(MainWindowViewModel.Settings.StorageFolder);
+            MainWindowViewModel.Settings.SetNewUser(deserializer.DeserializeUser());
+        }
+
+        private void deserializeSettings()
+        {
+            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(MainWindowViewModel.Settings.StorageFolder);
+            deserializer.DeserializeSettings();
+            MainWindowViewModel.Settings.UserSettings = DeserializationRepositorySettings.UserSettings;
+
+            DeserializationRepositorySettings.ClearRepositories();
         }
 
         private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -183,19 +198,19 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void checkAppDataFolder()
         {
-            if(!Directory.Exists(Settings.StorageFolder))
+            if(!Directory.Exists(MainWindowViewModel.Settings.StorageFolder))
             {
-                Directory.CreateDirectory(Settings.StorageFolder);
+                Directory.CreateDirectory(MainWindowViewModel.Settings.StorageFolder);
             }
 
-            if (!Directory.Exists(Settings.TemplateImageFolder))
+            if (!Directory.Exists(MainWindowViewModel.Settings.TemplateImageFolder))
             {
-                Directory.CreateDirectory(Settings.TemplateImageFolder);
+                Directory.CreateDirectory(MainWindowViewModel.Settings.TemplateImageFolder);
             }
 
-            if (!Directory.Exists(Settings.ThumbnailFallbackImageFolder))
+            if (!Directory.Exists(MainWindowViewModel.Settings.ThumbnailFallbackImageFolder))
             {
-                Directory.CreateDirectory(Settings.ThumbnailFallbackImageFolder);
+                Directory.CreateDirectory(MainWindowViewModel.Settings.ThumbnailFallbackImageFolder);
             }
         }
 
