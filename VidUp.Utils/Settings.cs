@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Drexel.VidUp.Business
+namespace Drexel.VidUp.Utils
 {
     public class Settings
     {

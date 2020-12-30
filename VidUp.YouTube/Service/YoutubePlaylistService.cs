@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Data;
 using Newtonsoft.Json;
 
@@ -17,6 +18,8 @@ namespace Drexel.VidUp.Youtube.Service
 
         public static async Task<bool> AddToPlaylist(Upload upload)
         {
+            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Start.");
+
             if (!string.IsNullOrWhiteSpace(upload.VideoId) && upload.Playlist != null)
             {
                 try
@@ -33,21 +36,26 @@ namespace Drexel.VidUp.Youtube.Service
 
                     FileInfo info = new FileInfo(upload.FilePath);
                     //request upload session/uri
+
+                    Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Creating playlist request.");
                     HttpWebRequest request =
                         await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
                             $"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet", "POST", jsonBytes, "application/json; charset=utf-8");
 
+                    Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Getting request/data stream.");
                     using (Stream dataStream = await request.GetRequestStreamAsync())
                     {
                         dataStream.Write(jsonBytes, 0, jsonBytes.Length);
                     }
 
+                    Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Try getting response for playlist.");
                     using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
                     {
                     }
                 }
                 catch (WebException e)
                 {
+                    Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Unexpected WebException: {e.ToString()}.");
                     if (e.Response != null)
                     {
                         using (e.Response)
@@ -65,15 +73,18 @@ namespace Drexel.VidUp.Youtube.Service
                 }
                 catch (Exception e)
                 {
+                    Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Unexpected Exception: {e.ToString()}.");
                     upload.UploadErrorMessage = $"Playlist addition failed: {e.ToString()}";
                     return false;
                 }
             }
             else
             {
+                Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, nothing to add to playlist.");
                 return false;
             }
 
+            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End.");
             return true;
         }
 

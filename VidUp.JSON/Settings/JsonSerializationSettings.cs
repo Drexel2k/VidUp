@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Json.Settings

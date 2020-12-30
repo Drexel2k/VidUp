@@ -61,6 +61,7 @@ namespace Drexel.VidUp.Youtube
 
         public async Task<UploaderResult> Upload(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
         {
+            Tracer.Write($"Uploader.Upload: Start with resumeUploads: {resumeUploads}, maxUploadInBytesPerSecond: {maxUploadInBytesPerSecond}.");
             this.uploadStats = uploadStats;
             this.resumeUploads = resumeUploads;
 
@@ -133,6 +134,7 @@ namespace Drexel.VidUp.Youtube
 
             this.uploadStats = null;
 
+            Tracer.Write($"Uploader.Upload: End.");
             return oneUploadFinished ? UploaderResult.OneUploadFinished : UploaderResult.NoUploadFinished;
         }
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.Youtube.Service
 {
@@ -13,13 +14,20 @@ namespace Drexel.VidUp.Youtube.Service
 
         public static async Task<bool> AddThumbnail(Upload upload)
         {
+            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Start.");
+
             if (!string.IsNullOrWhiteSpace(upload.VideoId) && !string.IsNullOrWhiteSpace(upload.ThumbnailFilePath) && File.Exists(upload.ThumbnailFilePath))
             {
+                Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Adding thumbnail.");
+
                 try
                 {
+
+                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Creating thumbnail request.");
                     HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
                             string.Format("{0}?videoId={1}", YoutubeThumbnailService.thumbnailEndpoint, upload.VideoId), "POST", upload.ThumbnailFilePath);
 
+                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Getting request/data stream.");
                     using (FileStream inputStream = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
                     using (Stream dataStream = await request.GetRequestStreamAsync())
                     {
@@ -31,12 +39,15 @@ namespace Drexel.VidUp.Youtube.Service
                         }
                     }
 
+                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Try getting response for thumbnail.");
                     using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
                     {
                     }
                 }
                 catch (WebException e)
                 {
+                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Unexpected WebException: {e.ToString()}.");
+
                     if (e.Response != null)
                     {
                         using (e.Response)
@@ -54,15 +65,19 @@ namespace Drexel.VidUp.Youtube.Service
                 }
                 catch (Exception e)
                 {
+                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Unexpected Exception: {e.ToString()}.");
+
                     upload.UploadErrorMessage = $"Thumbnail upload failed: {e.ToString()}";
                     return false;
                 }
             }
             else
             {
+                Tracer.Write($"YoutubeThumbnailService.AddThumbnail: No thumbnail to add.");
                 return false;
             }
 
+            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End.");
             return true;
         }
     }

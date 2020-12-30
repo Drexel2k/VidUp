@@ -29,7 +29,7 @@ namespace Drexel.VidUp.Youtube.Service
 
             HttpWebRequest request =  await HttpWebRequestCreator.createBasicHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = fileInfo.Length;
-            request.ContentType = MimeMapping.GetMimeMapping(file); ;
+            request.ContentType = MimeMapping.GetMimeMapping(file);
 
             return request;
         }
@@ -103,7 +103,7 @@ namespace Drexel.VidUp.Youtube.Service
             return request;
         }
 
-        public static async Task<HttpWebRequest> CreateAuthenticatedResumeHttpWebRequest(string endpoint, string httpMethod, long uploadFileSize, long startByteIndex, int chunkSize)
+        public static async Task<HttpWebRequest> CreateAuthenticatedResumeHttpWebRequest(string endpoint, string httpMethod, long uploadFileSize, long startByteIndex, int chunkSize, string contentType)
         {
             if (string.IsNullOrWhiteSpace(endpoint))
             {
@@ -129,6 +129,7 @@ namespace Drexel.VidUp.Youtube.Service
 
             HttpWebRequest request = await HttpWebRequestCreator.createBasicHttpWebRequest(endpoint, httpMethod);
             request.ContentLength = lastByteIndex - startByteIndex + 1;
+            request.ContentType = contentType;
             request.Headers.Add("Content-Range", rangeString);
 
             return request;

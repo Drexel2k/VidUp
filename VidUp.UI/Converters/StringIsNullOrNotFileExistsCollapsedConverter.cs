@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows.Data;
 using System.Windows.Markup;
-using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.UI.Converters
 {

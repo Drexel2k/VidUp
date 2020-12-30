@@ -1,4 +1,4 @@
-﻿using Drexel.VidUp.Business;
+﻿using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.Json.Settings
 {

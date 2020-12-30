@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
-using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
