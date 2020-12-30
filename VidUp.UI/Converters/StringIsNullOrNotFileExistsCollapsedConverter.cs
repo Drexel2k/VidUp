@@ -1,14 +1,9 @@
-﻿#region
-
-using System;
-using System.Diagnostics.Eventing.Reader;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
 using System.Windows.Markup;
-using Drexel.VidUp.UI.ViewModels;
-
-#endregion
+using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.Converters
 {
@@ -38,11 +33,11 @@ namespace Drexel.VidUp.UI.Converters
 
             if (parameterInternal == "image")
             {
-                targetFolder = MainWindowViewModel.Settings.TemplateImageFolder;
+                targetFolder = Settings.SettingsInstance.TemplateImageFolder;
             }
             else if (parameterInternal == "fallbackthumb")
             {
-                targetFolder = MainWindowViewModel.Settings.ThumbnailFallbackImageFolder;
+                targetFolder = Settings.SettingsInstance.ThumbnailFallbackImageFolder;
             }
             else
             {

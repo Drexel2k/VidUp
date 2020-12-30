@@ -444,7 +444,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             var view = new NewTemplateControl
             {
-                DataContext = new NewTemplateViewModel(MainWindowViewModel.Settings.TemplateImageFolder)
+                DataContext = new NewTemplateViewModel(Settings.SettingsInstance.TemplateImageFolder)
             };
 
             bool result = (bool)await DialogHost.Show(view, "RootDialog");

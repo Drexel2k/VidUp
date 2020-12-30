@@ -130,8 +130,14 @@
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Update" VerticalContentAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:Button Header="Autoset Paylists" SizeDefinition="Middle,Middle,Small" Icon="images/list-auto.png"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
-                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlist to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <Fluent:Button Header="Set Paylists" SizeDefinition="Middle,Middle,Small" Icon="images/list-auto.png"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
+                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlists to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding AutoSetPlaylists}">
+                                <TextBlock Margin="0 4 0 0">Auto Set Playlists</TextBlock>
+                            </Fluent:CheckBox>
+                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="If checked, playlists will be set to published videos automatically every 12 hours when app is running. Will be done at app start, if last attempt is longer ago than 12 hours." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>

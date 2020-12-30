@@ -21,8 +21,6 @@ namespace Drexel.VidUp.UI.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        public static Settings Settings;
-
         private int tabNo;
         private List<object> viewModels = new List<object>(new object[4]);
 
@@ -56,21 +54,21 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void initialize(string user, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
-            MainWindowViewModel.Settings = new Settings();
+            Settings.SettingsInstance = new Settings();
             if (user == null)
             {
                 this.deserializeUser();
             }
             else
             {
-                MainWindowViewModel.Settings.SetNewUser(user);
+                Settings.SettingsInstance.SetNewUser(user);
             }
 
             this.checkAppDataFolder();
             this.deserializeSettings();
             this.deserializeContent();
-            JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.StorageFolder, this.uploadList, this.templateList, this.playlistList);
-            JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.StorageFolder, MainWindowViewModel.Settings.UserSettings);
+            JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.SettingsInstance.StorageFolder, this.uploadList, this.templateList, this.playlistList);
+            JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.UserSettings);
 
             uploadList = this.uploadList;
             templateList = this.templateList;
@@ -144,8 +142,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private void deserializeContent()
         {
             JsonDeserializationContent deserializer = new JsonDeserializationContent(
-                MainWindowViewModel.Settings.StorageFolder, MainWindowViewModel.Settings.TemplateImageFolder, MainWindowViewModel.Settings.ThumbnailFallbackImageFolder);
-            YoutubeAuthentication.SerializationFolder = MainWindowViewModel.Settings.StorageFolder;
+                Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.TemplateImageFolder, Settings.SettingsInstance.ThumbnailFallbackImageFolder);
+            YoutubeAuthentication.SerializationFolder = Settings.SettingsInstance.StorageFolder;
             deserializer.Deserialize();
             this.templateList = DeserializationRepositoryContent.TemplateList;
             this.templateList.CollectionChanged += this.templateListCollectionChanged;
@@ -164,15 +162,15 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void deserializeUser()
         {
-            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(MainWindowViewModel.Settings.StorageFolder);
-            MainWindowViewModel.Settings.SetNewUser(deserializer.DeserializeUser());
+            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(Settings.SettingsInstance.StorageFolder);
+            Settings.SettingsInstance.SetNewUser(deserializer.DeserializeUser());
         }
 
         private void deserializeSettings()
         {
-            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(MainWindowViewModel.Settings.StorageFolder);
+            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(Settings.SettingsInstance.StorageFolder);
             deserializer.DeserializeSettings();
-            MainWindowViewModel.Settings.UserSettings = DeserializationRepositorySettings.UserSettings;
+            Settings.SettingsInstance.UserSettings = DeserializationRepositorySettings.UserSettings;
 
             DeserializationRepositorySettings.ClearRepositories();
         }
@@ -198,19 +196,19 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void checkAppDataFolder()
         {
-            if(!Directory.Exists(MainWindowViewModel.Settings.StorageFolder))
+            if(!Directory.Exists(Settings.SettingsInstance.StorageFolder))
             {
-                Directory.CreateDirectory(MainWindowViewModel.Settings.StorageFolder);
+                Directory.CreateDirectory(Settings.SettingsInstance.StorageFolder);
             }
 
-            if (!Directory.Exists(MainWindowViewModel.Settings.TemplateImageFolder))
+            if (!Directory.Exists(Settings.SettingsInstance.TemplateImageFolder))
             {
-                Directory.CreateDirectory(MainWindowViewModel.Settings.TemplateImageFolder);
+                Directory.CreateDirectory(Settings.SettingsInstance.TemplateImageFolder);
             }
 
-            if (!Directory.Exists(MainWindowViewModel.Settings.ThumbnailFallbackImageFolder))
+            if (!Directory.Exists(Settings.SettingsInstance.ThumbnailFallbackImageFolder))
             {
-                Directory.CreateDirectory(MainWindowViewModel.Settings.ThumbnailFallbackImageFolder);
+                Directory.CreateDirectory(Settings.SettingsInstance.ThumbnailFallbackImageFolder);
             }
         }
 

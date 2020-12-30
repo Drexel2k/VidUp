@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Timers;
+using System.Windows.Forms.VisualStyles;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
@@ -29,6 +31,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private bool autoSettingPlaylists;
 
+        private readonly object autoSetPlaylistsLock = new object();
+        private Timer autoSetPlaylistTimer;
 
         #region properties
         public Playlist Playlist
@@ -148,6 +152,16 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.playlist != null ? this.playlist.LastModified : DateTime.MinValue; 
         }
 
+        public bool AutoSetPlaylists
+        {
+            get => Settings.SettingsInstance.UserSettings.AutoSetPlaylists;
+            set
+            {
+                Settings.SettingsInstance.UserSettings.AutoSetPlaylists = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+            }
+        }
+
 
         #endregion properties
 
@@ -177,6 +191,24 @@ namespace Drexel.VidUp.UI.ViewModels
             this.newPlaylistCommand = new GenericCommand(this.OpenNewPlaylistDialog);
             this.removePlaylistCommand = new GenericCommand(this.RemovePlaylist);
             this.autoSetPlaylistsCommand = new GenericCommand(this.autoSetPlaylists);
+
+
+            this.autoSetPlaylistTimer = new Timer();
+            this.autoSetPlaylistTimer.AutoReset = false;
+            this.autoSetPlaylistTimer.Elapsed += autoSetPlaylistTimerElapsed;
+
+            if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
+            {
+                TimeSpan span = DateTime.Now - Settings.SettingsInstance.UserSettings.LastAutoAddToPlaylist;
+                if (span.TotalHours > 12)
+                {
+                    this.autoSetPlaylists(null);
+                }
+                else
+                {
+                    this.autoSetPlaylistTimer.Interval = (12 - span.TotalHours) * 60 * 60 * 1000;
+                }
+            }
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -251,19 +283,30 @@ namespace Drexel.VidUp.UI.ViewModels
             this.SelectedPlaylist = new PlaylistComboboxViewModel(playlist);
         }
 
+        private void autoSetPlaylistTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            this.autoSetPlaylists(null);
+        }
+
         private async void autoSetPlaylists(object obj)
         {
-            this.autoSettingPlaylists = true;
-            this.raisePropertyChanged("AutoSettingPlaylists");
-            MainWindowViewModel.Settings.UserSettings.LastAutoAddToPlaylist = DateTime.Now;
-            JsonSerializationSettings.JsonSerializer.SerializeSettings();
+            lock (this.autoSetPlaylistsLock)
+            {
+                if (this.autoSettingPlaylists)
+                {
+                    return;
+                }
+
+                this.autoSettingPlaylists = true;
+                this.raisePropertyChanged("AutoSettingPlaylists");
+            }
 
             Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap = new Dictionary<string, List<Upload>>();
             foreach (Template template in this.templateList)
             {
                 if (template.SetPlaylistAfterPublication && template.Playlist != null && !template.Playlist.NotExistsOnYoutube)
                 {
-                    Upload[] uploads = template.Uploads.Where(upload1 => upload1.UploadStatus == UplStatus.Finished && 
+                    Upload[] uploads = template.Uploads.Where(upload1 => upload1.UploadStatus == UplStatus.Finished &&
                         !string.IsNullOrWhiteSpace(upload1.VideoId) && upload1.Playlist == null && !upload1.NotExistsOnYoutube).ToArray();
 
                     if (uploads.Length >= 1)
@@ -339,6 +382,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+
+            Settings.SettingsInstance.UserSettings.LastAutoAddToPlaylist = DateTime.Now;
+            JsonSerializationSettings.JsonSerializer.SerializeSettings();
+
+            if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
+            {
+                //stop timer if triggered manually and restart
+                this.autoSetPlaylistTimer.Stop();
+                //first call after constructor the timer can be less than 12 hours.
+                this.autoSetPlaylistTimer.Interval = 12 * 60 * 60 * 1000;
+                this.autoSetPlaylistTimer.Start();
+            }
 
             this.autoSettingPlaylists = false;
             this.raisePropertyChanged("AutoSettingPlaylists");

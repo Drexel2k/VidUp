@@ -7,7 +7,19 @@ namespace Drexel.VidUp.Business
     public class UserSettings
     {
         [JsonProperty]
+        private bool autoSetPlaylists;
+
+        [JsonProperty]
         private DateTime lastAutoAddToPlaylist;
+
+        public bool AutoSetPlaylists
+        {
+            get => this.autoSetPlaylists;
+            set
+            {
+                this.autoSetPlaylists = value;
+            }
+        }
 
         public DateTime LastAutoAddToPlaylist
         {
