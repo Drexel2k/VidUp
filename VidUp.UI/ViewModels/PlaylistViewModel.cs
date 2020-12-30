@@ -159,9 +159,9 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 Settings.SettingsInstance.UserSettings.AutoSetPlaylists = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                this.setAutoSetPlaylistsTimer();
             }
         }
-
 
         #endregion properties
 
@@ -199,21 +199,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
             {
-                TimeSpan span = DateTime.Now - Settings.SettingsInstance.UserSettings.LastAutoAddToPlaylist;
-                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists is enabled, last autoset is {span.TotalHours} hours ago.");
-
-                if (span.TotalHours > 12)
-                {
-                    Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Starting autosetting playlists immediately.");
-                    this.autoSetPlaylists(null);
-                }
-                else
-                {
-                    double nextAutoSetPlaylists = (12 - span.TotalHours);
-                    Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Scheduling autosetting playlists in {nextAutoSetPlaylists} hours.");
-
-                    this.autoSetPlaylistTimer.Interval = nextAutoSetPlaylists * 60 * 60 * 1000;
-                }
+                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists is enabled, setting up timer.");
+                this.calculateTimeAndSetAutoSetPlaylistsTimer();
             }
         }
 
@@ -406,6 +393,40 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.autoSettingPlaylists = false;
             this.raisePropertyChanged("AutoSettingPlaylists");
+        }
+
+        private void setAutoSetPlaylistsTimer()
+        {
+            if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
+            {
+                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists enabled by user, setting up timer.");
+                this.calculateTimeAndSetAutoSetPlaylistsTimer();
+            }
+            else
+            {
+                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists disabled by user, stopping timer.");
+                this.autoSetPlaylistTimer.Stop();
+            }
+        }
+
+        private void calculateTimeAndSetAutoSetPlaylistsTimer()
+        {
+            TimeSpan span = DateTime.Now - Settings.SettingsInstance.UserSettings.LastAutoAddToPlaylist;
+            Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Last autoset is {span.TotalHours} hours ago.");
+
+            if (span.TotalHours > 12)
+            {
+                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Starting autosetting playlists immediately.");
+                this.autoSetPlaylists(null);
+            }
+            else
+            {
+                double nextAutoSetPlaylists = (12 - span.TotalHours);
+                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Scheduling autosetting playlists in {nextAutoSetPlaylists} hours.");
+
+                this.autoSetPlaylistTimer.Interval = nextAutoSetPlaylists * 60 * 60 * 1000;
+                this.autoSetPlaylistTimer.Start();
+            }
         }
     }
 }
