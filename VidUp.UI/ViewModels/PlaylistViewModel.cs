@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Timers;
+using System.Windows.Forms.VisualStyles;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
@@ -30,11 +31,21 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand autoSetPlaylistsCommand;
 
         private bool autoSettingPlaylists;
+        private int intervalInSeconds = 12 * 60 * 60;
 
         private readonly object autoSetPlaylistsLock = new object();
         private Timer autoSetPlaylistTimer;
 
         #region properties
+
+        private TimeSpan interval
+        {
+            get
+            {
+                return TimeSpan.FromSeconds(this.intervalInSeconds);
+            }
+        }
+
         public Playlist Playlist
         {
             get
@@ -278,9 +289,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void autoSetPlaylistTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: Starting autosetting playlists.");
+            Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: Start autosetting playlists.");
             this.autoSetPlaylists(null);
-            Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: Finished autosetting playlists.");
+            Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: End autosetting playlists.");
         }
 
         private async void autoSetPlaylists(object obj)
@@ -383,11 +394,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
             {
-                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Autosetting playlists is enabled, setting timer to 12 hours.");
+                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Autosetting playlists is enabled, setting timer to {this.interval.Days * 24 + this.interval.Hours}:{this.interval.Minutes}:{this.interval.Seconds} hours:minutes:seconds.");
                 //stop timer if triggered manually and restart
                 this.autoSetPlaylistTimer.Stop();
-                //first call after constructor the timer can be less than 12 hours.
-                this.autoSetPlaylistTimer.Interval = 12 * 60 * 60 * 1000;
+                //first call after constructor the timer can be less than interval.
+                this.autoSetPlaylistTimer.Interval = this.intervalInSeconds * 1000;
                 this.autoSetPlaylistTimer.Start();
             }
 
@@ -412,19 +423,20 @@ namespace Drexel.VidUp.UI.ViewModels
         private void calculateTimeAndSetAutoSetPlaylistsTimer()
         {
             TimeSpan span = DateTime.Now - Settings.SettingsInstance.UserSettings.LastAutoAddToPlaylist;
-            Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Last autoset is {span.TotalHours} hours ago.");
+            Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Last autoset is {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds ago.");
 
-            if (span.TotalHours > 12)
+            if (span.TotalSeconds > this.intervalInSeconds)
             {
                 Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Starting autosetting playlists immediately.");
                 this.autoSetPlaylists(null);
             }
             else
             {
-                double nextAutoSetPlaylists = (12 - span.TotalHours);
-                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Scheduling autosetting playlists in {nextAutoSetPlaylists} hours.");
+                double nextAutoSetPlaylists = ((this.intervalInSeconds - span.TotalSeconds) * 1000);
+                span = TimeSpan.FromMilliseconds(nextAutoSetPlaylists);
+                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Scheduling autosetting playlists in {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds.");
 
-                this.autoSetPlaylistTimer.Interval = nextAutoSetPlaylists * 60 * 60 * 1000;
+                this.autoSetPlaylistTimer.Interval = nextAutoSetPlaylists;
                 this.autoSetPlaylistTimer.Start();
             }
         }
