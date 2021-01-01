@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -26,6 +27,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private ObservableTemplateViewModels observableTemplateViewModels;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
+
+        //need for determination of upload status color
+        private bool resumeUploads;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -110,6 +114,57 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get => this.upload.UploadStatus;
         }
+
+        public SolidColorBrush UploadStatusColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.UploadStatus == UplStatus.Finished || this.upload.UploadStatus == UplStatus.Uploading)
+                {
+                    color = Colors.Lime;
+                }
+
+                if (this.upload.UploadStatus == UplStatus.ReadyForUpload)
+                {
+                    color = Colors.Gold;
+                }
+
+                if (this.upload.UploadStatus == UplStatus.Failed || this.upload.UploadStatus == UplStatus.Stopped)
+                {
+                    if (this.resumeUploads)
+                    {
+                        color = Colors.Gold;
+                    }
+                    else
+                    {
+                        color = Colors.Transparent;
+                    }
+                }
+
+                if (this.upload.UploadStatus == UplStatus.Paused)
+                {
+                    color = Colors.Transparent;
+                }
+
+                return new SolidColorBrush(color);
+            }
+        }
+
+        public bool UploadStatusColorAnimation
+        {
+            get
+            {
+                if ( this.upload.UploadStatus == UplStatus.Uploading)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
 
         public string FilePath
         {
@@ -447,6 +502,15 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool ResumeUploads
+        {
+            set
+            {
+                this.resumeUploads = value; 
+                this.raisePropertyChanged("UploadStatusColor");
+            }
+        }
+
         public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             if (observableTemplateViewModels == null)
@@ -482,6 +546,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadErrorMessage");
                 this.raisePropertyChanged("ShowUploadErrorIcon");
                 this.raisePropertyChanged("UploadStatus");
+                this.raisePropertyChanged("UploadStatusColor");
+                this.raisePropertyChanged("UploadStatusColorAnimation");
                 this.raisePropertyChanged("UploadStart");
                 this.raisePropertyChanged("UploadEnd");
                 this.raisePropertyChanged("ControlsEnabled");
@@ -513,7 +579,15 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void resetUploadState(object parameter)
         {
-            this.upload.UploadStatus = UplStatus.ReadyForUpload;
+            if (this.upload.BytesSent > 0 && this.upload.UploadStatus != UplStatus.Stopped && this.upload.UploadStatus != UplStatus.Finished)
+            {
+                this.upload.UploadStatus = UplStatus.Stopped;
+            }
+            else
+            {
+                this.upload.UploadStatus = UplStatus.ReadyForUpload;
+            }
+
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 

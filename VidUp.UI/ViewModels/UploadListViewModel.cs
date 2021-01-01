@@ -165,6 +165,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.resumeUploads != value)
                 {
                     this.resumeUploads = value;
+                    this.notifyUploadsAboutResumeState();
                     this.raisePropertyChanged("ResumeUploads");
                 }
             }
@@ -349,6 +350,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.resetRecalculatePublishAtStartDateCommand = new GenericCommand(this.resetRecalculatePublishAtStartDate);
             this.removeUploadsCommand = new GenericCommand(this.removeUploads);
             this.resetUploadsCommand = new GenericCommand(this.resetUploads);
+
+            this.notifyUploadsAboutResumeState();
         }
 
         //need to change the template filter combobox selected item, if this template is deleted. So the selected
@@ -691,6 +694,14 @@ namespace Drexel.VidUp.UI.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private void notifyUploadsAboutResumeState()
+        {
+            foreach (UploadViewModel uploadViewModel in this.observableUploadViewModels)
+            {
+                uploadViewModel.ResumeUploads = this.resumeUploads;
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -355,6 +356,7 @@ namespace Drexel.VidUp.Youtube.Service
             video.VideoSnippet.Title = upload.YtTitle;
             video.VideoSnippet.Description = upload.Description;
             video.VideoSnippet.Tags = (upload.Tags != null ? upload.Tags : new List<string>()).ToArray();
+            //video.VideoSnippet.DefaultAudioLanguage = upload.VideoLanguage;
 
             video.Status = new YoutubeStatus();
             video.Status.Privacy = upload.Visibility.ToString().ToLower(); // "unlisted", "private" or "public"

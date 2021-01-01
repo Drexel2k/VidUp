@@ -185,10 +185,12 @@
             </StackPanel>
             <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />
-                <materialDesign:PackIcon Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="0 4 0 0" Background="Transparent" />
+                <materialDesign:PackIcon Width="20" Height="20" Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="7 2 0 0" Background="Red" />
             </StackPanel>
             <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal">
-                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="100" Margin="0 0 40 0" />
+
+                <ProgressBar Width="20" Height="20" Background="{Binding UploadStatusColor}" Foreground="LimeGreen" materialDesign:TransitionAssist.DisableTransitions="True" IsIndeterminate="{Binding UploadStatusColorAnimation}"  Margin ="0 0 2 6" />
+                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="100" Margin="0 0 18 0" />
                 <Label Content="Upload Started: " Width="90" />
             </StackPanel>
             <StackPanel Grid.Row="9" Grid.Column="2" Orientation="Horizontal">

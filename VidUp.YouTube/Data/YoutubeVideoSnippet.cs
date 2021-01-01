@@ -16,5 +16,8 @@ namespace Drexel.VidUp.Youtube.Data
 
 		[JsonProperty(PropertyName = "tags")]
 		public string[] Tags { get; set; }
-	}
+
+        [JsonProperty(PropertyName = "defaultAudioLanguage")]
+        public string DefaultAudioLanguage { get; set; }
+    }
 }
