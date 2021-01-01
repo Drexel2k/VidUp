@@ -41,6 +41,285 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public List<object> ViewModels
+        {
+            get => this.viewModels;
+        }
+
+        //is bound to grid row 1 (main window content) MainWindow.Xaml
+        public object CurrentViewModel
+        {
+            get
+            {
+                return this.viewModels[this.tabNo];
+            }
+        }
+
+        public AppStatus AppStatus
+        {
+            get => this.appStatus;
+        }
+
+        private TaskbarState taskbarStateInternal
+        {
+            set
+            {
+                this.taskbarState = value;
+                this.raisePropertyChanged("TotalProgressPercentage");
+                this.raisePropertyChanged("TaskbarItemProgressState");
+            }
+        }
+
+        public PostUploadAction PostUploadAction
+        {
+            get => this.postUploadAction;
+            set
+            {
+                this.postUploadAction = value;
+                this.raisePropertyChanged("PostUploadAction");
+            }
+        }
+
+        public Array PostUploadActions
+        {
+            get
+            {
+                return Enum.GetValues(typeof(PostUploadAction));
+            }
+        }
+
+        public string AppTitle
+        {
+            get
+            {
+                Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                string product = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute), false)).Product;
+                string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                return string.Format("{0} {1}", product, version);
+            }
+        }
+
+        public float TotalProgressPercentage
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return this.uploadStats.TotalProgressPercentage;
+                }
+                else
+                {
+                    if (this.taskbarState == TaskbarState.Normal)
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+            }
+        }
+
+        public TaskbarItemProgressState TaskbarItemProgressState
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return TaskbarItemProgressState.Normal;
+                }
+                else
+                {
+                    if (this.taskbarState == TaskbarState.Normal)
+                    {
+                        return TaskbarItemProgressState.Normal;
+                    }
+                    else
+                    {
+                        return TaskbarItemProgressState.Paused;
+                    }
+                }
+            }
+        }
+
+        public string CurrentFilePercent
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return string.Format("{0}%", this.uploadStats.CurrentFilePercent);
+                }
+
+                return "n/a";
+            }
+        }
+        public string CurrentFileTimeLeft
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading && this.uploadStats.CurrentFileTimeLeft != null)
+                {
+                    return string.Format("{0}h {1}m {2}s",
+                        (int)this.uploadStats.CurrentFileTimeLeft.Value.TotalHours,
+                        this.uploadStats.CurrentFileTimeLeft.Value.Minutes,
+                        this.uploadStats.CurrentFileTimeLeft.Value.Seconds);
+                }
+
+                return "n/a";
+            }
+        }
+
+        public string CurrentFileMbLeft
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return this.uploadStats.CurrentFileMbLeft.ToString("N0", CultureInfo.CurrentCulture);
+                }
+
+                return "n/a";
+            }
+        }
+
+        public string CurrentUploadSpeedInKiloBytesPerSecond
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return this.uploadStats.CurrentSpeedInKiloBytesPerSecond.ToString("N0", CultureInfo.CurrentCulture);
+                }
+
+                return "n/a";
+            }
+        }
+
+        public string TotalTimeLeft
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading && this.uploadStats.TotalTimeLeft != null)
+                {
+                    return string.Format("{0}h {1}m {2}s",
+                        (int)this.uploadStats.TotalTimeLeft.Value.TotalHours,
+                        this.uploadStats.TotalTimeLeft.Value.Minutes,
+                        this.uploadStats.TotalTimeLeft.Value.Seconds);
+                }
+
+                return "n/a";
+            }
+        }
+
+        public string TotalMbLeft
+        {
+            get
+            {
+                if (this.appStatus == AppStatus.Uploading)
+                {
+                    return this.uploadStats.TotalMbLeft.ToString("N0", CultureInfo.CurrentCulture);
+                }
+
+                if (((UploadListViewModel)this.viewModels[0]).ResumeUploads)
+                {
+                    return ((int)((float)this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable /
+                                   Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                }
+                else
+                {
+                    return ((int)((float)this.uploadList.RemainingBytesOfFilesToUpload /
+                                  Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                }
+            }
+        }
+
+        public string MaxUploadInKiloBytesPerSecond
+        {
+            get
+            {
+                return (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond / 1024).ToString("N0", CultureInfo.CurrentCulture); ;
+            }
+
+            set
+            {
+                value = value.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator, string.Empty);
+                if (long.TryParse(value, out long kiloBytesPerSecond))
+                {
+                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
+                    if (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond < 262144) // minimum 256 KiloBytes per second
+                    {
+                        ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
+                    }
+                }
+                else
+                {
+                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
+                }
+
+                this.raisePropertyChanged("MaxUploadInKiloBytesPerSecond");
+            }
+        }
+
+        public int TabNo
+        {
+            get
+            {
+                return this.tabNo;
+            }
+            set
+            {
+                if (this.tabNo != value)
+                {
+                    this.tabNo = value;
+                    this.raisePropertyChanged("TabNo");
+                    this.raisePropertyChanged("CurrentViewModel");
+                }
+            }
+        }
+
+        public int WindowTop
+        {
+            get => Settings.SettingsInstance.UserSettings.WindowTop;
+            set
+            {
+                Settings.SettingsInstance.UserSettings.WindowTop = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+            }
+        }
+
+        public int WindowLeft
+        {
+            get => Settings.SettingsInstance.UserSettings.WindowLeft;
+            set
+            {
+                Settings.SettingsInstance.UserSettings.WindowLeft = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+            }
+        }
+
+        public int WindowHeight
+        {
+            get => Settings.SettingsInstance.UserSettings.WindowHeight;
+            set
+            {
+                Settings.SettingsInstance.UserSettings.WindowHeight = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+            }
+        }
+
+        public int WindowWidth
+        {
+            get => Settings.SettingsInstance.UserSettings.WindowWidth;
+            set
+            {
+                Settings.SettingsInstance.UserSettings.WindowWidth = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+            }
+        }
+
+
         public MainWindowViewModel()
         {
             this.initialize(null, out _, out _, out _);
@@ -209,244 +488,6 @@ namespace Drexel.VidUp.UI.ViewModels
             if (!Directory.Exists(Settings.SettingsInstance.ThumbnailFallbackImageFolder))
             {
                 Directory.CreateDirectory(Settings.SettingsInstance.ThumbnailFallbackImageFolder);
-            }
-        }
-
-        public List<object> ViewModels
-        {
-            get => this.viewModels;
-        }
-
-        //is bound to grid row 1 (main window content) MainWindow.Xaml
-        public object CurrentViewModel
-        {
-            get
-            {
-                return this.viewModels[this.tabNo];
-            }
-        }
-
-        public AppStatus AppStatus
-        {
-            get => this.appStatus;
-        }
-
-        private TaskbarState taskbarStateInternal
-        {
-            set
-            {
-                this.taskbarState = value;
-                this.raisePropertyChanged("TotalProgressPercentage");
-                this.raisePropertyChanged("TaskbarItemProgressState");
-            }
-        }
-
-        public PostUploadAction PostUploadAction
-        {
-            get => this.postUploadAction;
-            set
-            {
-                this.postUploadAction = value;
-                this.raisePropertyChanged("PostUploadAction");
-            }
-        }
-
-        public Array PostUploadActions
-        {
-            get
-            {
-                return Enum.GetValues(typeof(PostUploadAction));
-            }
-        }
-
-        public string AppTitle
-        {
-            get
-            {
-                Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                string product = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute), false)).Product;
-                string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                return string.Format("{0} {1}", product, version);
-            }
-        }
-
-       public float TotalProgressPercentage
-       {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading)
-                {
-                    return this.uploadStats.TotalProgressPercentage;
-                }
-                else
-                {
-                    if (this.taskbarState == TaskbarState.Normal)
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        return 1;
-                    }
-                }
-            }
-       }
-
-        public TaskbarItemProgressState TaskbarItemProgressState
-        {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading)
-                {
-                    return TaskbarItemProgressState.Normal;
-                }
-                else
-                {
-                    if (this.taskbarState == TaskbarState.Normal)
-                    {
-                        return TaskbarItemProgressState.Normal;
-                    }
-                    else
-                    {
-                        return TaskbarItemProgressState.Paused;
-                    }
-                }
-            }
-        }
-
-    public string CurrentFilePercent
-        {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading)
-                {
-                    return string.Format("{0}%", this.uploadStats.CurrentFilePercent);
-                }
-
-                return "n/a";
-            }
-        }
-        public string CurrentFileTimeLeft
-        {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading && this.uploadStats.CurrentFileTimeLeft != null)
-                {
-                    return string.Format("{0}h {1}m {2}s",
-                        (int)this.uploadStats.CurrentFileTimeLeft.Value.TotalHours,
-                        this.uploadStats.CurrentFileTimeLeft.Value.Minutes,
-                        this.uploadStats.CurrentFileTimeLeft.Value.Seconds);
-                }
-
-                return "n/a";
-            }
-        }
-
-        public string CurrentFileMbLeft
-        {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading)
-                {
-                    return this.uploadStats.CurrentFileMbLeft.ToString("N0", CultureInfo.CurrentCulture);
-                }
-
-                return "n/a";
-            }
-        }
-
-        public string CurrentUploadSpeedInKiloBytesPerSecond
-        {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading)
-                {
-                    return this.uploadStats.CurrentSpeedInKiloBytesPerSecond.ToString("N0", CultureInfo.CurrentCulture);
-                }
-
-                return "n/a";
-            }
-        }
-
-        public string TotalTimeLeft
-        {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading && this.uploadStats.TotalTimeLeft != null)
-                {
-                    return string.Format("{0}h {1}m {2}s",
-                        (int)this.uploadStats.TotalTimeLeft.Value.TotalHours,
-                        this.uploadStats.TotalTimeLeft.Value.Minutes,
-                        this.uploadStats.TotalTimeLeft.Value.Seconds);
-                }
-
-                return "n/a";
-            }
-        }
-
-        public string TotalMbLeft
-        {
-            get
-            {
-                if (this.appStatus == AppStatus.Uploading)
-                {
-                    return this.uploadStats.TotalMbLeft.ToString("N0", CultureInfo.CurrentCulture);
-                }
-
-                if (((UploadListViewModel)this.viewModels[0]).ResumeUploads)
-                {
-                    return ((int) ((float) this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable /
-                                   Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
-                }
-                else
-                {
-                    return ((int)((float)this.uploadList.RemainingBytesOfFilesToUpload /
-                                  Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
-                }
-            }
-        }
-
-        public string MaxUploadInKiloBytesPerSecond
-        {
-            get
-            {
-                return (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond / 1024).ToString("N0", CultureInfo.CurrentCulture); ;
-            }
-
-            set
-            {
-                value = value.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator, string.Empty);
-                if (long.TryParse(value, out long kiloBytesPerSecond))
-                {
-                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
-                    if (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond < 262144) // minimum 256 KiloBytes per second
-                    {
-                        ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
-                    }
-                }
-                else
-                {
-                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
-                }
-
-                this.raisePropertyChanged("MaxUploadInKiloBytesPerSecond");
-            }
-        }
-
-        public int TabNo
-        {
-            get
-            {
-                return this.tabNo;
-            }
-            set
-            {
-                if (this.tabNo != value)
-                {
-                    this.tabNo = value;
-                    this.raisePropertyChanged("TabNo");
-                    this.raisePropertyChanged("CurrentViewModel");
-                }
             }
         }
 
