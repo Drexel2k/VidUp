@@ -356,7 +356,13 @@ namespace Drexel.VidUp.Youtube.Service
             video.VideoSnippet.Title = upload.YtTitle;
             video.VideoSnippet.Description = upload.Description;
             video.VideoSnippet.Tags = (upload.Tags != null ? upload.Tags : new List<string>()).ToArray();
-            //video.VideoSnippet.DefaultAudioLanguage = upload.VideoLanguage;
+            video.VideoSnippet.VideoLanguage = upload.VideoLanguage != null ? upload.VideoLanguage.Name : null;
+            video.VideoSnippet.Category = null;
+            if (upload.Category != null)
+            {
+                video.VideoSnippet.Category = upload.Category.Id;
+            }
+
 
             video.Status = new YoutubeStatus();
             video.Status.Privacy = upload.Visibility.ToString().ToLower(); // "unlisted", "private" or "public"
