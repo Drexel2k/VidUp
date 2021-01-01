@@ -279,7 +279,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public int WindowTop
+        public int? WindowTop
         {
             get => Settings.SettingsInstance.UserSettings.WindowTop;
             set
@@ -289,7 +289,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public int WindowLeft
+        public int? WindowLeft
         {
             get => Settings.SettingsInstance.UserSettings.WindowLeft;
             set
@@ -299,7 +299,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public int WindowHeight
+        public int? WindowHeight
         {
             get => Settings.SettingsInstance.UserSettings.WindowHeight;
             set
@@ -309,7 +309,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public int WindowWidth
+        public int? WindowWidth
         {
             get => Settings.SettingsInstance.UserSettings.WindowWidth;
             set

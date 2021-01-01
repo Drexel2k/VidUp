@@ -16,16 +16,16 @@ namespace Drexel.VidUp.Utils
         private DateTime lastAutoAddToPlaylist;
 
         [JsonProperty]
-        private int windowWidth;
+        private int? windowWidth;
 
         [JsonProperty]
-        private int windowHeight;
+        private int? windowHeight;
 
         [JsonProperty]
-        private int windowLeft;
+        private int? windowLeft;
 
         [JsonProperty]
-        private int windowTop;
+        private int? windowTop;
 
         public bool Trace
         {
@@ -50,7 +50,7 @@ namespace Drexel.VidUp.Utils
             }
         }
 
-        public int WindowWidth
+        public int? WindowWidth
         {
             get => this.windowWidth;
             set
@@ -59,7 +59,7 @@ namespace Drexel.VidUp.Utils
             }
         }
 
-        public int WindowHeight
+        public int? WindowHeight
         {
             get => this.windowHeight;
             set
@@ -68,7 +68,7 @@ namespace Drexel.VidUp.Utils
             }
         }
 
-        public int WindowLeft
+        public int? WindowLeft
         {
             get => this.windowLeft;
             set
@@ -77,7 +77,7 @@ namespace Drexel.VidUp.Utils
             }
         }
 
-        public int WindowTop
+        public int? WindowTop
         {
             get => this.windowTop;
             set
