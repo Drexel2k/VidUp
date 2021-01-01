@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -56,6 +57,10 @@ namespace Drexel.VidUp.Business
         private string videoId;
         [JsonProperty]
         private bool notExistsOnYoutube;
+        [JsonProperty]
+        private CultureInfo videoLanguage;
+        [JsonProperty]
+        private Category category;
 
         private long fileLength;
 
@@ -340,7 +345,27 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public CultureInfo VideoLanguage
+        {
+            get => this.videoLanguage;
+            set
+            {
+                this.videoLanguage = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("VideoLanguage");
+            }
+        }
 
+        public Category Category
+        {
+            get => this.category;
+            set
+            {
+                this.category = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("Category");
+            }
+        }
 
         [JsonConstructor]
         private Upload()
@@ -379,6 +404,8 @@ namespace Drexel.VidUp.Business
             this.CopyTagsFromtemplate();
             this.CopyVisibilityFromTemplate();
             this.CopyPlaylistFromTemplate();
+            this.CopyVideoLanguageFromTemplate();
+            this.CopyCategoryFromTemplate();
         }
 
         public void CopyVisibilityFromTemplate()
@@ -447,6 +474,23 @@ namespace Drexel.VidUp.Business
                 this.Playlist = this.template.Playlist;
             }
         }
+
+        public void CopyVideoLanguageFromTemplate()
+        {
+            if (this.template != null )
+            {
+                this.VideoLanguage = this.template.VideoLanguage;
+            }
+        }
+
+        public void CopyCategoryFromTemplate()
+        {
+            if (this.template != null )
+            {
+                this.Category = this.template.Category;
+            }
+        }
+
         public void AutoSetPublishAtDateTime()
         {
             if (this.template == null)

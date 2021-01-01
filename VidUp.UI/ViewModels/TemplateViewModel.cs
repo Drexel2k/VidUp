@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
@@ -223,7 +224,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChangedAndSerializeTemplateList("TagsAsString");
             }
         }
-        public Visibility Visibility 
+        public Visibility SelectedVisibility 
         { 
             get => this.template != null ? this.template.YtVisibility : Visibility.Private;
             set
@@ -238,7 +239,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.template.YtVisibility = value;
                 this.raisePropertyChanged("UsePublishAtSchedule");
-                this.raisePropertyChangedAndSerializeTemplateList("Visibility");
+                this.raisePropertyChangedAndSerializeTemplateList("SelectedVisibility");
             }
         }
 
@@ -364,7 +365,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.template.UsePublishAtSchedule = value;
 
-                this.raisePropertyChanged("Visibility");
+                this.raisePropertyChanged("SelectedVisibility");
                 this.raisePropertyChangedAndSerializeTemplateList("UsePublishAtSchedule");
             }
         }
@@ -394,6 +395,36 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.template.TemplateMode = value;
                 this.raisePropertyChangedAndSerializeTemplateList("TemplateMode");
+            }
+        }
+
+        public CultureInfo[] VideoLanguages
+        {
+            get => Cultures.CultureInfos;
+        }
+
+        public CultureInfo VideoLanguage
+        {
+            get => this.template != null ? this.template.VideoLanguage : null;
+            set
+            {
+                this.template.VideoLanguage = value;
+                this.raisePropertyChangedAndSerializeTemplateList("VideoLanguage");
+            }
+        }
+
+        public Category[] Categories
+        {
+            get => Category.Categories;
+        }
+
+        public Category Category
+        {
+            get => this.template != null ? this.template.Category : null;
+            set
+            {
+                this.template.Category = value;
+                this.raisePropertyChangedAndSerializeTemplateList("Category");
             }
         }
 

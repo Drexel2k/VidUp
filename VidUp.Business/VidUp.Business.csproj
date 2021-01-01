@@ -67,6 +67,8 @@
     <Compile Include="..\VidUp.UI\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Category.cs" />
+    <Compile Include="Cultures.cs" />
     <Compile Include="DayPosition.cs" />
     <Compile Include="MonthRelativeCombination.cs" />
     <Compile Include="MonthRelativeCombinationConverter.cs" />

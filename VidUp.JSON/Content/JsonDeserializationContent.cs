@@ -75,6 +75,8 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new GuidNullConverter());
             //This converters returns existing Playlist objects from deserialization repository.
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
+            serializer.Converters.Add(new CategoryIdConverter());
+            serializer.Converters.Add(new CultureInfoCultureStringConverter());
 
             using (StreamReader sr = new StreamReader(this.allUploadsFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
@@ -94,6 +96,8 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new StringEnumConverter());
             serializer.Converters.Add(new UploadGuidStringConverter());
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
+            serializer.Converters.Add(new CategoryIdConverter());
+            serializer.Converters.Add(new CultureInfoCultureStringConverter());
 
             using (StreamReader sr = new StreamReader(templateListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))

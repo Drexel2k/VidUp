@@ -56,6 +56,8 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new StringEnumConverter());
             serializer.Converters.Add(new GuidNullConverter());
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
+            serializer.Converters.Add(new CategoryIdConverter());
+            serializer.Converters.Add(new CultureInfoCultureStringConverter());
             serializer.Formatting = Formatting.Indented;
 
             using (StreamWriter sw = new StreamWriter(this.allUploadsFilePath))
@@ -88,6 +90,9 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new StringEnumConverter());
             serializer.Converters.Add(new UploadGuidStringConverter());
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
+            serializer.Converters.Add(new CategoryIdConverter());
+            serializer.Converters.Add(new CultureInfoCultureStringConverter());
+
             serializer.Formatting = Formatting.Indented;
 
             using (StreamWriter sw = new StreamWriter(templateListFilePath))

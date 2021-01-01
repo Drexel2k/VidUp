@@ -67,9 +67,11 @@
     <Compile Include="..\VidUp.UI\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Content\CultureInfoCultureStringConverter.cs" />
     <Compile Include="Content\DeserializationRepositoryContent.cs" />
     <Compile Include="Content\JsonSerializationContent.cs" />
     <Compile Include="Content\JsonDeserializationContent.cs" />
+    <Compile Include="Content\CategoryIdConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Content\GuidNullConverter.cs" />
     <Compile Include="Content\TemplateGuidStringConverter.cs" />

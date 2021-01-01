@@ -19,8 +19,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private GenericCommand pauseCommand;
         private GenericCommand resetStateCommand;
-        private GenericCommand noTemplateCommand;
-        private GenericCommand noPlaylistCommand;
+        private GenericCommand removeComboBoxValueCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetThumbnailCommand;
         private GenericCommand resetToTemplateValueCommand;
@@ -70,19 +69,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand NoTemplateCommand
+        public GenericCommand RemoveComboBoxValueCommand
         {
             get
             {
-                return this.noTemplateCommand;
-            }
-        }
-
-        public GenericCommand NoPlaylistCommand
-        {
-            get
-            {
-                return this.noPlaylistCommand;
+                return this.removeComboBoxValueCommand;
             }
         }
 
@@ -323,12 +314,12 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public Visibility Visibility
+        public Visibility SelectedVisibility
         {
             get => this.upload.Visibility;
             set
             {
-                if (value != Visibility.Private && this.Visibility == Visibility.Private)
+                if (value != Visibility.Private && this.SelectedVisibility == Visibility.Private)
                 {
                     if (this.PublishAt)
                     {
@@ -340,7 +331,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-                this.raisePropertyChanged("Visibility");
+                this.raisePropertyChanged("SelectedVisibility");
             }
         }
 
@@ -385,12 +376,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.UploadStatus == UplStatus.ReadyForUpload || this.upload.UploadStatus == UplStatus.Paused)
+                if (this.upload.BytesSent > 0)
                 {
-                    return true;
+                    return false;
                 }
 
-                return false;
+                return true;
             }
         }
 
@@ -433,9 +424,9 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (value && !this.PublishAt)
                 {
-                    if (this.Visibility != Visibility.Private)
+                    if (this.SelectedVisibility != Visibility.Private)
                     {
-                        this.Visibility = Visibility.Private;
+                        this.SelectedVisibility = Visibility.Private;
                     }
                 }
 
@@ -511,6 +502,38 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public CultureInfo[] VideoLanguages
+        {
+            get => Cultures.CultureInfos;
+        }
+
+        public CultureInfo SelectedVideoLanguage
+        {
+            get => this.upload.VideoLanguage;
+            set
+            {
+                this.upload.VideoLanguage = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("SelectedVideoLanguage");
+            }
+        }
+
+        public Category[] Categories
+        {
+            get => Category.Categories;
+        }
+
+        public Category SelectedCategory
+        {
+            get => this.upload.Category;
+            set
+            {
+                this.upload.Category = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("SelectedCategory");
+            }
+        }
+
         public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             if (observableTemplateViewModels == null)
@@ -533,12 +556,40 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.resetStateCommand = new GenericCommand(this.resetUploadState);
             this.pauseCommand = new GenericCommand(this.setPausedUploadState);
-            this.noTemplateCommand = new GenericCommand(this.setTemplateToNull);
-            this.noPlaylistCommand = new GenericCommand(this.setPlaylistToNull);
+            this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
             this.openFileDialogCommand = new GenericCommand(this.openThumbnailDialog);
             this.resetThumbnailCommand = new GenericCommand(this.resetThumbnail);
-            this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateVuale);
+            this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateValue);
         }
+
+        private void removeComboBoxValue(object parameter)
+        {
+            if (!this.ControlsEnabled)
+            {
+                MessageBox.Show("Upload cannot be modified if upload is started.");
+                return;
+            }
+
+            switch (parameter)
+            {
+                case "template":
+                    this.SelectedTemplate = null;
+                    break;
+                case "playlist":
+                    this.SelectedPlaylist = null;
+                    break;
+                case "videolanguage":
+                    this.SelectedVideoLanguage = null;
+                    break;
+                case "category":
+                    this.SelectedCategory = null;
+                    break;
+                default:
+                    throw new InvalidOperationException("No parameter for removeComboBoxValue specified.");
+                    break;
+            }
+        }
+
         private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "UploadStatus")
@@ -597,28 +648,6 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
-        private void setTemplateToNull(object parameter)
-        {
-            if (this.UploadStatus == UplStatus.Finished)
-            {
-                MessageBox.Show("Template cannot be removed if upload is finished. Please clear upload list from finished uploads.");
-                return;
-            }
-
-            this.SelectedTemplate = null;
-        }
-
-        private void setPlaylistToNull(object parameter)
-        {
-            if (this.UploadStatus == UplStatus.Finished)
-            {
-                MessageBox.Show("Template cannot be removed if upload is finished. Please clear upload list from finished uploads.");
-                return;
-            }
-
-            this.SelectedPlaylist = null;
-        }
-
         private void openThumbnailDialog(object parameter)
         {
             if (this.UploadStatus == UplStatus.Finished)
@@ -673,7 +702,7 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
 
-        private void resetToTemplateVuale(object parameter)
+        private void resetToTemplateValue(object parameter)
         {
             if (this.upload.Template != null)
             { 
@@ -700,9 +729,20 @@ namespace Drexel.VidUp.UI.ViewModels
                         this.upload.CopyPlaylistFromTemplate();
                         raisePropertyChanged("PlaylistId");
                         break;
-                    default:
+                    case "videolanguage":
+                        this.upload.CopyVideoLanguageFromTemplate();
+                        raisePropertyChanged("VideoLanguage");
+                        break;
+                    case "category":
+                        this.upload.CopyCategoryFromTemplate();
+                        raisePropertyChanged("Category");
+                        break;
+                    case "all":
                         this.upload.CopyTemplateValues();
                         raisePropertyChanged(null);
+                        break;
+                    default:
+                        throw new InvalidOperationException("No parameter for resetToTemplateValue specified.");
                         break;
                 }
 

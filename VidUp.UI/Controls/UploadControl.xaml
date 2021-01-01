@@ -37,6 +37,7 @@
                 <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
                 <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
                 <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
+                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
             </Grid.RowDefinitions>
             <Canvas Grid.Row="0" Grid.ColumnSpan="3" Margin="1 0 1 0">
                 <Canvas.Background>
@@ -53,8 +54,10 @@
                     <StackPanel>
                         <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
                         <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
-                        <Button Content="Remove Template" Command="{Binding NoTemplateCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding ControlsEnabled}" />
-                        <Button Content="Remove Playlist" Command="{Binding NoPlaylistCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Template" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="template" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Playlist" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Video Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="videolanguage" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Category" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="category" IsEnabled="{Binding ControlsEnabled}" />
                         <Separator/>
                         <Button Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=UCUploads}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
                     </StackPanel>
@@ -141,7 +144,7 @@
                 </Button>
                 <Label Content="Visibility: " Width="110" />
             </StackPanel>
-            <ComboBox Grid.Row="7" Grid.Column="1"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding Visibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left">
+            <ComboBox Grid.Row="7" Grid.Column="1"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -163,7 +166,6 @@
                     </DatePicker.Resources>
                     -->
                 </DatePicker>
-                <!--Binding OneWay because setting is handled by event. -->
                 <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" IsEnabled="{Binding PublishAt}" />
             </StackPanel>
 
@@ -172,28 +174,46 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Template: " Width="66" />
-                <!--Binding OneWay because setting is handled by event. -->
             </StackPanel>
             <!-- Selected Template is clearable through burger menu. -->
             <ComboBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+            
             <StackPanel Grid.Row="8" Grid.Column="3" Grid.ColumnSpan="2" Orientation="Horizontal">
-                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist ID to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Playlist: " Width="63" />
                 <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="210" IsEnabled="{Binding ControlsEnabled}" />
             </StackPanel>
-            <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal">
+
+            <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset video language to template values." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="videolanguage" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+                    <materialDesign:PackIcon Kind="Refresh" />
+                </Button>
+                <Label Content="V. Lang.: " Width="66" />
+            </StackPanel>
+            <!-- Selected Template is clearable through burger menu. -->
+            <ComboBox Grid.Row="9" Grid.Column="1" SelectedItem="{Binding SelectedVideoLanguage}" ItemsSource="{Binding VideoLanguages}" DisplayMemberPath="EnglishName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+
+            <StackPanel Grid.Row="9" Grid.Column="3" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset category to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="category" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+                    <materialDesign:PackIcon Kind="Refresh" />
+                </Button>
+                <Label Content="Category: " Width="63" />
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="210" IsEnabled="{Binding ControlsEnabled}" />
+            </StackPanel>
+
+            <StackPanel  Grid.Row="10" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />
                 <materialDesign:PackIcon Width="20" Height="20" Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="7 2 0 0" Background="Red" />
             </StackPanel>
-            <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
 
                 <ProgressBar Width="20" Height="20" Background="{Binding UploadStatusColor}" Foreground="LimeGreen" materialDesign:TransitionAssist.DisableTransitions="True" IsIndeterminate="{Binding UploadStatusColorAnimation}"  Margin ="0 0 2 6" />
                 <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="100" Margin="0 0 18 0" />
                 <Label Content="Upload Started: " Width="90" />
             </StackPanel>
-            <StackPanel Grid.Row="9" Grid.Column="2" Orientation="Horizontal">
+            <StackPanel Grid.Row="10" Grid.Column="2" Orientation="Horizontal">
                 <Label Content="{Binding UploadStart, Mode=OneWay}"  Width="100"  Margin="0 0 0 0" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Label Content="Upload Ended: " Width="85" />
@@ -201,10 +221,10 @@
                 </StackPanel>
             </StackPanel>
 
-            <Label Grid.Row="10" Grid.Column="0" Content="File Size: " Width="110" />
-            <Label Grid.Row="10" Grid.Column="1"  Content="{Binding FileSizeInMegaByte}"  Width="100"  HorizontalAlignment="Left" />
-            <Label Grid.Row="10" Grid.Column="1" Content="Uploaded: " Width="90" HorizontalAlignment="Right" />
-            <Label Grid.Row="10" Grid.Column="2" Content="{Binding UploadedInMegaByte}" Width="100" HorizontalAlignment="Left" />
+            <Label Grid.Row="11" Grid.Column="0" Content="File Size: " Width="110" />
+            <Label Grid.Row="11" Grid.Column="1"  Content="{Binding FileSizeInMegaByte}"  Width="100"  HorizontalAlignment="Left" />
+            <Label Grid.Row="11" Grid.Column="1" Content="Uploaded: " Width="90" HorizontalAlignment="Right" />
+            <Label Grid.Row="11" Grid.Column="2" Content="{Binding UploadedInMegaByte}" Width="100" HorizontalAlignment="Left" />
 
         </Grid>
 

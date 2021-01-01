@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -50,55 +51,16 @@ namespace Drexel.VidUp.Business
         private Schedule publishAtSchedule;
         [JsonProperty] 
         private bool setPlaylistAfterPublication;
+        [JsonProperty]
+        private CultureInfo videoLanguage;
+        [JsonProperty]
+        private Category category;
 
         private TemplateList templateList;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [JsonConstructor]
-        private Template()
-        {
-        }
 
-        //for fake templates(e.g. All and None Templates for filter)
-        public Template(string name)
-        {
-            this.name = name;
-        }
-
-        public Template(string name, string imagefilePath, TemplateMode templateMode, string rootFolderPath, string partOfFileName, TemplateList templateList)
-        {
-            if(templateList == null)
-            {
-                throw new ArgumentException("templateList must not be null.");
-            }
-
-            this.guid = Guid.NewGuid();
-            this.Name = name;
-            this.templateList = templateList;
-            this.ImageFilePathForEditing = imagefilePath;
-            this.templateMode = templateMode;
-            this.rootFolderPath = rootFolderPath;
-            this.partOfFileName = partOfFileName;
-            this.uploads = new List<Upload>();
-            this.tags = new List<string>();
-            this.created = DateTime.Now;
-            this.lastModified = this.created;
-            this.visibility = Visibility.Private;
-        }
-
-        public void SetTemplateReferenceToUploads()
-        {
-            if (this.uploads == null)
-            {
-                this.uploads = new List<Upload>();
-            }
-
-            foreach (Upload upload in this.uploads)
-            {
-                upload.Template = this;
-            }
-        }
 
         #region properties
         public Guid Guid { get => this.guid; }
@@ -316,7 +278,73 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public CultureInfo VideoLanguage
+        {
+            get => this.videoLanguage;
+            set
+            {
+                this.videoLanguage = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("VideoLanguage");
+            }
+        }
+
+        public Category Category
+        {
+            get => this.category;
+            set
+            {
+                this.category = value;
+                this.lastModifiedInternal = DateTime.Now;
+                this.raisePropertyChanged("Category");
+            }
+        }
+
         #endregion properties
+
+        [JsonConstructor]
+        private Template()
+        {
+        }
+        //for fake templates(e.g. All and None Templates for filter)
+        public Template(string name)
+        {
+            this.name = name;
+        }
+
+        public Template(string name, string imagefilePath, TemplateMode templateMode, string rootFolderPath, string partOfFileName, TemplateList templateList)
+        {
+            if (templateList == null)
+            {
+                throw new ArgumentException("templateList must not be null.");
+            }
+
+            this.guid = Guid.NewGuid();
+            this.Name = name;
+            this.templateList = templateList;
+            this.ImageFilePathForEditing = imagefilePath;
+            this.templateMode = templateMode;
+            this.rootFolderPath = rootFolderPath;
+            this.partOfFileName = partOfFileName;
+            this.uploads = new List<Upload>();
+            this.tags = new List<string>();
+            this.created = DateTime.Now;
+            this.lastModified = this.created;
+            this.visibility = Visibility.Private;
+        }
+
+        public void SetTemplateReferenceToUploads()
+        {
+            if (this.uploads == null)
+            {
+                this.uploads = new List<Upload>();
+            }
+
+            foreach (Upload upload in this.uploads)
+            {
+                upload.Template = this;
+            }
+        }
         private string getImageFilePath()
         {
             if (string.IsNullOrWhiteSpace(this.imageFilePath) || !File.Exists(this.imageFilePath))
