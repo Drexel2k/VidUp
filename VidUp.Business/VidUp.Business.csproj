@@ -90,5 +90,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VidUp.Utils\VidUp.Utils.csproj">
+      <Project>{12fe9421-0706-4e87-a6b5-ac52522252fe}</Project>
+      <Name>VidUp.Utils</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Windows;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.UI.ViewModels;
+using Drexel.VidUp.Utils;
 
 #endregion
 
@@ -25,6 +26,7 @@ namespace Drexel.VidUp.UI
         private void exHandler(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
+            Tracer.Write(e.ToString());
             MessageBox.Show(e.ToString(), "PRESS CTRL+C TO COPY!");
         }
 

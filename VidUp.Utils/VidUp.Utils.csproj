@@ -70,12 +70,6 @@
     <Compile Include="UserSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VidUp.Business\VidUp.Business.csproj">
-      <Project>{81AFDA84-286A-4F0C-B073-DFDC251DFA00}</Project>
-      <Name>VidUp.Business</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

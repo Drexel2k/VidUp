@@ -50,9 +50,11 @@
                     <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="3" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
                             <StackPanel>
-                                <Button Content="Remove Playlist" Command="{Binding NoPlaylistCommand}" CommandParameter="{Binding Guid}" />
+                                <Button Content="Remove Playlist" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="playlist" />
+                                <Button Content="Remove Video Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="videolanguage" />
+                                <Button Content="Remove Category" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="category" />
                                 <Separator/>
-                                <Button Content="Delete" Command="{Binding RemoveTemplateCommand}" CommandParameter="{Binding Guid}"/>
+                                <Button Content="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding Guid}"/>
                             </StackPanel>
                         </materialDesign:PopupBox>
                     </Button>
@@ -214,12 +216,12 @@
 
                     <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Video Language: " Width="115" />
-                        <ComboBox ItemsSource="{Binding VideoLanguages}" SelectedItem="{Binding VideoLanguage}" DisplayMemberPath="EnglishName" Width="180" />
+                        <ComboBox ItemsSource="{Binding VideoLanguages}" SelectedItem="{Binding SelectedVideoLanguage}" DisplayMemberPath="EnglishName" Width="180" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Category: " Width="115" />
-                        <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}" DisplayMemberPath="Name" Width="180" />
+                        <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="180" />
                     </StackPanel>
 
                 </Grid>

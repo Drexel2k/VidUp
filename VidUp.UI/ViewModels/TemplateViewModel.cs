@@ -27,8 +27,8 @@ namespace Drexel.VidUp.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         private GenericCommand newTemplateCommand;
-        private GenericCommand removeTemplateCommand;
-        private GenericCommand noPlaylistCommand;
+        private GenericCommand deleteCommand;
+        private GenericCommand removeComboBoxValueCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetCommand;
         private GenericCommand openPublishAtCommand;
@@ -118,7 +118,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.template.Playlist = value.Playlist;
                 }
 
-                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChangedAndSerializeTemplateList("SelectedPlaylist");
             }
         }
 
@@ -130,19 +130,19 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand RemoveTemplateCommand
+        public GenericCommand DeleteCommand
         {
             get
             {
-                return this.removeTemplateCommand;
+                return this.deleteCommand;
             }
         }
 
-        public GenericCommand NoPlaylistCommand
+        public GenericCommand RemoveComboBoxValueCommand
         {
             get
             {
-                return this.noPlaylistCommand;
+                return this.removeComboBoxValueCommand;
             }
         }
 
@@ -403,13 +403,13 @@ namespace Drexel.VidUp.UI.ViewModels
             get => Cultures.CultureInfos;
         }
 
-        public CultureInfo VideoLanguage
+        public CultureInfo SelectedVideoLanguage
         {
             get => this.template != null ? this.template.VideoLanguage : null;
             set
             {
                 this.template.VideoLanguage = value;
-                this.raisePropertyChangedAndSerializeTemplateList("VideoLanguage");
+                this.raisePropertyChangedAndSerializeTemplateList("SelectedVideoLanguage");
             }
         }
 
@@ -418,13 +418,13 @@ namespace Drexel.VidUp.UI.ViewModels
             get => Category.Categories;
         }
 
-        public Category Category
+        public Category SelectedCategory
         {
             get => this.template != null ? this.template.Category : null;
             set
             {
                 this.template.Category = value;
-                this.raisePropertyChangedAndSerializeTemplateList("Category");
+                this.raisePropertyChangedAndSerializeTemplateList("SelectedCategory");
             }
         }
 
@@ -455,8 +455,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialog);
-            this.removeTemplateCommand = new GenericCommand(this.RemoveTemplate);
-            this.noPlaylistCommand = new GenericCommand(this.setPlaylistToNull);
+            this.deleteCommand = new GenericCommand(this.DeleteTemplate);
+            this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
             this.openPublishAtCommand = new GenericCommand(this.openPublishAt);
@@ -489,7 +489,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public void RemoveTemplate(Object guid)
+        public void DeleteTemplate(Object guid)
         {       
             Template template = this.templateList.GetTemplate(System.Guid.Parse((string)guid));
 
@@ -518,9 +518,23 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
 
-        private void setPlaylistToNull(object parameter)
+        private void removeComboBoxValue(object parameter)
         {
-            this.SelectedPlaylist = null;
+            switch (parameter)
+            {
+                case "playlist":
+                    this.SelectedPlaylist = null;
+                    break;
+                case "videolanguage":
+                    this.SelectedVideoLanguage = null;
+                    break;
+                case "category":
+                    this.SelectedCategory = null;
+                    break;
+                default:
+                    throw new InvalidOperationException("No parameter for removeComboBoxValue specified.");
+                    break;
+            }
         }
 
         private void openFileDialog(object parameter)

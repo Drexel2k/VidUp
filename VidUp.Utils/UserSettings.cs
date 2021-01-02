@@ -27,6 +27,9 @@ namespace Drexel.VidUp.Utils
         [JsonProperty]
         private int? windowTop;
 
+        [JsonProperty]
+        private string[] videoLanguagesFilter;
+
         public bool Trace
         {
             get => this.trace;
@@ -84,6 +87,11 @@ namespace Drexel.VidUp.Utils
             {
                 this.windowTop = value;
             }
+        }
+
+        public string[] VideoLanguagesFilter
+        {
+            get => this.videoLanguagesFilter;
         }
 
         [JsonConstructor]
