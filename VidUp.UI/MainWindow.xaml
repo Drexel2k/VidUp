@@ -67,7 +67,7 @@
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Recalculate Publish At Dates">
 
-                        <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RecalculatePublishAtCommand}" />
+                        <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/calendar.png" Command="{Binding RecalculatePublishAtCommand}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -121,7 +121,7 @@
                     <Fluent:RibbonGroupBox Header="Reset Uploads">
                         <!-- CommandParamter is to enable testing -->
                         <StackPanel Orientation="Horizontal">
-                        <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding ResetUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                        <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="images/reset.png" Command="{Binding ResetUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
                         <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetToUploadStatuses}" SelectedItem="{Binding ResetToUploadStatus}" Width="150">
                             <Fluent:ComboBox.ItemTemplate>
                                 <DataTemplate>
