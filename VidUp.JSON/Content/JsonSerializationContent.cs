@@ -54,7 +54,7 @@ namespace Drexel.VidUp.Json.Content
 
             JsonSerializer serializer = new JsonSerializer();
             serializer.Converters.Add(new StringEnumConverter());
-            serializer.Converters.Add(new GuidNullConverter());
+            serializer.Converters.Add(new TemplateGuidStringConverter());
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());

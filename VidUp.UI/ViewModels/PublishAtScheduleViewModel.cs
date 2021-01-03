@@ -2202,8 +2202,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-
-        //todo: move integrity logic to Schedule class
         public string this[string propertyName]
         {
             get

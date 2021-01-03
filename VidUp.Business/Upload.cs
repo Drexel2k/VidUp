@@ -29,18 +29,14 @@ namespace Drexel.VidUp.Business
         private string thumbnailFilePath;
         [JsonProperty]
         private Playlist playlist;
-        private Template template;
-
         [JsonProperty]
-        private Guid templateGuid;
-
+        private Template template;
         [JsonProperty]
         private UplStatus uploadStatus;
         [JsonProperty]
         private DateTime? publishAt;
         [JsonProperty]
         private string uploadErrorMessage;
-
         [JsonProperty]
         private string title;
         [JsonProperty]
@@ -65,14 +61,6 @@ namespace Drexel.VidUp.Business
         private long fileLength;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        //only for serialization
-        [JsonProperty(PropertyName = "template")]
-        public Guid TemplateGuid
-        {
-            get => this.template != null ? this.template.Guid : Guid.Empty;
-            set => this.templateGuid = value;
-        }
 
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }

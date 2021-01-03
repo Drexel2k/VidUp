@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Drexel.VidUp.Business;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 namespace Drexel.VidUp.Json.Content
 {
@@ -72,11 +74,13 @@ namespace Drexel.VidUp.Json.Content
 
             JsonSerializer serializer = new JsonSerializer();
             serializer.Converters.Add(new StringEnumConverter());
-            serializer.Converters.Add(new GuidNullConverter());
             //This converters returns existing Playlist objects from deserialization repository.
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
+            //templates are set to null, because template objects do not yet exist.
+            //templates are set on setTemplateOnUploads by reading json again.
+            serializer.Converters.Add(new TemplateNullConverter());
 
             using (StreamReader sr = new StreamReader(this.allUploadsFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
@@ -99,7 +103,7 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
 
-            using (StreamReader sr = new StreamReader(templateListFilePath))
+            using (StreamReader sr = new StreamReader(this.templateListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
             {
                 //set reader to templateList to avoid creation of TemplateList which will cause addition of event listeners etc. in constructor
@@ -110,18 +114,35 @@ namespace Drexel.VidUp.Json.Content
             }
         }
 
+        //setting templates on uploads by reading json again
         private void setTemplateOnUploads()
         {
             if (JsonDeserializationContent.AllUploads != null && this.templates != null)
             {
+                Dictionary<Guid,Guid> uploadTemplateMap = new Dictionary<Guid, Guid>();
+                using (StreamReader sr = new StreamReader(this.allUploadsFilePath))
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    JArray jUploads = JArray.Load(reader);
+                    foreach (JToken jUpload in jUploads)
+                    {
+                        string uploadGuid = jUpload["guid"].Value<string>();
+                        string templateGuid = jUpload["template"].Value<string>();
+                        if (!String.IsNullOrWhiteSpace(templateGuid))
+                        {
+                            uploadTemplateMap.Add(Guid.Parse(uploadGuid), Guid.Parse(templateGuid));
+                        }
+                    }
+                }
+
                 foreach (Upload upload in JsonDeserializationContent.AllUploads)
                 {
-                    Type uploadType = typeof(Upload);
-                    FieldInfo templateGuidFieldInfo = uploadType.GetField("templateGuid", BindingFlags.NonPublic | BindingFlags.Instance);
-                    Guid templateGuid = (Guid) templateGuidFieldInfo.GetValue(upload);
-
-                    FieldInfo templateFieldInfo = uploadType.GetField("template", BindingFlags.NonPublic | BindingFlags.Instance);
-                    templateFieldInfo.SetValue(upload, this.templates.Find(template => template.Guid == templateGuid));
+                   if(uploadTemplateMap.ContainsKey(upload.Guid))
+                   {
+                       Type uploadType = typeof(Upload);
+                        FieldInfo templateFieldInfo = uploadType.GetField("template", BindingFlags.NonPublic | BindingFlags.Instance);
+                        templateFieldInfo.SetValue(upload, this.templates.Find(template => template.Guid == uploadTemplateMap[upload.Guid]));
+                    }
                 }
             }
         }

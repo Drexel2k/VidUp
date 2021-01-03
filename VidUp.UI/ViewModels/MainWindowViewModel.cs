@@ -514,6 +514,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("TotalMbLeft");
             }
 
+            //todo: on adding new uploads, uploads are serialized multiple times
             if (e.PropertyName == "TotalBytesToUploadIncludingResumableRemaining" || e.PropertyName == "TotalBytesToUploadRemaining")
             {
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
