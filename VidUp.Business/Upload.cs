@@ -413,6 +413,19 @@ namespace Drexel.VidUp.Business
                 {
                     this.tags.Clear();
                     this.tags.AddRange(this.template.Tags);
+
+                    Regex regex = new Regex(@"#([^#]+)#");
+                    int matchIndex = 0;
+                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
+                    {
+                        for (int tagIndex = 0; tagIndex < this.tags.Count; tagIndex++)
+                        {
+                            this.tags[tagIndex] = this.tags[tagIndex].Replace("#" + matchIndex + "#", match.Groups[1].Value);
+                        }
+
+                        matchIndex++;
+                    }
+
                     this.raisePropertyChanged("Tags");
                 }
             }
@@ -425,6 +438,15 @@ namespace Drexel.VidUp.Business
                 if (!string.IsNullOrWhiteSpace(this.template.Description))
                 {
                     this.description = this.template.Description;
+                    Regex regex = new Regex(@"#([^#]+)#");
+                    int matchIndex = 0;
+                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
+                    {
+                        this.description = this.description.Replace("#" + matchIndex + "#", match.Groups[1].Value);
+
+                        matchIndex++;
+                    }
+
                     this.raisePropertyChanged("Description");
                 }
             }

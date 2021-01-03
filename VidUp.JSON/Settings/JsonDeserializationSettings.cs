@@ -15,7 +15,7 @@ namespace Drexel.VidUp.Json.Settings
             this.settingsFilePath = Path.Combine(serializationFolder, "settings.json");
         }
 
-        public string DeserializeUser()
+        public static string DeserializeUser()
         {
             string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "appsettings.json");
             JObject appSettings = JObject.Parse(File.ReadAllText(path));

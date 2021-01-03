@@ -6,6 +6,7 @@ namespace Drexel.VidUp.Utils
     public class Settings
     {
         private string user;
+        public string subFolder;
         private string storageFolder;
         private string templateImageFolder;
         private string thumbnailFallbackImageFolder;
@@ -27,21 +28,16 @@ namespace Drexel.VidUp.Utils
             }
         }
 
-        public Settings()
+        //for testing purposes
+        public Settings(string user, string subFolder)
         {
-            this.user = string.Empty;
-            this.storageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), string.Format("VidUp{0}", this.user));
+            this.user = string.IsNullOrWhiteSpace(user) ? string.Empty : user;
+            this.subFolder = string.IsNullOrWhiteSpace(subFolder) ? string.Empty : subFolder;
+
+            this.storageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), string.Format("VidUp{0}", this.user), this.subFolder);
             this.templateImageFolder = Path.Combine(this.StorageFolder, "TemplateImages");
             this.thumbnailFallbackImageFolder = Path.Combine(this.StorageFolder, "FallbackThumbnailImages");
             this.userSettings = new UserSettings();
-        }
-
-        public void SetNewUser(string user)
-        {
-            this.user = user;
-            this.storageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), string.Format("VidUp{0}", this.user));
-            this.templateImageFolder = Path.Combine(this.StorageFolder, "TemplateImages");
-            this.thumbnailFallbackImageFolder = Path.Combine(this.StorageFolder, "FallbackThumbnailImages");
         }
     }
 }

@@ -322,26 +322,23 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public MainWindowViewModel()
         {
-            this.initialize(null, out _, out _, out _);
+            this.initialize(null ,null, out _, out _, out _);
         }
 
         //for testing purposes
-        public MainWindowViewModel(string user, string storageFolder, string templateImageFolder, string thumbnailFallbackImageFolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        public MainWindowViewModel(string user, string subFolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
-            this.initialize(user, out uploadList, out templateList, out playlistList);
+            this.initialize(user, subFolder, out uploadList, out templateList, out playlistList);
         }
 
-        private void initialize(string user, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        private void initialize(string user, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
-            Settings.SettingsInstance = new Settings();
-            if (user == null)
+            if (string.IsNullOrWhiteSpace(user))
             {
-                this.deserializeUser();
+                user = JsonDeserializationSettings.DeserializeUser();
             }
-            else
-            {
-                Settings.SettingsInstance.SetNewUser(user);
-            }
+
+            Settings.SettingsInstance = new Settings(user, subfolder);
 
             this.checkAppDataFolder();
             this.deserializeSettings();
@@ -437,12 +434,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
 
             DeserializationRepositoryContent.ClearRepositories();
-        }
-
-        private void deserializeUser()
-        {
-            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(Settings.SettingsInstance.StorageFolder);
-            Settings.SettingsInstance.SetNewUser(deserializer.DeserializeUser());
         }
 
         private void deserializeSettings()

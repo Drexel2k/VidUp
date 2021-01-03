@@ -89,7 +89,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 0);
@@ -100,10 +100,10 @@ namespace Drexel.VidUp.Test
             playlistList = null;
             mainWindowViewModel = null;
 
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "templatelist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json")));
         }
 
         [Test]
@@ -112,7 +112,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel) mainWindowViewModel.CurrentViewModel;
             
@@ -130,12 +130,12 @@ namespace Drexel.VidUp.Test
             playlistList = null;
             mainWindowViewModel = null;
 
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "templatelist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json")));
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -156,7 +156,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -175,7 +175,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "templatelist.json"))))["templates"];
             Assert.IsTrue(jArray.Count == 0);
         }
 
@@ -185,7 +185,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             mainWindowViewModel.TabNo = 1;
             TemplateViewModel templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;
@@ -206,12 +206,12 @@ namespace Drexel.VidUp.Test
             playlistList = null;
             mainWindowViewModel = null;
 
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "templatelist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json")));
 
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -243,7 +243,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             mainWindowViewModel.TabNo = 2;
             PlaylistViewModel playlistViewModel = (PlaylistViewModel)mainWindowViewModel.CurrentViewModel;
@@ -262,12 +262,12 @@ namespace Drexel.VidUp.Test
             playlistList = null;
             mainWindowViewModel = null;
 
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json")));
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "templatelist.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json")));
 
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json"))))["playlists"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json"))))["playlists"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -297,7 +297,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
@@ -321,10 +321,10 @@ namespace Drexel.VidUp.Test
             playlistList = null;
             mainWindowViewModel = null;
 
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -359,7 +359,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -386,7 +386,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
@@ -413,10 +413,10 @@ namespace Drexel.VidUp.Test
             playlistList = null;
             mainWindowViewModel = null;
 
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -455,7 +455,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -482,7 +482,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
@@ -523,10 +523,10 @@ namespace Drexel.VidUp.Test
             playlistList = null;
             mainWindowViewModel = null;
 
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 2);
 
@@ -583,7 +583,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(foundUploadWithoutTemplateMatch);
             Assert.IsTrue(foundUploadWithTemplateMatch);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 2);
 
@@ -618,7 +618,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -631,7 +631,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(template.Uploads.Count == 1);
             Assert.IsTrue(template.Uploads[0].Guid != Guid.Parse(uploadGuid));
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -651,7 +651,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -670,7 +670,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -696,7 +696,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json"))))["playlists"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json"))))["playlists"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -725,7 +725,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -737,7 +737,7 @@ namespace Drexel.VidUp.Test
             Template template = templateList.GetTemplate(0);
             Assert.IsTrue(template.Uploads.Count == 0);
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -757,7 +757,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -776,7 +776,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -802,7 +802,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 0);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json"))))["playlists"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json"))))["playlists"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -830,7 +830,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -843,7 +843,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(template.Uploads.Count == 1);
             Assert.IsTrue(template.Uploads[0].Guid != Guid.Parse(uploadGuid));
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -863,7 +863,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -882,7 +882,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -908,7 +908,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json"))))["playlists"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json"))))["playlists"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -937,7 +937,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -950,7 +950,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(template.Uploads.Count == 1);
             Assert.IsTrue(template.Uploads[0].Guid == Guid.Parse(uploadGuid));
 
-            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploads.json")));
+            JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 2);
 
@@ -977,7 +977,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(found);
             Assert.IsTrue(!foundAgain);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -996,7 +996,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(!found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -1022,7 +1022,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(found);
 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(CurrentSettings.StorageFolder, "playlistlist.json"))))["playlists"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json"))))["playlists"];
 
             Assert.IsTrue(jArray.Count == 1);
 
@@ -1052,7 +1052,7 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out uploadList, out templateList, out playlistList);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
@@ -1081,7 +1081,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[2].Template == template);
             Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0].Template == uploadListViewModel.RemoveSelectedTemplate.Template);
             Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0] == uploadListViewModel.RemoveSelectedTemplate);
-            Assert.IsTrue(uploadListViewModel.RemoveUploadStatuses[5] == uploadListViewModel.RemoveUploadStatus);
+            Assert.IsTrue(uploadListViewModel.StatusesInclAll[5] == uploadListViewModel.RemoveUploadStatus);
 
             Assert.IsTrue(templateViewModel.Template == template);
             Assert.IsTrue(templateViewModel.ObservableTemplateViewModels[0].Template == template);

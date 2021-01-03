@@ -17,13 +17,13 @@ namespace Drexel.VidUp.Test
                 configSource = fullTestName;
             }
 
-            CurrentSettings.StorageFolder = Path.Combine(BaseSettings.StorageFolder, fullTestName);
-            Directory.CreateDirectory(CurrentSettings.StorageFolder);
+            BaseSettings.SubFolder = fullTestName;
+            Directory.CreateDirectory(BaseSettings.StorageFolder);
 
-            TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "templatelist.json");
-            TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "uploadlist.json");
-            TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "uploads.json");
-            TestHelpers.copyFile(configSource, CurrentSettings.StorageFolder, "playlistlist.json");
+            TestHelpers.copyFile(configSource, BaseSettings.StorageFolder, "templatelist.json");
+            TestHelpers.copyFile(configSource, BaseSettings.StorageFolder, "uploadlist.json");
+            TestHelpers.copyFile(configSource, BaseSettings.StorageFolder, "uploads.json");
+            TestHelpers.copyFile(configSource, BaseSettings.StorageFolder, "playlistlist.json");
         }
 
         private static void copyFile(string fullTestName, string testStorageFolder, string fileName)
@@ -40,7 +40,7 @@ namespace Drexel.VidUp.Test
 
         private static void getConfigSource(string fullQualifiedClassName, string testMethodName, out string configSource, out string fullTestName)
         {
-            fullTestName = TestHelpers.GetTestName(fullQualifiedClassName, testMethodName);
+            fullTestName = TestHelpers.getTestName(fullQualifiedClassName, testMethodName);
 
             configSource = null;
             MethodBase method = Type.GetType(fullQualifiedClassName).GetMethod(testMethodName);
@@ -53,7 +53,7 @@ namespace Drexel.VidUp.Test
             }
         }
 
-        public static string GetTestName(string fullQualifiedClassName, string testMethodName)
+        private static string getTestName(string fullQualifiedClassName, string testMethodName)
         {
             int startIndex = fullQualifiedClassName.LastIndexOf('.') + 1;
             string className = fullQualifiedClassName.Substring(startIndex,

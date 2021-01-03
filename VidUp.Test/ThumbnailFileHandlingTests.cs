@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Drexel.VidUp.Business;
@@ -44,11 +45,11 @@ namespace Drexel.VidUp.Test
                 Directory.Delete(ThumbnailFileHandlingTests.t1RootFolder, true);
             }
 
-            CurrentSettings.StorageFolder = Path.Combine(BaseSettings.StorageFolder, "ThumbnailFileHandlingTests");
-            ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath = Path.Combine(CurrentSettings.ThumbnailFallbackImageFolder, "image1.png");
-            ThumbnailFileHandlingTests.thumbNailFallbackFileExistedImage12TargetFilePath = Path.Combine(CurrentSettings.ThumbnailFallbackImageFolder, "image12.png");
+            BaseSettings.SubFolder = String.Empty;
+            ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath = Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image1.png");
+            ThumbnailFileHandlingTests.thumbNailFallbackFileExistedImage12TargetFilePath = Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image12.png");
             
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, CurrentSettings.StorageFolder, CurrentSettings.TemplateImageFolder, CurrentSettings.ThumbnailFallbackImageFolder, out _, out ThumbnailFileHandlingTests.templateList, out _);
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix,null, out _, out ThumbnailFileHandlingTests.templateList, out _);
             ThumbnailFileHandlingTests.uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             mainWindowViewModel.TabNo = 1;
             ThumbnailFileHandlingTests.templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;
@@ -122,7 +123,7 @@ namespace Drexel.VidUp.Test
         {
             ThumbnailFileHandlingTests.u1.ThumbnailFilePath = ThumbnailFileHandlingTests.thumbNailSourceImage2FilePath;
             Assert.IsTrue(ThumbnailFileHandlingTests.u1.ThumbnailFilePath == ThumbnailFileHandlingTests.thumbNailSourceImage2FilePath);
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.ThumbnailFallbackImageFolder, "image2.png")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image2.png")));
         }
 
         [Test, Order(6)]
@@ -138,7 +139,7 @@ namespace Drexel.VidUp.Test
         {
             ThumbnailFileHandlingTests.u1.ThumbnailFilePath = ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath;
             Assert.IsTrue(ThumbnailFileHandlingTests.u1.ThumbnailFilePath == ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath);
-            Assert.IsTrue(!File.Exists(Path.Combine(CurrentSettings.ThumbnailFallbackImageFolder, "image13.png")));            
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image13.png")));            
         }
 
         [Test, Order(8)]
@@ -204,7 +205,7 @@ namespace Drexel.VidUp.Test
         [Test, Order(16)]
         public void TestRemoveT1()
         {
-            ThumbnailFileHandlingTests.templateViewModel.RemoveTemplate(ThumbnailFileHandlingTests.t1.Guid.ToString());
+            ThumbnailFileHandlingTests.templateViewModel.DeleteTemplate(ThumbnailFileHandlingTests.t1.Guid.ToString());
             Assert.IsTrue(File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
         }
 
@@ -242,7 +243,7 @@ namespace Drexel.VidUp.Test
         [Test, Order(20)]
         public void TestRemoveT12()
         {
-            ThumbnailFileHandlingTests.templateViewModel.RemoveTemplate(ThumbnailFileHandlingTests.t1.Guid.ToString());
+            ThumbnailFileHandlingTests.templateViewModel.DeleteTemplate(ThumbnailFileHandlingTests.t1.Guid.ToString());
             Assert.IsTrue(!File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
         }
     }
