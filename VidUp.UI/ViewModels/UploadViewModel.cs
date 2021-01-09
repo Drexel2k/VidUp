@@ -189,9 +189,6 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.Template = value.Template;
                 }
 
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-
                 //if template changes all values are set to template values
                 this.raisePropertyChanged(null);
             }
@@ -263,7 +260,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Title = value;
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
                 this.raisePropertyChanged("YtTitle");
                 this.raisePropertyChanged("Title");
@@ -276,8 +272,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Description = value;
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-
                 this.raisePropertyChanged("Description");
             }
         }
@@ -288,8 +282,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Tags = new List<string>(value.Split(','));
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-
                 this.raisePropertyChanged("TagsAsString");
             }
         }
@@ -300,8 +292,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Tags = value;
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-
                 this.raisePropertyChanged("TagsAsString");
             }
         }
@@ -328,9 +318,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.upload.Visibility = value;
-
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-
                 this.raisePropertyChanged("SelectedVisibility");
             }
         }
@@ -349,7 +336,6 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.Playlist = value.Playlist;
                 }
 
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedPlaylist");
             }
         }
@@ -389,8 +375,6 @@ namespace Drexel.VidUp.UI.ViewModels
         public void SetPublishAtTime(TimeSpan quarterHour)
         {
             this.upload.SetPublishAtTime(quarterHour);
-
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             this.raisePropertyChanged("PublishAtTime");
         }
 
@@ -441,8 +425,6 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.PublishAt = null;
                 }
 
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-
                 this.raisePropertyChanged("PublishAt");
                 this.raisePropertyChanged("PublishAtTime");
                 this.raisePropertyChanged("PublishAtDate");
@@ -473,7 +455,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.SetPublishAtDate(value.Value);
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("PublishAtDate");
             }
         }
@@ -513,7 +494,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.VideoLanguage = value;
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedVideoLanguage");
             }
         }
@@ -529,7 +509,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Category = value;
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedCategory");
             }
         }
@@ -639,13 +618,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.UploadStatus = UplStatus.ReadyForUpload;
             }
 
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void setPausedUploadState(object parameter)
         {
             this.upload.UploadStatus = UplStatus.Paused;
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void openThumbnailDialog(object parameter)
@@ -686,7 +663,6 @@ namespace Drexel.VidUp.UI.ViewModels
             if (result == DialogResult.OK)
             {
                 this.ThumbnailFilePath = fileDialog.FileName;
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             }
         }
 
@@ -701,7 +677,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.ThumbnailFilePath = null;
         }
 
-
         private void resetToTemplateValue(object parameter)
         {
             if (this.upload.Template != null)
@@ -710,43 +685,41 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     case "title":
                         this.upload.CopyTitleFromTemplate();
-                        raisePropertyChanged("Title");
-                        raisePropertyChanged("YtTitle");
+                        this.raisePropertyChanged("Title");
+                        this.raisePropertyChanged("YtTitle");
                         break;
                     case "description":
                         this.upload.CopyDescriptionFromTemplate();
-                        raisePropertyChanged("Description");
+                        this.raisePropertyChanged("Description");
                         break;
                     case "tags":
                         this.upload.CopyTagsFromtemplate();
-                        raisePropertyChanged("TagsAsString");
+                        this.raisePropertyChanged("TagsAsString");
                         break;
                     case "visibility":
                         this.upload.CopyVisibilityFromTemplate();
-                        raisePropertyChanged("Visibility");
+                        this.raisePropertyChanged("Visibility");
                         break;
                     case "playlist":
                         this.upload.CopyPlaylistFromTemplate();
-                        raisePropertyChanged("PlaylistId");
+                        this.raisePropertyChanged("PlaylistId");
                         break;
                     case "videolanguage":
                         this.upload.CopyVideoLanguageFromTemplate();
-                        raisePropertyChanged("VideoLanguage");
+                        this.raisePropertyChanged("VideoLanguage");
                         break;
                     case "category":
                         this.upload.CopyCategoryFromTemplate();
-                        raisePropertyChanged("Category");
+                        this.raisePropertyChanged("Category");
                         break;
                     case "all":
                         this.upload.CopyTemplateValues();
-                        raisePropertyChanged(null);
+                        this.raisePropertyChanged(null);
                         break;
                     default:
                         throw new InvalidOperationException("No parameter for resetToTemplateValue specified.");
                         break;
                 }
-
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             }
         }
     }

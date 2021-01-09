@@ -96,7 +96,7 @@
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
                         <!-- CommandParamter is to enable testing -->
-                        <Fluent:Button Header="Remove Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                        <Fluent:Button Header="Delete Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding DeleteUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -107,7 +107,7 @@
                                 <RowDefinition Height="22" />
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">Status:</TextBlock>
-                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding StatusesInclAll}" SelectedItem="{Binding RemoveUploadStatus}" Width="150">
+                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding StatusesInclAll}" SelectedItem="{Binding DeleteSelectedUploadStatus}" Width="150">
                                 <Fluent:ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>
@@ -115,14 +115,14 @@
                                 </Fluent:ComboBox.ItemTemplate>
                             </Fluent:ComboBox>
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="5 2 0 0">Template:</TextBlock>
-                            <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding RemoveSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
+                            <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding DeleteSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
                         </Grid>
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Reset Uploads">
                         <!-- CommandParamter is to enable testing -->
                         <StackPanel Orientation="Horizontal">
                         <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="images/reset.png" Command="{Binding ResetUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
-                        <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetToUploadStatuses}" SelectedItem="{Binding ResetToUploadStatus}" Width="150">
+                        <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetToUploadStatuses}" SelectedItem="{Binding ResetToSelectedUploadStatus}" Width="150">
                             <Fluent:ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>
@@ -140,7 +140,7 @@
                                 <RowDefinition Height="22" />
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">With Status:</TextBlock>
-                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding StatusesInclAll}" SelectedItem="{Binding ResetWithUploadStatus}" Width="150">
+                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding StatusesInclAll}" SelectedItem="{Binding ResetWithSelectedUploadStatus}" Width="150">
                                 <Fluent:ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>

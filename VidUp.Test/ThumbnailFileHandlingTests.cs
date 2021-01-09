@@ -212,7 +212,7 @@ namespace Drexel.VidUp.Test
         [Test, Order(17)]
         public void TestRemoveU1()
         {
-            ThumbnailFileHandlingTests.uploadListViewModel.RemoveUpload(ThumbnailFileHandlingTests.u1.Guid.ToString());
+            ThumbnailFileHandlingTests.uploadListViewModel.DeleteUpload(ThumbnailFileHandlingTests.u1.Guid.ToString());
             Assert.IsTrue(!File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
         }
 
@@ -236,7 +236,7 @@ namespace Drexel.VidUp.Test
         [Test, Order(19)]
         public void TestRemoveU12()
         {
-            ThumbnailFileHandlingTests.uploadListViewModel.RemoveUpload(ThumbnailFileHandlingTests.u1.Guid.ToString());
+            ThumbnailFileHandlingTests.uploadListViewModel.DeleteUpload(ThumbnailFileHandlingTests.u1.Guid.ToString());
             Assert.IsTrue(File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
         }
 

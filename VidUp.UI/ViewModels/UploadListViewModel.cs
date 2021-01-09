@@ -39,7 +39,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand stopUploadingCommand;
         private GenericCommand recalculatePublishAtCommand;
         private GenericCommand resetRecalculatePublishAtStartDateCommand;
-        private GenericCommand removeUploadsCommand;
+        private GenericCommand deleteUploadsCommand;
         private GenericCommand resetUploadsCommand;
 
         private UploadStatus uploadStatus = UploadStatus.NotUploading;
@@ -47,11 +47,11 @@ namespace Drexel.VidUp.UI.ViewModels
         private bool resumeUploads = true;
         private long maxUploadInBytesPerSecond = 0;
 
-        private TemplateComboboxViewModel removeSelectedTemplate;
-        private string removeUploadStatus = "Finished";
+        private TemplateComboboxViewModel deleteSelectedTemplate;
+        private string deleteSelectedUploadStatus = "Finished";
 
-        private string resetToUploadStatus = "ReadyForUpload";
-        private string resetWithUploadStatus = "Paused";
+        private string resetToSelectedUploadStatus = "ReadyForUpload";
+        private string resetWithSelectedUploadStatus = "Paused";
         private TemplateComboboxViewModel resetWithSelectedTemplate;
 
         private TemplateComboboxViewModel recalculatePublishAtSelectedTemplate;
@@ -111,11 +111,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand RemoveUploadsCommand
+        public GenericCommand DeleteUploadsCommand
         {
             get
             {
-                return this.removeUploadsCommand;
+                return this.deleteUploadsCommand;
             }
         }
 
@@ -219,18 +219,18 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         //Selected template for upload removal
-        public TemplateComboboxViewModel RemoveSelectedTemplate
+        public TemplateComboboxViewModel DeleteSelectedTemplate
         {
             get
             {
-                return this.removeSelectedTemplate;
+                return this.deleteSelectedTemplate;
             }
             set
             {
-                if (this.removeSelectedTemplate != value)
+                if (this.deleteSelectedTemplate != value)
                 {
-                    this.removeSelectedTemplate = value;
-                    this.raisePropertyChanged("RemoveSelectedTemplate");
+                    this.deleteSelectedTemplate = value;
+                    this.raisePropertyChanged("DeleteSelectedTemplate");
                 }
             }
         }
@@ -247,18 +247,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string RemoveUploadStatus
+        public string DeleteSelectedUploadStatus
         {
             get
             {
-                return this.removeUploadStatus;
+                return this.deleteSelectedUploadStatus;
             }
             set
             {
-                if (this.removeUploadStatus != value)
+                if (this.deleteSelectedUploadStatus != value)
                 {
-                    this.removeUploadStatus = value;
-                    this.raisePropertyChanged("RemoveUploadStatus");
+                    this.deleteSelectedUploadStatus = value;
+                    this.raisePropertyChanged("DeleteSelectedUploadStatus");
                 }
             }
         }
@@ -276,34 +276,34 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string ResetToUploadStatus
+        public string ResetToSelectedUploadStatus
         {
             get
             {
-                return this.resetToUploadStatus;
+                return this.resetToSelectedUploadStatus;
             }
             set
             {
-                if (this.resetToUploadStatus != value)
+                if (this.resetToSelectedUploadStatus != value)
                 {
-                    this.resetToUploadStatus = value;
-                    this.raisePropertyChanged("ResetToUploadStatus");
+                    this.resetToSelectedUploadStatus = value;
+                    this.raisePropertyChanged("ResetToSelectedUploadStatus");
                 }
             }
         }
 
-        public string ResetWithUploadStatus
+        public string ResetWithSelectedUploadStatus
         {
             get
             {
-                return this.resetWithUploadStatus;
+                return this.resetWithSelectedUploadStatus;
             }
             set
             {
-                if (this.resetWithUploadStatus != value)
+                if (this.resetWithSelectedUploadStatus != value)
                 {
-                    this.resetWithUploadStatus = value;
-                    this.raisePropertyChanged("ResetWithUploadStatus");
+                    this.resetWithSelectedUploadStatus = value;
+                    this.raisePropertyChanged("ResetWithSelectedUploadStatus");
                 }
             }
         }
@@ -328,6 +328,10 @@ namespace Drexel.VidUp.UI.ViewModels
             ObservableTemplateViewModels observableTemplateViewModelsInclAllNone, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             this.uploadList = uploadList;
+            foreach (Upload upload in this.uploadList)
+            {
+                upload.DataChanged += this.uploadDataChanged;
+            }
 
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
@@ -337,18 +341,18 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableTemplateViewModelsInclAllNone.CollectionChanged+= this.observableTemplateViewModelsInclAllNoneCollectionChanged;
             this.observableTemplateViewModelsInclAll.CollectionChanged += this.observableTemplateViewModelsInclAllCollectionChanged;
             this.recalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAll[0];
-            this.removeSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
+            this.deleteSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
             this.resetWithSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
 
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
 
-            this.deleteCommand = new GenericCommand(this.RemoveUpload);
+            this.deleteCommand = new GenericCommand(this.DeleteUpload);
             this.addUploadCommand = new GenericCommand(this.openUploadDialog);
             this.startUploadingCommand = new GenericCommand(this.startUploading);
             this.stopUploadingCommand = new GenericCommand(this.stopUploading);
             this.recalculatePublishAtCommand = new GenericCommand(this.recalculatePublishAt);
             this.resetRecalculatePublishAtStartDateCommand = new GenericCommand(this.resetRecalculatePublishAtStartDate);
-            this.removeUploadsCommand = new GenericCommand(this.removeUploads);
+            this.deleteUploadsCommand = new GenericCommand(this.deleteUploads);
             this.resetUploadsCommand = new GenericCommand(this.resetUploads);
 
             this.notifyUploadsAboutResumeState();
@@ -373,9 +377,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             if (e.Action == NotifyCollectionChangedAction.Remove)
             {
-                if ((TemplateComboboxViewModel) e.OldItems[0] == this.removeSelectedTemplate)
+                if ((TemplateComboboxViewModel) e.OldItems[0] == this.deleteSelectedTemplate)
                 {
-                    this.RemoveSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
+                    this.DeleteSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
                 }
             }
         }
@@ -410,17 +414,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        //exposed for testing
-        public void RemoveUpload(object parameter)
-        {
-            Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
-            this.uploadList.RemoveUploads(upload2 => upload2 == upload);
-
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-            JsonSerializationContent.JsonSerializer.SerializeUploadList();
-            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-        }
-
         public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
         {
             this.uploadList.ReOrder(uploadToMove, uploadAtTargetPosition);
@@ -452,9 +445,18 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.uploadList.AddUploads(uploads);
 
+            foreach (Upload upload in uploads)
+            {
+                upload.DataChanged += uploadDataChanged;
+            }
+
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();
-            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+        }
+
+        private void uploadDataChanged(object sender, EventArgs e)
+        {
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private async void startUploading(object obj)
@@ -501,7 +503,7 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         //parameter skips dialog for testing
-        private async void removeUploads(object parameter)
+        private async void deleteUploads(object parameter)
         {
             bool skipDialog = (bool)parameter;
             bool remove = true;
@@ -509,11 +511,11 @@ namespace Drexel.VidUp.UI.ViewModels
             //skip dialog on testing
             if (!(bool)skipDialog)
             {
-                if (this.removeUploadStatus == "All" ||
-                    (UplStatus) Enum.Parse(typeof(UplStatus), this.removeUploadStatus) != UplStatus.Finished)
+                if (this.deleteSelectedUploadStatus == "All" ||
+                    (UplStatus) Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus) != UplStatus.Finished)
                 {
                     ConfirmControl control = new ConfirmControl(
-                        $"Do you really want to remove all uploads with template = '{this.removeSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.removeUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'?");
+                        $"Do you really want to remove all uploads with template = '{this.deleteSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.deleteSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'?");
 
                     remove = (bool) await DialogHost.Show(control, "RootDialog");
                 }
@@ -521,7 +523,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (remove)
             {
-                this.removeUploads();
+                this.deleteUploads();
             }
         }
 
@@ -535,7 +537,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (!(bool)skipDialog)
             {
                 ConfirmControl control = new ConfirmControl(
-                    $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.");
+                    $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.");
 
                 remove = (bool)await DialogHost.Show(control, "RootDialog");
             }
@@ -553,7 +555,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.recalculatePublishAtStartDate != null)
                 {
                     this.uploadList.SetStartDateOnAllTemplateSchedules(this.recalculatePublishAtStartDate.Value);
-                    JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 }
 
                 foreach (Upload upload in this.uploadList)
@@ -576,8 +577,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.recalculatePublishAtStartDate != null)
                 {
-                    this.uploadList.SetStartDateOnTemplateSchedule(this.recalculatePublishAtSelectedTemplate.Template, this.recalculatePublishAtStartDate.Value);
-                    JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                    this.recalculatePublishAtSelectedTemplate.Template.SetStartDateOnTemplateSchedule(this.recalculatePublishAtStartDate.Value);
                 }
 
                 foreach (Upload upload in this.uploadList)
@@ -598,8 +598,6 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                 }
             }
-
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void resetRecalculatePublishAtStartDate(object obj)
@@ -607,51 +605,69 @@ namespace Drexel.VidUp.UI.ViewModels
             this.RecalculatePublishAtStartDate = null;
         }
 
-        private void removeUploads()
+        //exposed for testing
+        public void DeleteUpload(object parameter)
+        {
+            Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
+            upload.DataChanged -= this.uploadDataChanged;
+            this.uploadList.RemoveUploads(upload2 => upload2 == upload);
+
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeUploadList();
+        }
+
+        private void deleteUploads()
         {
             Predicate<Upload>[] predicates = new Predicate<Upload>[2];
 
-            if (this.removeUploadStatus == "All")
+            if (this.deleteSelectedUploadStatus == "All")
             {
                 predicates[0] = upload => true;
             }
             else
             {
-                UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.removeUploadStatus);
+                UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus);
                 predicates[0] = upload => upload.UploadStatus == status;
             }
 
-            if (this.removeSelectedTemplate.Template.Name == "All")
+            if (this.deleteSelectedTemplate.Template.Name == "All")
             {
                 predicates[1] = upload => true;
             }
-            else if (this.removeSelectedTemplate.Template.Name == "None")
+            else if (this.deleteSelectedTemplate.Template.Name == "None")
             {
                 predicates[1] = upload => upload.Template == null;
             }
             else
             {
-                predicates[1] = upload => upload.Template == this.removeSelectedTemplate.Template;
+                predicates[1] = upload => upload.Template == this.deleteSelectedTemplate.Template;
             }
 
-            this.uploadList.RemoveUploads(PredicateCombiner.And(predicates));
+            Predicate<Upload> combinedPredicate = PredicateCombiner.And(predicates);
+            List<Upload> uploadsToDelete = this.uploadList.GetUploads(combinedPredicate);
+
+            foreach (Upload uploadToDelete in uploadsToDelete)
+            {
+                uploadToDelete.DataChanged -= this.uploadDataChanged;
+            }
+
+            this.uploadList.RemoveUploads(combinedPredicate);
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();
-            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         private void resetUploads()
         {
             Predicate<Upload>[] predicates = new Predicate<Upload>[2];
 
-            if (this.resetWithUploadStatus == "All")
+            if (this.resetWithSelectedUploadStatus == "All")
             {
                 predicates[0] = upload => true;
             }
             else
             {
-                UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.resetWithUploadStatus);
+                UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.resetWithSelectedUploadStatus);
                 predicates[0] = upload => upload.UploadStatus == status;
             }
 
@@ -670,7 +686,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             List<Upload> uploads = this.uploadList.Uploads.Where(upload => PredicateCombiner.And(predicates)(upload)).ToList();
 
-            UplStatus resetToStatus = (UplStatus) Enum.Parse(typeof(UplStatus), this.resetToUploadStatus);
+            UplStatus resetToStatus = (UplStatus) Enum.Parse(typeof(UplStatus), this.resetToSelectedUploadStatus);
             foreach (Upload upload in uploads)
             {
                 if (resetToStatus == UplStatus.Stopped)

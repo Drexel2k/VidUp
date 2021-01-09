@@ -132,7 +132,7 @@ namespace Drexel.VidUp.Test
 
             Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
             Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploadlist.json")));
-            Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "templatelist.json")));
+            Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "templatelist.json")));
             Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "playlistlist.json")));
 
             JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -174,9 +174,6 @@ namespace Drexel.VidUp.Test
 
             Assert.IsTrue(uploadsCount == 1);
             Assert.IsTrue(found);
-
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "templatelist.json"))))["templates"];
-            Assert.IsTrue(jArray.Count == 0);
         }
 
         [Test]
@@ -1079,9 +1076,9 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithTemplateGuid).Upload == uploadWithTemplate);
             Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithoutTemplateGuid).Upload == uploadWithoutTemplate);
             Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[2].Template == template);
-            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0].Template == uploadListViewModel.RemoveSelectedTemplate.Template);
-            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0] == uploadListViewModel.RemoveSelectedTemplate);
-            Assert.IsTrue(uploadListViewModel.StatusesInclAll[5] == uploadListViewModel.RemoveUploadStatus);
+            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0].Template == uploadListViewModel.DeleteSelectedTemplate.Template);
+            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0] == uploadListViewModel.DeleteSelectedTemplate);
+            Assert.IsTrue(uploadListViewModel.StatusesInclAll[5] == uploadListViewModel.DeleteSelectedUploadStatus);
 
             Assert.IsTrue(templateViewModel.Template == template);
             Assert.IsTrue(templateViewModel.ObservableTemplateViewModels[0].Template == template);

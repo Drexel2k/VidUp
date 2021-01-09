@@ -1385,7 +1385,7 @@ namespace Drexel.VidUp.Business
         private DateTime dailyGetNextDate(DateTime dateTime)
         {
             DateTime potentialNextDate = dateTime.Date;
-            int remainder = (potentialNextDate.Date - this.StartDate.Date).Days % this.DailyDayFrequency;
+            int remainder = (potentialNextDate.Date - this.startDate.Date).Days % this.DailyDayFrequency;
             if (remainder > 0)
             {
                 potentialNextDate = potentialNextDate.AddDays(this.DailyDayFrequency - remainder);
@@ -1396,7 +1396,7 @@ namespace Drexel.VidUp.Business
 
         private DateTime weeklyGetNextDate(DateTime dateTime)
         {
-            int weekIndex = Schedule.weeklyGetWeekIndex(this.StartDate, dateTime);
+            int weekIndex = Schedule.weeklyGetWeekIndex(this.startDate, dateTime);
             int remainder = weekIndex % this.weeklyWeekFrequency;
             if (remainder > 0)
             {
@@ -1409,14 +1409,14 @@ namespace Drexel.VidUp.Business
             {
                 if (this.weeklyDays[index])
                 {
-                    return Schedule.weeklyGetBeginningOfWeek(this.StartDate).AddDays(weekIndex * 7 + index);
+                    return Schedule.weeklyGetBeginningOfWeek(this.startDate).AddDays(weekIndex * 7 + index);
                 }
             }
 
             //current day or no day after (in this week) are enabled in this schedule, so we take first valid day of next week
             dayIndex = Array.IndexOf(this.weeklyDays, true);
             weekIndex = weekIndex + this.weeklyWeekFrequency;
-            return Schedule.weeklyGetBeginningOfWeek(this.StartDate).AddDays(weekIndex * 7 + dayIndex);
+            return Schedule.weeklyGetBeginningOfWeek(this.startDate).AddDays(weekIndex * 7 + dayIndex);
         }
 
         //slightly different signature as for daily and weekly, as we need the original date
@@ -1425,7 +1425,7 @@ namespace Drexel.VidUp.Business
         private bool monthlyGetNextDateMonthDateBased(DateTime dateTime, out DateTime nextDate, out int originalDay)
         {
             bool corrected = false;
-            int monthIndex = Schedule.monthlyGetMonthIndex(this.StartDate, dateTime);
+            int monthIndex = Schedule.monthlyGetMonthIndex(this.startDate, dateTime);
             int remainder = monthIndex % this.monthlyMonthFrequency;
             if (remainder > 0)
             {
@@ -1445,7 +1445,7 @@ namespace Drexel.VidUp.Business
                         index = maxDays - 1;
                     }
 
-                    nextDate = Schedule.monthlyGetBeginningOfMonth(this.StartDate).AddMonths(monthIndex).AddDays(index);
+                    nextDate = Schedule.monthlyGetBeginningOfMonth(this.startDate).AddMonths(monthIndex).AddDays(index);
                     originalDay = originalDayIndex + 1;
                     return corrected;
                 }
@@ -1454,7 +1454,7 @@ namespace Drexel.VidUp.Business
             //current day or no day after (in this month) are enabled in this schedule, so we take first valid day of next month
             int dayIndex = Array.IndexOf(this.monthlyMonthDateBasedDates, true);
             monthIndex = monthIndex + this.monthlyMonthFrequency;
-            nextDate = Schedule.monthlyGetBeginningOfMonth(this.StartDate).AddMonths(monthIndex).AddDays(dayIndex);
+            nextDate = Schedule.monthlyGetBeginningOfMonth(this.startDate).AddMonths(monthIndex).AddDays(dayIndex);
             originalDay = dayIndex;
             return corrected;
         }
@@ -1467,14 +1467,14 @@ namespace Drexel.VidUp.Business
         private KeyValuePair<MonthRelativeCombination, DateTime> monthlyGetNextDateMonthRelativeBased(DateTime dateTime)
         {
             KeyValuePair<MonthRelativeCombination, DateTime> result;
-              int monthIndex = Schedule.monthlyGetMonthIndex(this.StartDate, dateTime);
+              int monthIndex = Schedule.monthlyGetMonthIndex(this.startDate, dateTime);
             int remainder = monthIndex % this.monthlyMonthFrequency;
             if (remainder > 0)
             {
                 monthIndex = monthIndex + (this.monthlyMonthFrequency - remainder);
             }
 
-            DateTime monthStart = Schedule.monthlyGetBeginningOfMonth(this.StartDate).AddMonths(monthIndex);
+            DateTime monthStart = Schedule.monthlyGetBeginningOfMonth(this.startDate).AddMonths(monthIndex);
 
             Dictionary<MonthRelativeCombination, DateTime> monthDates = new Dictionary<MonthRelativeCombination, DateTime>();
             foreach (MonthRelativeCombination monthlyMonthRelativeBasedCombination in this.monthlyMonthRelativeBasedCombinations)

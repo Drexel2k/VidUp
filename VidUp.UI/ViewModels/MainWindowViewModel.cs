@@ -428,7 +428,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.PropertyChanged += this.uploadListPropertyChanged;
 
             this.playlistList = DeserializationRepositoryContent.PlaylistList;
-            this.playlistList.CollectionChanged += playlistListCollectionChanged;
+            this.playlistList.CollectionChanged += this.playlistListCollectionChanged;
 
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
@@ -503,12 +503,6 @@ namespace Drexel.VidUp.UI.ViewModels
             if (e.PropertyName == "TotalBytesToUpload")
             {
                 this.raisePropertyChanged("TotalMbLeft");
-            }
-
-            //todo: on adding new uploads, uploads are serialized multiple times
-            if (e.PropertyName == "TotalBytesToUploadIncludingResumableRemaining" || e.PropertyName == "TotalBytesToUploadRemaining")
-            {
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             }
         }
 

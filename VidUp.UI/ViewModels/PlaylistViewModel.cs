@@ -27,7 +27,7 @@ namespace Drexel.VidUp.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         private GenericCommand newPlaylistCommand;
-        private GenericCommand removePlaylistCommand;
+        private GenericCommand deletePlaylistCommand;
         private GenericCommand autoSetPlaylistsCommand;
 
         private bool autoSettingPlaylists;
@@ -109,11 +109,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand RemovePlaylistCommand
+        public GenericCommand DeletePlaylistCommand
         {
             get
             {
-                return this.removePlaylistCommand;
+                return this.deletePlaylistCommand;
             }
         }
 
@@ -200,7 +200,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.SelectedPlaylist = this.observablePlaylistViewModels.PlaylistCount > 0 ? this.observablePlaylistViewModels[0] : null;
 
             this.newPlaylistCommand = new GenericCommand(this.OpenNewPlaylistDialog);
-            this.removePlaylistCommand = new GenericCommand(this.RemovePlaylist);
+            this.deletePlaylistCommand = new GenericCommand(this.DeletePlaylist);
             this.autoSetPlaylistsCommand = new GenericCommand(this.autoSetPlaylists);
 
 
@@ -241,7 +241,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public void RemovePlaylist(object playlistId)
+        public void DeletePlaylist(object playlistId)
         {       
             Playlist playlist = this.playlistList.GetPlaylist((string)playlistId);
 
@@ -266,8 +266,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.playlistList.Remove(playlist);
 
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         private void raisePropertyChangedAndSerializePlaylistList(string propertyName)
@@ -329,6 +327,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
+            //check if all needed playlists exist on youtube and if not mark them es not existing and remove from playlistUploadsWithoutPlaylistMap
             Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistService.GetPlaylists(playlistUploadsWithoutPlaylistMap.Keys);
             if (playlistUploadsWithoutPlaylistMap.Count != playlistVideos.Count)
             {
@@ -345,7 +344,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 JsonSerializationContent.JsonSerializer.SerializePlaylistList();
             }
-
 
             //check if videos are already in playlist on YT.
             foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)

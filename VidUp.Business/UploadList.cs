@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 
 #endregion
@@ -164,15 +165,6 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, uploads));
         }
 
-        //after deserialiatzion
-        public void SetEventListeners()
-        {
-            foreach (Upload upload in uploads)
-            {
-                upload.PropertyChanged += uploadPropertyChanged;
-            }
-        }
-
         public void RemoveUploads(Predicate<Upload> predicate)
         {
             List<Upload> oldUploads = this.uploads.FindAll(predicate);
@@ -315,6 +307,11 @@ namespace Drexel.VidUp.Business
             return this.uploads.Find(match);
         }
 
+        public List<Upload> GetUploads(Predicate<Upload> match)
+        {
+            return this.uploads.Where(upload => match(upload)).ToList();
+        }
+
         public int FindIndex(Predicate<Upload> predicate)
         {
             return this.uploads.FindIndex(predicate);
@@ -378,20 +375,11 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void SetStartDateOnTemplateSchedule(Template template, DateTime startDate)
-        {
-            if (template.PublishAtSchedule != null)
-            {
-                template.PublishAtSchedule.IgnoreUploadsBefore = DateTime.Now;
-                template.PublishAtSchedule.StartDate = startDate;
-            }
-        }
-
         public void SetStartDateOnAllTemplateSchedules(DateTime startDate)
         {
             foreach (Template template in this.templateList)
             {
-                this.SetStartDateOnTemplateSchedule(template, startDate);
+                template.SetStartDateOnTemplateSchedule(startDate);
             }
         }
     }

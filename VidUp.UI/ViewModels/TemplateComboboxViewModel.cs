@@ -1,9 +1,5 @@
-﻿#region
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Drexel.VidUp.Business;
-
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {

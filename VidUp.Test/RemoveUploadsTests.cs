@@ -82,7 +82,7 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveUploadsCommand.Execute(true);
+            uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -286,9 +286,9 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveSelectedTemplate =
+            uploadListViewModel.DeleteSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template789FilterGuid);
-            uploadListViewModel.RemoveUploadsCommand.Execute(true);
+            uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -399,9 +399,9 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveSelectedTemplate =
+            uploadListViewModel.DeleteSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "None");
-            uploadListViewModel.RemoveUploadsCommand.Execute(true);
+            uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -485,10 +485,10 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel) mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveUploadStatus = uploadListViewModel.StatusesInclAll[2];
-            uploadListViewModel.RemoveSelectedTemplate =
+            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[2];
+            uploadListViewModel.DeleteSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template234FilterGuid);
-            uploadListViewModel.RemoveUploadsCommand.Execute(true);
+            uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -586,9 +586,9 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveUploadStatus = uploadListViewModel.StatusesInclAll[1];
+            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[1];
 
-            uploadListViewModel.RemoveUploadsCommand.Execute(true);
+            uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -837,10 +837,10 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveUploadStatus = uploadListViewModel.StatusesInclAll[0];
-            uploadListViewModel.RemoveSelectedTemplate =
+            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[0];
+            uploadListViewModel.DeleteSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template456Guid);
-            uploadListViewModel.RemoveUploadsCommand.Execute(true);
+            uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
@@ -1007,10 +1007,10 @@ namespace Drexel.VidUp.Test
             }
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.RemoveUploadStatus = uploadListViewModel.StatusesInclAll[0];
-            uploadListViewModel.RemoveSelectedTemplate =
+            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[0];
+            uploadListViewModel.DeleteSelectedTemplate =
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "All");
-            uploadListViewModel.RemoveUploadsCommand.Execute(true);
+            uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel = null;
 
