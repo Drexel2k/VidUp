@@ -94,8 +94,7 @@ namespace Drexel.VidUp.Youtube
 
                 upload.UploadStatus = UplStatus.Uploading;
 
-                UploadResult result = await YoutubeUploadService.Upload(upload, maxUploadInBytesPerSecond,
-                    updateUploadProgress, this.isStopped);
+                UploadResult result = await YoutubeUploadService.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress, this.isStopped);
 
                 if (result.UploadSuccessFull)
                 {

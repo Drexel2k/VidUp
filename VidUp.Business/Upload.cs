@@ -128,6 +128,9 @@ namespace Drexel.VidUp.Business
                 {
                     this.ResumableSessionUri = null;
                     this.BytesSent = 0;
+                    this.uploadStart = null;
+                    this.uploadEnd = null;
+                    this.uploadErrorMessage = null;
                 }
 
                 if (value == UplStatus.Uploading)
@@ -138,6 +141,11 @@ namespace Drexel.VidUp.Business
                 if (value == UplStatus.Finished)
                 {
                     this.uploadEnd = DateTime.Now;
+                }
+
+                if (value == UplStatus.Stopped)
+                {
+                    this.uploadErrorMessage = null;
                 }
 
                 this.LastModified = DateTime.Now;
@@ -649,19 +657,15 @@ namespace Drexel.VidUp.Business
             {
                 nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(nextPossibleDateTime);
 
-                IEnumerable<Upload> relevantUploads;
-                relevantUploads = this.Template.PublishAtSchedule.IgnoreUploadsBefore == null ?
+                IEnumerable<Upload> relevantUploads = this.Template.PublishAtSchedule.IgnoreUploadsBefore == null ?
                     this.template.Uploads.Where(upload => upload != this).ToArray() :
                     this.template.Uploads.Where(upload => upload != this && (upload.UploadStart == null || upload.UploadStart > upload.Template.PublishAtSchedule.IgnoreUploadsBefore)).ToArray();
 
-                if (!relevantUploads.Any(upload => (upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading || upload.UploadStatus == UplStatus.Failed ||
-                                                    upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Finished)
-                                                   && upload.PublishAt == nextPossibleDateTime))
+                if (!relevantUploads.Any(upload => upload.PublishAt == nextPossibleDateTime))
                 {
                     isFree = true;
                 }
             }
-
 
             this.publishAt = nextPossibleDateTime;
 

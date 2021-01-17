@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Drexel.VidUp.Business;
 
 #endregion
 
@@ -18,6 +19,12 @@ namespace Drexel.VidUp.Youtube.Service
         private const int keepHistoryForInSeconds = 30;
         private const int historyForStatsInSeconds = 20;
 
+        private DateTime lastStatsUpdate;
+        private static TimeSpan twoSeconds = new TimeSpan(0, 0, 2);
+        private Action<YoutubeUploadStats> updateUploadProgress;
+        private YoutubeUploadStats stats;
+        private Upload upload;
+
         private Stream baseStream;
         private long maximumBytesPerSecondRead;
         private Dictionary<long, int> bytesPerTick = new Dictionary<long, int>();
@@ -25,6 +32,9 @@ namespace Drexel.VidUp.Youtube.Service
         private byte[] memoryBuffer = new byte[ThrottledBufferedStream.memoryBufferSizeInBytes];
         private int bufferPosition = 0;
         private int bytesInBuffer = 0;
+
+        private long position = 0;
+        private Func<bool> stopUpload;
 
 
         private long currentTicks
@@ -40,14 +50,15 @@ namespace Drexel.VidUp.Youtube.Service
             get
             {
                 long historyTicks = currentTicks - ThrottledBufferedStream.historyForStatsInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds;
-                var historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks);
+                var historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks).ToList();
                 int sum = historyBytes.Sum(historyByte => historyByte.Value);
 
                 long minTick = this.bytesPerTick.Min(kvp => kvp.Key);
-                if (minTick > this.currentTicks - ThrottledBufferedStream.historyForStatsInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds)
+                if (minTick > this.currentTicks - ThrottledBufferedStream.historyForStatsInSeconds *
+                    ThrottledBufferedStream.tickMultiplierForSeconds)
                 {
                     TimeSpan duration = DateTime.Now - new DateTime(minTick);
-                    return (int)((sum / duration.TotalMilliseconds) * 1000);
+                    return (int) ((sum / duration.TotalMilliseconds) * 1000);
                 }
                 else
                 {
@@ -83,7 +94,7 @@ namespace Drexel.VidUp.Youtube.Service
         {
             get
             {
-                return false;
+                return true;
             }
         }
 
@@ -107,22 +118,17 @@ namespace Drexel.VidUp.Youtube.Service
         {
             get
             {
-                return this.baseStream.Position;
+                return this.position;
             }
             set
             {
                 this.bufferPosition = 0;
                 this.baseStream.Position = value;
+                this.position = value;
             }
         }
 
-        public ThrottledBufferedStream(Stream baseStream)
-            : this(baseStream, 0)
-        {
-            // Nothing todo.
-        }
-
-        public ThrottledBufferedStream(Stream baseStream, long maximumBytesPerSecond)
+        public ThrottledBufferedStream(Stream baseStream, long maximumBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, YoutubeUploadStats stats, Upload upload, Func<bool> stopUpload)
         {
             if (ThrottledBufferedStream.historyForUploadInSeconds > ThrottledBufferedStream.keepHistoryForInSeconds)
             {
@@ -145,8 +151,15 @@ namespace Drexel.VidUp.Youtube.Service
                     maximumBytesPerSecond, "The maximum number of bytes per second can't be negatie.");
             }
 
+            this.updateUploadProgress = updateUploadProgress;
+            this.stats = stats;
+            this.upload = upload;
+            this.lastStatsUpdate = DateTime.Now;
+            this.stopUpload = stopUpload;
+
             this.baseStream = baseStream;
             this.maximumBytesPerSecondRead = maximumBytesPerSecond;
+            this.position = this.baseStream.Position;
         }
 
         public override void Flush()
@@ -156,6 +169,11 @@ namespace Drexel.VidUp.Youtube.Service
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (stopUpload != null && stopUpload())
+            {
+                return 0;
+            }
+
             if (count <= 0)
             {
                 return 0;
@@ -182,9 +200,11 @@ namespace Drexel.VidUp.Youtube.Service
             }
 
             long currentTicks = this.currentTicks;
+
             this.throttle(currentTicks);
 
             int bytesRead = this.readInternal(buffer, offset, count);
+            this.position += bytesRead;
 
             if (this.bytesPerTick.ContainsKey(currentTicks))
             {
@@ -194,6 +214,16 @@ namespace Drexel.VidUp.Youtube.Service
             {
                 this.bytesPerTick.Add(currentTicks, bytesRead);
             }
+
+            if (DateTime.Now - this.lastStatsUpdate > ThrottledBufferedStream.twoSeconds)
+            {
+                stats.CurrentSpeedInBytesPerSecond = this.CurrentSpeedInBytesPerSecond;
+                upload.BytesSent = this.position;
+                updateUploadProgress(stats);
+                this.lastStatsUpdate = DateTime.Now;
+            }
+
+
 
             return bytesRead;
         }
@@ -243,7 +273,8 @@ namespace Drexel.VidUp.Youtube.Service
         public override long Seek(long offset, SeekOrigin origin)
         {
             this.bufferPosition = 0;
-            return this.baseStream.Seek(offset, origin);
+            this.position = this.baseStream.Seek(offset, origin);
+            return this.position;
         }
 
         public override void SetLength(long value)

@@ -12,7 +12,7 @@ namespace Drexel.VidUp.Json.Content
 
         public List<Guid> Guids
         {
-            get => guids;
+            get => this.guids;
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
-using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 
@@ -18,67 +18,45 @@ namespace Drexel.VidUp.Youtube.Service
 
             if (!string.IsNullOrWhiteSpace(upload.VideoId) && !string.IsNullOrWhiteSpace(upload.ThumbnailFilePath) && File.Exists(upload.ThumbnailFilePath))
             {
-                Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Adding thumbnail.");
+                Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Video with thumbnail to add available.");
 
-                try
+
+                using (HttpClient client = await HttpHelper.GetAuthenticatedStandardClient())
+                using (FileStream fs = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
                 {
-
-                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Creating thumbnail request.");
-                    HttpWebRequest request = await HttpWebRequestCreator.CreateAuthenticatedUploadHttpWebRequest(
-                            string.Format("{0}?videoId={1}", YoutubeThumbnailService.thumbnailEndpoint, upload.VideoId), "POST", upload.ThumbnailFilePath);
-
-                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Getting request/data stream.");
-                    using (FileStream inputStream = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
-                    using (Stream dataStream = await request.GetRequestStreamAsync())
+                    using (StreamContent content = HttpHelper.GetStreamContentUpload(fs, MimeMapping.GetMimeMapping(upload.ThumbnailFilePath)))
                     {
-                        byte[] buffer = new byte[1024];
-                        int bytesRead;
-                        while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                        HttpResponseMessage message;
+                        try
                         {
-                            await dataStream.WriteAsync(buffer, 0, bytesRead);
+                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Add thumbnail.");
+                            message = await client.PostAsync($"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}", content);
                         }
-                    }
-
-                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Try getting response for thumbnail.");
-                    using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                    {
-                    }
-                }
-                catch (WebException e)
-                {
-                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Unexpected WebException: {e.ToString()}.");
-
-                    if (e.Response != null)
-                    {
-                        using (e.Response)
-                        using (StreamReader reader = new StreamReader(e.Response.GetResponseStream()))
+                        catch (Exception e)
                         {
-                            upload.UploadErrorMessage += $"Thumbnail upload failed: {await reader.ReadToEndAsync()}, exception: {e.ToString()}";
+                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.PostAsync Exception: {e.ToString()}.");
+                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpClient.PutAsync Exception: {e.ToString()}.";
+                            return false;
                         }
-                    }
-                    else
-                    {
-                        upload.UploadErrorMessage += $"Thumbnail upload failed: {e.ToString()}";
-                    }
 
-                    return false;
-                }
-                catch (Exception e)
-                {
-                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Unexpected Exception: {e.ToString()}.");
+                        using (message)
+                        {
+                            if (!message.IsSuccessStatusCode)
+                            {
+                                Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                                upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.";
+                                return false;
+                            }
+                        }
 
-                    upload.UploadErrorMessage = $"Thumbnail upload failed: {e.ToString()}";
-                    return false;
+                        Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End.");
+                        return true;
+                    }
                 }
             }
-            else
-            {
-                Tracer.Write($"YoutubeThumbnailService.AddThumbnail: No thumbnail to add.");
-                return false;
-            }
 
-            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End.");
-            return true;
+            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: No thumbnail to add.");
+            return false;
         }
     }
 }

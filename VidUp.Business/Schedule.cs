@@ -1466,8 +1466,7 @@ namespace Drexel.VidUp.Business
 
         private KeyValuePair<MonthRelativeCombination, DateTime> monthlyGetNextDateMonthRelativeBased(DateTime dateTime)
         {
-            KeyValuePair<MonthRelativeCombination, DateTime> result;
-              int monthIndex = Schedule.monthlyGetMonthIndex(this.startDate, dateTime);
+            int monthIndex = Schedule.monthlyGetMonthIndex(this.startDate, dateTime);
             int remainder = monthIndex % this.monthlyMonthFrequency;
             if (remainder > 0)
             {
