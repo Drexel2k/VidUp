@@ -33,37 +33,35 @@ namespace Drexel.VidUp.Youtube.Service
 
                 string contentJson = JsonConvert.SerializeObject(playlistItem);
 
-                using (HttpClient client = await HttpHelper.GetAuthenticatedStandardClient())
+                HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                using (ByteArrayContent content = HttpHelper.GetStreamContent(contentJson, "application/json"))
                 {
-                    using (ByteArrayContent content = HttpHelper.GetStreamContent(contentJson, "application/json"))
-                    {
-                        HttpResponseMessage message;
+                    HttpResponseMessage message;
 
-                        try
+                    try
+                    {
+                        Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Add to Playlist.");
+                        message = await client.PostAsync($"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet", content);
+                    }
+                    catch (Exception e)
+                    {
+                        Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, HttpClient.PostAsync Exception: {e.ToString()}.");
+                        upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpClient.PostAsync Exception: {e.ToString()}.";
+                        return false;
+                    }
+
+                    using (message)
+                    {
+                        if (!message.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Add to Playlist.");
-                            message = await client.PostAsync($"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet", content);
-                        }
-                        catch (Exception e)
-                        {
-                            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, HttpClient.PostAsync Exception: {e.ToString()}.");
-                            upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpClient.PostAsync Exception: {e.ToString()}.";
+                            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                            upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.";
                             return false;
                         }
-
-                        using (message)
-                        {
-                            if (!message.IsSuccessStatusCode)
-                            {
-                                Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
-                                upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.";
-                                return false;
-                            }
-                        }
-
-                        Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End.");
-                        return true;
                     }
+
+                    Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End.");
+                    return true;
                 }
             }
 
@@ -87,64 +85,62 @@ namespace Drexel.VidUp.Youtube.Service
 
                     foreach (string playlistId in playlistIdsInternal)
                     {
-                        using (HttpClient client = await HttpHelper.GetAuthenticatedStandardClient())
+                        HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                        HttpResponseMessage message;
+
+                        try
                         {
-                            HttpResponseMessage message;
+                            Tracer.Write($"YoutubePlaylistService.GetPlaylists: Get Playlist info.");
+                            message = await client.GetAsync($"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}");
+                        }
+                        catch (Exception e)
+                        {
+                            Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                            throw;
+                        }
 
-                            try
+                        using (message)
+                        {
+                            if (!message.IsSuccessStatusCode)
                             {
-                                Tracer.Write($"YoutubePlaylistService.GetPlaylists: Get Playlist info.");
-                                message = await client.GetAsync($"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}");
-                            }
-                            catch (Exception e)
-                            {
-                                Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, HttpClient.GetAsync Exception: {e.ToString()}.");
-                                throw;
-                            }
-
-                            using (message)
-                            {
-                                if (!message.IsSuccessStatusCode)
+                                if (message.StatusCode != HttpStatusCode.NotFound)
                                 {
-                                    if (message.StatusCode != HttpStatusCode.NotFound)
-                                    {
-                                        Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
-                                        throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
-                                    }
-
-                                    continue;
+                                    Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                                    throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
                                 }
 
-                                List<string> videoIds = new List<string>();
-                                result.Add(playlistId, videoIds);
+                                continue;
+                            }
 
-                                var definition = new
+                            List<string> videoIds = new List<string>();
+                            result.Add(playlistId, videoIds);
+
+                            var definition = new
+                            {
+                                Items = new[]
                                 {
-                                    Items = new[]
+                                new
+                                {
+                                    Snippet = new
                                     {
-                                    new
-                                    {
-                                        Snippet = new
+                                        ResourceId = new
                                         {
-                                            ResourceId = new
-                                            {
-                                                VideoId = ""
-                                            }
+                                            VideoId = ""
                                         }
                                     }
                                 }
-                                };
+                            }
+                            };
 
-                                var response =
-                                    JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(),
-                                        definition);
+                            var response =
+                                JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(),
+                                    definition);
 
-                                if (response.Items.Length > 0)
+                            if (response.Items.Length > 0)
+                            {
+                                foreach (var item in response.Items)
                                 {
-                                    foreach (var item in response.Items)
-                                    {
-                                        videoIds.Add(item.Snippet.ResourceId.VideoId);
-                                    }
+                                    videoIds.Add(item.Snippet.ResourceId.VideoId);
                                 }
                             }
                         }

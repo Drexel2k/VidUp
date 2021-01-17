@@ -69,7 +69,7 @@
     <Compile Include="..\VidUp.UI\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AccesToken.cs" />
+    <Compile Include="Service\AccesToken.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="Data\VideoResource.cs" />
     <Compile Include="Data\YoutubePlaylistItemRequest.cs" />

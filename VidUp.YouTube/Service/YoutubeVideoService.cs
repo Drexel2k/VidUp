@@ -22,53 +22,52 @@ namespace Drexel.VidUp.Youtube.Service
             {
                 Tracer.Write($"YoutubeVideoService.IsPublic: Videos to check available.");
 
-                using (HttpClient client = await HttpHelper.GetAuthenticatedStandardClient())
+                HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                HttpResponseMessage message;
+
+                try
                 {
-                    HttpResponseMessage message;
+                    Tracer.Write($"YoutubeVideoService.IsPublic: Get video information.");
+                    message = await client.GetAsync($"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIds)}");
+                }
+                catch (Exception e)
+                {
+                    Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                    throw;
+                }
 
-                    try
+                using (message)
+                {
+                    if (!message.IsSuccessStatusCode)
                     {
-                        Tracer.Write($"YoutubeVideoService.IsPublic: Get video information.");
-                        message = await client.GetAsync($"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIds)}");
+                        Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                        throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
                     }
-                    catch (Exception e)
-                    {
-                        Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpClient.GetAsync Exception: {e.ToString()}.");
-                        throw;
-                    }
 
-                    using (message)
+                    var definition = new
                     {
-                        if (!message.IsSuccessStatusCode)
+                        Items = new[]
                         {
-                            Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
-                            throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
-                        }
-
-                        var definition = new
-                        {
-                            Items = new[]
+                            new
                             {
-                                new
+                                Id = "",
+                                Status = new
                                 {
-                                    Id = "",
-                                    Status = new
-                                    {
-                                        PrivacyStatus = ""
-                                    }
+                                    PrivacyStatus = ""
                                 }
                             }
-                        };
-
-                        var response =
-                            JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(), definition);
-
-                        foreach (var item in response.Items)
-                        {
-                            result.Add(item.Id, item.Status.PrivacyStatus == "public");
                         }
+                    };
+
+                    var response =
+                        JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(), definition);
+
+                    foreach (var item in response.Items)
+                    {
+                        result.Add(item.Id, item.Status.PrivacyStatus == "public");
                     }
                 }
+                
             }
 
             Tracer.Write($"YoutubeVideoService.IsPublic: End.");
