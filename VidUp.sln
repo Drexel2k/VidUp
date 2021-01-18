@@ -9,13 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VidUp.UI", "VidUp.UI\VidUp.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VidUp.Json", "VidUp.Json\VidUp.Json.csproj", "{88F42201-2C15-4994-A3C0-0A47CF9B5E18}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "VidUp.Setup", "VidUp.Setup\VidUp.Setup.wixproj", "{990EEC84-618D-4441-BFF7-AD5B0386CA69}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VidUp.Utils", "VidUp.Utils\VidUp.Utils.csproj", "{24A5202C-4AFF-48A6-9317-04DA92B2AC47}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VidUp.Youtube", "VidUp.Youtube\VidUp.Youtube.csproj", "{7511C911-F013-4DBC-8B2A-5C027B60EEDA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VidUp.Test", "VidUp.Test\VidUp.Test.csproj", "{255F5758-AD3D-4730-B801-26B252E47C66}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "VidUp.Setup", "VidUp.Setup\VidUp.Setup.vdproj", "{EAADDD04-8F65-4674-9102-2301742D7D0C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,10 +49,6 @@ Global
 		{88F42201-2C15-4994-A3C0-0A47CF9B5E18}.Release|Any CPU.Build.0 = Release|Any CPU
 		{88F42201-2C15-4994-A3C0-0A47CF9B5E18}.Release|x86.ActiveCfg = Release|x86
 		{88F42201-2C15-4994-A3C0-0A47CF9B5E18}.Release|x86.Build.0 = Release|x86
-		{990EEC84-618D-4441-BFF7-AD5B0386CA69}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{990EEC84-618D-4441-BFF7-AD5B0386CA69}.Debug|x86.ActiveCfg = Debug|x86
-		{990EEC84-618D-4441-BFF7-AD5B0386CA69}.Release|Any CPU.ActiveCfg = Release|x64
-		{990EEC84-618D-4441-BFF7-AD5B0386CA69}.Release|x86.ActiveCfg = Release|x86
 		{24A5202C-4AFF-48A6-9317-04DA92B2AC47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{24A5202C-4AFF-48A6-9317-04DA92B2AC47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24A5202C-4AFF-48A6-9317-04DA92B2AC47}.Debug|x86.ActiveCfg = Debug|x86
@@ -73,6 +69,10 @@ Global
 		{255F5758-AD3D-4730-B801-26B252E47C66}.Debug|x86.ActiveCfg = Debug|x86
 		{255F5758-AD3D-4730-B801-26B252E47C66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{255F5758-AD3D-4730-B801-26B252E47C66}.Release|x86.ActiveCfg = Release|x86
+		{EAADDD04-8F65-4674-9102-2301742D7D0C}.Debug|Any CPU.ActiveCfg = Debug
+		{EAADDD04-8F65-4674-9102-2301742D7D0C}.Debug|x86.ActiveCfg = Debug
+		{EAADDD04-8F65-4674-9102-2301742D7D0C}.Release|Any CPU.ActiveCfg = Release
+		{EAADDD04-8F65-4674-9102-2301742D7D0C}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
