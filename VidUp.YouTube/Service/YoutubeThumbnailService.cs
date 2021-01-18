@@ -2,9 +2,9 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
+using HeyRed.Mime;
 
 namespace Drexel.VidUp.Youtube.Service
 {
@@ -23,7 +23,7 @@ namespace Drexel.VidUp.Youtube.Service
 
                 HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
                 using (FileStream fs = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
-                using (StreamContent content = HttpHelper.GetStreamContentUpload(fs, MimeMapping.GetMimeMapping(upload.ThumbnailFilePath)))
+                using (StreamContent content = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
                 {
                     HttpResponseMessage message;
                     try

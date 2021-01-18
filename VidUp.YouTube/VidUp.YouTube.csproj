@@ -1,114 +1,45 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{299C9F42-69F3-4266-BB57-C9267C9B8DAF}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Drexel.VidUp.Youtube</RootNamespace>
-    <AssemblyName>VidUp.Youtube</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Platforms>AnyCPU;x86</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\Debug\x64\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\x64\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutputPath>bin\Debug\x86\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>bin\Release\x64\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutputPath>bin\Release\x86\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Web" />
+    <Compile Include="..\VidUp.UI\AssemblyInfo\CommonAssemblyInfo.cs" Link="AssemblyInfo\CommonAssemblyInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="..\VidUp.UI\CommonAssemblyInfo.cs">
-      <Link>CommonAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="Service\AccesToken.cs" />
-    <Compile Include="Credentials.cs" />
-    <Compile Include="Data\VideoResource.cs" />
-    <Compile Include="Data\YoutubePlaylistItemRequest.cs" />
-    <Compile Include="Data\YoutubePlaylistItemSnippet .cs" />
-    <Compile Include="Service\PartStream.cs" />
-    <Compile Include="Service\HttpHelper.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\ThrottledBufferedStream.cs" />
-    <Compile Include="Service\YoutubeThumbnailService.cs" />
-    <Compile Include="Service\YoutubeVideoService.cs" />
-    <Compile Include="Uploader.cs" />
-    <Compile Include="Service\UploadResult.cs" />
-    <Compile Include="UploaderResult.cs" />
-    <Compile Include="UploadStats.cs" />
-    <Compile Include="Service\YoutubeUploadService.cs" />
-    <Compile Include="Service\YoutubeAuthentication.cs" />
-    <Compile Include="Data\YoutubeVideoSnippet.cs" />
-    <Compile Include="Data\YoutubeStatus.cs" />
-    <Compile Include="Service\YoutubeUploadStats.cs" />
-    <Compile Include="Data\YoutubeVideoRequest.cs" />
-    <Compile Include="Service\YoutubePlaylistService.cs" />
+    <PackageReference Include="MimeTypesMap" Version="1.0.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\VidUp.Business\VidUp.Business.csproj">
-      <Project>{81afda84-286a-4f0c-b073-dfdc251dfa00}</Project>
-      <Name>VidUp.Business</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\VidUp.Json\VidUp.Json.csproj">
-      <Project>{33d84357-abb1-4a1d-93a2-cf3266a792d4}</Project>
-      <Name>VidUp.Json</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\VidUp.Utils\VidUp.Utils.csproj">
-      <Project>{12FE9421-0706-4E87-A6B5-AC52522252FE}</Project>
-      <Name>VidUp.Utils</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\VidUp.Business\VidUp.Business.csproj" />
+    <ProjectReference Include="..\VidUp.Json\VidUp.Json.csproj" />
+    <ProjectReference Include="..\VidUp.Utils\VidUp.Utils.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

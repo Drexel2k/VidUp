@@ -5,10 +5,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Data;
+using HeyRed.Mime;
 using Newtonsoft.Json;
 using Timer = System.Timers.Timer;
 
@@ -139,7 +139,7 @@ namespace Drexel.VidUp.Youtube.Service
                         chunkStream = new PartStream(inputStream, YoutubeUploadService.uploadChunkSizeInBytes);
 
                         Tracer.Write($"YoutubeUploadService.Upload: Creating content stream.");
-                        using (content = HttpHelper.GetStreamContentResumableUpload(chunkStream, uploadByteIndex, YoutubeUploadService.uploadChunkSizeInBytes, MimeMapping.GetMimeMapping(upload.FilePath)))
+                        using (content = HttpHelper.GetStreamContentResumableUpload(chunkStream, uploadByteIndex, YoutubeUploadService.uploadChunkSizeInBytes, MimeTypesMap.GetMimeType(upload.FilePath)))
                         {
                             try
                             {
@@ -270,7 +270,7 @@ namespace Drexel.VidUp.Youtube.Service
             {
                 content.Headers.Add("Slug", httpHeaderCompatibleString);
                 content.Headers.Add("X-Upload-Content-Length", info.Length.ToString());
-                content.Headers.Add("X-Upload-Content-Type", MimeMapping.GetMimeMapping(upload.FilePath));
+                content.Headers.Add("X-Upload-Content-Type", MimeTypesMap.GetMimeType(upload.FilePath));
 
                 using (HttpResponseMessage message = await client.PostAsync($"{YoutubeUploadService.uploadEndpoint}?part=snippet,status&uploadType=resumable", content))
                 {
