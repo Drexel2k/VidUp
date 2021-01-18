@@ -24,7 +24,9 @@ namespace Drexel.VidUp.Youtube.Service
             HttpHelper.uploadClient.Timeout = Timeout.InfiniteTimeSpan;
         }
 
-        private static int bufferSize = 10 * 1024;
+        //buffer is set to constant value like 1024, 4096, 16384 etc.
+        //eg. if set to 10240 buffer will be 16384.
+        private static int bufferSize = 16 * 1024;
 
         public static async Task<HttpClient> GetAuthenticatedStandardClient()
         {
@@ -49,9 +51,9 @@ namespace Drexel.VidUp.Youtube.Service
             }
         }
 
-        public static ByteArrayContent GetStreamContentContentRangeOnly(long length)
+        public static StreamContent GetStreamContentContentRangeOnly(long length)
         {
-            ByteArrayContent content = new ByteArrayContent(new byte[0]);
+            StreamContent content = new StreamContent(Stream.Null);
             content.Headers.ContentLength = 0;
             content.Headers.Add("Content-Range", string.Format("bytes */{0}", length.ToString()));
 
@@ -73,21 +75,21 @@ namespace Drexel.VidUp.Youtube.Service
             return streamContent;
         }
 
-        public static StreamContent GetStreamContentResumableUpload(Stream data, long startByteIndex, int chunkSize, string contentType)
+        public static StreamContent GetStreamContentResumableUpload(Stream data, long orirginalLength, long startByteIndex, int chunkSize, string contentType)
         {
             long lastByteIndex;
-            if (startByteIndex + chunkSize >= data.Length)
+            if (startByteIndex + chunkSize >= orirginalLength)
             {
-                lastByteIndex = data.Length - 1;
+                lastByteIndex = orirginalLength - 1;
             }
             else
             {
                 lastByteIndex = startByteIndex + chunkSize - 1;
             }
 
-            string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, lastByteIndex, data.Length);
-            StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
+            string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, lastByteIndex, orirginalLength);
 
+            StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
             content.Headers.ContentLength = lastByteIndex - startByteIndex + 1;
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
             content.Headers.Add("Content-Range", rangeString);

@@ -42,7 +42,7 @@
                        </ComboBox>
                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                            <Button Command="{Binding ResetCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 3 0" Width="80" Height="20" Padding="0" Content="Reset" />
-                           <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 10 5" ToolTip="Resets all schedule setting, daily, weekly and monthly!" ToolTipService.ShowDuration="60000" Background="Transparent" />
+                           <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 10 5" ToolTip="Resets all schedule setting, daily, weekly and monthly!" ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                    </DockPanel>
                 </Grid>
@@ -87,7 +87,7 @@
                     <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton IsChecked="{Binding DailyHasAdvancedSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <Label Content="Advanced Schedule " Width="121" />
-                        <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Alternating, rotating publish times can be defined for up to 3 days, up to 3 a day." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Alternating, rotating publish times can be defined for up to 3 days, up to 3 a day." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
                     <Label Grid.Row="2" Grid.Column="0" Content="Day 1" Width="40" HorizontalAlignment="Left" Margin="0 5 0 0" />
@@ -165,7 +165,7 @@
                     <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton IsChecked="{Binding WeeklyHasAdvancedSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <Label Content="Advanced Schedule " Width="121" />
-                        <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Up to 3 publish times per day can be set." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Up to 3 publish times per day can be set." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
                     <ComboBox  Grid.Row="3" Grid.Column="0" SelectedItem="{Binding WeeklyMondayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyMondayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
@@ -270,7 +270,7 @@
                     <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton IsChecked="{Binding MonthlyHasAdvancedSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <Label Content="Advanced Schedule " Width="121" />
-                        <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Up to 3 publish times per day can be set." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Up to 3 publish times per day can be set." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
 

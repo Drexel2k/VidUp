@@ -61,7 +61,7 @@
                             <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding DataContext.AppStatus, Converter={converters:AppStatusIsUploadingConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                                 <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
                             </Fluent:CheckBox>
-                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="images/stop-upload.png"  Command="{Binding StopUploadingCommand}" />
                     </Fluent:RibbonGroupBox>
@@ -166,13 +166,13 @@
                     <Fluent:RibbonGroupBox Header="Update" VerticalContentAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
                             <Fluent:Button Header="Set Playlists" SizeDefinition="Middle,Middle,Small" Icon="images/list-auto.png"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
-                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlists to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlists to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding AutoSetPlaylists}">
                                 <TextBlock Margin="0 4 0 0">Auto Set Playlists</TextBlock>
                             </Fluent:CheckBox>
-                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="If checked, playlists will be set to published videos automatically every 12 hours when app is running. Will be done at app start, if last attempt is longer ago than 12 hours." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="If checked, playlists will be set to published videos automatically every 12 hours when app is running. Will be done at app start, if last attempt is longer ago than 12 hours." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
@@ -208,10 +208,10 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Action performed after all uploads are finished." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Action performed after all uploads are finished." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     <Label Content="Max Upload: " />
                     <TextBox Text="{Binding MaxUploadInKiloBytesPerSecond, UpdateSourceTrigger=PropertyChanged, Delay=500}" Width="70" />
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 256, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 256, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 </StackPanel>
                 <Grid>
                     <Grid.RowDefinitions>

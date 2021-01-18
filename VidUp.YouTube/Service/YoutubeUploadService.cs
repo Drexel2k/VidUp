@@ -126,6 +126,7 @@ namespace Drexel.VidUp.Youtube.Service
                                 errors.AppendLine($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception: {e.ToString()}.");
 
                                 error = true;
+                                uploadTry++;
                                 continue;
                             }
 
@@ -139,7 +140,7 @@ namespace Drexel.VidUp.Youtube.Service
                         chunkStream = new PartStream(inputStream, YoutubeUploadService.uploadChunkSizeInBytes);
 
                         Tracer.Write($"YoutubeUploadService.Upload: Creating content stream.");
-                        using (content = HttpHelper.GetStreamContentResumableUpload(chunkStream, uploadByteIndex, YoutubeUploadService.uploadChunkSizeInBytes, MimeTypesMap.GetMimeType(upload.FilePath)))
+                        using (content = HttpHelper.GetStreamContentResumableUpload(chunkStream, inputStream.Length, uploadByteIndex, YoutubeUploadService.uploadChunkSizeInBytes, MimeTypesMap.GetMimeType(upload.FilePath)))
                         {
                             try
                             {
@@ -208,7 +209,7 @@ namespace Drexel.VidUp.Youtube.Service
         private static async Task<long> getUploadByteIndex(Upload upload)
         {
             HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
-            using (ByteArrayContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length))
+            using (StreamContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length))
             using (HttpResponseMessage message = await client.PutAsync(upload.ResumableSessionUri, content))
             {
                 string range = message.Headers.GetValues("Range").First();

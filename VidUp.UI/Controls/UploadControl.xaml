@@ -86,7 +86,7 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
             </StackPanel>
             <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                 <Label Content="Thumbnail: " Width="68" />
@@ -125,7 +125,7 @@
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Tags: " Width="35" />
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 </StackPanel>
                 <TextBox x:Name="Tags" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus">
                     <TextBox.Text>

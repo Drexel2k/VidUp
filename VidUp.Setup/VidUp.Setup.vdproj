@@ -15,13 +15,13 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_517C67AC36E04867AE4CA6EDDA74B932"
+        "MsmKey" = "8:_038B096CF2EA48D0947040E0BAF0CE58"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_6D9202E0AEB4410BAAD5F4EAC4A6AF70"
+        "MsmKey" = "8:_517C67AC36E04867AE4CA6EDDA74B932"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -50,6 +50,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.5.0.x64"
+                    {
+                    "Name" = "8:.NET Desktop Runtime 5.0.1 (x64)"
+                    "ProductCode" = "8:Microsoft.NetCore.DesktopRuntime.5.0.x64"
+                    }
+                }
             }
         }
         "Release"
@@ -191,7 +199,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:VidUp"
         "ProductCode" = "8:{45EA59BF-8566-4CAE-8D3C-E147F0240FD4}"
-        "PackageCode" = "8:{25206F24-C2CD-4E91-8C04-B37361F1BAA1}"
+        "PackageCode" = "8:{4C9C662C-927A-4BA1-B1E0-1E256544AB7F}"
         "UpgradeCode" = "8:{41AC4E42-952A-4D5B-ABB5-8EC4153BE8AF}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -319,7 +327,7 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_6D9202E0AEB4410BAAD5F4EAC4A6AF70"
+            "Target" = "8:"
             "Folder" = "8:_68AD4144D9CB4215891D8708C4F4BC07"
             "WorkingFolder" = "8:_A145BCF1FF0B46EFA75B2BDB11A3785A"
             "Icon" = "8:_517C67AC36E04867AE4CA6EDDA74B932"
@@ -724,9 +732,9 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_6D9202E0AEB4410BAAD5F4EAC4A6AF70"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_038B096CF2EA48D0947040E0BAF0CE58"
             {
-            "SourcePath" = "8:..\\VidUp.UI\\obj\\Release\\net5.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\VidUp.UI\\obj\\Debug\\net5.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_A145BCF1FF0B46EFA75B2BDB11A3785A"
@@ -744,7 +752,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:Release|Any CPU"
+            "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:PublishItems"
             "OutputProjectGuid" = "8:{E568A83D-8FA1-45EE-B4D7-0C525D8923A4}"
             "ShowKeyOutput" = "11:TRUE"

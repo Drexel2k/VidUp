@@ -1,13 +1,9 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using Drexel.VidUp.Business;
-
-#endregion
 
 namespace Drexel.VidUp.Youtube.Service
 {
@@ -222,8 +218,6 @@ namespace Drexel.VidUp.Youtube.Service
                 updateUploadProgress(stats);
                 this.lastStatsUpdate = DateTime.Now;
             }
-
-
 
             return bytesRead;
         }

@@ -21,12 +21,12 @@
         <TextBlock Grid.Row="0">New Playlist</TextBlock>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <TextBox wpf:HintAssist.Hint="Playlist Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Width="280" />
-            <materialDesign:PackIcon Kind="HelpOutline"  VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For display in VidUp, doesn't need to be the same as the Youtube playlist title." ToolTipService.ShowDuration="60000" Background="Transparent" />
+            <materialDesign:PackIcon Kind="HelpCircleOutline"  VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="For display in VidUp, doesn't need to be the same as the Youtube playlist title." ToolTipService.ShowDuration="60000" Background="Transparent" />
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <TextBox wpf:HintAssist.Hint="Playlist Id" Text="{Binding PlaylistId, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Width="280"  />
-            <materialDesign:PackIcon Kind="HelpOutline"  VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
+            <materialDesign:PackIcon Kind="HelpCircleOutline"  VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3"
                     Margin="0 16 0 0">
