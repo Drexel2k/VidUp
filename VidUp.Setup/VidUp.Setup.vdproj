@@ -319,7 +319,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_8A1A7B903FD147828685B9E5F4F85C97"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_5233913A51FF4D52994CBC620F74C61A"
             {
             "Name" = "8:VidUp"
             "Arguments" = "8:"
@@ -327,7 +327,7 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:"
+            "Target" = "8:_038B096CF2EA48D0947040E0BAF0CE58"
             "Folder" = "8:_68AD4144D9CB4215891D8708C4F4BC07"
             "WorkingFolder" = "8:_A145BCF1FF0B46EFA75B2BDB11A3785A"
             "Icon" = "8:_517C67AC36E04867AE4CA6EDDA74B932"
@@ -734,7 +734,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_038B096CF2EA48D0947040E0BAF0CE58"
             {
-            "SourcePath" = "8:..\\VidUp.UI\\obj\\Debug\\net5.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\VidUp.UI\\obj\\Release\\net5.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_A145BCF1FF0B46EFA75B2BDB11A3785A"
