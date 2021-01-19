@@ -123,7 +123,7 @@ namespace Drexel.VidUp.Youtube.Service
                             catch (Exception e)
                             {
                                 Tracer.Write($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception package {package} try {uploadTry}: {e.ToString()}.");
-                                errors.AppendLine($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception package {package} try {uploadTry}: {e.Message}.");
+                                errors.AppendLine($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception package {package} try {uploadTry}: {e.GetType().ToString()}: {e.Message}.");
 
                                 error = true;
                                 uploadTry++;
@@ -163,7 +163,7 @@ namespace Drexel.VidUp.Youtube.Service
                             catch (Exception e)
                             {
                                 Tracer.Write($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception package {package} try {uploadTry}: {e.ToString()}.");
-                                errors.AppendLine($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception package {package} try {uploadTry}: {e.Message}.");
+                                errors.AppendLine($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception package {package} try {uploadTry}: {e.GetType().ToString()}: {e.Message}.");
 
                                 error = true;
                                 uploadTry++;
@@ -193,6 +193,12 @@ namespace Drexel.VidUp.Youtube.Service
                                 var definition = new { Id = "" };
                                 var response = JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(), definition);
                                 upload.VideoId = response.Id;
+
+                                //last stats update to reach 0 bytes and time left.
+                                stats.CurrentSpeedInBytesPerSecond = 1;
+                                upload.BytesSent = inputStream.Position;
+                                updateUploadProgress(stats);
+
                                 upload.UploadStatus = UplStatus.Finished;
                                 uploadResult.VideoResult = VideoResult.Finished;
                                 Tracer.Write($"YoutubeUploadService.Upload: Upload finished with {package}, video id {upload.VideoId}.");

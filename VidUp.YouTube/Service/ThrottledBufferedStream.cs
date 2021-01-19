@@ -207,7 +207,7 @@ namespace Drexel.VidUp.Youtube.Service
             {
                 stats.CurrentSpeedInBytesPerSecond = this.CurrentSpeedInBytesPerSecond;
                 upload.BytesSent = this.position;
-                updateUploadProgress(stats);
+                this.updateUploadProgress(stats);
                 this.lastStatsUpdate = DateTime.Now;
             }
 
