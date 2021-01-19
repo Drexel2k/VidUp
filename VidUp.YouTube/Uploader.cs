@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -20,8 +21,9 @@ namespace Drexel.VidUp.Youtube
 
         private UploadStats uploadStats;
 
-        private bool stopUpload = false;
         private bool resumeUploads;
+        private CancellationTokenSource tokenSource;
+        private bool uploadStopped;
 
         public event EventHandler UploadStatsUpdated;
 
@@ -33,11 +35,7 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        public bool StopUpload
-        {
-            get => this.stopUpload;
-            set => this.stopUpload = value;
-        }
+        public bool UploadStopped { get => this.uploadStopped; }
 
         public Uploader(UploadList uploadList)
         {
@@ -47,6 +45,8 @@ namespace Drexel.VidUp.Youtube
             }
 
             this.uploadList = uploadList;
+
+            this.tokenSource = new CancellationTokenSource();
         }
 
         private void onUploadStatsUpdated()
@@ -86,7 +86,7 @@ namespace Drexel.VidUp.Youtube
 
             List<Upload> uploadsOfSession = new List<Upload>();
 
-            while (upload != null && !this.stopUpload)
+            while (upload != null)
             {
                 uploadsOfSession.Add(upload);
                 upload.UploadErrorMessage = null;
@@ -94,25 +94,24 @@ namespace Drexel.VidUp.Youtube
 
                 upload.UploadStatus = UplStatus.Uploading;
 
-                UploadResult result = await YoutubeUploadService.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress, this.isStopped);
 
-                if (result.UploadSuccessFull)
+                UploadResult uploadResult = await YoutubeUploadService.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress, this.tokenSource.Token);
+
+                if (uploadResult.VideoResult == VideoResult.Finished)
                 {
                     oneUploadFinished = true;
-                    upload.UploadStatus = UplStatus.Finished;
-                }
-                else
-                {
-                    if (upload.UploadStatus != UplStatus.Stopped)
-                    {
-                        upload.UploadStatus = UplStatus.Failed;
-                    }
                 }
 
                 this.uploadedLength += upload.FileLength;
                 this.uploadStats.FinishUpload();
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+
+                if (uploadResult.VideoResult == VideoResult.Stopped)
+                {
+                    this.uploadStopped = true;
+                    break;
+                }
 
                 upload = this.uploadList.GetUpload(
                     PredicateCombiner.And(
@@ -150,7 +149,7 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        void updateUploadProgress(YoutubeUploadStats stats)
+        private void updateUploadProgress(YoutubeUploadStats stats)
         {
             //check if upload has been added or removed
             long totalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
@@ -169,9 +168,9 @@ namespace Drexel.VidUp.Youtube
             this.onUploadStatsUpdated();
         }
 
-        private bool isStopped()
+        public void StopUpload()
         {
-            return this.stopUpload;
+            this.tokenSource.Cancel();
         }
     }
 }

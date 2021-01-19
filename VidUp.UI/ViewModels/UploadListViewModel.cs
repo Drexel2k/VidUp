@@ -473,7 +473,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.uploader = new Uploader(this.uploadList);
                 this.uploader.UploadStatsUpdated += (sender, args) => this.onUploadStatsUpdated();
                 UploaderResult uploadResult = await uploader.Upload(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
-                bool uploadStopped = uploader.StopUpload;
+                bool uploadStopped = uploader.UploadStopped;
                 this.uploader = null;
 
                 this.uploadStatus = UploadStatus.NotUploading;
@@ -497,7 +497,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 Uploader uploader = this.uploader;
                 if (uploader != null)
                 {
-                    uploader.StopUpload = true;
+                    uploader.StopUpload();
                 }
             }
         }

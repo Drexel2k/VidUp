@@ -2,7 +2,7 @@
 {
     public class UploadResult
     {
-        public bool UploadSuccessFull { get; set; }
+        public VideoResult VideoResult { get; set; }
 
         public bool ThumbnailSuccessFull { get; set; }
 

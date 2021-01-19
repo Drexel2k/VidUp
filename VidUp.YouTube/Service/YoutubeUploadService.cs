@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
@@ -32,25 +33,26 @@ namespace Drexel.VidUp.Youtube.Service
             }
         }
 
-        public static async Task<UploadResult> Upload(Upload upload, long maxUploadInBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, Func<bool> stopUpload)
+        public static async Task<UploadResult> Upload(Upload upload, long maxUploadInBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, CancellationToken cancellationToken)
         {
             Tracer.Write($"YoutubeUploadService.Upload: Start with upload: {upload.FilePath}, maxUploadInBytesPerSecond: {maxUploadInBytesPerSecond}.");
 
             upload.UploadErrorMessage = string.Empty;
 
-            UploadResult result = new UploadResult()
+            UploadResult uploadResult = new UploadResult()
             {
-                UploadSuccessFull = false,
+                VideoResult = VideoResult.Failed,
                 ThumbnailSuccessFull = false,
                 PlaylistSuccessFull = false
             };
 
             if (!File.Exists(upload.FilePath))
             {
-                upload.UploadErrorMessage = "File does not exist.";
-
                 Tracer.Write($"YoutubeUploadService.Upload: End, file doesn't exist.");
-                return result;
+
+                upload.UploadErrorMessage = "File does not exist.";
+                upload.UploadStatus = UplStatus.Failed;
+                return uploadResult;
             }
 
             StringBuilder errors = new StringBuilder();
@@ -75,7 +77,7 @@ namespace Drexel.VidUp.Youtube.Service
 
                 YoutubeUploadStats stats = new YoutubeUploadStats();
                 using (FileStream fileStream = new FileStream(upload.FilePath, FileMode.Open))
-                using (ThrottledBufferedStream inputStream = new ThrottledBufferedStream(fileStream, maxUploadInBytesPerSecond, updateUploadProgress, stats, upload, stopUpload))
+                using (ThrottledBufferedStream inputStream = new ThrottledBufferedStream(fileStream, maxUploadInBytesPerSecond, updateUploadProgress, stats, upload))
                 {
                     inputStream.Position = uploadByteIndex;
                     YoutubeUploadService.stream = inputStream;
@@ -107,8 +109,10 @@ namespace Drexel.VidUp.Youtube.Service
                             if (uploadTry > 3)
                             {
                                 Tracer.Write($"YoutubeUploadService.Upload: End, Upload not successful after 3 tries.");
+
                                 upload.UploadErrorMessage = $"YoutubeUploadService.Upload: Upload not successful after 3 tries.";
-                                return result;
+                                upload.UploadStatus = UplStatus.Failed;
+                                return uploadResult;
                             }
 
                             //give a little time on IOException, e.g. to await router redial in on 24h disconnect
@@ -144,17 +148,18 @@ namespace Drexel.VidUp.Youtube.Service
                         {
                             try
                             {
-                                message = await client.PutAsync(upload.ResumableSessionUri, content);
+                                message = await client.PutAsync(upload.ResumableSessionUri, content, cancellationToken);
+                            }
+                            catch (TaskCanceledException e)
+                            {
+                                Tracer.Write($"YoutubeUploadService.Upload: End, Upload stopped by user.");
+
+                                upload.UploadStatus = UplStatus.Stopped;
+                                uploadResult.VideoResult = VideoResult.Stopped;
+                                return uploadResult;
                             }
                             catch (Exception e)
                             {
-                                if (stopUpload != null && stopUpload())
-                                {
-                                    Tracer.Write($"YoutubeUploadService.Upload: End, Upload stopped by user.");
-                                    upload.UploadStatus = UplStatus.Stopped;
-                                    return result;
-                                }
-
                                 Tracer.Write($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception: {e.ToString()}.");
                                 errors.AppendLine($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception: {e.ToString()}.");
 
@@ -181,7 +186,7 @@ namespace Drexel.VidUp.Youtube.Service
                                 var response = JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(), definition);
                                 upload.VideoId = response.Id;
                                 upload.UploadStatus = UplStatus.Finished;
-                                result.UploadSuccessFull = true;
+                                uploadResult.VideoResult = VideoResult.Finished;
                             }
                         }
 
@@ -194,16 +199,16 @@ namespace Drexel.VidUp.Youtube.Service
             {
                 Tracer.Write($"YoutubeUploadService.Upload: End, Unexpected Exception: {e.ToString()}.");
 
-                upload.UploadStatus = UplStatus.Failed;
                 upload.UploadErrorMessage = $"YoutubeUploadService.Upload: Unexpected Exception: {e.ToString()}.";
-                return result;
+                upload.UploadStatus = UplStatus.Failed;
+                return uploadResult;
             }
 
-            result.ThumbnailSuccessFull = await YoutubeThumbnailService.AddThumbnail(upload);
-            result.PlaylistSuccessFull = await YoutubePlaylistService.AddToPlaylist(upload);
+            uploadResult.ThumbnailSuccessFull = await YoutubeThumbnailService.AddThumbnail(upload);
+            uploadResult.PlaylistSuccessFull = await YoutubePlaylistService.AddToPlaylist(upload);
 
             Tracer.Write($"YoutubeUploadService.Upload: End.");
-            return result;
+            return uploadResult;
         }
 
         private static async Task<long> getUploadByteIndex(Upload upload)

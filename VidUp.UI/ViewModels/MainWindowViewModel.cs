@@ -94,7 +94,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
                 string product = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute), false)).Product;
-                string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string version = Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
                 return string.Format("{0} {1}", product, version);
             }
         }

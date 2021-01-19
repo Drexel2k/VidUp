@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -389,11 +388,6 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (!this.ControlsEnabled)
-                {
-                    return false;
-                }
-
                 if (this.upload.PublishAt == null)
                 {
                     return false;
@@ -426,6 +420,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.raisePropertyChanged("PublishAt");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
                 this.raisePropertyChanged("PublishAtTime");
                 this.raisePropertyChanged("PublishAtDate");
             }
@@ -456,6 +451,21 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.upload.SetPublishAtDate(value.Value);
                 this.raisePropertyChanged("PublishAtDate");
+            }
+        }
+
+        public bool PublishAtDateTimeControlsEnabled
+        {
+            get
+            {
+                if (!this.ControlsEnabled)
+                {
+                    return false;
+                }
+                else
+                {
+                    return this.upload.PublishAt != null;
+                }
             }
         }
 
@@ -592,6 +602,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (e.PropertyName == "PublishAt")
             {
                 this.raisePropertyChanged("PublishAt");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
                 this.raisePropertyChanged("PublishAtTime");
                 this.raisePropertyChanged("PublishAtDate");
             }

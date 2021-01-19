@@ -154,7 +154,7 @@
             <StackPanel  Grid.Row="7" Grid.Column="2" Orientation="Horizontal">
                 <ToggleButton IsChecked="{Binding PublishAt}" IsEnabled="{Binding ControlsEnabled}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
                 <Label Content="Publish At: " Width="77" />
-                <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" Margin="0 3 0 0">
+                <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" Margin="0 3 0 0">
                     <!--
                     <DatePicker.Resources>
                         <Style x:Key="MaterialDesignDatePickerTextBox"
@@ -165,7 +165,7 @@
                     </DatePicker.Resources>
                     -->
                 </DatePicker>
-                <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" IsEnabled="{Binding PublishAt}" />
+                <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" />
             </StackPanel>
 
             <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">

@@ -14,7 +14,9 @@ namespace Drexel.VidUp.Utils
             if (dateTime.Minute % 15 != 0)
             {
                 int minutes = dateTime.Minute / 15 * 15 + 15;
-                dateTime = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, minutes, 0);
+                dateTime = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0);
+                //if minutes are 60, DateTime initialization will fail.
+                dateTime = dateTime.AddMinutes(minutes);
             }
 
             return dateTime;

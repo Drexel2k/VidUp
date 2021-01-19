@@ -30,8 +30,6 @@ namespace Drexel.VidUp.Youtube.Service
         private int bytesInBuffer = 0;
 
         private long position = 0;
-        private Func<bool> stopUpload;
-
 
         private long currentTicks
         {
@@ -124,7 +122,7 @@ namespace Drexel.VidUp.Youtube.Service
             }
         }
 
-        public ThrottledBufferedStream(Stream baseStream, long maximumBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, YoutubeUploadStats stats, Upload upload, Func<bool> stopUpload)
+        public ThrottledBufferedStream(Stream baseStream, long maximumBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, YoutubeUploadStats stats, Upload upload)
         {
             if (ThrottledBufferedStream.historyForUploadInSeconds > ThrottledBufferedStream.keepHistoryForInSeconds)
             {
@@ -151,7 +149,6 @@ namespace Drexel.VidUp.Youtube.Service
             this.stats = stats;
             this.upload = upload;
             this.lastStatsUpdate = DateTime.Now;
-            this.stopUpload = stopUpload;
 
             this.baseStream = baseStream;
             this.maximumBytesPerSecondRead = maximumBytesPerSecond;
@@ -165,11 +162,6 @@ namespace Drexel.VidUp.Youtube.Service
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (stopUpload != null && stopUpload())
-            {
-                return 0;
-            }
-
             if (count <= 0)
             {
                 return 0;
