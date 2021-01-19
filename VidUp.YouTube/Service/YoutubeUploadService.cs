@@ -100,7 +100,11 @@ namespace Drexel.VidUp.Youtube.Service
                     {
                         if (totalBytesSentInSession == 0 || error)
                         {
-                            Tracer.Write($"YoutubeUploadService.Upload: Upload try: {uploadTry}.");
+                            //try 4 isn't executed.
+                            if (uploadTry <= 3)
+                            {
+                                Tracer.Write($"YoutubeUploadService.Upload: Upload try: {uploadTry}.");
+                            }
                         }
 
                         if (error)
@@ -110,7 +114,7 @@ namespace Drexel.VidUp.Youtube.Service
                             {
                                 Tracer.Write($"YoutubeUploadService.Upload: End, Upload not successful after 3 tries.");
 
-                                upload.UploadErrorMessage = $"YoutubeUploadService.Upload: Upload not successful after 3 tries.";
+                                upload.UploadErrorMessage = $"YoutubeUploadService.Upload: Upload not successful after 3 tries. Errors: {errors.ToString()}";
                                 upload.UploadStatus = UplStatus.Failed;
                                 return uploadResult;
                             }
