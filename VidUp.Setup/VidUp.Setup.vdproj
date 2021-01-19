@@ -172,7 +172,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_A145BCF1FF0B46EFA75B2BDB11A3785A"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFiles64Folder]\\VidUp"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -199,7 +199,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:VidUp 1.6.2"
         "ProductCode" = "8:{DB4A50FB-ACA8-4073-AB62-677B5BF81E56}"
-        "PackageCode" = "8:{CC8D6BB5-DF79-4661-97CD-928AFDF7C71A}"
+        "PackageCode" = "8:{29D8EE1B-59A1-4B87-B153-7251B624198B}"
         "UpgradeCode" = "8:{41AC4E42-952A-4D5B-ABB5-8EC4153BE8AF}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -734,7 +734,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_038B096CF2EA48D0947040E0BAF0CE58"
             {
-            "SourcePath" = "8:..\\VidUp.UI\\obj\\Debug\\net5.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\VidUp.UI\\obj\\Release\\net5.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_A145BCF1FF0B46EFA75B2BDB11A3785A"
