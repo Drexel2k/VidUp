@@ -361,12 +361,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.BytesSent > 0)
+                if (string.IsNullOrWhiteSpace(this.upload.ResumableSessionUri))
                 {
-                    return false;
+                    return true;
                 }
 
-                return true;
+                return false;
             }
         }
 
@@ -590,8 +590,12 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadStatusColorAnimation");
                 this.raisePropertyChanged("UploadStart");
                 this.raisePropertyChanged("UploadEnd");
-                this.raisePropertyChanged("ControlsEnabled");
                 this.raisePropertyChanged("StateCommandsEnabled");
+            }
+
+            if (e.PropertyName == "ResumableSessionUri")
+            {
+                this.raisePropertyChanged("ControlsEnabled");
             }
 
             if (e.PropertyName == "BytesSent")
