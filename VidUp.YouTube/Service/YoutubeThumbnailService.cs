@@ -34,7 +34,7 @@ namespace Drexel.VidUp.Youtube.Service
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.PostAsync Exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpClient.PutAsync Exception: {e.ToString()}.";
+                        upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpClient.PutAsync Exception: {e.GetType().ToString()}: {e.Message}.";
                         return false;
                     }
 
@@ -53,8 +53,8 @@ namespace Drexel.VidUp.Youtube.Service
                 }
             }
 
-            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: No thumbnail to add.");
-            return false;
+            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, no thumbnail to add.");
+            return true;
         }
     }
 }

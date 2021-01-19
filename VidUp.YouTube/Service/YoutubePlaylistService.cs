@@ -46,7 +46,7 @@ namespace Drexel.VidUp.Youtube.Service
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, HttpClient.PostAsync Exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpClient.PostAsync Exception: {e.ToString()}.";
+                        upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpClient.PostAsync Exception: {e.GetType().ToString()}: {e.Message}.";
                         return false;
                     }
 
@@ -66,7 +66,7 @@ namespace Drexel.VidUp.Youtube.Service
             }
 
             Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, nothing to add to playlist.");
-            return false;
+            return true;
         }
 
 

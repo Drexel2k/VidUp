@@ -380,7 +380,10 @@ namespace Drexel.VidUp.UI.ViewModels
                                 if (videosPublicMap[upload.VideoId])
                                 {
                                     upload.Playlist = this.playlistList.GetPlaylist(playlistVideosWithoutPlaylist.Key);
-                                    await YoutubePlaylistService.AddToPlaylist(upload);
+                                    if (!await YoutubePlaylistService.AddToPlaylist(upload))
+                                    {
+                                        upload.Playlist = null;
+                                    }
                                 }
                             }
                             else
