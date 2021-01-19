@@ -89,6 +89,7 @@ namespace Drexel.VidUp.Youtube.Service
                     //on IOExceptions try 2 times more to upload the chunk.
                     //no response from the server shall be requested on IOException.
                     short uploadTry = 1;
+                    int package = 0;
                     bool error = false;
 
                     Tracer.Write($"YoutubeUploadService.Upload: fileLength: {fileLength}.");
@@ -98,23 +99,14 @@ namespace Drexel.VidUp.Youtube.Service
 
                     while (fileLength > totalBytesSentInSession + initialBytesSent)
                     {
-                        if (totalBytesSentInSession == 0 || error)
-                        {
-                            //try 4 isn't executed.
-                            if (uploadTry <= 3)
-                            {
-                                Tracer.Write($"YoutubeUploadService.Upload: Upload try: {uploadTry}.");
-                            }
-                        }
-
                         if (error)
                         {
                             error = false;
                             if (uploadTry > 3)
                             {
-                                Tracer.Write($"YoutubeUploadService.Upload: End, Upload not successful after 3 tries.");
+                                Tracer.Write($"YoutubeUploadService.Upload: End, Upload not successful after 3 tries for package {package}.");
 
-                                upload.UploadErrorMessage = $"YoutubeUploadService.Upload: Upload not successful after 3 tries. Errors: {errors.ToString()}";
+                                upload.UploadErrorMessage = $"YoutubeUploadService.Upload: Upload not successful after 3 tries for package {package}. Errors: {errors.ToString()}";
                                 upload.UploadStatus = UplStatus.Failed;
                                 return uploadResult;
                             }
@@ -130,8 +122,8 @@ namespace Drexel.VidUp.Youtube.Service
                             }
                             catch (Exception e)
                             {
-                                Tracer.Write($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception: {e.ToString()}.");
-                                errors.AppendLine($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception: {e.ToString()}.");
+                                Tracer.Write($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception package {package} try {uploadTry}: {e.ToString()}.");
+                                errors.AppendLine($"YoutubeUploadService.Upload: Get uploadByteIndex due to error Exception package {package} try {uploadTry}: {e.Message}.");
 
                                 error = true;
                                 uploadTry++;
@@ -144,14 +136,20 @@ namespace Drexel.VidUp.Youtube.Service
                             upload.BytesSent = uploadByteIndex;
                             totalBytesSentInSession = uploadByteIndex - initialBytesSent;
                         }
+                        else
+                        {
+                            package++;
+                            Tracer.Write($"YoutubeUploadService.Upload: Upload try: Package {package} Try {uploadTry}.");
+                        }
 
                         chunkStream = new PartStream(inputStream, YoutubeUploadService.uploadChunkSizeInBytes);
 
-                        Tracer.Write($"YoutubeUploadService.Upload: Creating content stream.");
+                        Tracer.Write($"YoutubeUploadService.Upload: Creating content.");
                         using (content = HttpHelper.GetStreamContentResumableUpload(chunkStream, inputStream.Length, uploadByteIndex, YoutubeUploadService.uploadChunkSizeInBytes, MimeTypesMap.GetMimeType(upload.FilePath)))
                         {
                             try
                             {
+                                Tracer.Write($"YoutubeUploadService.Upload: Start uploading.");
                                 message = await client.PutAsync(upload.ResumableSessionUri, content, cancellationToken);
                             }
                             catch (TaskCanceledException e)
@@ -164,8 +162,8 @@ namespace Drexel.VidUp.Youtube.Service
                             }
                             catch (Exception e)
                             {
-                                Tracer.Write($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception: {e.ToString()}.");
-                                errors.AppendLine($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception: {e.ToString()}.");
+                                Tracer.Write($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception package {package} try {uploadTry}: {e.ToString()}.");
+                                errors.AppendLine($"YoutubeUploadService.Upload: HttpClient.PutAsync Exception package {package} try {uploadTry}: {e.Message}.");
 
                                 error = true;
                                 uploadTry++;
@@ -175,12 +173,18 @@ namespace Drexel.VidUp.Youtube.Service
 
                         using (message)
                         {
-                            if ((int)message.StatusCode != 308)
+                            if ((int)message.StatusCode == 308)
+                            {
+                                //one upload package succeeded, reset upload counter.
+                                uploadTry = 1;
+                                Tracer.Write($"YoutubeUploadService.Upload: Package {package} finished.");
+                            }
+                            else
                             {
                                 if (!message.IsSuccessStatusCode)
                                 {
-                                    Tracer.Write($"YoutubeUploadService.Upload: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
-                                    errors.AppendLine($"YoutubeUploadService.Upload: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                                    Tracer.Write($"YoutubeUploadService.Upload: HttpResponseMessage unexpected status code package {package} try {uploadTry}: {message.StatusCode} with message {message.ReasonPhrase}.");
+                                    errors.AppendLine($"YoutubeUploadService.Upload: HttpResponseMessage unexpected status code package {package} try {uploadTry}: {message.StatusCode} with message {message.ReasonPhrase}.");
                                     error = true;
                                     uploadTry++;
                                     continue;
@@ -191,6 +195,7 @@ namespace Drexel.VidUp.Youtube.Service
                                 upload.VideoId = response.Id;
                                 upload.UploadStatus = UplStatus.Finished;
                                 uploadResult.VideoResult = VideoResult.Finished;
+                                Tracer.Write($"YoutubeUploadService.Upload: Upload finished with {package}, video id {upload.VideoId}.");
                             }
                         }
 
