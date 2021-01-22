@@ -60,10 +60,6 @@ namespace Drexel.VidUp.Business
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //raised only once even if multiple properties are changed
-        //so serialization in this case takes only place once.
-        public event EventHandler DataChanged;
-
         #region properties
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
@@ -88,7 +84,6 @@ namespace Drexel.VidUp.Business
             {
                 this.setName(value);
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Name");
             }
         }
@@ -100,7 +95,6 @@ namespace Drexel.VidUp.Business
             {
                 this.title = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Title");
             }
         }
@@ -111,7 +105,6 @@ namespace Drexel.VidUp.Business
             {
                 this.description = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Description");
             }
         }
@@ -123,7 +116,6 @@ namespace Drexel.VidUp.Business
             {
                 this.tags = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Tags");
             }
         }
@@ -135,7 +127,6 @@ namespace Drexel.VidUp.Business
             {
                 this.visibility = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("YtVisibility");
             }
         }
@@ -156,7 +147,6 @@ namespace Drexel.VidUp.Business
                 this.imageFilePath = newFilePath;
                 
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("ImageFilePathForEditing", oldFilePath, value);
             }
         }
@@ -171,7 +161,6 @@ namespace Drexel.VidUp.Business
             {
                 this.templateMode = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("TemplateMode");
             }
         }
@@ -183,7 +172,6 @@ namespace Drexel.VidUp.Business
             {
                 this.rootFolderPath = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("RootFolderPath");
             }
         }
@@ -195,7 +183,6 @@ namespace Drexel.VidUp.Business
             {
                 this.partOfFileName = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("PartOfFileName");
             }
         }
@@ -207,7 +194,6 @@ namespace Drexel.VidUp.Business
             {
                 this.thumbnailFolderPath = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("ThumbnailFolderPath");
             }
         }
@@ -221,7 +207,6 @@ namespace Drexel.VidUp.Business
                 string filePath = this.templateList.CopyThumbnailFallbackToStorageFolder(value);
                 this.thumbnailFallbackFilePath = filePath;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("ThumbnailFallbackFilePath", oldValue, value);
             }
         }
@@ -233,7 +218,6 @@ namespace Drexel.VidUp.Business
             {
                 this.isDefault = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("IsDefault");
             }
         }
@@ -247,7 +231,6 @@ namespace Drexel.VidUp.Business
             {
                 this.playlist = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Playlist");
             }
         }
@@ -267,7 +250,6 @@ namespace Drexel.VidUp.Business
 
                 this.usePublishAtSchedule = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("UsePublishAtSchedule");
             }
         }
@@ -279,7 +261,6 @@ namespace Drexel.VidUp.Business
             {
                 this.publishAtSchedule = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("PublishAtSchedule");
             }
         }
@@ -291,7 +272,6 @@ namespace Drexel.VidUp.Business
             {
                 this.setPlaylistAfterPublication = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("SetPlaylistAfterPublication");
             }
         }
@@ -303,7 +283,6 @@ namespace Drexel.VidUp.Business
             {
                 this.videoLanguage = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("VideoLanguage");
             }
         }
@@ -315,7 +294,6 @@ namespace Drexel.VidUp.Business
             {
                 this.category = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Category");
             }
         }
@@ -376,13 +354,11 @@ namespace Drexel.VidUp.Business
         public void AddUpload(Upload upload)
         {
             this.uploads.Add(upload);
-            this.raiseDataChanged();
         }
 
         public void RemoveUpload(Upload upload)
         {
             this.uploads.Remove(upload);
-            this.raiseDataChanged();
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -401,15 +377,6 @@ namespace Drexel.VidUp.Business
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgsEx(propertyName, oldValue, newValue));
-            }
-        }
-
-        private void raiseDataChanged()
-        {
-            EventHandler handler = this.DataChanged;
-            if (handler != null)
-            {
-                handler(this, null);
             }
         }
 
@@ -439,8 +406,6 @@ namespace Drexel.VidUp.Business
                         return;
                     }
                 }
-
-                this.raiseDataChanged();
             }
         }
 
@@ -451,7 +416,6 @@ namespace Drexel.VidUp.Business
                 this.PublishAtSchedule.IgnoreUploadsBefore = DateTime.Now;
                 this.PublishAtSchedule.StartDate = startDate;
             }
-            this.raiseDataChanged();
         }
 
         private static int compareUploadPublishAtDates(Upload upload1, Upload upload2)

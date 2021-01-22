@@ -328,11 +328,6 @@ namespace Drexel.VidUp.UI.ViewModels
             ObservableTemplateViewModels observableTemplateViewModelsInclAllNone, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
             this.uploadList = uploadList;
-            foreach (Upload upload in this.uploadList)
-            {
-                upload.DataChanged += this.uploadDataChanged;
-            }
-
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
 
@@ -445,18 +440,13 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.uploadList.AddUploads(uploads);
 
-            foreach (Upload upload in uploads)
+            if (uploads.Any(upl => upl.Template != null))
             {
-                upload.DataChanged += uploadDataChanged;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();
-        }
-
-        private void uploadDataChanged(object sender, EventArgs e)
-        {
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private async void startUploading(object obj)
@@ -608,12 +598,8 @@ namespace Drexel.VidUp.UI.ViewModels
         //exposed for testing
         public void DeleteUpload(object parameter)
         {
-            Upload upload = this.observableUploadViewModels.GetUploadByGuid(Guid.Parse((string)parameter)).Upload;
-            upload.DataChanged -= this.uploadDataChanged;
-            this.uploadList.RemoveUploads(upload2 => upload2 == upload);
-
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-            JsonSerializationContent.JsonSerializer.SerializeUploadList();
+            Guid uploadGuid = Guid.Parse((string)parameter);
+            this.deleteUploads(upload => upload.Guid == uploadGuid);
         }
 
         private void deleteUploads()
@@ -644,14 +630,25 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             Predicate<Upload> combinedPredicate = PredicateCombiner.And(predicates);
-            List<Upload> uploadsToDelete = this.uploadList.GetUploads(combinedPredicate);
+            this.deleteUploads(combinedPredicate);
+            
+        }
 
-            foreach (Upload uploadToDelete in uploadsToDelete)
+        private void deleteUploads(Predicate<Upload> predicate)
+        {
+            bool serializeTemplates = false;
+            List<Upload> uploadsToDelete = this.uploadList.GetUploads(predicate);
+            if (uploadsToDelete.Any(upl => upl.Template != null))
             {
-                uploadToDelete.DataChanged -= this.uploadDataChanged;
+                serializeTemplates = true;
             }
 
-            this.uploadList.RemoveUploads(combinedPredicate);
+            this.uploadList.RemoveUploads(predicate);
+
+            if (serializeTemplates)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+            }
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();

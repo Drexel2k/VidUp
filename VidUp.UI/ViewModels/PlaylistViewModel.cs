@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Timers;
-using System.Windows.Forms.VisualStyles;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
@@ -265,6 +264,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.playlistList.Remove(playlist);
 
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
         }
 

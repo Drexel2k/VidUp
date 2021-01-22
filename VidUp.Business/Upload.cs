@@ -62,10 +62,6 @@ namespace Drexel.VidUp.Business
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //raised only once even if multiple properties are changed
-        //so serialization in this case takes only place once.
-        public event EventHandler DataChanged;
-
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
 
@@ -102,8 +98,8 @@ namespace Drexel.VidUp.Business
                     //must be set before AutoSetTemplate but AutoSetTemplate
                     //shall no be called when template is set to null
                     this.template = value;
-                    this.copyTemplateValuesInternal(false);
-                    this.autoSetThumbnail(false);
+                    this.copyTemplateValuesInternal();
+                    this.autoSetThumbnail();
                     this.autoSetPublishAtDateTimeInteral(false);
                 }
                 else
@@ -113,7 +109,6 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Template");
             }
         }
@@ -149,7 +144,6 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("UploadStatus");
             }
         }
@@ -161,7 +155,6 @@ namespace Drexel.VidUp.Business
             {
                 this.publishAt = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("PublishAt");
             }
         }
@@ -173,12 +166,11 @@ namespace Drexel.VidUp.Business
             {
                 this.tags = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Tags");
             }
         }
 
-        public string ImageFilePath { get => this.getImagePath(this.template); }
+        public string ImageFilePath { get => this.getImagePath(); }
 
         public string YtTitle
         {
@@ -203,7 +195,6 @@ namespace Drexel.VidUp.Business
                 string oldValue = this.thumbnailFilePath;
                 this.thumbnailFilePath = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("ThumbnailFilePath", oldValue, value);
             }
         }
@@ -215,7 +206,6 @@ namespace Drexel.VidUp.Business
             {
                 this.playlist = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Playlist");
             }
         }
@@ -230,7 +220,6 @@ namespace Drexel.VidUp.Business
             {
                 this.uploadErrorMessage = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("UploadErrorMessage");
             }
         }
@@ -251,7 +240,6 @@ namespace Drexel.VidUp.Business
 
                 this.title = title;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Title");
             }
         }
@@ -266,7 +254,6 @@ namespace Drexel.VidUp.Business
             {
                 this.description = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Description");
             }
         }
@@ -281,7 +268,6 @@ namespace Drexel.VidUp.Business
             {
                 this.visibility = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Visibility");
             }
         }
@@ -313,7 +299,6 @@ namespace Drexel.VidUp.Business
             {
                 this.resumableSessionUri = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("ResumableSessionUri");
             }
         }
@@ -327,7 +312,6 @@ namespace Drexel.VidUp.Business
             {
                 this.bytesSent = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("BytesSent");
             }
         }
@@ -342,7 +326,6 @@ namespace Drexel.VidUp.Business
             {
                 this.videoId = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("VideoId");
             }
         }
@@ -357,7 +340,6 @@ namespace Drexel.VidUp.Business
             {
                 this.notExistsOnYoutube = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("VideoId");
             }
         }
@@ -369,7 +351,6 @@ namespace Drexel.VidUp.Business
             {
                 this.videoLanguage = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("VideoLanguage");
             }
         }
@@ -381,7 +362,6 @@ namespace Drexel.VidUp.Business
             {
                 this.category = value;
                 this.LastModified = DateTime.Now;
-                this.raiseDataChanged();
                 this.raisePropertyChanged("Category");
             }
         }
@@ -404,7 +384,7 @@ namespace Drexel.VidUp.Business
 
             //to ensure at least file name is set as title.
             this.title = title = Path.GetFileNameWithoutExtension(this.filePath);
-            this.autoSetThumbnail(false);
+            this.autoSetThumbnail();
         }
 
         [OnDeserialized()]
@@ -418,52 +398,41 @@ namespace Drexel.VidUp.Business
 
         public void CopyTemplateValues()
         {
-            this.copyTemplateValuesInternal(true);
+            this.copyTemplateValuesInternal();
         }
 
-        private void copyTemplateValuesInternal(bool raiseDataChanged)
+        private void copyTemplateValuesInternal()
         {
-            this.copyTitleFromTemplateInternal(false);
-            this.copyDescriptionFromTemplateInternal(false);
-            this.copyTagsFromtemplateInternal(false);
-            this.copyVisibilityFromTemplateInternal(false);
-            this.copyPlaylistFromTemplateInternal(false);
-            this.copyVideoLanguageFromTemplateInternal(false);
-            this.copyCategoryFromTemplateInternal(false);
-
-            if (raiseDataChanged)
-            {
-                this.raiseDataChanged();
-            }
+            this.copyTitleFromTemplateInternal();
+            this.copyDescriptionFromTemplateInternal();
+            this.copyTagsFromtemplateInternal();
+            this.copyVisibilityFromTemplateInternal();
+            this.copyPlaylistFromTemplateInternal();
+            this.copyVideoLanguageFromTemplateInternal();
+            this.copyCategoryFromTemplateInternal();
         }
 
         public void CopyVisibilityFromTemplate()
         {
-            this.copyVisibilityFromTemplateInternal(true);
+            this.copyVisibilityFromTemplateInternal();
         }
 
-        private void copyVisibilityFromTemplateInternal(bool raiseDataChanged)
+        private void copyVisibilityFromTemplateInternal()
         {
             if (this.template != null)
             {
                 this.visibility = this.template.YtVisibility;
                 this.LastModified = DateTime.Now;
-                if (raiseDataChanged)
-                {
-                    this.raiseDataChanged();
-
-                }
-
                 this.raisePropertyChanged("Visibility");
             }
         }
 
         public void CopyTagsFromtemplate()
         {
-            this.copyTagsFromtemplateInternal(true);
+            this.copyTagsFromtemplateInternal();
         }
 
-        private void copyTagsFromtemplateInternal(bool raiseDataChanged)
+        private void copyTagsFromtemplateInternal()
         {
             if (this.template != null)
             {
@@ -485,12 +454,6 @@ namespace Drexel.VidUp.Business
                     }
 
                     this.LastModified = DateTime.Now;
-                    if (raiseDataChanged)
-                    {
-                        this.raiseDataChanged();
-
-                    }
-
                     this.raisePropertyChanged("Tags");
                 }
             }
@@ -498,10 +461,10 @@ namespace Drexel.VidUp.Business
 
         public void CopyDescriptionFromTemplate()
         {
-            this.copyDescriptionFromTemplateInternal(true);
+            this.copyDescriptionFromTemplateInternal();
         }
 
-        private void copyDescriptionFromTemplateInternal(bool raiseDataChanged)
+        private void copyDescriptionFromTemplateInternal()
         {
             if (this.template != null)
             {
@@ -518,12 +481,6 @@ namespace Drexel.VidUp.Business
                     }
 
                     this.LastModified = DateTime.Now;
-                    if (raiseDataChanged)
-                    {
-                        this.raiseDataChanged();
-
-                    }
-
                     this.raisePropertyChanged("Description");
                 }
             }
@@ -531,10 +488,10 @@ namespace Drexel.VidUp.Business
 
         public void CopyTitleFromTemplate()
         {
-            this.copyTitleFromTemplateInternal(true);
+            this.copyTitleFromTemplateInternal();
         }
 
-        private void copyTitleFromTemplateInternal(bool raiseDataChanged)
+        private void copyTitleFromTemplateInternal()
         {
             if (this.template != null)
             {
@@ -556,78 +513,54 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.LastModified = DateTime.Now;
-                if (raiseDataChanged)
-                {
-                    this.raiseDataChanged();
-
-                }
-
                 this.raisePropertyChanged("Title");
             }
         }
 
         public void CopyPlaylistFromTemplate()
         {
-            this.copyPlaylistFromTemplateInternal(true);
+            this.copyPlaylistFromTemplateInternal();
         }
 
-        private void copyPlaylistFromTemplateInternal(bool raiseDataChanged)
+        private void copyPlaylistFromTemplateInternal()
         {
             if (this.template != null && !this.template.SetPlaylistAfterPublication)
             {
                 this.playlist = this.template.Playlist;
 
                 this.LastModified = DateTime.Now;
-                if (raiseDataChanged)
-                {
-                    this.raiseDataChanged();
-
-                }
-
                 this.raisePropertyChanged("Playlist");
             }
         }
 
         public void CopyVideoLanguageFromTemplate()
         {
-            this.copyVideoLanguageFromTemplateInternal(true);
+            this.copyVideoLanguageFromTemplateInternal();
         }
 
-        private void copyVideoLanguageFromTemplateInternal(bool raiseDataChanged)
+        private void copyVideoLanguageFromTemplateInternal()
         {
             if (this.template != null )
             {
                 this.videoLanguage = this.template.VideoLanguage;
 
                 this.LastModified = DateTime.Now;
-                if (raiseDataChanged)
-                {
-                    this.raiseDataChanged();
-
-                }
-
                 this.raisePropertyChanged("VideoLanguage");
             }
         }
 
         public void CopyCategoryFromTemplate()
         {
-            this.copyCategoryFromTemplateInternal(true);
+            this.copyCategoryFromTemplateInternal();
         }
 
-        private void copyCategoryFromTemplateInternal(bool raiseDataChanged)
+        private void copyCategoryFromTemplateInternal()
         {
             if (this.template != null )
             {
                 this.category = this.template.Category;
 
                 this.LastModified = DateTime.Now;
-                if (raiseDataChanged)
-                {
-                    this.raiseDataChanged();
-
-                }
-
                 this.raisePropertyChanged("Category");
             }
         }
@@ -670,12 +603,6 @@ namespace Drexel.VidUp.Business
             this.publishAt = nextPossibleDateTime;
 
             this.LastModified = DateTime.Now;
-            if (raiseDataChanged)
-            {
-                this.raiseDataChanged();
-
-            }
-
             this.raisePropertyChanged("Visibility");
             this.raisePropertyChanged("PublishAt");
         }
@@ -685,7 +612,6 @@ namespace Drexel.VidUp.Business
             this.publishAt = new DateTime(this.publishAt.Value.Year, this.publishAt.Value.Month, this.publishAt.Value.Day, quarterHour.Hours, quarterHour.Minutes, 0);
 
             this.LastModified = DateTime.Now;
-            this.raiseDataChanged();
             this.raisePropertyChanged("PublishAt");
         }
 
@@ -696,11 +622,10 @@ namespace Drexel.VidUp.Business
             this.publishAt = new DateTime(publishDate.Year, publishDate.Month, publishDate.Day, publishAtTime.Hours, publishAtTime.Minutes, 0);
 
             this.LastModified = DateTime.Now;
-            this.raiseDataChanged();
             this.raisePropertyChanged("PublishAt");
         }
 
-        private void autoSetThumbnail(bool raiseDataChanged)
+        private void autoSetThumbnail()
         {
             string[] extensions = { ".png", ".jpg", ".jpeg" };
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();
@@ -748,15 +673,10 @@ namespace Drexel.VidUp.Business
             }
 
             this.LastModified = DateTime.Now;
-            if (raiseDataChanged)
-            {
-                this.raiseDataChanged();
-            }
-
             this.raisePropertyChanged("ThumbnailFilePath", oldFilePath, this.thumbnailFilePath);
         }
 
-        private string getImagePath(Template template)
+        private string getImagePath()
         {
             if (this.template == null)
             {
@@ -782,15 +702,6 @@ namespace Drexel.VidUp.Business
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgsEx(propertyName, oldValue, newValue));
-            }
-        }
-
-        private void raiseDataChanged()
-        {
-            EventHandler handler = this.DataChanged;
-            if (handler != null)
-            {
-                handler(this, null);
             }
         }
     }

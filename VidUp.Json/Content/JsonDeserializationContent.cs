@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using Drexel.VidUp.Business;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -139,9 +140,16 @@ namespace Drexel.VidUp.Json.Content
                 {
                    if(uploadTemplateMap.ContainsKey(upload.Guid))
                    {
-                       Type uploadType = typeof(Upload);
+                        Type uploadType = typeof(Upload);
                         FieldInfo templateFieldInfo = uploadType.GetField("template", BindingFlags.NonPublic | BindingFlags.Instance);
-                        templateFieldInfo.SetValue(upload, this.templates.Find(template => template.Guid == uploadTemplateMap[upload.Guid]));
+                        Template template = this.templates.Find(template => template.Guid == uploadTemplateMap[upload.Guid]);
+
+                        if (template == null)
+                        {
+                            throw new SerializationException("Template not found.");
+                        }
+
+                        templateFieldInfo.SetValue(upload, template);
                     }
                 }
             }

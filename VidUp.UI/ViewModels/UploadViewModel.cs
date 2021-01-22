@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -188,6 +189,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.Template = value.Template;
                 }
 
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 //if template changes all values are set to template values
                 this.raisePropertyChanged(null);
             }
@@ -260,6 +262,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.upload.Title = value;
 
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("YtTitle");
                 this.raisePropertyChanged("Title");
             }
@@ -271,6 +274,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Description = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("Description");
             }
         }
@@ -281,6 +285,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Tags = new List<string>(value.Split(','));
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("TagsAsString");
             }
         }
@@ -308,17 +313,28 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.Visibility;
             set
             {
-                if (value != Visibility.Private && this.SelectedVisibility == Visibility.Private)
-                {
-                    if (this.PublishAt)
-                    {
-                        this.PublishAt = false;
-                    }
-                }
-
-                this.upload.Visibility = value;
-                this.raisePropertyChanged("SelectedVisibility");
+                this.setSelectedVisibilityInternal(value, true);
             }
+        }
+
+        private void setSelectedVisibilityInternal(Visibility value, bool serialize)
+        {
+            if (value != Visibility.Private && this.SelectedVisibility == Visibility.Private)
+            {
+                if (this.PublishAt)
+                {
+                    this.setPublishAtInternal(false, false);
+                }
+            }
+
+            this.upload.Visibility = value;
+
+            if (serialize)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            }
+
+            this.raisePropertyChanged("SelectedVisibility");
         }
 
         public PlaylistComboboxViewModel SelectedPlaylist
@@ -335,6 +351,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.upload.Playlist = value.Playlist;
                 }
 
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedPlaylist");
             }
         }
@@ -374,6 +391,7 @@ namespace Drexel.VidUp.UI.ViewModels
         public void SetPublishAtTime(TimeSpan quarterHour)
         {
             this.upload.SetPublishAtTime(quarterHour);
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             this.raisePropertyChanged("PublishAtTime");
         }
 
@@ -400,30 +418,41 @@ namespace Drexel.VidUp.UI.ViewModels
 
             set
             {
-                if (value && !this.PublishAt)
-                {
-                    if (this.SelectedVisibility != Visibility.Private)
-                    {
-                        this.SelectedVisibility = Visibility.Private;
-                    }
-                }
-
-                if (value)
-                {
-                    //default publish at is 24 hour in the future
-                    this.upload.PublishAt = QuarterHourCalculator.GetRoundedToNextQuarterHour
-                        (new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, 0).AddHours(24));
-                }
-                else
-                {
-                    this.upload.PublishAt = null;
-                }
-
-                this.raisePropertyChanged("PublishAt");
-                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-                this.raisePropertyChanged("PublishAtTime");
-                this.raisePropertyChanged("PublishAtDate");
+                this.setPublishAtInternal(value, true);
             }
+        }
+
+        private void setPublishAtInternal(bool value, bool serialize)
+        {
+            if (value && !this.PublishAt)
+            {
+                if (this.SelectedVisibility != Visibility.Private)
+                {
+                    this.SelectedVisibility = Visibility.Private;
+                }
+            }
+
+            if (value)
+            {
+                //default publish at is 24 hour in the future
+                this.upload.PublishAt = QuarterHourCalculator.GetRoundedToNextQuarterHour
+                (new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour,
+                    DateTime.Now.Minute, 0).AddHours(24));
+            }
+            else
+            {
+                this.upload.PublishAt = null;
+            }
+
+            if (serialize)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            }
+
+            this.raisePropertyChanged("PublishAt");
+            this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+            this.raisePropertyChanged("PublishAtTime");
+            this.raisePropertyChanged("PublishAtDate");
         }
 
         public QuarterHourViewModel PublishAtTime
@@ -450,6 +479,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.SetPublishAtDate(value.Value);
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("PublishAtDate");
             }
         }
@@ -480,6 +510,8 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 string oldFilePath = this.upload.ThumbnailFilePath;
                 this.upload.ThumbnailFilePath = value;
+
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("ThumbnailFilePath");
             }
         }
@@ -504,6 +536,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.VideoLanguage = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedVideoLanguage");
             }
         }
@@ -519,6 +552,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Category = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedCategory");
             }
         }
@@ -615,7 +649,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
-            PropertyChangedEventHandler handler = PropertyChanged;
+            PropertyChangedEventHandler handler = this.PropertyChanged;
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
@@ -633,11 +667,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.UploadStatus = UplStatus.ReadyForUpload;
             }
 
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void setPausedUploadState(object parameter)
         {
             this.upload.UploadStatus = UplStatus.Paused;
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void openThumbnailDialog(object parameter)
@@ -735,6 +771,8 @@ namespace Drexel.VidUp.UI.ViewModels
                         throw new InvalidOperationException("No parameter for resetToTemplateValue specified.");
                         break;
                 }
+
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             }
         }
     }

@@ -118,6 +118,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.template.Playlist = value.Playlist;
                 }
 
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("SelectedPlaylist");
             }
         }
@@ -190,6 +191,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Name = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("Name");
             }
         }
@@ -200,6 +202,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Title = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("Title");
 
             }
@@ -210,6 +213,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Description = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("Description");
 
             }
@@ -221,6 +225,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Tags = new List<string>(value.Split(','));
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("TagsAsString");
             }
         }
@@ -238,6 +243,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.template.YtVisibility = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("UsePublishAtSchedule");
                 this.raisePropertyChanged("SelectedVisibility");
             }
@@ -280,6 +286,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("LastImageFilePathAdded");
 
                 this.template.ImageFilePathForEditing = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
 
                 this.raisePropertyChanged("ImageBitmap");
                 this.raisePropertyChanged("ImageFilePathForEditing");
@@ -297,6 +304,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.RootFolderPath = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("RootFolderPath");
             }
         }
@@ -307,6 +315,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.PartOfFileName = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("PartOfFileName");
             }
         }
@@ -317,6 +326,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.ThumbnailFolderPath = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("ThumbnailFolderPath");
             }
         }
@@ -330,7 +340,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.lastThumbnailFallbackFilePathAdded = value;
                 this.raisePropertyChanged("LastThumbnailFallbackFilePathAdded");
                 this.template.ThumbnailFallbackFilePath = value;
-
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("ThumbnailFallbackFilePath");
             }
         }
@@ -346,6 +356,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.IsDefault = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("IsDefault");
             }
         }
@@ -364,7 +375,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.template.UsePublishAtSchedule = value;
-
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("SelectedVisibility");
                 this.raisePropertyChanged("UsePublishAtSchedule");
             }
@@ -376,6 +387,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.SetPlaylistAfterPublication = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("SetPlaylistAfterPublication");
             }
         }
@@ -388,13 +400,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public TemplateMode TemplateMode
+        public TemplateMode SelectedTemplateMode
         {
             get => this.template != null ? this.template.TemplateMode : TemplateMode.FolderBased;
             set
             {
                 this.template.TemplateMode = value;
-                this.raisePropertyChanged("TemplateMode");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SelectedTemplateMode");
             }
         }
 
@@ -409,6 +422,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.VideoLanguage = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("SelectedVideoLanguage");
             }
         }
@@ -424,6 +438,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Category = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("SelectedCategory");
             }
         }
@@ -448,11 +463,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.templateList = templateList;
-            foreach (Template template1 in this.templateList)
-            {
-                template1.DataChanged += this.templateDataChanged;
-            }
-
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
 
@@ -496,7 +506,6 @@ namespace Drexel.VidUp.UI.ViewModels
         public void DeleteTemplate(Object guid)
         {       
             Template template = this.templateList.GetTemplate(System.Guid.Parse((string)guid));
-            template.DataChanged -= this.templateDataChanged;
 
             //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
             //will set the SelectedTemplate to null which causes problems if there are templates left
@@ -518,6 +527,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.templateList.Remove(template);
 
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
@@ -623,6 +633,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 PublishAtScheduleViewModel data = (PublishAtScheduleViewModel)view.DataContext;
                 this.template.PublishAtSchedule = data.Schedule;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
         }
 
@@ -638,16 +649,10 @@ namespace Drexel.VidUp.UI.ViewModels
             List<Template> list = new List<Template>();
             list.Add(template);
             this.templateList.AddTemplates(list);
-            template.DataChanged += this.templateDataChanged;
 
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
 
             this.SelectedTemplate = new TemplateComboboxViewModel(template);
-        }
-
-        private void templateDataChanged(object sender, EventArgs e)
-        {
-            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
     }
 }

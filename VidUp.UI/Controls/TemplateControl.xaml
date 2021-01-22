@@ -66,7 +66,7 @@
 
                     <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Template Mode: " Width="115" />
-                        <ComboBox ItemsSource="{Binding TemplateModes}" SelectedItem="{Binding TemplateMode}" Width="120" Margin="0 0 10 0">
+                        <ComboBox ItemsSource="{Binding TemplateModes}" SelectedItem="{Binding SelectedTemplateMode}" Width="120" Margin="0 0 10 0">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -76,7 +76,7 @@
                         <materialDesign:PackIcon Kind="HelpCircleOutline" ToolTip="Sets how the template is set automatically to a new upload, by folder path or by part of the file name." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding TemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}">
+                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}">
                         <Label Content="Project Root Folder:" Width="115" />
                         <Label Width="366" Margin="0 0 10 0">
                             <TextBlock Text="{Binding RootFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
@@ -88,7 +88,7 @@
                         <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Grid.Column="1" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding TemplateMode, Mode=OneWay, Converter={converters:TemplateModeFileNameBasedVisibleConverter}}">
+                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFileNameBasedVisibleConverter}}">
                         <Label Content="Part of File Name:" Width="115" />
                         <TextBox Text="{Binding PartOfFileName, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="400" TextWrapping="Wrap" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="To every file which is added with this text as part of its file name this template is assigned automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />

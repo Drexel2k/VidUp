@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Json.Content;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -83,26 +84,6 @@ namespace Drexel.VidUp.UI.ViewModels
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
-        }
-
-        public void AddUploads(List<Upload> uploads)
-        {
-            List<UploadViewModel> newViewModels = new List<UploadViewModel>();
-            foreach(Upload upload in uploads)
-            {
-                newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels));
-            }
-
-            this.uploadViewModels.AddRange(newViewModels);
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newViewModels));
-        }
-
-        public void Remove(Upload upload)
-        {
-            int position = this.uploadViewModels.FindIndex(uvm => uvm.Guid == upload.Guid.ToString());
-            UploadViewModel uploadViewModel = this.uploadViewModels[position];
-            this.uploadViewModels.Remove(uploadViewModel);
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, uploadViewModel, position));
         }
 
         public UploadViewModel GetUploadByGuid(Guid guid)

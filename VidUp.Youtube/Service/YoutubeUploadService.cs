@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Data;
 using HeyRed.Mime;
@@ -60,6 +61,7 @@ namespace Drexel.VidUp.Youtube.Service
             {
                 Tracer.Write($"YoutubeUploadService.Upload: Initialize upload.");
                 long uploadByteIndex = await YoutubeUploadService.initializeUpload(upload);
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 Tracer.Write($"YoutubeUploadService.Upload: Initial uploadByteIndex: {uploadByteIndex}.");
 
                 upload.BytesSent = uploadByteIndex;
@@ -128,7 +130,7 @@ namespace Drexel.VidUp.Youtube.Service
                                 Tracer.Write($"YoutubeUploadService.Upload: Start uploading.");
                                 message = await client.PutAsync(upload.ResumableSessionUri, content, cancellationToken);
                             }
-                            catch (TaskCanceledException e)
+                            catch (TaskCanceledException)
                             {
                                 Tracer.Write($"YoutubeUploadService.Upload: End, Upload stopped by user.");
 

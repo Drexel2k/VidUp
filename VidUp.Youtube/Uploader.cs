@@ -25,6 +25,9 @@ namespace Drexel.VidUp.Youtube
         private CancellationTokenSource tokenSource;
         private bool uploadStopped;
 
+        private static double serializationInterval = 30d;
+        private DateTime lastSerialization;
+
         public event EventHandler UploadStatsUpdated;
 
         public long MaxUploadInBytesPerSecond
@@ -89,12 +92,11 @@ namespace Drexel.VidUp.Youtube
             while (upload != null)
             {
                 uploadsOfSession.Add(upload);
-                upload.UploadErrorMessage = null;
                 this.uploadStats.InitializeNewUpload(upload, this.resumeUploads ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable : this.uploadList.RemainingBytesOfFilesToUpload);
 
                 upload.UploadStatus = UplStatus.Uploading;
 
-
+                this.lastSerialization = DateTime.Now;
                 UploadResult uploadResult = await YoutubeUploadService.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress, this.tokenSource.Token);
 
                 if (uploadResult.VideoResult == VideoResult.Finished)
@@ -151,6 +153,12 @@ namespace Drexel.VidUp.Youtube
 
         private void updateUploadProgress(YoutubeUploadStats stats)
         {
+            if ((DateTime.Now - this.lastSerialization).TotalSeconds >= Uploader.serializationInterval)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.lastSerialization = DateTime.Now;
+            }
+
             //check if upload has been added or removed
             long totalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
             long delta = this.sessionTotalBytesOfFilesToUpload - (totalBytesOfFilesToUpload + this.uploadedLength);
