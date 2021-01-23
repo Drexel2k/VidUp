@@ -8,8 +8,8 @@
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              xmlns:viewModels="clr-namespace:Drexel.VidUp.UI.ViewModels"
              IsEnabled="{Binding TemplateSet}">
-    <ScrollViewer HorizontalScrollBarVisibility="Auto">
-        <Grid Height="Auto" Width="Auto" Margin="4">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" Margin="4">
+        <Grid Height="Auto" Width="Auto">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
 

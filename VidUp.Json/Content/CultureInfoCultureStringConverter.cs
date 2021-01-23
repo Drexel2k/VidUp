@@ -15,7 +15,7 @@ namespace Drexel.VidUp.Json.Content
                 return null;
             }
 
-            return Cultures.CultureInfos.Where(culture => culture.Name == (string)reader.Value).First();
+            return Cultures.RelevantCultureInfos.Where(culture => culture.Name == (string)reader.Value).First();
         }
 
         public override void WriteJson(JsonWriter writer, CultureInfo value, JsonSerializer serializer)

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Utils
@@ -28,11 +30,12 @@ namespace Drexel.VidUp.Utils
         private int? windowTop;
 
         [JsonProperty]
-        private string[] videoLanguagesFilter;
+        private List<string> videoLanguagesFilter;
 
         public bool Trace
         {
             get => this.trace;
+            set => this.trace = value;
         }
 
         public bool AutoSetPlaylists
@@ -89,7 +92,7 @@ namespace Drexel.VidUp.Utils
             }
         }
 
-        public string[] VideoLanguagesFilter
+        public List<string> VideoLanguagesFilter
         {
             get => this.videoLanguagesFilter;
         }

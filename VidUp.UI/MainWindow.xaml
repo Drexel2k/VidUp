@@ -33,6 +33,9 @@
             <controls:PlaylistControl />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:VidUpViewModel}"  />
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <controls:SettingsControl />
+        </DataTemplate>
 
         <!-- booleans for command paramters-->
         <system:Boolean x:Key="FalseValue">False</system:Boolean>
@@ -176,6 +179,8 @@
                         </StackPanel>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
+                <Fluent:RibbonTabItem Header="Settings">
+                </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">
                         <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="images/handshake48.png" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
@@ -184,15 +189,10 @@
                         <Fluent:Button Header="About" SizeDefinition="Middle,Middle,Small" Icon="images/about.png"  Command="{Binding AboutCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <!--<Fluent:RibbonTabItem Header="Settings">
-                    <Fluent:RibbonGroupBox Header="Youtube">
-                        <Fluent:Button Header="Account Settings" LargeIcon="images/youtube.png" />
-                    </Fluent:RibbonGroupBox>
-                </Fluent:RibbonTabItem>-->
             </Fluent:Ribbon>
 
             <Grid Grid.Row="1">
-                <ContentControl Content="{Binding CurrentViewModel}" />
+                <ContentControl VerticalAlignment="Top"  HorizontalAlignment="Left" Content="{Binding CurrentViewModel}" />
             </Grid>
 
             <StackPanel Grid.Row="2" Orientation="Vertical">

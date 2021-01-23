@@ -8,19 +8,8 @@
              x:Name="UCPlaylist"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              IsEnabled="{Binding PlaylistSet}">
-    <ScrollViewer HorizontalScrollBarVisibility="Auto">
-        <Grid Height="Auto" Width="Auto" Margin="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-            </Grid.RowDefinitions>
-
-            <GroupBox Grid.Row="0" Padding="0">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" Margin="4">
+            <GroupBox Padding="0">
                 <GroupBox.Header>
                     <TextBlock Text="PLAYLIST SETTINGS" Margin="2" />
                 </GroupBox.Header>
@@ -57,6 +46,5 @@
                 </Grid>
 
             </GroupBox>
-        </Grid>
     </ScrollViewer>
 </UserControl>

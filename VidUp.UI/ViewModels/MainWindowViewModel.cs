@@ -22,7 +22,7 @@ namespace Drexel.VidUp.UI.ViewModels
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         private int tabNo;
-        private List<object> viewModels = new List<object>(new object[4]);
+        private List<object> viewModels = new List<object>(new object[5]);
 
         private AppStatus appStatus = AppStatus.Idle;
         private ObservableTemplateViewModels observableTemplateViewModels;
@@ -364,7 +364,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
-            this.viewModels[3] = new VidUpViewModel();
+            this.viewModels[3] = new SettingsViewModel();
+            this.viewModels[4] = new VidUpViewModel();
         }
 
         private void uploadListViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)

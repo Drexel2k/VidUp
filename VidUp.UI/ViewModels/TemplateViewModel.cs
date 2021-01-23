@@ -411,9 +411,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public CultureInfo[] VideoLanguages
+        public List<CultureInfo> VideoLanguages
         {
-            get => Cultures.CultureInfos;
+            get => Cultures.RelevantCultureInfos;
         }
 
         public CultureInfo SelectedVideoLanguage

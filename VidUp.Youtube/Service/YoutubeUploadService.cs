@@ -258,6 +258,7 @@ namespace Drexel.VidUp.Youtube.Service
                         throw;
                     }
 
+                    await Task.Delay(TimeSpan.FromSeconds(2));
                     requestTry++;
                 }
             }
@@ -343,6 +344,7 @@ namespace Drexel.VidUp.Youtube.Service
                         throw;
                     }
 
+                    await Task.Delay(TimeSpan.FromSeconds(2));
                     requestTry++;
                 }
             }

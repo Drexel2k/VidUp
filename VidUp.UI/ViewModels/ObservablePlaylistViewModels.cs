@@ -1,12 +1,8 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Drexel.VidUp.Business;
-
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -67,7 +63,7 @@ namespace Drexel.VidUp.UI.ViewModels
             throw new InvalidOperationException("ObservablePlaylistViewModels supports only adding and removing.");
         }
 
-        internal PlaylistComboboxViewModel GetViewModel(Playlist playlist)
+        public PlaylistComboboxViewModel GetViewModel(Playlist playlist)
         {
             if (playlist != null)
             {
