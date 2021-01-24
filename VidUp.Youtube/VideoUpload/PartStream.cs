@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Drexel.VidUp.Youtube.Service
+namespace Drexel.VidUp.Youtube.VideoUpload
 {
     public class PartStream : Stream
     {

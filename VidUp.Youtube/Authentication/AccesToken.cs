@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Drexel.VidUp.Youtube
+namespace Drexel.VidUp.Youtube.Authentication
 {
     public class AccessToken
     {

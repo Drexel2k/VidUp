@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.Service;
+using Drexel.VidUp.Youtube.Video;
+using Drexel.VidUp.Youtube.VideoUpload;
 
 
 namespace Drexel.VidUp.Youtube
@@ -34,7 +35,7 @@ namespace Drexel.VidUp.Youtube
         {
             set
             {
-                YoutubeUploadService.MaxUploadInBytesPerSecond = value;
+                YoutubeVideoUploadService.MaxUploadInBytesPerSecond = value;
             }
         }
 
@@ -97,7 +98,7 @@ namespace Drexel.VidUp.Youtube
                 upload.UploadStatus = UplStatus.Uploading;
 
                 this.lastSerialization = DateTime.Now;
-                UploadResult uploadResult = await YoutubeUploadService.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress, this.tokenSource.Token);
+                UploadResult uploadResult = await YoutubeVideoUploadService.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress, this.tokenSource.Token);
 
                 if (uploadResult.VideoResult == VideoResult.Finished)
                 {

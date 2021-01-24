@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube.Video.Data;
 using Newtonsoft.Json;
 
-namespace Drexel.VidUp.Youtube.Service
+namespace Drexel.VidUp.Youtube.Video
 {
     public class YoutubeVideoService
     {
         private static string videoEndpoint = "https://www.googleapis.com/youtube/v3/videos";
-
         public static async Task<Dictionary<string, bool>> IsPublic(List<string> videoIds)
         {
             Tracer.Write($"YoutubeVideoService.IsPublic: Start.");
@@ -44,30 +42,14 @@ namespace Drexel.VidUp.Youtube.Service
                         throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
                     }
 
-                    var definition = new
-                    {
-                        Items = new[]
-                        {
-                            new
-                            {
-                                Id = "",
-                                Status = new
-                                {
-                                    PrivacyStatus = ""
-                                }
-                            }
-                        }
-                    };
+                    YoutubeVideosGetResponse response = JsonConvert.DeserializeObject<YoutubeVideosGetResponse>(await message.Content.ReadAsStringAsync());
 
-                    var response =
-                        JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(), definition);
-
-                    foreach (var item in response.Items)
+                    foreach (YoutubeVideosGetResponseVideo item in response.Items)
                     {
                         result.Add(item.Id, item.Status.PrivacyStatus == "public");
                     }
                 }
-                
+
             }
 
             Tracer.Write($"YoutubeVideoService.IsPublic: End.");

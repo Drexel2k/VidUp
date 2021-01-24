@@ -8,7 +8,8 @@ using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.Service;
+using Drexel.VidUp.Youtube.Playlist;
+using Drexel.VidUp.Youtube.Video;
 using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -331,7 +332,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (playlistUploadsWithoutPlaylistMap.Count > 0)
             {
                 //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
-                Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistService.GetPlaylists(playlistUploadsWithoutPlaylistMap.Keys);
+                Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylists(playlistUploadsWithoutPlaylistMap.Keys);
                 if (playlistUploadsWithoutPlaylistMap.Count != playlistVideos.Count)
                 {
                     IEnumerable<KeyValuePair<string, List<Upload>>> missingPlaylistsTemp =
@@ -381,7 +382,7 @@ namespace Drexel.VidUp.UI.ViewModels
                                 if (videosPublicMap[upload.VideoId])
                                 {
                                     upload.Playlist = this.playlistList.GetPlaylist(playlistVideosWithoutPlaylist.Key);
-                                    if (!await YoutubePlaylistService.AddToPlaylist(upload))
+                                    if (!await YoutubePlaylistItemService.AddToPlaylist(upload))
                                     {
                                         upload.Playlist = null;
                                     }

@@ -6,7 +6,7 @@ using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using HeyRed.Mime;
 
-namespace Drexel.VidUp.Youtube.Service
+namespace Drexel.VidUp.Youtube.Thumbnail
 {
     public class YoutubeThumbnailService
     {

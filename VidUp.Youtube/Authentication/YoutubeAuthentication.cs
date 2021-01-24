@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Drexel.VidUp.Youtube.Service
+namespace Drexel.VidUp.Youtube.Authentication
 {
     public static class YoutubeAuthentication
     {

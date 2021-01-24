@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using Drexel.VidUp.Business;
 
-namespace Drexel.VidUp.Youtube.Service
+namespace Drexel.VidUp.Youtube.VideoUpload
 {
     public class ThrottledBufferedStream : Stream, IDisposable
     {

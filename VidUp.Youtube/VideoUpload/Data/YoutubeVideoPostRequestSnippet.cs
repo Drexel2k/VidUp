@@ -1,12 +1,8 @@
-﻿#region
+﻿using Newtonsoft.Json;
 
-using Newtonsoft.Json;
-
-#endregion
-
-namespace Drexel.VidUp.Youtube.Data
+namespace Drexel.VidUp.Youtube.VideoUpload.Data
 {
-	public class YoutubeVideoSnippet
+	public class YoutubeVideoPostRequestSnippet
 	{
 		[JsonProperty(PropertyName = "title")]
 		public string Title { get; set; }

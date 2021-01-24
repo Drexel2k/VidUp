@@ -5,8 +5,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
+using Drexel.VidUp.Youtube.Authentication;
 
-namespace Drexel.VidUp.Youtube.Service
+namespace Drexel.VidUp.Youtube
 {
     public static class HttpHelper
     {

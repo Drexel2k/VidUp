@@ -15,7 +15,7 @@ using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
-using Drexel.VidUp.Youtube.Service;
+using Drexel.VidUp.Youtube.Authentication;
 
 namespace Drexel.VidUp.UI.ViewModels
 {

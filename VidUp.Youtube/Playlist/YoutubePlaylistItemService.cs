@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.Data;
+using Drexel.VidUp.Youtube.Playlist.Data;
 using Newtonsoft.Json;
 
-namespace Drexel.VidUp.Youtube.Service
+namespace Drexel.VidUp.Youtube.Playlist
 {
-    public class YoutubePlaylistService
+    public class YoutubePlaylistItemService
     {
         private static string playlistItemsEndpoint = "https://www.googleapis.com/youtube/v3/playlistItems";
 
@@ -25,11 +23,11 @@ namespace Drexel.VidUp.Youtube.Service
             {
                 Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Videos to add available.");
 
-                YoutubePlaylistItemRequest playlistItem = new YoutubePlaylistItemRequest();
-                playlistItem.PlaylistSnippet = new YoutubePlaylistItemSnippet();
-                playlistItem.PlaylistSnippet.PlaylistId = upload.Playlist.PlaylistId;
-                playlistItem.PlaylistSnippet.ResourceId = new VideoResource();
-                playlistItem.PlaylistSnippet.ResourceId.VideoId = upload.VideoId;
+                YoutubePlaylistItemPostRequest playlistItem = new YoutubePlaylistItemPostRequest();
+                playlistItem.Snippet = new YoutubePlaylistItemPostRequestSnippet();
+                playlistItem.Snippet.PlaylistId = upload.Playlist.PlaylistId;
+                playlistItem.Snippet.ResourceId = new YoutubePlaylistItemsGetResponseResourceId();
+                playlistItem.Snippet.ResourceId.VideoId = upload.VideoId;
 
                 string contentJson = JsonConvert.SerializeObject(playlistItem);
 
@@ -41,7 +39,7 @@ namespace Drexel.VidUp.Youtube.Service
                     try
                     {
                         Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Add to Playlist.");
-                        message = await client.PostAsync($"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet", content);
+                        message = await client.PostAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet", content);
                     }
                     catch (Exception e)
                     {
@@ -91,7 +89,7 @@ namespace Drexel.VidUp.Youtube.Service
                         try
                         {
                             Tracer.Write($"YoutubePlaylistService.GetPlaylists: Get Playlist info.");
-                            message = await client.GetAsync($"{YoutubePlaylistService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}");
+                            message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}");
                         }
                         catch (Exception e)
                         {
@@ -115,30 +113,11 @@ namespace Drexel.VidUp.Youtube.Service
                             List<string> videoIds = new List<string>();
                             result.Add(playlistId, videoIds);
 
-                            var definition = new
-                            {
-                                Items = new[]
-                                {
-                                new
-                                {
-                                    Snippet = new
-                                    {
-                                        ResourceId = new
-                                        {
-                                            VideoId = ""
-                                        }
-                                    }
-                                }
-                            }
-                            };
-
-                            var response =
-                                JsonConvert.DeserializeAnonymousType(await message.Content.ReadAsStringAsync(),
-                                    definition);
+                            YoutubePlaylistItemsGetResponse response = JsonConvert.DeserializeObject<YoutubePlaylistItemsGetResponse>(await message.Content.ReadAsStringAsync());
 
                             if (response.Items.Length > 0)
                             {
-                                foreach (var item in response.Items)
+                                foreach (YoutubePlaylistItemsGetResponsePlaylistItem item in response.Items)
                                 {
                                     videoIds.Add(item.Snippet.ResourceId.VideoId);
                                 }
