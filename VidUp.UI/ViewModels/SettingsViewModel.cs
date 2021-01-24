@@ -80,13 +80,14 @@ namespace Drexel.VidUp.UI.ViewModels
                         {
                             if (this.observableCultureInfoViewModels[index] != checkedCultureViewModels[index])
                             {
-                                this.observableCultureInfoViewModels[index] = checkedCultureViewModels[index];
+                                this.observableCultureInfoViewModels.Insert(index, checkedCultureViewModels[index]);
                             }
                         }
                     }
                 }
                 else
                 {
+                    bool inserted = false;
                     for (int index = 0; index < this.observableCultureInfoViewModels.Count; index++)
                     {
                         if (!this.observableCultureInfoViewModels[index].IsChecked)
@@ -94,9 +95,16 @@ namespace Drexel.VidUp.UI.ViewModels
                             if (this.observableCultureInfoViewModels[index].Name.CompareTo(cultureViewModel.Name) > 0)
                             {
                                 this.observableCultureInfoViewModels.Insert(index, cultureViewModel);
+                                inserted = true;
                                 break;
                             }
                         }
+                    }
+
+                    //if unchecked cultureViewModel is the last position in order
+                    if (!inserted)
+                    {
+                        this.observableCultureInfoViewModels.Add(cultureViewModel);
                     }
                 }
                 
