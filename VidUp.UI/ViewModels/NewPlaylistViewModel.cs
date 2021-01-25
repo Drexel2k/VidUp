@@ -27,31 +27,6 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.observablePlaylistSelectionViewModels;
         }
 
-        public ReadOnlyCollection<PlaylistSelectionViewModel> AllPaylists
-        {
-            get => this.allPayPlaylistSelectionViewModels.AsReadOnly();
-        }
-
-        public bool ShowPlaylistRemoveNotification
-        {
-            get
-            {
-                foreach (string selectedPlaylist in this.selectedPlaylists)
-                {
-                    PlaylistSelectionViewModel playlistViewModel = this.observablePlaylistSelectionViewModels.FirstOrDefault(playlist => playlist.Id == selectedPlaylist);
-                    if (playlistViewModel != null)
-                    {
-                        if (!playlistViewModel.IsChecked)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
-        }
-
         public string SearchText
         {
             get => this.searchText;
@@ -80,9 +55,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 foreach (Playlist playlist in playlists)
                 {
-                    PlaylistSelectionViewModel playlistSelectionViewModel = new PlaylistSelectionViewModel(playlist.Id, playlist.Title, this.selectedPlaylists.Contains(playlist.Id));
-                    playlistSelectionViewModel.PropertyChanged += playlistViewModelPropertyChanged;
-                    this.allPayPlaylistSelectionViewModels.Add(playlistSelectionViewModel);
+                    if (!this.selectedPlaylists.Contains(playlist.Id))
+                    {
+                        PlaylistSelectionViewModel playlistSelectionViewModel = new PlaylistSelectionViewModel(playlist.Id, playlist.Title, false);
+                        playlistSelectionViewModel.PropertyChanged += playlistViewModelPropertyChanged;
+                        this.allPayPlaylistSelectionViewModels.Add(playlistSelectionViewModel); }
                 }
 
                 this.filterObservablePlaylistSelectionViewmodels();
@@ -100,7 +77,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
             string searchText = this.searchText.ToLower();
             List<PlaylistSelectionViewModel> selectedViewModels = new List<PlaylistSelectionViewModel>();
-            List<PlaylistSelectionViewModel> toBeDeletedViewModels = new List<PlaylistSelectionViewModel>();
             List<PlaylistSelectionViewModel> notSelectedViewModels = new List<PlaylistSelectionViewModel>();
             foreach (PlaylistSelectionViewModel playlistSelectionViewModel in this.allPayPlaylistSelectionViewModels)
             {
@@ -110,33 +86,20 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    if (playlistSelectionViewModel.ToBeDeleted)
+                    if (playlistSelectionViewModel.Title.ToLower().Contains(searchText))
                     {
-                        toBeDeletedViewModels.Add(playlistSelectionViewModel);
+                        notSelectedViewModels.Add(playlistSelectionViewModel);
                     }
-                    else
-                    {
-                        if (playlistSelectionViewModel.Title.ToLower().Contains(searchText))
-                        {
-
-                            notSelectedViewModels.Add(playlistSelectionViewModel);
-                        }
-                    }
+                    
                 }
             }
 
             selectedViewModels.Sort((vm1,vm2) => vm1.Title.CompareTo(vm2.Title));
-            toBeDeletedViewModels.Sort((vm1, vm2) => vm1.Title.CompareTo(vm2.Title));
             notSelectedViewModels.Sort((vm1, vm2) => vm1.Title.CompareTo(vm2.Title));
 
             foreach (PlaylistSelectionViewModel selectedViewModel in selectedViewModels)
             {
                 this.observablePlaylistSelectionViewModels.Add(selectedViewModel);
-            }
-
-            foreach (PlaylistSelectionViewModel toBeDeletedViewModel in toBeDeletedViewModels)
-            {
-                this.observablePlaylistSelectionViewModels.Add(toBeDeletedViewModel);
             }
 
             foreach (PlaylistSelectionViewModel notSelectedViewModel in notSelectedViewModels)
@@ -176,59 +139,24 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    if (playlistSelectionViewModel.ToBeDeleted)
+                    bool inserted = false;
+                    for (int index = 0; index < this.observablePlaylistSelectionViewModels.Count; index++)
                     {
-                        List<PlaylistSelectionViewModel> toBeDeletedViewModels = this.observablePlaylistSelectionViewModels.Where(playlistViewModel => playlistViewModel.ToBeDeleted).ToList();
-                        if (toBeDeletedViewModels.Count == 0)
+                        if (!this.observablePlaylistSelectionViewModels[index].IsChecked)
                         {
-                            PlaylistSelectionViewModel firstUncheckedViewModel = this.observablePlaylistSelectionViewModels.FirstOrDefault(playlistViewModel => !playlistViewModel.IsChecked);
-                            if (firstUncheckedViewModel == null)
+                            if (this.observablePlaylistSelectionViewModels[index].Title.CompareTo(playlistSelectionViewModel.Title) > 0)
                             {
-                                this.observablePlaylistSelectionViewModels.Add(playlistSelectionViewModel);
-                            }
-                            else
-                            {
-                                this.observablePlaylistSelectionViewModels.Insert(this.observablePlaylistSelectionViewModels.IndexOf(firstUncheckedViewModel), playlistSelectionViewModel);
-                            }
-                        }
-                        else
-                        {
-                            toBeDeletedViewModels.Add(playlistSelectionViewModel);
-                            toBeDeletedViewModels.Sort((cultureViewModel1, cultureViewModel2) => cultureViewModel1.Title.CompareTo(cultureViewModel2.Title));
-
-                            int toBeDeletedStartIndex = this.observablePlaylistSelectionViewModels.IndexOf(
-                                this.observablePlaylistSelectionViewModels.FirstOrDefault(playlistViewModel => playlistViewModel.ToBeDeleted));
-
-                            for (int index = 0; index < toBeDeletedViewModels.Count; index++)
-                            {
-                                if (this.observablePlaylistSelectionViewModels[index + toBeDeletedStartIndex] != toBeDeletedViewModels[index])
-                                {
-                                    this.observablePlaylistSelectionViewModels.Insert(index + toBeDeletedStartIndex, toBeDeletedViewModels[index]);
-                                }
+                                this.observablePlaylistSelectionViewModels.Insert(index, playlistSelectionViewModel);
+                                inserted = true;
+                                break;
                             }
                         }
                     }
-                    else
-                    {
-                        bool inserted = false;
-                        for (int index = 0; index < this.observablePlaylistSelectionViewModels.Count; index++)
-                        {
-                            if (!this.observablePlaylistSelectionViewModels[index].IsChecked && !this.observablePlaylistSelectionViewModels[index].ToBeDeleted)
-                            {
-                                if (this.observablePlaylistSelectionViewModels[index].Title.CompareTo(playlistSelectionViewModel.Title) > 0)
-                                {
-                                    this.observablePlaylistSelectionViewModels.Insert(index, playlistSelectionViewModel);
-                                    inserted = true;
-                                    break;
-                                }
-                            }
-                        }
 
-                        //if unchecked cultureViewModel is the last position in order
-                        if (!inserted)
-                        {
-                            this.observablePlaylistSelectionViewModels.Add(playlistSelectionViewModel);
-                        }
+                    //if unchecked playlistSelectionViewModel is the last position in order
+                    if (!inserted)
+                    {
+                        this.observablePlaylistSelectionViewModels.Add(playlistSelectionViewModel);
                     }
                 }
 

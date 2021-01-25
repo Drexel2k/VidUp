@@ -233,23 +233,12 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 NewPlaylistViewModel data = (NewPlaylistViewModel)view.DataContext;
                 Playlist playlistCheck;
-                foreach (PlaylistSelectionViewModel playlistSelectionViewModel in data.AllPaylists)
+                foreach (PlaylistSelectionViewModel playlistSelectionViewModel in data.ObservablePlaylistSelectionViewModels)
                 {
                     if (playlistSelectionViewModel.IsChecked)
                     {
-                        if (this.playlistList.FirstOrDefault(playlist => playlist.PlaylistId == playlistSelectionViewModel.Id) == null)
-                        {
-                            Playlist playlist = new Playlist(playlistSelectionViewModel.Id, playlistSelectionViewModel.Title);
-                            this.AddPlaylist(playlist);
-                        }
-                    }
-                    else
-                    {
-                        playlistCheck = this.playlistList.FirstOrDefault(playlist => playlist.PlaylistId == playlistSelectionViewModel.Id);
-                        if (playlistCheck != null)
-                        {
-                            this.DeletePlaylist(playlistCheck.PlaylistId);
-                        }
+                        Playlist playlist = new Playlist(playlistSelectionViewModel.Id, playlistSelectionViewModel.Title);
+                        this.AddPlaylist(playlist);
                     }
                 }
             }

@@ -26,13 +26,11 @@
             </StackPanel>
 
             <Label Visibility="{Binding ShowPlaylistReceiveError, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" Content="Playlists could not be received." />
-            <Label Visibility="{Binding ShowPlaylistRemoveNotification, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" Content="If used playlist is removed, it will be removed from any template and upload." />
 
             <ListView MaxHeight="300" MinWidth="500" ItemsSource="{Binding ObservablePlaylistSelectionViewModels}" HorizontalAlignment="Left" HorizontalContentAlignment="Left">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ExclamationThick" Foreground="Red" Margin ="0 4 0 0" Visibility="{Binding ToBeDeleted, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" ToolTip="Was originally selected and will be deleted." ToolTipService.ShowDuration="60000" Background="Transparent" />
                             <ToggleButton IsChecked="{Binding IsChecked}"/>
                             <Label Content="{Binding Title}" />
                         </StackPanel>

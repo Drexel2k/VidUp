@@ -9,7 +9,6 @@ namespace Drexel.VidUp.UI.ViewModels
         private string id;
         private string title;
         private bool isChecked;
-        private bool isCheckedOriginalState;
 
         public event PropertyChangedEventHandler PropertyChanged;
         
@@ -26,20 +25,6 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.isChecked = value;
                 this.raisePropertyChanged("IsChecked");
-                this.raisePropertyChanged("ToBeDeleted");
-            }
-        }
-
-        public bool ToBeDeleted
-        {
-            get
-            {
-                if (this.isCheckedOriginalState && !this.isChecked)
-                {
-                    return true;
-                }
-
-                return false;
             }
         }
 
@@ -55,7 +40,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.id = id;
             this.title = title;
             this.isChecked = isChecked;
-            this.isCheckedOriginalState = isChecked;
         }
 
         private void raisePropertyChanged(string propertyName)
