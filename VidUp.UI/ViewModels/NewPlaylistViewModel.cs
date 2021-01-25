@@ -64,7 +64,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.filterObservablePlaylistSelectionViewmodels();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 this.showPlaylistReceiveError = true;
                 this.raisePropertyChanged("ShowPlaylistReceiveError");
