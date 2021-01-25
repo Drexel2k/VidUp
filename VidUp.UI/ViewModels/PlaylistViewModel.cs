@@ -233,7 +233,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 NewPlaylistViewModel data = (NewPlaylistViewModel)view.DataContext;
                 Playlist playlistCheck;
-                foreach (PlaylistSelectionViewModel playlistSelectionViewModel in data.ObservablePlaylistSelectionViewModels)
+                foreach (PlaylistSelectionViewModel playlistSelectionViewModel in data.AllPaylists)
                 {
                     if (playlistSelectionViewModel.IsChecked)
                     {

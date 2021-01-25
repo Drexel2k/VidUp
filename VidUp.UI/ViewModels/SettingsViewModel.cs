@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Windows.Documents;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.Utils;
@@ -109,7 +107,16 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 
                 List<CultureViewModel> checkedCultureViewModelsUpdated = this.observableCultureInfoViewModels.Where(cultureViewModel => cultureViewModel.IsChecked).ToList();
-                Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Clear();
+
+                if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter == null)
+                {
+                    Settings.SettingsInstance.UserSettings.VideoLanguagesFilter = new List<string>();
+                }
+                else
+                {
+                    Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Clear();
+                }
+
                 if (checkedCultureViewModelsUpdated.Count >= 0)
                 {
                     foreach (CultureViewModel cultureViewModelUpdated in checkedCultureViewModelsUpdated)
@@ -133,22 +140,20 @@ namespace Drexel.VidUp.UI.ViewModels
             foreach (CultureInfo cultureInfo in Cultures.AllCultureInfos)
             {
                 CultureViewModel cultureViewModel;
-                if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter != null)
+                if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter != null &&
+                    Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Contains(cultureInfo.Name))
                 {
-                    if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Contains(cultureInfo.Name))
+                    cultureViewModel = new CultureViewModel(cultureInfo, true);
+                    cultureViewModel.PropertyChanged += cultureViewModelPropertyChanged;
+                    selectedViewModels.Add(cultureViewModel);
+                }
+                else
+                {
+                    if (cultureInfo.Name.ToLower().Contains(searchText) || cultureInfo.EnglishName.ToLower().Contains(searchText))
                     {
-                        cultureViewModel = new CultureViewModel(cultureInfo, true);
+                        cultureViewModel = new CultureViewModel(cultureInfo, false);
                         cultureViewModel.PropertyChanged += cultureViewModelPropertyChanged;
-                        selectedViewModels.Add(cultureViewModel);
-                    }
-                    else
-                    {
-                        if (cultureInfo.Name.ToLower().Contains(searchText) || cultureInfo.EnglishName.ToLower().Contains(searchText))
-                        {
-                            cultureViewModel = new CultureViewModel(cultureInfo, false);
-                            cultureViewModel.PropertyChanged += cultureViewModelPropertyChanged;
-                            notSelectedViewModels.Add(cultureViewModel);
-                        }
+                        notSelectedViewModels.Add(cultureViewModel);
                     }
                 }
             }

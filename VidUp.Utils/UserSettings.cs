@@ -95,6 +95,10 @@ namespace Drexel.VidUp.Utils
         public List<string> VideoLanguagesFilter
         {
             get => this.videoLanguagesFilter;
+            set
+            {
+                this.videoLanguagesFilter = value;
+            }
         }
 
         [JsonConstructor]

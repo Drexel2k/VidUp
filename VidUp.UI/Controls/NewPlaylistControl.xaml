@@ -20,6 +20,11 @@
         <TextBlock Grid.Row="0">Select paylists to use in VidUp:</TextBlock>
 
         <StackPanel Orientation="Vertical" Grid.Row="1">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Search: "/>
+                <TextBox x:Name="Title" Width="150"  Text="{Binding SearchText, Delay=500, UpdateSourceTrigger=PropertyChanged}"  />
+            </StackPanel>
+
             <Label Visibility="{Binding ShowPlaylistReceiveError, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" Content="Playlists could not be received." />
             <Label Visibility="{Binding ShowPlaylistRemoveNotification, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" Content="If used playlist is removed, it will be removed from any template and upload." />
 
@@ -27,7 +32,8 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <ToggleButton IsChecked="{Binding IsChecked}" />
+                            <materialDesign:PackIcon Kind="ExclamationThick" Foreground="Red" Margin ="0 4 0 0" Visibility="{Binding ToBeDeleted, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" ToolTip="Was originally selected and will be deleted." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <ToggleButton IsChecked="{Binding IsChecked}"/>
                             <Label Content="{Binding Title}" />
                         </StackPanel>
                     </DataTemplate>

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
