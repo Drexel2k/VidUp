@@ -175,6 +175,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool ResetStateCommandEnabled
+        {
+            get
+            {
+                return this.StateCommandsEnabled && this.upload.VerifyForUpload();
+            }
+        }
+
         public TemplateComboboxViewModel SelectedTemplate
         {
             get => this.observableTemplateViewModels.GetViewModel(this.upload.Template);
@@ -250,11 +258,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string YtTitle
-        {
-            get => this.upload.YtTitle;
-        }
-
         public string Title
         {
             get => this.upload.Title;
@@ -263,10 +266,51 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Title = value;
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                this.raisePropertyChanged("YtTitle");
                 this.raisePropertyChanged("Title");
+                this.raisePropertyChanged("YtTitle");
+                this.raisePropertyChanged("TitleColor");
+                this.raisePropertyChanged("TitleCharacterCount");
             }
         }
+
+        public string YtTitle
+        {
+            get
+            {
+                if (this.upload.Title.Length <= YoutubeLimits.TitleLimit)
+                {
+                    return this.upload.Title;
+                }
+                else
+                {
+                    return this.upload.Title.Substring(0, YoutubeLimits.TitleLimit);
+                }
+            }
+        }
+
+        public string TitleCharacterCount
+        {
+            get
+            {
+                return this.upload.Title.Length.ToString("N0", CultureInfo.CurrentCulture);
+            }
+        }
+
+        public SolidColorBrush TitleColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.Title.Length > YoutubeLimits.TitleLimit)
+                {
+                    color = Colors.Red;
+                }
+                
+                return new SolidColorBrush(color);
+            }
+        }
+
 
         public string Description
         {
@@ -276,27 +320,76 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Description = value;
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("Description");
+                this.raisePropertyChanged("DescriptionColor");
+                this.raisePropertyChanged("DescriptionCharacterCount");
             }
         }
+
+        public string DescriptionCharacterCount
+        {
+            get
+            {
+                return this.upload.Description.Length.ToString("N0", CultureInfo.CurrentCulture);
+            }
+        }
+
+        public SolidColorBrush DescriptionColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.Description.Length > YoutubeLimits.DescriptionLimit)
+                {
+                    color = Colors.Red;
+                }
+
+                return new SolidColorBrush(color);
+            }
+        }
+
+        public string MaxDescriptionCharacters
+        {
+            get
+            {
+                return $"/ {YoutubeLimits.DescriptionLimit.ToString("N0", CultureInfo.CurrentCulture)}";
+            }
+        }
+
 
         public string TagsAsString
         {
             get => string.Join(",", this.upload.Tags);
             set
             {
-                this.upload.Tags = new List<string>(value.Split(','));
+                this.upload.SetTags(new List<string>(value.Split(',')));
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("TagsAsString");
+                this.raisePropertyChanged("TagsColor");
+                this.raisePropertyChanged("TagsCharacterCount");
             }
         }
 
-        public List<string> Tags
+        public string TagsCharacterCount
         {
-            get => this.upload.Tags;
-            set
+            get
             {
-                this.upload.Tags = value;
-                this.raisePropertyChanged("TagsAsString");
+                return this.upload.TagsCharacterCount.ToString("N0", CultureInfo.CurrentCulture);
+            }
+        }
+
+        public SolidColorBrush TagsColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.TagsCharacterCount > YoutubeLimits.TagsLimit)
+                {
+                    color = Colors.Red;
+                }
+
+                return new SolidColorBrush(color);
             }
         }
 
@@ -359,6 +452,21 @@ namespace Drexel.VidUp.UI.ViewModels
         public string FileSizeInMegaByte
         {
             get => $"{((float)this.upload.FileLength / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
+        }
+
+        public SolidColorBrush FileSizeColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.FileLength > YoutubeLimits.FileSizeLimit)
+                {
+                    color = Colors.Red;
+                }
+
+                return new SolidColorBrush(color);
+            }
         }
 
         public string UploadedInMegaByte
@@ -577,7 +685,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.quarterHourViewModels = new QuarterHourViewModels(false);
 
-            this.resetStateCommand = new GenericCommand(this.resetUploadState);
+            this.resetStateCommand = new GenericCommand(this.resetUploadStateCommand);
             this.pauseCommand = new GenericCommand(this.setPausedUploadState);
             this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
             this.openFileDialogCommand = new GenericCommand(this.openThumbnailDialog);
@@ -625,6 +733,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadStart");
                 this.raisePropertyChanged("UploadEnd");
                 this.raisePropertyChanged("StateCommandsEnabled");
+                this.raisePropertyChanged("ResetStateCommandEnabled");
             }
 
             if (e.PropertyName == "ResumableSessionUri")
@@ -644,6 +753,21 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("PublishAtTime");
                 this.raisePropertyChanged("PublishAtDate");
             }
+
+            if (e.PropertyName == "Title")
+            {
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
+
+            if (e.PropertyName == "Description")
+            {
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
+
+            if (e.PropertyName == "Tags")
+            {
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -656,9 +780,20 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void resetUploadState(object parameter)
+        private void resetUploadStateCommand(object parameter)
         {
-            if (this.upload.BytesSent > 0 && this.upload.UploadStatus != UplStatus.Stopped && this.upload.UploadStatus != UplStatus.Finished)
+            this.resetUploadState();
+        }
+
+        private bool resetUploadState()
+        {
+            if (!this.upload.VerifyForUpload())
+            {
+                return false;
+            }
+
+            if (this.upload.BytesSent > 0 && this.upload.UploadStatus != UplStatus.Stopped &&
+                this.upload.UploadStatus != UplStatus.Finished)
             {
                 this.upload.UploadStatus = UplStatus.Stopped;
             }
@@ -668,6 +803,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            return true;
         }
 
         private void setPausedUploadState(object parameter)

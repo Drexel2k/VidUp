@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -118,6 +119,14 @@ namespace Drexel.VidUp.Business
             get { return this.uploadStatus; }
             set
             {
+                if (!this.VerifyForUpload())
+                {
+                    if (value != UplStatus.Paused)
+                    {
+                        throw new InvalidOperationException("Upload can only be in paused state due to Youtube limitations.");
+                    }
+                }
+
                 this.uploadStatus = value;
                 if (value == UplStatus.ReadyForUpload)
                 {
@@ -159,33 +168,37 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public List<string> Tags
+        public ReadOnlyCollection<string> Tags
         {
-            get => this.tags;
-            set
+            get => this.tags.AsReadOnly();
+        }
+
+        public int TagsCharacterCount
+        {
+            get
             {
-                this.tags = value;
-                this.LastModified = DateTime.Now;
-                this.raisePropertyChanged("Tags");
+                int length = 0;
+                foreach (string tag in this.tags)
+                {
+                    length += tag.Length;
+                    if (tag.Contains(' '))
+                    {
+                        //quotation marks
+                        length += 2;
+                    }
+                }
+
+                //commas
+                if (this.tags.Count > 1)
+                {
+                    length += this.tags.Count - 1;
+                }
+
+                return length;
             }
         }
 
         public string ImageFilePath { get => this.getImagePath(); }
-
-        public string YtTitle
-        {
-            get
-            {
-                if (this.title.Length <= 100)
-                {
-                    return this.title;
-                }
-                else
-                {
-                    return title.Substring(0, 100);
-                }
-            }
-        }
 
         public string ThumbnailFilePath
         {
@@ -240,6 +253,7 @@ namespace Drexel.VidUp.Business
 
                 this.title = title;
                 this.LastModified = DateTime.Now;
+                this.verifyAndSetUploadStatus();
                 this.raisePropertyChanged("Title");
             }
         }
@@ -254,6 +268,7 @@ namespace Drexel.VidUp.Business
             {
                 this.description = value;
                 this.LastModified = DateTime.Now;
+                this.verifyAndSetUploadStatus();
                 this.raisePropertyChanged("Description");
             }
         }
@@ -379,12 +394,15 @@ namespace Drexel.VidUp.Business
             this.created = DateTime.Now;
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
+            this.title = string.Empty;
+            this.description = string.Empty;
             this.tags = new List<string>();
             this.visibility = Visibility.Private;
 
             //to ensure at least file name is set as title.
             this.title = title = Path.GetFileNameWithoutExtension(this.filePath);
             this.autoSetThumbnail();
+            this.verifyAndSetUploadStatus();
         }
 
         [OnDeserialized()]
@@ -394,6 +412,19 @@ namespace Drexel.VidUp.Business
             {
                 this.uploadStatus = UplStatus.Stopped;
             }
+
+            if (!this.VerifyForUpload())
+            {
+                this.uploadStatus = UplStatus.Paused;
+            }
+        }
+
+        public void SetTags(IEnumerable<string> tags)
+        {
+            this.tags.Clear();
+            this.tags.AddRange(tags);
+            this.raisePropertyChanged("Tags");
+            this.verifyAndSetUploadStatus();
         }
 
         public void CopyTemplateValues()
@@ -683,8 +714,10 @@ namespace Drexel.VidUp.Business
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "images/defaultupload.png");
             }
 
-           return this.template.ImageFilePathForRendering;
+            return this.template.ImageFilePathForRendering;
         }
+
+
 
         private void raisePropertyChanged(string propertyName)
         {
@@ -693,6 +726,26 @@ namespace Drexel.VidUp.Business
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public bool VerifyForUpload()
+        {
+            if (this.title.Length > YoutubeLimits.TitleLimit || this.description.Length > YoutubeLimits.DescriptionLimit ||
+                this.TagsCharacterCount > YoutubeLimits.TagsLimit || this.fileLength > YoutubeLimits.FileSizeLimit)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void verifyAndSetUploadStatus()
+        {
+            if (!this.VerifyForUpload())
+            {
+                this.uploadStatus = UplStatus.Paused;
+                this.raisePropertyChanged("UploadStatus");
             }
         }
 

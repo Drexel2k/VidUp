@@ -521,7 +521,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private async void resetUploads(object parameter)
         {
             bool skipDialog = (bool)parameter;
-            bool remove = true;
+            bool reset = true;
 
             //skip dialog on testing
             if (!(bool)skipDialog)
@@ -529,10 +529,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 ConfirmControl control = new ConfirmControl(
                     $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.");
 
-                remove = (bool)await DialogHost.Show(control, "RootDialog");
+                reset = (bool)await DialogHost.Show(control, "RootDialog");
             }
 
-            if (remove)
+            if (reset)
             {
                 this.resetUploads();
             }
@@ -686,15 +686,19 @@ namespace Drexel.VidUp.UI.ViewModels
             UplStatus resetToStatus = (UplStatus) Enum.Parse(typeof(UplStatus), this.resetToSelectedUploadStatus);
             foreach (Upload upload in uploads)
             {
-                if (resetToStatus == UplStatus.Stopped)
+                if (upload.VerifyForUpload())
                 {
-                    if (upload.BytesSent <= 0)
+                    if (resetToStatus == UplStatus.Stopped)
                     {
-                        continue;
+                        //uplaod cannot be stopped if it hasn't been started
+                        if (string.IsNullOrWhiteSpace(upload.ResumableSessionUri))
+                        {
+                            continue;
+                        }
                     }
-                }
 
-                upload.UploadStatus = resetToStatus;
+                    upload.UploadStatus = resetToStatus;
+                }
             }
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
