@@ -40,6 +40,7 @@
     <None Remove="Images\file-minus.png" />
     <None Remove="Images\file-plus.png" />
     <None Remove="Images\handshake48.png" />
+    <None Remove="Images\list-auto-grey.png" />
     <None Remove="Images\list-auto.png" />
     <None Remove="Images\list-edit.png" />
     <None Remove="Images\list-plus.png" />
@@ -80,6 +81,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\handshake48.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\list-auto-grey.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\list-auto.png">

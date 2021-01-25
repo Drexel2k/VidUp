@@ -445,6 +445,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("ShowPlaylistHint");
                 this.raisePropertyChanged("SelectedPlaylist");
             }
         }
@@ -662,6 +663,19 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Category = value;
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedCategory");
+            }
+        }
+
+        public string ShowPlaylistHint
+        {
+            get
+            {
+                if (this.upload.Playlist == null && this.upload.Template != null && this.upload.Template.SetPlaylistAfterPublication && this.upload.Template.Playlist != null)
+                {
+                    return "Visible";
+                }
+
+                return "Collapsed";
             }
         }
 
