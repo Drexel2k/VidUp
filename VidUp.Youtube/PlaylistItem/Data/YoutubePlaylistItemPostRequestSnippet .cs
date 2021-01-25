@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Drexel.VidUp.Youtube.Playlist.Data
+namespace Drexel.VidUp.Youtube.PlaylistItem.Data
 {
 	public class YoutubePlaylistItemPostRequestSnippet
 	{
@@ -8,6 +8,6 @@ namespace Drexel.VidUp.Youtube.Playlist.Data
 		public string PlaylistId { get; set; }
 
 		[JsonProperty(PropertyName = "resourceId")]
-		public YoutubePlaylistItemsGetResponseResourceId ResourceId { get; set; }
+		public YoutubePlaylistItemPostRequestResourceId ResourceId { get; set; }
     }
 }

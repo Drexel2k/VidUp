@@ -1,81 +1,87 @@
-﻿#region
-
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows.Forms;
+using System.Linq;
+using System.Threading.Tasks;
+using Drexel.VidUp.Youtube.Playlist;
 
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
     class NewPlaylistViewModel : INotifyPropertyChanged
     {
-        private string name;
-        private string playlistId;
-        private bool formVaild = false;
+        private ObservableCollection<PlaylistSelectionViewModel> observablePlaylistSelectionViewModels;
+        private bool showPlaylistReceiveError = false;
+        private List<string> selectedPlaylists;
 
-        public string Name
+        public bool ShowPlaylistReceiveError
+        {
+            get => this.showPlaylistReceiveError;
+        }
+
+        public ObservableCollection<PlaylistSelectionViewModel> ObservablePlaylistSelectionViewModels
+        {
+            get => this.observablePlaylistSelectionViewModels;
+        }
+
+        public bool ShowPlaylistRemoveNotification
         {
             get
             {
-                return this.name;
-            }
-            set
-            {
-                if (this.name != value)
+                foreach (string selectedPlaylist in this.selectedPlaylists)
                 {
-                    this.name = value;
-                    if(!string.IsNullOrWhiteSpace(this.name) && !string.IsNullOrWhiteSpace(this.playlistId))
+                    PlaylistSelectionViewModel playlistViewModel = this.observablePlaylistSelectionViewModels.FirstOrDefault(playlist => playlist.Id == selectedPlaylist);
+                    if (playlistViewModel != null)
                     {
-                        this.FormValid = true;
+                        if (!playlistViewModel.IsChecked)
+                        {
+                            return true;
+                        }
                     }
-                    else
-                    {
-                        this.FormValid = false;
-                    }
-
-                    this.raisePropertyChanged("Name");
                 }
-            }
-        }
-        public string PlaylistId
-        {
-            get
-            {
-                return this.playlistId;
-            }
-            set
-            {
-                if (this.playlistId != value)
-                {
-                    this.playlistId = value;
-                    if (!string.IsNullOrWhiteSpace(this.playlistId) && !string.IsNullOrWhiteSpace(this.name))
-                    {
-                        this.FormValid = true;
-                    }
-                    else
-                    {
-                        this.FormValid = false;
-                    }
 
-                    this.raisePropertyChanged("PlaylistId");
-                }
-            }
-        }
-
-        public bool FormValid
-        {
-            get => this.formVaild;
-            private set
-            {
-                this.formVaild = value;
-                this.raisePropertyChanged("FormValid");
+                return false;
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public NewPlaylistViewModel()
+        public NewPlaylistViewModel(List<string> selectedPlaylists)
         {
+            this.selectedPlaylists = selectedPlaylists == null ? new List<string>() : selectedPlaylists;
+            this.observablePlaylistSelectionViewModels = new ObservableCollection<PlaylistSelectionViewModel>();
+
+            this.refreshObservablePlaylistSelectionViewmodels();
+        }
+
+        private async Task refreshObservablePlaylistSelectionViewmodels()
+        {
+            try
+            {
+                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylists();
+                playlists.Sort((p1,p2) => p1.Title.CompareTo(p2.Title));
+
+                foreach (Playlist playlist in playlists)
+                {
+                    PlaylistSelectionViewModel playlistViewModel = new PlaylistSelectionViewModel(playlist.Id, playlist.Title, this.selectedPlaylists.Contains(playlist.Id));
+                    playlistViewModel.PropertyChanged += playlistViewModelPropertyChanged;
+                    this.observablePlaylistSelectionViewModels.Add(playlistViewModel);
+                }
+            }
+            catch (Exception e)
+            {
+                this.showPlaylistReceiveError = true;
+                this.raisePropertyChanged("ShowPlaylistReceiveError");
+            }
+        }
+
+        private void playlistViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsChecked")
+            {
+                this.raisePropertyChanged("ShowPlaylistRemoveNotification");
+            }
         }
 
         private void raisePropertyChanged(string propertyName)

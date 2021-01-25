@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Drexel.VidUp.Youtube.Playlist.Data
+namespace Drexel.VidUp.Youtube.PlaylistItem.Data
 {
     public class YoutubePlaylistItemsGetResponsePlaylistItem
     {

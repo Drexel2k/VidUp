@@ -10,7 +10,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string playlistId;
         [JsonProperty]
-        private string name;
+        private string title;
         [JsonProperty]
         private DateTime created;
         [JsonProperty]
@@ -38,12 +38,12 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string Name
+        public string Title
         {
-            get => this.name;
+            get => this.title;
             set
             {
-                this.name = value;
+                this.title = value;
                 this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("Name");
             }
@@ -70,10 +70,10 @@ namespace Drexel.VidUp.Business
 
         }
 
-        public Playlist(string name, string playlistId)
+        public Playlist(string playlistId, string title)
         {
             this.playlistId = playlistId;
-            this.name = name;
+            this.title = title;
             this.created = DateTime.Now;
             this.lastModified = this.created;
         }

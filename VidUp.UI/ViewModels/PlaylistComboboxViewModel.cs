@@ -40,7 +40,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string Name
         {
-            get => this.playlist != null ? this.playlist.Name : string.Empty;
+            get => this.playlist != null ? this.playlist.Title : string.Empty;
         }
 
         public PlaylistComboboxViewModel(Playlist playlist)

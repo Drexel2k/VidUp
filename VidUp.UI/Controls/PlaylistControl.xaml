@@ -40,7 +40,7 @@
                     </StackPanel>
                     <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Playlist ID: " Width="115" />
-                        <TextBox Text="{Binding PlaylistId, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="480" TextWrapping="Wrap" />
+                        <TextBox Text="{Binding PlaylistId, Mode=OneWay}"  Width="480" TextWrapping="Wrap" IsEnabled="False" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
                 </Grid>

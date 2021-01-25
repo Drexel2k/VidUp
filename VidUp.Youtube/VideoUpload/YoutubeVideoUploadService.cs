@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.Playlist;
+using Drexel.VidUp.Youtube.PlaylistItem;
 using Drexel.VidUp.Youtube.Thumbnail;
 using Drexel.VidUp.Youtube.VideoUpload.Data;
 using HeyRed.Mime;

@@ -6,10 +6,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.Playlist.Data;
+using Drexel.VidUp.Youtube.PlaylistItem.Data;
 using Newtonsoft.Json;
 
-namespace Drexel.VidUp.Youtube.Playlist
+namespace Drexel.VidUp.Youtube.PlaylistItem
 {
     public class YoutubePlaylistItemService
     {
@@ -17,16 +17,16 @@ namespace Drexel.VidUp.Youtube.Playlist
 
         public static async Task<bool> AddToPlaylist(Upload upload)
         {
-            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Start.");
+            Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: Start.");
 
             if (!string.IsNullOrWhiteSpace(upload.VideoId) && upload.Playlist != null)
             {
-                Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Videos to add available.");
+                Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: Videos to add available.");
 
                 YoutubePlaylistItemPostRequest playlistItem = new YoutubePlaylistItemPostRequest();
                 playlistItem.Snippet = new YoutubePlaylistItemPostRequestSnippet();
                 playlistItem.Snippet.PlaylistId = upload.Playlist.PlaylistId;
-                playlistItem.Snippet.ResourceId = new YoutubePlaylistItemsGetResponseResourceId();
+                playlistItem.Snippet.ResourceId = new YoutubePlaylistItemPostRequestResourceId();
                 playlistItem.Snippet.ResourceId.VideoId = upload.VideoId;
 
                 string contentJson = JsonConvert.SerializeObject(playlistItem);
@@ -38,13 +38,13 @@ namespace Drexel.VidUp.Youtube.Playlist
 
                     try
                     {
-                        Tracer.Write($"YoutubePlaylistService.AddToPlaylist: Add to Playlist.");
+                        Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: Add to Playlist.");
                         message = await client.PostAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet", content);
                     }
                     catch (Exception e)
                     {
-                        Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, HttpClient.PostAsync Exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpClient.PostAsync Exception: {e.GetType().ToString()}: {e.Message}.";
+                        Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpClient.PostAsync Exception: {e.ToString()}.");
+                        upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpClient.PostAsync Exception: {e.GetType().ToString()}: {e.Message}.";
                         return false;
                     }
 
@@ -52,25 +52,25 @@ namespace Drexel.VidUp.Youtube.Playlist
                     {
                         if (!message.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
-                            upload.UploadErrorMessage += $"YoutubePlaylistService.AddToPlaylist: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.";
+                            Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                            upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.";
                             return false;
                         }
                     }
 
-                    Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End.");
+                    Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End.");
                     return true;
                 }
             }
 
-            Tracer.Write($"YoutubePlaylistService.AddToPlaylist: End, nothing to add to playlist.");
+            Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, nothing to add to playlist.");
             return true;
         }
 
 
         public static async Task<Dictionary<string, List<string>>> GetPlaylists(IEnumerable<string> playlistIds)
         {
-            Tracer.Write($"YoutubePlaylistService.GetPlaylists: Start.");
+            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: Start.");
             Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
 
             if (playlistIds != null)
@@ -79,7 +79,7 @@ namespace Drexel.VidUp.Youtube.Playlist
                 string[] playlistIdsInternal = playlistIds as string[] ?? playlistIds.ToArray();
                 if (playlistIdsInternal.Length > 0)
                 {
-                    Tracer.Write($"YoutubePlaylistService.GetPlaylists: Playlists to get available.");
+                    Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: Playlists to get available.");
 
                     foreach (string playlistId in playlistIdsInternal)
                     {
@@ -88,12 +88,12 @@ namespace Drexel.VidUp.Youtube.Playlist
 
                         try
                         {
-                            Tracer.Write($"YoutubePlaylistService.GetPlaylists: Get Playlist info.");
+                            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: Get Playlist info.");
                             message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}");
                         }
                         catch (Exception e)
                         {
-                            Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: End, HttpClient.GetAsync Exception: {e.ToString()}.");
                             throw;
                         }
 
@@ -103,7 +103,7 @@ namespace Drexel.VidUp.Youtube.Playlist
                             {
                                 if (message.StatusCode != HttpStatusCode.NotFound)
                                 {
-                                    Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                                    Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
                                     throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
                                 }
 
@@ -127,7 +127,7 @@ namespace Drexel.VidUp.Youtube.Playlist
                 }
             }
 
-            Tracer.Write($"YoutubePlaylistService.GetPlaylists: End.");
+            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: End.");
             return result;
         }
     }
