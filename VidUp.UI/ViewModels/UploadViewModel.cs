@@ -329,7 +329,8 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.upload.Description.Length.ToString("N0", CultureInfo.CurrentCulture);
+                return this.upload.Description != null ? 
+                    this.upload.Description.Length.ToString("N0", CultureInfo.CurrentCulture) : 0.ToString("N0", CultureInfo.CurrentCulture);
             }
         }
 
@@ -339,7 +340,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 Color color = Colors.Transparent;
 
-                if (this.upload.Description.Length > YoutubeLimits.DescriptionLimit)
+                if (this.upload.Description != null && this.upload.Description.Length > YoutubeLimits.DescriptionLimit)
                 {
                     color = Colors.Red;
                 }
@@ -362,7 +363,8 @@ namespace Drexel.VidUp.UI.ViewModels
             get => string.Join(",", this.upload.Tags);
             set
             {
-                this.upload.SetTags(new List<string>(value.Split(',')));
+                this.upload.Tags.Clear();
+                this.upload.Tags.AddRange(value.Split(','));
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("TagsAsString");
                 this.raisePropertyChanged("TagsColor");

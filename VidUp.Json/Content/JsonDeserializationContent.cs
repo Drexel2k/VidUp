@@ -58,11 +58,30 @@ namespace Drexel.VidUp.Json.Content
             }
 
             JsonSerializer serializer = new JsonSerializer();
+            serializer.MissingMemberHandling = MissingMemberHandling.Error;
 
+            bool error = false;
             using (StreamReader sr = new StreamReader(this.playlistListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                DeserializationRepositoryContent.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
+                try
+                {
+                    DeserializationRepositoryContent.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
+                }
+                catch (JsonSerializationException)
+                {
+                    error = true;
+                }
+            }
+
+            if (error)
+            {
+                using (StreamReader sr = new StreamReader(this.playlistListFilePath))
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    serializer.ContractResolver = new PlaylistContractResolver();
+                    DeserializationRepositoryContent.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
+                }
             }
         }
 

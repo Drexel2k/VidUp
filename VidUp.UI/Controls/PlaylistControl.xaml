@@ -34,7 +34,7 @@
                     </Button>
 
                     <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="Name: " Width="115" />
+                        <Label Content="Title: " Width="115" />
                         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="480" TextWrapping="Wrap" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="For display in VidUp, doesn't need to be the same as the Youtube playlist title." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>

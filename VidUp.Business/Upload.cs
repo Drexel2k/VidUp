@@ -168,9 +168,9 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public ReadOnlyCollection<string> Tags
+        public List<string> Tags
         {
-            get => this.tags.AsReadOnly();
+            get => this.tags;
         }
 
         public int TagsCharacterCount
@@ -394,8 +394,6 @@ namespace Drexel.VidUp.Business
             this.created = DateTime.Now;
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
-            this.title = string.Empty;
-            this.description = string.Empty;
             this.tags = new List<string>();
             this.visibility = Visibility.Private;
 
@@ -412,19 +410,6 @@ namespace Drexel.VidUp.Business
             {
                 this.uploadStatus = UplStatus.Stopped;
             }
-
-            if (!this.VerifyForUpload())
-            {
-                this.uploadStatus = UplStatus.Paused;
-            }
-        }
-
-        public void SetTags(IEnumerable<string> tags)
-        {
-            this.tags.Clear();
-            this.tags.AddRange(tags);
-            this.raisePropertyChanged("Tags");
-            this.verifyAndSetUploadStatus();
         }
 
         public void CopyTemplateValues()
@@ -731,8 +716,10 @@ namespace Drexel.VidUp.Business
 
         public bool VerifyForUpload()
         {
-            if (this.title.Length > YoutubeLimits.TitleLimit || this.description.Length > YoutubeLimits.DescriptionLimit ||
-                this.TagsCharacterCount > YoutubeLimits.TagsLimit || this.fileLength > YoutubeLimits.FileSizeLimit)
+            if (this.title != null && this.title.Length > YoutubeLimits.TitleLimit || 
+                this.description != null && this.description.Length > YoutubeLimits.DescriptionLimit ||
+                this.TagsCharacterCount > YoutubeLimits.TagsLimit || 
+                this.fileLength > YoutubeLimits.FileSizeLimit)
             {
                 return false;
             }
