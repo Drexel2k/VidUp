@@ -165,7 +165,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.resumeUploads != value)
                 {
                     this.resumeUploads = value;
-                    this.notifyUploadsAboutResumeState();
+                    this.observableUploadViewModels.ResumeUploads = value;
                     this.raisePropertyChanged("ResumeUploads");
                 }
             }
@@ -339,7 +339,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.deleteSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
             this.resetWithSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
 
-            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
+            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads);
 
             this.deleteCommand = new GenericCommand(this.DeleteUpload);
             this.addUploadCommand = new GenericCommand(this.openUploadDialog);
@@ -349,8 +349,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.resetRecalculatePublishAtStartDateCommand = new GenericCommand(this.resetRecalculatePublishAtStartDate);
             this.deleteUploadsCommand = new GenericCommand(this.deleteUploads);
             this.resetUploadsCommand = new GenericCommand(this.resetUploads);
-
-            this.notifyUploadsAboutResumeState();
         }
 
         //need to change the template filter combobox selected item, if this template is deleted. So the selected
@@ -711,14 +709,6 @@ namespace Drexel.VidUp.UI.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        private void notifyUploadsAboutResumeState()
-        {
-            foreach (UploadViewModel uploadViewModel in this.observableUploadViewModels)
-            {
-                uploadViewModel.ResumeUploads = this.resumeUploads;
             }
         }
     }

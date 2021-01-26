@@ -17,7 +17,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0">Select paylists to use in VidUp:</TextBlock>
+        <TextBlock Grid.Row="0">Select playlists to use in VidUp:</TextBlock>
 
         <StackPanel Orientation="Vertical" Grid.Row="1">
             <StackPanel Orientation="Horizontal">

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Windows.Controls;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 
@@ -15,10 +16,25 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableTemplateViewModels observableTemplateViewModels;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
 
-        public ObservableUploadViewModels(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
+        private bool resumeUploads;
+
+        public bool ResumeUploads
+        {
+            set
+            {
+                this.resumeUploads = value;
+                foreach (UploadViewModel uploadViewModel in this.uploadViewModels)
+                {
+                    uploadViewModel.ResumeUploads = this.resumeUploads;
+                }
+            }
+        }
+
+        public ObservableUploadViewModels(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads)
         {
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.resumeUploads = resumeUploads;
 
             this.uploadViewModels = new List<UploadViewModel>();
             
@@ -26,7 +42,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 foreach (Upload upload in uploadList)
                 {
-                    this.uploadViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels));
+                    this.uploadViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads));
                 }
 
                 uploadList.CollectionChanged += uploadListCollectionChanged;
@@ -40,7 +56,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 List<UploadViewModel> newViewModels = new List<UploadViewModel>();
                 foreach (Upload upload in e.NewItems)
                 {
-                    newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels));
+                    newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads));
                 }
 
                 this.uploadViewModels.AddRange(newViewModels);

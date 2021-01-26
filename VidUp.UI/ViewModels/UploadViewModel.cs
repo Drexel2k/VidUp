@@ -679,7 +679,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
+        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads)
         {
             if (observableTemplateViewModels == null)
             {
@@ -696,6 +696,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.resumeUploads = resumeUploads;
 
             this.quarterHourViewModels = new QuarterHourViewModels(false);
 
