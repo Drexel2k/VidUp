@@ -406,7 +406,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async Task<Dictionary<string, List<string>>> getPlaylistsAndRemoveNotExistingPlaylists(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap)
         {
-            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylists(playlistUploadsWithoutPlaylistMap.Keys);
+            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContent(playlistUploadsWithoutPlaylistMap.Keys.ToList());
             if (playlistUploadsWithoutPlaylistMap.Count != playlistVideos.Count)
             {
                 KeyValuePair<string, List<Upload>>[] missingPlaylists = playlistUploadsWithoutPlaylistMap

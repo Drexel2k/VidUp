@@ -16,26 +16,26 @@ namespace Drexel.VidUp.Youtube.Playlist
         {
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: Start.");
             List<Playlist> result = new List<Playlist>();
-            await YoutubePlaylistService.addPlaylists(null, result);
+            await YoutubePlaylistService.addPlaylistsToResult(null, result);
             
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: End.");
             return result;
         }
 
-        private static async Task<List<Playlist>> addPlaylists(string pageToken, List<Playlist> result)
+        private static async Task<List<Playlist>> addPlaylistsToResult(string pageToken, List<Playlist> result)
         {
             if (result == null)
             {
                 throw new ArgumentException("result must not be null.");
             }
 
-            Tracer.Write($"YoutubePlaylistService.addPlaylists: Start, pageToken = { pageToken }.");
+            Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Start, pageToken = { pageToken }.");
             HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
             HttpResponseMessage message;
 
             try
             {
-                Tracer.Write($"YoutubePlaylistService.addPlaylists: Get Playlists.");
+                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Get Playlists.");
                 if (string.IsNullOrWhiteSpace(pageToken))
                 {
                     message = await client.GetAsync($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={ YoutubePlaylistService.maxResults }");
@@ -47,7 +47,7 @@ namespace Drexel.VidUp.Youtube.Playlist
             }
             catch (Exception e)
             {
-                Tracer.Write($"YoutubePlaylistService.addPlaylists: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
                 throw;
             }
 
@@ -55,7 +55,7 @@ namespace Drexel.VidUp.Youtube.Playlist
             {
                 if (!message.IsSuccessStatusCode)
                 {
-                    Tracer.Write($"YoutubePlaylistService.addPlaylists: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                    Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
                     throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
                 }
 
@@ -71,12 +71,12 @@ namespace Drexel.VidUp.Youtube.Playlist
 
                 if (!string.IsNullOrWhiteSpace(response.NextPageToken))
                 {
-                    await YoutubePlaylistService.addPlaylists(response.NextPageToken, result);
+                    await YoutubePlaylistService.addPlaylistsToResult(response.NextPageToken, result);
                 }
             }
 
 
-            Tracer.Write($"YoutubePlaylistService.addPlaylists: End, pageToken = { pageToken }.");
+            Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, pageToken = { pageToken }.");
             return result;
         }
     }

@@ -14,6 +14,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
     public class YoutubePlaylistItemService
     {
         private static string playlistItemsEndpoint = "https://www.googleapis.com/youtube/v3/playlistItems";
+        private static int maxResults = 50;
 
         public static async Task<bool> AddToPlaylist(Upload upload)
         {
@@ -67,68 +68,91 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
             return true;
         }
 
-
-        public static async Task<Dictionary<string, List<string>>> GetPlaylists(IEnumerable<string> playlistIds)
+        public static async Task<Dictionary<string, List<string>>> GetPlaylistsContent(IEnumerable<string> playlistIds)
         {
-            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: Start.");
+            Tracer.Write($"YoutubePlaylistItemService.GetPlaylistsContent: Start.");
             Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
 
             if (playlistIds != null)
             {
                 playlistIds = playlistIds.Distinct();
-                string[] playlistIdsInternal = playlistIds as string[] ?? playlistIds.ToArray();
-                if (playlistIdsInternal.Length > 0)
+                foreach (string playlistId in playlistIds)
                 {
-                    Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: Playlists to get available.");
+                    List<string> playlistResult = new List<string>();
 
-                    foreach (string playlistId in playlistIdsInternal)
+                    if (await YoutubePlaylistItemService.addPlaylistContentToResult(playlistId, null, playlistResult))
                     {
-                        HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
-                        HttpResponseMessage message;
-
-                        try
-                        {
-                            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: Get Playlist info.");
-                            message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}");
-                        }
-                        catch (Exception e)
-                        {
-                            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: End, HttpClient.GetAsync Exception: {e.ToString()}.");
-                            throw;
-                        }
-
-                        using (message)
-                        {
-                            if (!message.IsSuccessStatusCode)
-                            {
-                                if (message.StatusCode != HttpStatusCode.NotFound)
-                                {
-                                    Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
-                                    throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
-                                }
-
-                                continue;
-                            }
-
-                            List<string> videoIds = new List<string>();
-                            result.Add(playlistId, videoIds);
-
-                            YoutubePlaylistItemsGetResponse response = JsonConvert.DeserializeObject<YoutubePlaylistItemsGetResponse>(await message.Content.ReadAsStringAsync());
-
-                            if (response.Items.Length > 0)
-                            {
-                                foreach (YoutubePlaylistItemsGetResponsePlaylistItem item in response.Items)
-                                {
-                                    videoIds.Add(item.Snippet.ResourceId.VideoId);
-                                }
-                            }
-                        }
+                        result.Add(playlistId, playlistResult);
                     }
                 }
             }
+            else
+            {
+                return result;
+            }
 
-            Tracer.Write($"YoutubePlaylistItemService.GetPlaylists: End.");
+            Tracer.Write($"YoutubePlaylistItemService.GetPlaylistsContent: End.");
             return result;
+        }
+
+        private static async Task<bool> addPlaylistContentToResult(string playlistId, string pageToken, List<string> result)
+        {
+            Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Start.");
+
+            HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+            HttpResponseMessage message;
+
+            try
+            {
+                Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Get Playlist info.");
+                if (string.IsNullOrWhiteSpace(pageToken))
+                {
+                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}");
+                }
+                else
+                {
+                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}&pageToken={pageToken}");
+                }
+            }
+            catch (Exception e)
+            {
+                Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                throw;
+            }
+
+            using (message)
+            {
+                if (!message.IsSuccessStatusCode)
+                {
+                    if (message.StatusCode != HttpStatusCode.NotFound)
+                    {
+                        Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
+                        throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}.");
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                YoutubePlaylistItemsGetResponse response = JsonConvert.DeserializeObject<YoutubePlaylistItemsGetResponse>(await message.Content.ReadAsStringAsync());
+
+                if (response.Items.Length > 0)
+                {
+                    foreach (YoutubePlaylistItemsGetResponsePlaylistItem item in response.Items)
+                    {
+                        result.Add(item.Snippet.ResourceId.VideoId);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(response.NextPageToken))
+                {
+                    return await YoutubePlaylistItemService.addPlaylistContentToResult(playlistId, response.NextPageToken, result);
+                }
+            }
+
+            Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End.");
+            return true;
         }
     }
 }

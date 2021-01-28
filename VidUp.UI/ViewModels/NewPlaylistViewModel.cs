@@ -128,12 +128,21 @@ namespace Drexel.VidUp.UI.ViewModels
                         checkedPlaylistSelectionViewModels.Add(playlistSelectionViewModel);
                         checkedPlaylistSelectionViewModels.Sort((cultureViewModel1, cultureViewModel2) => cultureViewModel1.Title.CompareTo(cultureViewModel2.Title));
 
-                        for (int index = 0; index < checkedPlaylistSelectionViewModels.Count; index++)
+                        bool inserted = false;
+                        for (int index = 0; index < observablePlaylistSelectionViewModels.Count; index++)
                         {
                             if (this.observablePlaylistSelectionViewModels[index] != checkedPlaylistSelectionViewModels[index])
                             {
                                 this.observablePlaylistSelectionViewModels.Insert(index, checkedPlaylistSelectionViewModels[index]);
+                                inserted = true;
+                                break;
                             }
+                        }
+
+                        //all items selected, so new checked playlist must be at the end
+                        if (!inserted)
+                        {
+                            this.observablePlaylistSelectionViewModels.Add(playlistSelectionViewModel);
                         }
                     }
                 }

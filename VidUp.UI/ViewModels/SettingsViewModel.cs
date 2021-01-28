@@ -74,12 +74,21 @@ namespace Drexel.VidUp.UI.ViewModels
                         checkedCultureViewModels.Add(cultureViewModel);
                         checkedCultureViewModels.Sort((cultureViewModel1, cultureViewModel2) => cultureViewModel1.Name.CompareTo(cultureViewModel2.Name));
 
-                        for (int index = 0; index < checkedCultureViewModels.Count; index++)
+                        bool inserted = false;
+                        for (int index = 0; index < this.observableCultureInfoViewModels.Count; index++)
                         {
                             if (this.observableCultureInfoViewModels[index] != checkedCultureViewModels[index])
                             {
                                 this.observableCultureInfoViewModels.Insert(index, checkedCultureViewModels[index]);
+                                inserted = true;
+                                break;
                             }
+                        }
+
+                        //all items selected, so new checked playlist must be at the end
+                        if (!inserted)
+                        {
+                            this.observableCultureInfoViewModels.Add(cultureViewModel);
                         }
                     }
                 }
