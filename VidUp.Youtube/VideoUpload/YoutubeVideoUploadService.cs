@@ -119,8 +119,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         else
                         {
                             package++;
-                            Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: Package {package} Try {uploadTry}.");
                         }
+
+                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: Package {package} Try {uploadTry}.");
 
                         chunkStream = new PartStream(inputStream, YoutubeVideoUploadService.uploadChunkSizeInBytes);
 

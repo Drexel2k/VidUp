@@ -756,6 +756,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (e.PropertyName == "ResumableSessionUri")
             {
                 this.raisePropertyChanged("ControlsEnabled");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
             }
 
             if (e.PropertyName == "BytesSent")
