@@ -140,6 +140,7 @@ namespace Drexel.VidUp.Business
                 if (value == UplStatus.Uploading)
                 {
                     this.uploadStart = DateTime.Now;
+                    this.uploadErrorMessage = null;
                 }
 
                 if (value == UplStatus.Finished)

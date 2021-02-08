@@ -1,13 +1,9 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.UI.ViewModels;
 using Drexel.VidUp.Utils;
-
-#endregion
 
 namespace Drexel.VidUp.UI
 {
@@ -30,10 +26,13 @@ namespace Drexel.VidUp.UI
             MessageBox.Show(e.ToString(), "PRESS CTRL+C TO COPY!");
         }
 
-        private void Image_Drop(object sender, DragEventArgs e)
+        private void fileDrop(object sender, DragEventArgs e)
         {
+            Tracer.Write($"MainWindow.fileDrop: Start.");
             UploadListViewModel uploadListViewModel = (UploadListViewModel)((MainWindowViewModel)this.DataContext).CurrentViewModel;
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            Tracer.Write($"MainWindow.fileDrop: Dropped {files.Length} files.");
             List<Upload> uploads = new List<Upload>();
             foreach (string file in files)
             {
@@ -41,6 +40,7 @@ namespace Drexel.VidUp.UI
             }
 
             uploadListViewModel.AddUploads(uploads);
+            Tracer.Write($"MainWindow.fileDrop: End.");
         }
     }
 }

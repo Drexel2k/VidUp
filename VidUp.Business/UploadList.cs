@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,9 +6,8 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
-
-#endregion
 
 namespace Drexel.VidUp.Business
 {
@@ -137,19 +134,28 @@ namespace Drexel.VidUp.Business
 
         public void AddUploads(List<Upload> uploads)
         {
-            foreach(Upload upload in uploads)
+            Tracer.Write($"UploadList.AddUploads: Start, add {uploads.Count} uploads.");
+            foreach (Upload upload in uploads)
             {
+                Tracer.Write($"UploadList.AddUploads: Start, adding '{upload.FilePath}' uploads.");
                 Template template = this.templateList.GetTemplateForUpload(upload);
                 if (template != null)
                 {
+                    Tracer.Write($"UploadList.AddUploads: Template '{template.Name}' found for upload.");
                     upload.Template = template;
                 }
                 else
                 {
+                    Tracer.Write($"UploadList.AddUploads: No template found for upload, try to get default template.");
                     template = this.templateList.GetDefaultTemplate();
                     if (template != null)
                     {
+                        Tracer.Write($"UploadList.AddUploads: Default template '{template.Name}' found.");
                         upload.Template = template;
+                    }
+                    else
+                    {
+                        Tracer.Write($"UploadList.AddUploads: No default template found.");
                     }
                 }
 
@@ -163,15 +169,20 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, uploads));
+            Tracer.Write($"UploadList.AddUploads: End.");
         }
 
-        public void RemoveUploads(Predicate<Upload> predicate)
+        public void DeleteUploads(Predicate<Upload> predicate)
         {
+            Tracer.Write($"UploadList.DeleteUploads: Start.");
             List<Upload> oldUploads = this.uploads.FindAll(predicate);
+
+            Tracer.Write($"UploadList.DeleteUploads: Delete {oldUploads.Count} uploads from upload list.");
             this.uploads.RemoveAll(predicate);
 
             foreach (Upload upload in oldUploads)
             {
+                Tracer.Write($"UploadList.DeleteUploads: Delete upload '{upload.FilePath}'.");
                 if (upload.UploadStatus != UplStatus.Finished && upload.Template != null)
                 {
                     upload.Template = null;
@@ -187,6 +198,7 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldUploads));
+            Tracer.Write($"UploadList.DeleteUploads: Ende.");
         }
 
         private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)

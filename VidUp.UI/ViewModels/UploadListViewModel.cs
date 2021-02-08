@@ -416,6 +416,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void openUploadDialog(object obj)
         {
+            Tracer.Write($"UploadListViewModel.openUploadDialog: Start.");
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = true;
 
@@ -424,27 +425,38 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (result == DialogResult.OK)
             {
+                Tracer.Write($"UploadListViewModel.openUploadDialog: DialogResult OK.");
                 List<Upload> uploads = new List<Upload>();
                 foreach (string fileName in fileDialog.FileNames)
                 {
                     uploads.Add(new Upload(fileName));
                 }
 
+                Tracer.Write($"UploadListViewModel.openUploadDialog: Selected {uploads.Count} files.");
                 this.AddUploads(uploads);
             }
+            else
+            {
+                Tracer.Write($"UploadListViewModel.openUploadDialog: DialogResult not OK.");
+            }
+
+            Tracer.Write($"UploadListViewModel.openUploadDialog: End.");
         }
 
         public void AddUploads(List<Upload> uploads)
         {
+            Tracer.Write($"UploadListViewModel.AddUploads: Start, add {uploads.Count} uploads.");
             this.uploadList.AddUploads(uploads);
 
             if (uploads.Any(upl => upl.Template != null))
             {
+                Tracer.Write($"UploadListViewModel.AddUploads: At least one template was auto added.");
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();
+            Tracer.Write($"UploadListViewModel.AddUploads: End.");
         }
 
         private async void startUploading(object obj)
@@ -493,6 +505,7 @@ namespace Drexel.VidUp.UI.ViewModels
         //parameter skips dialog for testing
         private async void deleteUploads(object parameter)
         {
+            Tracer.Write($"UploadListViewModel.deleteUploads(object parameter): Start.");
             bool skipDialog = (bool)parameter;
             bool remove = true;
 
@@ -511,8 +524,15 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (remove)
             {
+                Tracer.Write($"UploadListViewModel.deleteUploads: DialogResult OK.");
                 this.deleteUploads();
             }
+            else
+            {
+                Tracer.Write($"UploadListViewModel.deleteUploads: DialogResult not OK.");
+            }
+
+            Tracer.Write($"UploadListViewModel.deleteUploads(object parameter): End.");
         }
 
         //parameter skips dialog for testing
@@ -596,52 +616,62 @@ namespace Drexel.VidUp.UI.ViewModels
         //exposed for testing
         public void DeleteUpload(object parameter)
         {
+            Tracer.Write($"UploadListViewModel.DeleteUpload: Start, Guid '{parameter}'.");
             Guid uploadGuid = Guid.Parse((string)parameter);
             this.deleteUploads(upload => upload.Guid == uploadGuid);
+            Tracer.Write($"UploadListViewModel.DeleteUpload: End.");
         }
 
         private void deleteUploads()
         {
+            Tracer.Write($"UploadListViewModel.deleteUploads: Start.");
             Predicate<Upload>[] predicates = new Predicate<Upload>[2];
 
             if (this.deleteSelectedUploadStatus == "All")
             {
+                Tracer.Write($"UploadListViewModel.deleteUploads: with status All.");
                 predicates[0] = upload => true;
             }
             else
             {
                 UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus);
+                Tracer.Write($"UploadListViewModel.deleteUploads: with status {this.deleteSelectedUploadStatus}.");
                 predicates[0] = upload => upload.UploadStatus == status;
             }
 
             if (this.deleteSelectedTemplate.Template.Name == "All")
             {
+                Tracer.Write($"UploadListViewModel.deleteUploads: with template All.");
                 predicates[1] = upload => true;
             }
             else if (this.deleteSelectedTemplate.Template.Name == "None")
             {
+                Tracer.Write($"UploadListViewModel.deleteUploads: with template None.");
                 predicates[1] = upload => upload.Template == null;
             }
             else
             {
+                Tracer.Write($"UploadListViewModel.deleteUploads: with template {this.deleteSelectedTemplate.Template.Name}.");
                 predicates[1] = upload => upload.Template == this.deleteSelectedTemplate.Template;
             }
 
             Predicate<Upload> combinedPredicate = PredicateCombiner.And(predicates);
             this.deleteUploads(combinedPredicate);
-            
+            Tracer.Write($"UploadListViewModel.deleteUploads: End.");
         }
 
         private void deleteUploads(Predicate<Upload> predicate)
         {
+            Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): Start.");
             bool serializeTemplates = false;
             List<Upload> uploadsToDelete = this.uploadList.GetUploads(predicate);
             if (uploadsToDelete.Any(upl => upl.Template != null))
             {
+                Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): At least one upload to delete has template.");
                 serializeTemplates = true;
             }
 
-            this.uploadList.RemoveUploads(predicate);
+            this.uploadList.DeleteUploads(predicate);
 
             if (serializeTemplates)
             {
@@ -650,6 +680,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();
+            Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): End.");
         }
 
         private void resetUploads()

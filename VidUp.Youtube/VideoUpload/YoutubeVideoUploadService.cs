@@ -53,7 +53,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: End, file doesn't exist.");
 
-                upload.UploadErrorMessage = "File does not exist.";
+                upload.UploadErrorMessage = "File does not exist. ";
                 upload.UploadStatus = UplStatus.Failed;
                 return uploadResult;
             }
@@ -100,7 +100,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload not successful after 3 tries for package {package}.");
 
-                                upload.UploadErrorMessage = $"YoutubeVideoUploadService.Upload: Upload not successful after 3 tries for package {package}. Errors: {errors.ToString()}";
+                                upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Upload not successful after 3 tries for package {package}. Errors: {errors.ToString()}. ";
                                 upload.UploadStatus = UplStatus.Failed;
                                 return uploadResult;
                             }
@@ -194,7 +194,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: End, Unexpected Exception: {e.ToString()}.");
 
-                upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Unexpected Exception: : {e.GetType().ToString()}: {e.Message}.";
+                upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Unexpected Exception: : {e.GetType().ToString()}: {e.Message}. ";
                 upload.UploadStatus = UplStatus.Failed;
                 return uploadResult;
             }
@@ -256,7 +256,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     if (requestTry >= 3)
                     {
                         Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: End, exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += "YoutubeVideoUploadService.getUploadByteIndex: Getting upload byte index failed 3 times.";
+                        upload.UploadErrorMessage += "YoutubeVideoUploadService.getUploadByteIndex: Getting upload byte index failed 3 times. ";
                         throw;
                     }
 
@@ -341,7 +341,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     if (requestTry >= 3)
                     {
                         Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End, exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += "YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed 3 times.";
+                        upload.UploadErrorMessage += "YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed 3 times. ";
                         throw;
                     }
 

@@ -56,7 +56,7 @@
                         <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Drag&amp;Drop Files Here">
-                        <Image Source="images/dragdrop.png" Drop="Image_Drop" AllowDrop="True" />
+                        <Image Source="images/dragdrop.png" Drop="fileDrop" AllowDrop="True" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Upload">
                         <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload.png"  Command="{Binding StartUploadingCommand}" />
