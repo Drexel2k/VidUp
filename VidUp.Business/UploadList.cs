@@ -137,7 +137,7 @@ namespace Drexel.VidUp.Business
             Tracer.Write($"UploadList.AddUploads: Start, add {uploads.Count} uploads.");
             foreach (Upload upload in uploads)
             {
-                Tracer.Write($"UploadList.AddUploads: Start, adding '{upload.FilePath}' uploads.");
+                Tracer.Write($"UploadList.AddUploads: Add '{upload.FilePath}'.");
                 Template template = this.templateList.GetTemplateForUpload(upload);
                 if (template != null)
                 {

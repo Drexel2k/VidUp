@@ -1,9 +1,6 @@
-﻿#region
-
+﻿using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Navigation;
-
-#endregion
 
 namespace Drexel.VidUp.UI.Controls
 {
@@ -17,9 +14,9 @@ namespace Drexel.VidUp.UI.Controls
             InitializeComponent();
         }
 
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        private void hyperlinkRequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-            System.Diagnostics.Process.Start("explorer.exe", e.Uri.AbsoluteUri);
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
             e.Handled = true;
         }
     }

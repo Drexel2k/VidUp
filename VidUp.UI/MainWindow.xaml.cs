@@ -15,7 +15,7 @@ namespace Drexel.VidUp.UI
     {
         public MainWindow()
         {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(exHandler);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.exHandler);
             InitializeComponent();
         }
 
@@ -29,6 +29,8 @@ namespace Drexel.VidUp.UI
         private void fileDrop(object sender, DragEventArgs e)
         {
             Tracer.Write($"MainWindow.fileDrop: Start.");
+            base.OnDrop(e);
+
             UploadListViewModel uploadListViewModel = (UploadListViewModel)((MainWindowViewModel)this.DataContext).CurrentViewModel;
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 

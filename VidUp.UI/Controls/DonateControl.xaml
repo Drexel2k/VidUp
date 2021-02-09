@@ -27,9 +27,9 @@
         <TextBlock Grid.Row="2">If you want to support this app and further</TextBlock>
         <TextBlock Grid.Row="3">development you can donate a voluntary amount</TextBlock>
         <TextBlock Grid.Row="4">if you want:</TextBlock>
-        <TextBlock Grid.Row="6">One time tip: <Hyperlink NavigateUri="https://paypal.me/drexel2k" RequestNavigate="Hyperlink_RequestNavigate">Paypal</Hyperlink></TextBlock>
-        <TextBlock Grid.Row="7">Recurring donation (U.S. platform): <Hyperlink NavigateUri="https://www.patreon.com/Drexel2k" RequestNavigate="Hyperlink_RequestNavigate">Patreon</Hyperlink></TextBlock>
-        <TextBlock Grid.Row="8">Recurring donation (German platform): <Hyperlink NavigateUri="https://steadyhq.com/en/drexel" RequestNavigate="Hyperlink_RequestNavigate">SteadHQ</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="6">One time tip: <Hyperlink NavigateUri="https://paypal.me/drexel2k" RequestNavigate="hyperlinkRequestNavigate">Paypal</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="7">Recurring donation (U.S. platform): <Hyperlink NavigateUri="https://www.patreon.com/DrexelsVidUp" RequestNavigate="hyperlinkRequestNavigate">Patreon</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="8">Recurring donation (German platform): <Hyperlink NavigateUri="https://steadyhq.com/en/drexelsvidup" RequestNavigate="hyperlinkRequestNavigate">SteadyHQ</Hyperlink></TextBlock>
 
         <Button Grid.Row="9" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
             <Button.CommandParameter>

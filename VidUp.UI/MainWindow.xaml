@@ -181,7 +181,7 @@
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem Header="Settings">
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="VidUp" >
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[4]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">
                         <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="images/handshake48.png" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
                     </Fluent:RibbonGroupBox>
