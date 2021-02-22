@@ -89,7 +89,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     Tracer.Write($"YoutubeVideoUploadService.Upload: fileLength: {fileLength}.");
                     PartStream chunkStream;
                     HttpResponseMessage message;
-                    StreamContent content;
+                    StreamContent streamContent;
 
                     while (fileLength > totalBytesSentInSession + initialBytesSent)
                     {
@@ -126,12 +126,12 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         chunkStream = new PartStream(inputStream, YoutubeVideoUploadService.uploadChunkSizeInBytes);
 
                         Tracer.Write($"YoutubeVideoUploadService.Upload: Creating content.");
-                        using (content = HttpHelper.GetStreamContentResumableUpload(chunkStream, inputStream.Length, uploadByteIndex, YoutubeVideoUploadService.uploadChunkSizeInBytes, MimeTypesMap.GetMimeType(upload.FilePath)))
+                        using (streamContent = HttpHelper.GetStreamContentResumableUpload(chunkStream, inputStream.Length, uploadByteIndex, YoutubeVideoUploadService.uploadChunkSizeInBytes, MimeTypesMap.GetMimeType(upload.FilePath)))
                         {
                             try
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: Start uploading.");
-                                message = await client.PutAsync(upload.ResumableSessionUri, content, cancellationToken);
+                                message = await client.PutAsync(upload.ResumableSessionUri, streamContent, cancellationToken);
                             }
                             catch (TaskCanceledException)
                             {
@@ -162,16 +162,17 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             }
                             else
                             {
+                                string content = await message.Content.ReadAsStringAsync();
                                 if (!message.IsSuccessStatusCode)
                                 {
-                                    Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code package {package} try {uploadTry}: {message.StatusCode} with message {message.ReasonPhrase}.");
-                                    errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code package {package} try {uploadTry}: {message.StatusCode} with message {message.ReasonPhrase}.");
+                                    Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code package {package} try {uploadTry}: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.");
+                                    errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code package {package} try {uploadTry}: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.");
                                     error = true;
                                     uploadTry++;
                                     continue;
                                 }
 
-                                YoutubeVideoPostResponse response = JsonConvert.DeserializeObject<YoutubeVideoPostResponse>(await message.Content.ReadAsStringAsync());
+                                YoutubeVideoPostResponse response = JsonConvert.DeserializeObject<YoutubeVideoPostResponse>(content);
                                 upload.VideoId = response.Id;
 
                                 //last stats update to reach 0 bytes and time left.

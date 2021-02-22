@@ -23,13 +23,13 @@ namespace Drexel.VidUp.Youtube.Thumbnail
 
                 HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
                 using (FileStream fs = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
-                using (StreamContent content = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
+                using (StreamContent streamcontent = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
                 {
                     HttpResponseMessage message;
                     try
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Add thumbnail.");
-                        message = await client.PostAsync($"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}", content);
+                        message = await client.PostAsync($"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}", streamcontent);
                     }
                     catch (Exception e)
                     {
@@ -40,10 +40,11 @@ namespace Drexel.VidUp.Youtube.Thumbnail
 
                     using (message)
                     {
+                        string content = await message.Content.ReadAsStringAsync();
                         if (!message.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.");
-                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase}.";
+                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.");
+                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.";
                             return false;
                         }
                     }
