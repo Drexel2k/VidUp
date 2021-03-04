@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Youtube.Authentication
 {
+    //based on: https://github.com/googlesamples/oauth-apps-for-windows/blob/master/OAuthDesktopApp/OAuthDesktopApp/MainWindow.xaml.cs
     public static class YoutubeAuthentication
     {
         private static string refreshToken;

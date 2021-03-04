@@ -742,8 +742,6 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             if (e.PropertyName == "UploadStatus")
             {
-                this.raisePropertyChanged("UploadErrorMessage");
-                this.raisePropertyChanged("ShowUploadErrorIcon");
                 this.raisePropertyChanged("UploadStatus");
                 this.raisePropertyChanged("UploadStatusColor");
                 this.raisePropertyChanged("UploadStatusColorAnimation");
@@ -785,6 +783,11 @@ namespace Drexel.VidUp.UI.ViewModels
             if (e.PropertyName == "Tags")
             {
                 this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
+
+            if (e.PropertyName == "UploadErrorMessage")
+            {
+                this.raisePropertyChanged("UploadErrorMessage");
             }
         }
 
