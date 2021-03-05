@@ -1,0 +1,10 @@
+{
+  "playlists": [
+    {
+      "playlistId": "FirstPlaylistId",
+      "name": "First Playlist",
+      "created": "2020-08-12T00:47:45.7617164+02:00",
+      "lastModified": "2020-08-12T00:47:45.7617164+02:00"
+    }
+  ]
+}

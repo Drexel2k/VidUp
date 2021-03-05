@@ -1,0 +1,28 @@
+{
+  "templates": [
+    {
+      "guid": "61ed37cf-2e7c-4f98-8348-9b469a76fc66",
+      "created": "2020-08-12T00:18:03.420888+02:00",
+      "lastModified": "2020-08-12T00:18:03.4228832+02:00",
+      "name": "First Template",
+      "title": "First Template Title",
+      "description": "First Template Description",
+      "tags": [
+        "Tag 1",
+        "Tag2"
+      ],
+      "visibility": "Private",
+      "uploads": [
+        "e1957955-c88b-4185-90f5-ce1c9fbfe08d"
+      ],
+      "imageFilePath": null,
+      "rootFolderPath": "{BaseDir}\\T1Root\\videos",
+      "thumbnailFolderPath": null,
+      "thumbnailFallbackFilePath": null,
+      "isDefault": false,
+      "playlist": "FirstPlaylistId",
+      "usePublishAtSchedule": false,
+      "publishAtSchedule": null
+    }
+  ]
+}

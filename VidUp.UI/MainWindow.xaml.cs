@@ -1,12 +1,9 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.UI.ViewModels;
-
-#endregion
+using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.UI
 {
@@ -18,39 +15,34 @@ namespace Drexel.VidUp.UI
     {
         public MainWindow()
         {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(exHandler);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.exHandler);
             InitializeComponent();
         }
 
         private void exHandler(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
+            Tracer.Write(e.ToString());
             MessageBox.Show(e.ToString(), "PRESS CTRL+C TO COPY!");
         }
 
-        private void Image_Drop(object sender, DragEventArgs e)
+        private void fileDrop(object sender, DragEventArgs e)
         {
-            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
+            Tracer.Write($"MainWindow.fileDrop: Start.");
+            base.OnDrop(e);
+
+            UploadListViewModel uploadListViewModel = (UploadListViewModel)((MainWindowViewModel)this.DataContext).CurrentViewModel;
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            Tracer.Write($"MainWindow.fileDrop: Dropped {files.Length} files.");
             List<Upload> uploads = new List<Upload>();
             foreach (string file in files)
             {
                 uploads.Add(new Upload(file));
             }
 
-            mainWindowViewModel.AddUploads(uploads);
-        }
-
-        private void CMainWindow_Activated(object sender, EventArgs e)
-        {
-            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
-            mainWindowViewModel.WindowActivated();
-        }
-
-        private void CMainWindow_Deactivated(object sender, EventArgs e)
-        {
-            MainWindowViewModel mainWindowViewModel = (MainWindowViewModel)this.DataContext;
-            mainWindowViewModel.WindowDeactivated();
+            uploadListViewModel.AddUploads(uploads);
+            Tracer.Write($"MainWindow.fileDrop: End.");
         }
     }
 }

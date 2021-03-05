@@ -3,16 +3,20 @@
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:Fluent="urn:fluent-ribbon"
                      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-                     Title="{Binding AppTitle}" 
-                     Width="1290" 
-                     MinHeight="600"
+                     Title="{Binding AppTitle}"
+                     Top="{Binding Path=WindowTop, Mode=TwoWay, Delay=500}"
+                     Left="{Binding WindowLeft, Mode=TwoWay, Delay=500}"
+                     Width="{Binding WindowWidth, Mode=TwoWay, Delay=500}" 
+                     Height="{Binding WindowHeight, Mode=TwoWay, Delay=500}"
                      xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
                      xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
                      xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
+                     xmlns:local="clr-namespace:Drexel.VidUp.UI"
+                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                      x:Name="CMainWindow"
-                     Icon="images/vidup.ico" Activated="CMainWindow_Activated" Deactivated="CMainWindow_Deactivated">
+                     Icon="images/vidup.ico">
     <Window.TaskbarItemInfo>
-        <TaskbarItemInfo ProgressValue="{Binding Mode=OneWay, Path=ProgressPercentage}" ProgressState="{Binding Mode=OneWay, Path=TaskbarItemProgressState}" />
+        <TaskbarItemInfo ProgressValue="{Binding Mode=OneWay, Path=TotalProgressPercentage}" ProgressState="{Binding Mode=OneWay, Path=TaskbarItemProgressState}" />
     </Window.TaskbarItemInfo>
 
     <Window.DataContext>
@@ -25,6 +29,17 @@
         <DataTemplate DataType="{x:Type vm:TemplateViewModel}">
             <controls:TemplateControl />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PlaylistViewModel}">
+            <controls:PlaylistControl />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:VidUpViewModel}"  />
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <controls:SettingsControl />
+        </DataTemplate>
+
+        <!-- booleans for command paramters-->
+        <system:Boolean x:Key="FalseValue">False</system:Boolean>
+        <system:Boolean x:Key="TrueValue">True</system:Boolean>
     </Window.Resources>
 
     <materialDesign:DialogHost Identifier="RootDialog">
@@ -36,65 +51,137 @@
             </Grid.RowDefinitions>
             <Fluent:Ribbon VerticalAlignment="Center" SelectedTabIndex="{Binding TabNo, Mode=TwoWay}">
                 <!--Tabs-->
-                <Fluent:RibbonTabItem Header="Upload" >
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[0]}" Header="Upload" >
                     <Fluent:RibbonGroupBox Header="Add Uploads">
                         <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Drag&amp;Drop Files Here">
-                        <Image Source="images/dragdrop.png" Drop="Image_Drop" AllowDrop="True" />
+                        <Image Source="images/dragdrop.png" Drop="fileDrop" AllowDrop="True" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Upload">
                         <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload.png"  Command="{Binding StartUploadingCommand}" />
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding AppStatus, Converter={converters:AppStatusIsUploadingConverter}}">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding DataContext.AppStatus, Converter={converters:AppStatusIsUploadingConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                                 <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
                             </Fluent:CheckBox>
-                            <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="images/stop-upload.png"  Command="{Binding StopUploadingCommand}" />
                     </Fluent:RibbonGroupBox>
-                    <Fluent:RibbonGroupBox Header="Remove Uploads">
+                    <Fluent:RibbonGroupBox Header="Recalculate Publish At Dates">
+
+                        <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/calendar.png" Command="{Binding RecalculatePublishAtCommand}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="22" />
+                                <RowDefinition Height="22" />
                             </Grid.RowDefinitions>
-                            <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Remove Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding RemoveUploadsCommand}" />
-                            <Grid Grid.Row="1" Grid.Column="0" >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="22" />
-                                    <RowDefinition Height="22" />
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">Status:</TextBlock>
-                                <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding RemoveUploadStatuses}" SelectedItem="{Binding RemoveUploadStatus}" Width="150">
-                                    <Fluent:ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>
-                                        </DataTemplate>
-                                    </Fluent:ComboBox.ItemTemplate>
-                                </Fluent:ComboBox>
-                                <TextBlock Grid.Row="1" Grid.Column="0" Margin="5 2 0 0">Template:</TextBlock>
-                                <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding RemoveTemplateViewModels}" SelectedItem="{Binding RemoveSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
-                            </Grid>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">Template:</TextBlock>
+                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAll}" SelectedItem="{Binding RecalculatePublishAtSelectedTemplate}" DisplayMemberPath="Name" Width="150" Grid.ColumnSpan="2"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="5 2 0 0">Start Date:</TextBlock>
+                            <Button Grid.Row="1" Grid.Column="1" Command="{Binding ResetRecalculatePublishAtStartDateCommand }"  Style="{StaticResource MaterialDesignRaisedLightButton}" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="10 5 2 0" Width="12" Height="12"  Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
+                                <Image Source="../Images/minus.png" />
+                            </Button>
+                            <DatePicker Grid.Row="1"  Grid.Column="1" Width="125" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding RecalculatePublishAtStartDate}" DisplayDateStart="{Binding RecalculatePublishAtFirstDate, Mode=OneWay}" HorizontalAlignment="Right">
+                                <DatePicker.Resources>
+                                    <Style x:Key="MaterialDesignDatePickerTextBox"
+                                           TargetType="DatePickerTextBox"
+                                           BasedOn="{StaticResource MaterialDesignDatePickerTextBox}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </Style>
+                                </DatePicker.Resources>
+                            </DatePicker>
                         </Grid>
-
+                    </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Remove Uploads">
+                        <!-- CommandParamter is to enable testing -->
+                        <Fluent:Button Header="Delete Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding DeleteUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="22" />
+                                <RowDefinition Height="22" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">Status:</TextBlock>
+                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding StatusesInclAll}" SelectedItem="{Binding DeleteSelectedUploadStatus}" Width="150">
+                                <Fluent:ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>
+                                    </DataTemplate>
+                                </Fluent:ComboBox.ItemTemplate>
+                            </Fluent:ComboBox>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="5 2 0 0">Template:</TextBlock>
+                            <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding DeleteSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
+                        </Grid>
+                    </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Reset Uploads">
+                        <!-- CommandParamter is to enable testing -->
+                        <StackPanel Orientation="Horizontal">
+                        <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="images/reset.png" Command="{Binding ResetUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                        <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetToUploadStatuses}" SelectedItem="{Binding ResetToSelectedUploadStatus}" Width="150">
+                            <Fluent:ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>
+                                </DataTemplate>
+                            </Fluent:ComboBox.ItemTemplate>
+                        </Fluent:ComboBox>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="22" />
+                                <RowDefinition Height="22" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 2 0 0">With Status:</TextBlock>
+                            <Fluent:ComboBox Grid.Row="0" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding StatusesInclAll}" SelectedItem="{Binding ResetWithSelectedUploadStatus}" Width="150">
+                                <Fluent:ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={converters:UplStatusStringValuesConverter}}"/>
+                                    </DataTemplate>
+                                </Fluent:ComboBox.ItemTemplate>
+                            </Fluent:ComboBox>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="5 2 0 0">With Template:</TextBlock>
+                            <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding ResetWithSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
+                        </Grid>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem Header="Templates" >
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[1]}" Header="Templates" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
-                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="NameWithDefaultIndicator"/>
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="NameWithDefaultIndicator" IsEditable="False" />
                         <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="images/file-document-box-plus.png" Command="{Binding NewTemplateCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem Header="VidUp" >
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[2]}" Header="Playlists" >
+                    <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/list-edit.png" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" IsEditable="False" />
+                        <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="images/list-plus.png" Command="{Binding NewPlaylistCommand}" />
+                    </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Update" VerticalContentAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <Fluent:Button Header="Set Playlists" SizeDefinition="Middle,Middle,Small" Icon="images/list-auto.png"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlists to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding AutoSetPlaylists}">
+                                <TextBlock Margin="0 4 0 0">Auto Set Playlists</TextBlock>
+                            </Fluent:CheckBox>
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="If checked, playlists will be set to published videos automatically every 12 hours when app is running. Will be done at app start, if last attempt is longer ago than 12 hours." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
+                    </Fluent:RibbonGroupBox>
+                </Fluent:RibbonTabItem>
+                <Fluent:RibbonTabItem Header="Settings">
+                </Fluent:RibbonTabItem>
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[4]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">
                         <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="images/handshake48.png" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
                     </Fluent:RibbonGroupBox>
@@ -102,17 +189,12 @@
                         <Fluent:Button Header="About" SizeDefinition="Middle,Middle,Small" Icon="images/about.png"  Command="{Binding AboutCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <!--<Fluent:RibbonTabItem Header="Settings">
-                    <Fluent:RibbonGroupBox Header="Youtube">
-                        <Fluent:Button Header="Account Settings" LargeIcon="images/youtube.png" />
-                    </Fluent:RibbonGroupBox>
-                </Fluent:RibbonTabItem>-->
             </Fluent:Ribbon>
 
             <Grid Grid.Row="1">
-                
-                <ContentControl Content="{Binding CurrentView}" />
+                <ContentControl VerticalAlignment="Top"  HorizontalAlignment="Left" Content="{Binding CurrentViewModel}" />
             </Grid>
+
             <StackPanel Grid.Row="2" Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="App Status: " />
@@ -126,10 +208,10 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Action performed after all uploads are finished." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Action performed after all uploads are finished." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     <Label Content="Max Upload: " />
                     <TextBox Text="{Binding MaxUploadInKiloBytesPerSecond, UpdateSourceTrigger=PropertyChanged, Delay=500}" Width="70" />
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 256, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 256, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 </StackPanel>
                 <Grid>
                     <Grid.RowDefinitions>

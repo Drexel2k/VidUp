@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="Drexel.VidUp.UI.Controls.SettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="clr-namespace:Drexel.VidUp.UI"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             x:Name="UCSettings"
+             IsEnabled="{Binding PlaylistSet}">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" Margin="4">
+        <Grid Height="Auto" Width="Auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <GroupBox Grid.Row="0" Grid.Column="0" Padding="0">
+                <GroupBox.Header>
+                    <TextBlock Text="GENERAL" Margin="2" />
+                </GroupBox.Header>
+
+                <Grid Height="Auto" Width="620" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="3">
+                        <ToggleButton IsChecked="{Binding Tracing}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
+                        <Label Content="Enable Tracing " Width="87" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Trace information in Documents\VidUp\trace.txt, may contain useful information on problems." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="1" Padding="0" Margin="0,10,0,0">
+                <GroupBox.Header>
+                    <TextBlock Text="VIDEO LANGUAGE FILTER" Margin="2" />
+                </GroupBox.Header>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Set used video languages to limit list in Video Language dropdown:" HorizontalAlignment="Left" Width="368" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Nothing selected means no filter at all." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Search: "/>
+                        <TextBox x:Name="Title" Width="150"  Text="{Binding SearchText, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
+                    </StackPanel>
+
+                    <ListView MaxHeight="300" MinWidth="500" ItemsSource="{Binding ObservableCultureInfoViewModels}" HorizontalAlignment="Left" HorizontalContentAlignment="Left">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <ToggleButton IsChecked="{Binding IsChecked}" />
+                                    <Label Content="{Binding DisplayName}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

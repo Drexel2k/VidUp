@@ -15,15 +15,32 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateList templateList;
         private List<TemplateComboboxViewModel> templateComboboxViewModels;
 
-        public int TemplateCount { get => templateComboboxViewModels.Count;  }
+        public int TemplateCount { get => this.templateComboboxViewModels.Count;  }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public ObservableTemplateViewModels(TemplateList templateList)
+        public ObservableTemplateViewModels(TemplateList templateList, bool addAll, bool addNone)
         {
             this.templateList = templateList;
 
             this.templateComboboxViewModels = new List<TemplateComboboxViewModel>();
+
+            if (addAll)
+            {
+                Template allTemplate = new Template("All");
+                TemplateComboboxViewModel allViewModel = new TemplateComboboxViewModel(allTemplate);
+
+                this.templateComboboxViewModels.Add(allViewModel);
+            }
+
+            if(addNone)
+            {
+                Template noneTemplate = new Template("None");
+                TemplateComboboxViewModel noViewModel = new TemplateComboboxViewModel(noneTemplate);
+
+                this.templateComboboxViewModels.Add(noViewModel);
+            }
+
             foreach (Template template in templateList)
             {
                 TemplateComboboxViewModel templateViewModel = new TemplateComboboxViewModel(template);

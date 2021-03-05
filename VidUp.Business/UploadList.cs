@@ -1,15 +1,13 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
-
-#endregion
 
 namespace Drexel.VidUp.Business
 {
@@ -25,8 +23,11 @@ namespace Drexel.VidUp.Business
         public event PropertyChangedEventHandler PropertyChanged;
         private CheckFileUsage checkFileUsage;
         private string thumbnailFallbackImageFolder;
+        private TemplateList templateList;
 
-        public long TotalBytesToUpload
+        public int UploadCount { get => this.uploads.Count; }
+
+        public long TotalBytesOfFilesToUpload
         {
             get
             {
@@ -40,7 +41,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public long TotalBytesToUploadRemaining
+        public long RemainingBytesOfFilesToUpload
         {
             get
             {
@@ -62,7 +63,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public long TotalBytesToUploadIncludingResumable
+        public long TotalBytesOfFilesToUploadIncludingResumable
         {
             get
             {
@@ -78,7 +79,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public long TotalBytesToUploadIncludingResumableRemaining
+        public long RemainingBytesOfFilesToUploadIncludingResumable
         {
             get
             {
@@ -87,13 +88,16 @@ namespace Drexel.VidUp.Business
                     upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
                     upload.UploadStatus == UplStatus.Stopped ||upload.UploadStatus== UplStatus.Failed))
                 {
-                    if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                    if (File.Exists(upload.FilePath))
                     {
-                        length += upload.FileLength;
-                    }
-                    else
-                    {
-                        length += upload.FileLength - upload.BytesSent;
+                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            length += upload.FileLength;
+                        }
+                        else
+                        {
+                            length += upload.FileLength - upload.BytesSent;
+                        }
                     }
                 }
 
@@ -109,34 +113,49 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string ThumbnailFallbackImageFolder
-        {
-            set
-            {
-                this.thumbnailFallbackImageFolder = value;
-            }
-        }
+        public ReadOnlyCollection<Upload> Uploads { get => this.uploads.AsReadOnly(); }
 
-        public UploadList()
+        public UploadList(List<Upload> uploads, TemplateList templateList, string thumbnailFallbackImageFolder)
         {
+            this.templateList = templateList;
+
             this.uploads = new List<Upload>();
+            if (uploads != null)
+            {
+                this.uploads = uploads;
+                foreach (Upload upload in this.uploads)
+                {
+                    upload.PropertyChanged += uploadPropertyChanged;
+                }
+            }
+
+            this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        public void AddUploads(List<Upload> uploads, TemplateList templateList)
+        public void AddUploads(List<Upload> uploads)
         {
-            foreach(Upload upload in uploads)
+            Tracer.Write($"UploadList.AddUploads: Start, add {uploads.Count} uploads.");
+            foreach (Upload upload in uploads)
             {
-                Template template = templateList.GetTemplateForUpload(upload);
+                Tracer.Write($"UploadList.AddUploads: Add '{upload.FilePath}'.");
+                Template template = this.templateList.GetTemplateForUpload(upload);
                 if (template != null)
                 {
+                    Tracer.Write($"UploadList.AddUploads: Template '{template.Name}' found for upload.");
                     upload.Template = template;
                 }
                 else
                 {
-                    template = templateList.GetDefaultTemplate();
+                    Tracer.Write($"UploadList.AddUploads: No template found for upload, try to get default template.");
+                    template = this.templateList.GetDefaultTemplate();
                     if (template != null)
                     {
+                        Tracer.Write($"UploadList.AddUploads: Default template '{template.Name}' found.");
                         upload.Template = template;
+                    }
+                    else
+                    {
+                        Tracer.Write($"UploadList.AddUploads: No default template found.");
                     }
                 }
 
@@ -150,24 +169,20 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, uploads));
+            Tracer.Write($"UploadList.AddUploads: End.");
         }
 
-        //after deserialiatzion
-        public void SetEventListeners()
+        public void DeleteUploads(Predicate<Upload> predicate)
         {
-            foreach (Upload upload in uploads)
-            {
-                upload.PropertyChanged += uploadPropertyChanged;
-            }
-        }
-
-        public void RemoveUploads(Predicate<Upload> predicate)
-        {
+            Tracer.Write($"UploadList.DeleteUploads: Start.");
             List<Upload> oldUploads = this.uploads.FindAll(predicate);
+
+            Tracer.Write($"UploadList.DeleteUploads: Delete {oldUploads.Count} uploads from upload list.");
             this.uploads.RemoveAll(predicate);
 
             foreach (Upload upload in oldUploads)
             {
+                Tracer.Write($"UploadList.DeleteUploads: Delete upload '{upload.FilePath}'.");
                 if (upload.UploadStatus != UplStatus.Finished && upload.Template != null)
                 {
                     upload.Template = null;
@@ -183,6 +198,7 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldUploads));
+            Tracer.Write($"UploadList.DeleteUploads: Ende.");
         }
 
         private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -282,6 +298,17 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public void RemovePlaylist(Playlist playlist)
+        {
+            foreach (Upload upload in this.uploads)
+            {
+                if (upload.Playlist == playlist)
+                {
+                    upload.Playlist = null;
+                }
+            }
+        }
+
         public Upload GetUpload(int index)
         {
             return this.uploads[index];
@@ -292,14 +319,14 @@ namespace Drexel.VidUp.Business
             return this.uploads.Find(match);
         }
 
+        public List<Upload> GetUploads(Predicate<Upload> match)
+        {
+            return this.uploads.Where(upload => match(upload)).ToList();
+        }
+
         public int FindIndex(Predicate<Upload> predicate)
         {
             return this.uploads.FindIndex(predicate);
-        }
-
-        public ReadOnlyCollection<Upload> GetReadyOnlyUploadList()
-        {
-            return this.uploads.AsReadOnly();
         }
 
         public IEnumerator<Upload> GetEnumerator()
@@ -357,6 +384,14 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.uploads[targetIndex] = uploadToMove;
+            }
+        }
+
+        public void SetStartDateOnAllTemplateSchedules(DateTime startDate)
+        {
+            foreach (Template template in this.templateList)
+            {
+                template.SetStartDateOnTemplateSchedule(startDate);
             }
         }
     }

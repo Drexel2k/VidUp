@@ -1,36 +1,52 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Remoting.Messaging;
 using System.Windows.Forms;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
-
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    class UploadViewModel : INotifyPropertyChanged
+    public class UploadViewModel : INotifyPropertyChanged
     {
         private Upload upload;
         private QuarterHourViewModels quarterHourViewModels;
 
         private GenericCommand pauseCommand;
         private GenericCommand resetStateCommand;
-        private GenericCommand noTemplateCommand;
+        private GenericCommand removeComboBoxValueCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetThumbnailCommand;
         private GenericCommand resetToTemplateValueCommand;
 
         private ObservableTemplateViewModels observableTemplateViewModels;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
+
+        //need for determination of upload status color
+        private bool resumeUploads;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public ObservableTemplateViewModels ObservableTemplateViewModels
+        {
+            get
+            {
+                return this.observableTemplateViewModels;
+            }
+        }
+
+        public ObservablePlaylistViewModels ObservablePlaylistViewModels
+        {
+            get
+            {
+                return this.observablePlaylistViewModels;
+            }
+        }
 
         public string Guid
         {
@@ -53,11 +69,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand NoTemplateCommand
+        public GenericCommand RemoveComboBoxValueCommand
         {
             get
             {
-                return this.noTemplateCommand;
+                return this.removeComboBoxValueCommand;
             }
         }
 
@@ -90,9 +106,81 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.UploadStatus;
         }
 
+        public SolidColorBrush UploadStatusColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.UploadStatus == UplStatus.Finished || this.upload.UploadStatus == UplStatus.Uploading)
+                {
+                    color = Colors.Lime;
+                }
+
+                if (this.upload.UploadStatus == UplStatus.ReadyForUpload)
+                {
+                    color = Colors.Gold;
+                }
+
+                if (this.upload.UploadStatus == UplStatus.Failed || this.upload.UploadStatus == UplStatus.Stopped)
+                {
+                    if (this.resumeUploads)
+                    {
+                        color = Colors.Gold;
+                    }
+                    else
+                    {
+                        color = Colors.Transparent;
+                    }
+                }
+
+                if (this.upload.UploadStatus == UplStatus.Paused)
+                {
+                    color = Colors.Transparent;
+                }
+
+                return new SolidColorBrush(color);
+            }
+        }
+
+        public bool UploadStatusColorAnimation
+        {
+            get
+            {
+                if ( this.upload.UploadStatus == UplStatus.Uploading)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+
         public string FilePath
         {
             get => this.upload.FilePath;
+        }
+
+        public bool StateCommandsEnabled
+        {
+            get
+            {
+                if (this.UploadStatus != UplStatus.Uploading)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool ResetStateCommandEnabled
+        {
+            get
+            {
+                return this.StateCommandsEnabled && this.upload.VerifyForUpload();
+            }
         }
 
         public TemplateComboboxViewModel SelectedTemplate
@@ -100,12 +188,17 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.observableTemplateViewModels.GetViewModel(this.upload.Template);
             set
             {
-                //combobox handling initiated in code behind
-                this.upload.Template = value.Template;
-                
-                this.SerializeAllUploads();
-                this.SerializeTemplateList();
+                if (value == null)
+                {
+                    this.upload.Template = null;
+                }
+                else
+                {
+                    this.upload.Template = value.Template;
+                }
 
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                //if template changes all values are set to template values
                 this.raisePropertyChanged(null);
             }
         }
@@ -124,9 +217,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.UploadStart > DateTime.MinValue)
+                if (this.upload.UploadStart != null)
                 {
-                    return this.upload.UploadStart.ToString("g");
+                    return this.upload.UploadStart.Value.ToString("g");
                 }
 
                 return null;
@@ -137,9 +230,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.UploadEnd > DateTime.MinValue)
+                if (this.upload.UploadEnd != null)
                 {
-                    return this.upload.UploadEnd.ToString("g");
+                    return this.upload.UploadEnd.Value.ToString("g");
                 }
 
                 return null;
@@ -165,23 +258,59 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string YtTitle
-        {
-            get => this.upload.YtTitle;
-        }
-
         public string Title
         {
             get => this.upload.Title;
             set
             {
                 this.upload.Title = value;
-                this.SerializeAllUploads();
 
-                this.raisePropertyChanged("YtTitle");
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("Title");
+                this.raisePropertyChanged("YtTitle");
+                this.raisePropertyChanged("TitleColor");
+                this.raisePropertyChanged("TitleCharacterCount");
             }
         }
+
+        public string YtTitle
+        {
+            get
+            {
+                if (this.upload.Title.Length <= YoutubeLimits.TitleLimit)
+                {
+                    return this.upload.Title;
+                }
+                else
+                {
+                    return this.upload.Title.Substring(0, YoutubeLimits.TitleLimit);
+                }
+            }
+        }
+
+        public string TitleCharacterCount
+        {
+            get
+            {
+                return this.upload.Title.Length.ToString("N0", CultureInfo.CurrentCulture);
+            }
+        }
+
+        public SolidColorBrush TitleColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.Title.Length > YoutubeLimits.TitleLimit)
+                {
+                    color = Colors.Red;
+                }
+                
+                return new SolidColorBrush(color);
+            }
+        }
+
 
         public string Description
         {
@@ -189,33 +318,80 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Description = value;
-                this.SerializeAllUploads();
-
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("Description");
+                this.raisePropertyChanged("DescriptionColor");
+                this.raisePropertyChanged("DescriptionCharacterCount");
             }
         }
+
+        public string DescriptionCharacterCount
+        {
+            get
+            {
+                return this.upload.Description != null ? 
+                    this.upload.Description.Length.ToString("N0", CultureInfo.CurrentCulture) : 0.ToString("N0", CultureInfo.CurrentCulture);
+            }
+        }
+
+        public SolidColorBrush DescriptionColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.Description != null && this.upload.Description.Length > YoutubeLimits.DescriptionLimit)
+                {
+                    color = Colors.Red;
+                }
+
+                return new SolidColorBrush(color);
+            }
+        }
+
+        public string MaxDescriptionCharacters
+        {
+            get
+            {
+                return $"/ {YoutubeLimits.DescriptionLimit.ToString("N0", CultureInfo.CurrentCulture)}";
+            }
+        }
+
 
         public string TagsAsString
         {
             get => string.Join(",", this.upload.Tags);
             set
             {
-                this.upload.Tags = new List<string>(value.Split(','));
-                this.SerializeAllUploads();
-
+                this.upload.Tags.Clear();
+                this.upload.Tags.AddRange(value.Split(','));
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("TagsAsString");
+                this.raisePropertyChanged("TagsColor");
+                this.raisePropertyChanged("TagsCharacterCount");
             }
         }
 
-        public List<string> Tags
+        public string TagsCharacterCount
         {
-            get => this.upload.Tags;
-            set
+            get
             {
-                this.upload.Tags = value;
-                this.SerializeAllUploads();
+                return this.upload.TagsCharacterCount.ToString("N0", CultureInfo.CurrentCulture);
+            }
+        }
 
-                this.raisePropertyChanged("TagsAsString");
+        public SolidColorBrush TagsColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.TagsCharacterCount > YoutubeLimits.TagsLimit)
+                {
+                    color = Colors.Red;
+                }
+
+                return new SolidColorBrush(color);
             }
         }
 
@@ -227,36 +403,52 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public Visibility Visibility
+        public Visibility SelectedVisibility
         {
             get => this.upload.Visibility;
             set
             {
-                if (value != Visibility.Private && this.Visibility == Visibility.Private)
-                {
-                    if (this.PublishAt)
-                    {
-                        this.PublishAt = false;
-                    }
-                }
-
-                this.upload.Visibility = value;
-
-                this.SerializeAllUploads();
-
-                this.raisePropertyChanged("Visibility");
+                this.setSelectedVisibilityInternal(value, true);
             }
         }
 
-        public string PlaylistId
+        private void setSelectedVisibilityInternal(Visibility value, bool serialize)
         {
-            get => this.upload.PlaylistId;
+            if (value != Visibility.Private && this.SelectedVisibility == Visibility.Private)
+            {
+                if (this.PublishAt)
+                {
+                    this.setPublishAtInternal(false, false);
+                }
+            }
+
+            this.upload.Visibility = value;
+
+            if (serialize)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            }
+
+            this.raisePropertyChanged("SelectedVisibility");
+        }
+
+        public PlaylistComboboxViewModel SelectedPlaylist
+        {
+            get => this.observablePlaylistViewModels.GetViewModel(this.upload.Playlist);
             set
             {
-                this.upload.PlaylistId = value;
-                this.SerializeAllUploads();
+                if (value == null)
+                {
+                    this.upload.Playlist = null;
+                }
+                else
+                {
+                    this.upload.Playlist = value.Playlist;
+                }
 
-                this.raisePropertyChanged("PlaylistId");
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("ShowPlaylistHint");
+                this.raisePropertyChanged("SelectedPlaylist");
             }
         }
 
@@ -265,36 +457,25 @@ namespace Drexel.VidUp.UI.ViewModels
             get => $"{((float)this.upload.FileLength / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
         }
 
+        public SolidColorBrush FileSizeColor
+        {
+            get
+            {
+                Color color = Colors.Transparent;
+
+                if (this.upload.FileLength > YoutubeLimits.FileSizeLimit)
+                {
+                    color = Colors.Red;
+                }
+
+                return new SolidColorBrush(color);
+            }
+        }
+
         public string UploadedInMegaByte
         {
             get => $"{((float)this.upload.BytesSent / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
         }
-
-        public string ShowFileNotExistsIcon
-        {
-            get
-            {
-                if (File.Exists(this.upload.FilePath))
-                {
-                    return "Collapsed";
-                }
-
-                return "Visible";
-            }
-        }
-
-        public string ShowThumbnailNotExistsIcon
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(this.upload.ThumbnailFilePath) || File.Exists(this.upload.ThumbnailFilePath))
-                {
-                    return "Collapsed";
-                }
-
-                return "Visible";
-            }
-        } 
 
         public string UploadErrorMessage
         {
@@ -308,7 +489,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (!(this.upload.UploadStatus == UplStatus.Finished))
+                if (string.IsNullOrWhiteSpace(this.upload.ResumableSessionUri))
                 {
                     return true;
                 }
@@ -321,8 +502,7 @@ namespace Drexel.VidUp.UI.ViewModels
         public void SetPublishAtTime(TimeSpan quarterHour)
         {
             this.upload.SetPublishAtTime(quarterHour);
-
-            this.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             this.raisePropertyChanged("PublishAtTime");
         }
 
@@ -337,7 +517,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                if (this.upload.PublishAt.Date == DateTime.MinValue)
+                if (this.upload.PublishAt == null)
                 {
                     return false;
                 }
@@ -349,67 +529,84 @@ namespace Drexel.VidUp.UI.ViewModels
 
             set
             {
-                if (value && !this.PublishAt)
-                {
-                    if (this.Visibility != Visibility.Private)
-                    {
-                        this.Visibility = Visibility.Private;
-                    }
-                }
-
-                if (this.upload.PublishAt.Date == DateTime.MinValue)
-                {
-                    this.upload.SetPublishAtDate(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1));
-                }
-                else
-                {
-                    this.upload.SetPublishAtDate(DateTime.MinValue);
-                    this.upload.SetPublishAtTime(new TimeSpan());
-                }
-
-                this.SerializeAllUploads();
-
-                this.raisePropertyChanged("PublishAt");
-                this.raisePropertyChanged("PublishAtTime");
-                this.raisePropertyChanged("PublishAtDate");
+                this.setPublishAtInternal(value, true);
             }
+        }
+
+        private void setPublishAtInternal(bool value, bool serialize)
+        {
+            if (value && !this.PublishAt)
+            {
+                if (this.SelectedVisibility != Visibility.Private)
+                {
+                    this.SelectedVisibility = Visibility.Private;
+                }
+            }
+
+            if (value)
+            {
+                //default publish at is 24 hour in the future
+                this.upload.PublishAt = QuarterHourCalculator.GetRoundedToNextQuarterHour
+                (new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour,
+                    DateTime.Now.Minute, 0).AddHours(24));
+            }
+            else
+            {
+                this.upload.PublishAt = null;
+            }
+
+            if (serialize)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            }
+
+            this.raisePropertyChanged("PublishAt");
+            this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+            this.raisePropertyChanged("PublishAtTime");
+            this.raisePropertyChanged("PublishAtDate");
         }
 
         public QuarterHourViewModel PublishAtTime
         {
             get
             {
-                return this.quarterHourViewModels.GetQuarterHourViewModel(this.upload.PublishAt.TimeOfDay);
-            }
-        }
-
-        public DateTime PublishAtDate
-        {
-            get
-            {
-                if (this.upload.PublishAt.Date == DateTime.MinValue)
-                {
-                    return DateTime.Now.AddDays(1);
-                }
-                else
-                {
-                    return this.upload.PublishAt;
-                }
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.upload.PublishAt != null ? this.upload.PublishAt.Value.TimeOfDay : TimeSpan.MinValue);
             }
             set
             {
-                this.upload.SetPublishAtDate(value);
-                this.SerializeAllUploads();
+                if (this.Upload.PublishAt.Value.TimeOfDay != value.QuarterHour)
+                {
+                    this.SetPublishAtTime(value.QuarterHour.Value);
+                }
+            }
+        }
 
+        public DateTime? PublishAtDate
+        {
+            get
+            {
+                return this.upload.PublishAt;
+            }
+            set
+            {
+                this.upload.SetPublishAtDate(value.Value);
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("PublishAtDate");
             }
         }
 
-        public DateTime PublishAtFirstDate
+        public bool PublishAtDateTimeControlsEnabled
         {
             get
             {
-                return DateTime.Now.AddDays(1);
+                if (!this.ControlsEnabled)
+                {
+                    return false;
+                }
+                else
+                {
+                    return this.upload.PublishAt != null;
+                }
             }
         }
 
@@ -424,88 +621,216 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 string oldFilePath = this.upload.ThumbnailFilePath;
                 this.upload.ThumbnailFilePath = value;
+
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("ThumbnailFilePath");
             }
         }
 
-        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels)
+        public bool ResumeUploads
         {
+            set
+            {
+                this.resumeUploads = value; 
+                this.raisePropertyChanged("UploadStatusColor");
+            }
+        }
+
+        public List<CultureInfo> VideoLanguages
+        {
+            get => Cultures.RelevantCultureInfos;
+        }
+
+        public CultureInfo SelectedVideoLanguage
+        {
+            get => this.upload.VideoLanguage;
+            set
+            {
+                this.upload.VideoLanguage = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("SelectedVideoLanguage");
+            }
+        }
+
+        public Category[] Categories
+        {
+            get => Category.Categories;
+        }
+
+        public Category SelectedCategory
+        {
+            get => this.upload.Category;
+            set
+            {
+                this.upload.Category = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("SelectedCategory");
+            }
+        }
+
+        public string ShowPlaylistHint
+        {
+            get
+            {
+                if (this.upload.Playlist == null && this.upload.Template != null && this.upload.Template.SetPlaylistAfterPublication && this.upload.Template.Playlist != null)
+                {
+                    return "Visible";
+                }
+
+                return "Collapsed";
+            }
+        }
+
+        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads)
+        {
+            if (observableTemplateViewModels == null)
+            {
+                throw new ArgumentException("ObservableTemplateViewModels must not be null.");
+            }
+
+            if (observablePlaylistViewModels == null)
+            {
+                throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
+            }
+
             this.upload = upload;
-            this.observableTemplateViewModels = observableTemplateViewModels;
             this.upload.PropertyChanged += this.uploadPropertyChanged;
+
+            this.observableTemplateViewModels = observableTemplateViewModels;
+            this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.resumeUploads = resumeUploads;
 
             this.quarterHourViewModels = new QuarterHourViewModels(false);
 
-            this.resetStateCommand = new GenericCommand(this.resetUploadState);
+            this.resetStateCommand = new GenericCommand(this.resetUploadStateCommand);
             this.pauseCommand = new GenericCommand(this.setPausedUploadState);
-            this.noTemplateCommand = new GenericCommand(this.setTemplateToNull);
+            this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
             this.openFileDialogCommand = new GenericCommand(this.openThumbnailDialog);
             this.resetThumbnailCommand = new GenericCommand(this.resetThumbnail);
-            this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateVuale);
+            this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateValue);
         }
+
+        private void removeComboBoxValue(object parameter)
+        {
+            if (!this.ControlsEnabled)
+            {
+                MessageBox.Show("Upload cannot be modified if upload is started.");
+                return;
+            }
+
+            switch (parameter)
+            {
+                case "template":
+                    this.SelectedTemplate = null;
+                    break;
+                case "playlist":
+                    this.SelectedPlaylist = null;
+                    break;
+                case "videolanguage":
+                    this.SelectedVideoLanguage = null;
+                    break;
+                case "category":
+                    this.SelectedCategory = null;
+                    break;
+                default:
+                    throw new InvalidOperationException("No parameter for removeComboBoxValue specified.");
+                    break;
+            }
+        }
+
         private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "UploadStatus")
             {
-                this.raisePropertyChanged("UploadErrorMessage");
-                this.raisePropertyChanged("ShowUploadErrorIcon");
                 this.raisePropertyChanged("UploadStatus");
+                this.raisePropertyChanged("UploadStatusColor");
+                this.raisePropertyChanged("UploadStatusColorAnimation");
                 this.raisePropertyChanged("UploadStart");
                 this.raisePropertyChanged("UploadEnd");
-                this.raisePropertyChanged("ControlsEnabled");
+                this.raisePropertyChanged("StateCommandsEnabled");
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
 
-                return;
+            if (e.PropertyName == "ResumableSessionUri")
+            {
+                this.raisePropertyChanged("ControlsEnabled");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
             }
 
             if (e.PropertyName == "BytesSent")
             {
                 this.raisePropertyChanged("UploadedInMegaByte");
             }
+
+            if (e.PropertyName == "PublishAt")
+            {
+                this.raisePropertyChanged("PublishAt");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+                this.raisePropertyChanged("PublishAtTime");
+                this.raisePropertyChanged("PublishAtDate");
+            }
+
+            if (e.PropertyName == "Title")
+            {
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
+
+            if (e.PropertyName == "Description")
+            {
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
+
+            if (e.PropertyName == "Tags")
+            {
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+            }
+
+            if (e.PropertyName == "UploadErrorMessage")
+            {
+                this.raisePropertyChanged("UploadErrorMessage");
+            }
         }
 
         private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
-            PropertyChangedEventHandler handler = PropertyChanged;
+            PropertyChangedEventHandler handler = this.PropertyChanged;
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 
-        public void SerializeAllUploads()
+        private void resetUploadStateCommand(object parameter)
         {
-            JsonSerialization.SerializeAllUploads();
+            this.resetUploadState();
         }
 
-        public void SerializeTemplateList()
+        private bool resetUploadState()
         {
-            JsonSerialization.SerializeTemplateList();
-        }
+            if (!this.upload.VerifyForUpload())
+            {
+                return false;
+            }
 
-        private void resetUploadState(object parameter)
-        {
-            this.upload.UploadStatus = UplStatus.ReadyForUpload;
-            JsonSerialization.SerializeAllUploads();
+            if (this.upload.BytesSent > 0 && this.upload.UploadStatus != UplStatus.Stopped &&
+                this.upload.UploadStatus != UplStatus.Finished)
+            {
+                this.upload.UploadStatus = UplStatus.Stopped;
+            }
+            else
+            {
+                this.upload.UploadStatus = UplStatus.ReadyForUpload;
+            }
+
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            return true;
         }
 
         private void setPausedUploadState(object parameter)
         {
             this.upload.UploadStatus = UplStatus.Paused;
-            JsonSerialization.SerializeAllUploads();
-        }
-
-        private void setTemplateToNull(object parameter)
-        {
-            if (this.UploadStatus == UplStatus.Finished)
-            {
-                MessageBox.Show("Template cannot be removed if upload is finished. Please clear upload list from finished uploads.");
-                return;
-            }
-
-            this.SelectedTemplate = null;
-            JsonSerialization.SerializeAllUploads();
-            JsonSerialization.SerializeTemplateList();
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void openThumbnailDialog(object parameter)
@@ -546,7 +871,6 @@ namespace Drexel.VidUp.UI.ViewModels
             if (result == DialogResult.OK)
             {
                 this.ThumbnailFilePath = fileDialog.FileName;
-                JsonSerialization.SerializeAllUploads();
             }
         }
 
@@ -561,8 +885,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.ThumbnailFilePath = null;
         }
 
-
-        private void resetToTemplateVuale(object parameter)
+        private void resetToTemplateValue(object parameter)
         {
             if (this.upload.Template != null)
             { 
@@ -570,32 +893,43 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     case "title":
                         this.upload.CopyTitleFromTemplate();
-                        raisePropertyChanged("Title");
-                        raisePropertyChanged("YtTitle");
+                        this.raisePropertyChanged("Title");
+                        this.raisePropertyChanged("YtTitle");
                         break;
                     case "description":
                         this.upload.CopyDescriptionFromTemplate();
-                        raisePropertyChanged("Description");
+                        this.raisePropertyChanged("Description");
                         break;
                     case "tags":
                         this.upload.CopyTagsFromtemplate();
-                        raisePropertyChanged("TagsAsString");
+                        this.raisePropertyChanged("TagsAsString");
                         break;
                     case "visibility":
-                        this.upload.CopyVisbilityFromTemplate();
-                        raisePropertyChanged("Visibility");
+                        this.upload.CopyVisibilityFromTemplate();
+                        this.raisePropertyChanged("Visibility");
                         break;
                     case "playlist":
-                        this.upload.CopyPlaylistIdFromTemplate();
-                        raisePropertyChanged("PlaylistId");
+                        this.upload.CopyPlaylistFromTemplate();
+                        this.raisePropertyChanged("PlaylistId");
+                        break;
+                    case "videolanguage":
+                        this.upload.CopyVideoLanguageFromTemplate();
+                        this.raisePropertyChanged("VideoLanguage");
+                        break;
+                    case "category":
+                        this.upload.CopyCategoryFromTemplate();
+                        this.raisePropertyChanged("Category");
+                        break;
+                    case "all":
+                        this.upload.CopyTemplateValues();
+                        this.raisePropertyChanged(null);
                         break;
                     default:
-                        this.upload.CopyTemplateValues();
-                        raisePropertyChanged(null);
+                        throw new InvalidOperationException("No parameter for resetToTemplateValue specified.");
                         break;
                 }
 
-                JsonSerialization.SerializeAllUploads();
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             }
         }
     }

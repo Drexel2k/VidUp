@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,8 +7,6 @@ using System.ComponentModel;
 using System.IO;
 using Newtonsoft.Json;
 
-#endregion
-
 namespace Drexel.VidUp.Business
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -18,8 +14,7 @@ namespace Drexel.VidUp.Business
     {
         [JsonProperty]
         private List<Template> templates;
-        private string templatesImagesStorageFolder;
-        private string thumbnailFallbackStorageFolder;
+        private string templateImageFolder;
         private string thumbnailFallbackImageFolder;
         private CheckFileUsage checkFileUsage;
 
@@ -27,14 +22,6 @@ namespace Drexel.VidUp.Business
         public event PropertyChangedEventHandler PropertyChanged;
 
         public int TemplateCount { get => this.templates.Count; }
-
-        public string ThumbnailFallbackImageFolder
-        {
-            set
-            {
-                this.thumbnailFallbackImageFolder = value;
-            }
-        }
 
         public CheckFileUsage CheckFileUsage
         {
@@ -44,30 +31,26 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public TemplateList(List<Template> templates, string templatesImagesStorageFolder, string thumbnailFallbackStorageFolder) : this(templatesImagesStorageFolder, thumbnailFallbackStorageFolder)
+        public TemplateList(List<Template> templates, string templateImageFolder, string thumbnailFallbackImageFolder)
         {
-            if(templates != null)
+            this.templateImageFolder = templateImageFolder;
+            this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
+
+            this.templates = new List<Template>();
+
+            if (templates != null)
             {
                 this.templates = templates;
 
                 foreach(Template template in templates)
                 {
                     template.PropertyChanged += templatePropertyChanged;
-                    template.TemplateList = this;
                 }
             }
         }
 
-        public TemplateList(string templatesImagesStorageFolder, string thumbnailFallbackFilePath)
-        {
-            this.templatesImagesStorageFolder = templatesImagesStorageFolder;
-            this.thumbnailFallbackStorageFolder = thumbnailFallbackFilePath;
-            this.templates = new List<Template>();
-        }
-
         private void templatePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-
             if (e.PropertyName == "IsDefault")
             {
                 Template template = (Template)sender;
@@ -75,11 +58,11 @@ namespace Drexel.VidUp.Business
                 {
                     if (template.IsDefault == true)
                     {
-                        foreach (Template templateInternal in this.templates)
+                        foreach (Template template2 in this.templates)
                         {
-                            if (templateInternal != template && templateInternal.IsDefault)
+                            if (template2 != template && template2.IsDefault)
                             {
-                                templateInternal.IsDefault = false;
+                                template2.IsDefault = false;
                             }
                         }
                     }
@@ -148,18 +131,31 @@ namespace Drexel.VidUp.Business
         {
             foreach (Template template in this.templates)
             {
-                if (template.RootFolderPath != null)
+                if (template.TemplateMode == TemplateMode.FolderBased)
                 {
-                    DirectoryInfo templateRootDirectory = new DirectoryInfo(template.RootFolderPath);
-                    DirectoryInfo uploadDirectory = new DirectoryInfo(upload.FilePath);
-
-                    while (uploadDirectory.Parent != null)
+                    if (!string.IsNullOrWhiteSpace(template.RootFolderPath))
                     {
-                        if (uploadDirectory.Parent.FullName == templateRootDirectory.FullName)
+                        DirectoryInfo templateRootDirectory = new DirectoryInfo(template.RootFolderPath);
+                        DirectoryInfo uploadDirectory = new DirectoryInfo(upload.FilePath);
+
+                        while (uploadDirectory.Parent != null)
+                        {
+                            if (uploadDirectory.Parent.FullName == templateRootDirectory.FullName)
+                            {
+                                return template;
+                            }
+                            else uploadDirectory = uploadDirectory.Parent;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(template.PartOfFileName))
+                    {
+                        if (Path.GetFileName(upload.FilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
                         {
                             return template;
                         }
-                        else uploadDirectory = uploadDirectory.Parent;
                     }
                 }
             }
@@ -197,12 +193,12 @@ namespace Drexel.VidUp.Business
 
         public string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
         {
-            return this.CopyImageToStorageFolder(thumbnailFallbackFilePath, this.thumbnailFallbackStorageFolder);
+            return this.CopyImageToStorageFolder(thumbnailFallbackFilePath, this.thumbnailFallbackImageFolder);
         }
 
         public string CopyTemplateImageToStorageFolder(string templateImageFilePath)
         {
-            return this.CopyImageToStorageFolder(templateImageFilePath, this.templatesImagesStorageFolder);
+            return this.CopyImageToStorageFolder(templateImageFilePath, this.templateImageFolder);
         }
 
         public string CopyImageToStorageFolder(string imageFilePath, string storageFolder)
@@ -278,6 +274,17 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, template));
         }
 
+        public void RemovePlaylist(Playlist playlist)
+        {
+            foreach (Template template in this.templates)
+            {
+                if (template.Playlist == playlist)
+                {
+                    template.Playlist = null;
+                }
+            }
+        }
+
         /// <summary>
         /// Checks:
         /// 1. is image not in template image storage folder -> do nothing
@@ -289,7 +296,7 @@ namespace Drexel.VidUp.Business
             if (imageFilePath != null)
             {
                 string imageFileFolder = Path.GetDirectoryName(imageFilePath);
-                if (String.Compare(Path.GetFullPath(this.templatesImagesStorageFolder).TrimEnd('\\'), imageFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (String.Compare(Path.GetFullPath(this.templateImageFolder).TrimEnd('\\'), imageFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;
                 }
@@ -325,22 +332,6 @@ namespace Drexel.VidUp.Business
         public Template GetTemplate(Guid guid)
         {
             return this.templates.Find(template => template.Guid == guid);
-        }
-
-        public void AddUpload(Upload upload)
-        {
-            Template template = this.templates.Find(templatek => templatek.Guid == upload.Template.Guid);
-            template.AddUpload(upload);
-        }
-
-        public ReadOnlyCollection<Template> GetReadonlyTemplateList()
-        {
-            return this.templates.AsReadOnly();
-        }
-
-        public Template Find(Predicate<Template> match)
-        {
-            return this.templates.Find(match);
         }
 
         public IEnumerator<Template> GetEnumerator()

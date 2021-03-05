@@ -1,16 +1,10 @@
-﻿#region
-
-using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Drexel.VidUp.UI.ViewModels;
 
-#endregion
 
 namespace Drexel.VidUp.UI.Controls
 {
-    //tod: Bei Template Auwahl auch wieder kein Template zulassen, wenn schon ein Template ausgewählt ist
     /// <summary>
     /// Interaktionslogik für UploadControl.xaml
     /// </summary>
@@ -19,34 +13,6 @@ namespace Drexel.VidUp.UI.Controls
         public UploadControl()
         {
             InitializeComponent();
-        }
-
-        //FU MVVM, Combox or whatever! When usercontrol view unloads, ComboBox sets selectedItem to null
-        //and so template is set to null on upload even if before a template was selected
-        private void ComboBoxTemplateSelect_DropDownClosed(object sender, EventArgs e)
-        {
-            ComboBox comboBox = (ComboBox)sender;
-            UploadViewModel uploadViewModel = (UploadViewModel)comboBox.DataContext;
-            TemplateComboboxViewModel selectedTemplate = (TemplateComboboxViewModel)comboBox.SelectedItem;
-            if (selectedTemplate != null)
-            {
-                if (uploadViewModel.SelectedTemplate == null ||
-                    uploadViewModel.SelectedTemplate.Template != selectedTemplate.Template)
-                {
-                    uploadViewModel.SelectedTemplate = new TemplateComboboxViewModel(selectedTemplate.Template);
-                }
-            }
-        }
-
-        private void ComboBoxQuarterHourSelect_DropDownClosed(object sender, EventArgs e)
-        {
-            ComboBox comboBox = (ComboBox)sender;
-            UploadViewModel uploadViewModel = (UploadViewModel)comboBox.DataContext;
-            QuarterHourViewModel selectedQuarterHour = (QuarterHourViewModel)comboBox.SelectedItem;
-            if (uploadViewModel.Upload.PublishAtTime != selectedQuarterHour.QuarterHour)
-            {
-                uploadViewModel.SetPublishAtTime(selectedQuarterHour.QuarterHour.Value);
-            }
         }
         private void controlGotFocus(object sender, RoutedEventArgs e)
         {
@@ -97,6 +63,7 @@ namespace Drexel.VidUp.UI.Controls
 
                 // Inititate the drag-and-drop operation.
                 DragDrop.DoDragDrop(this, data, DragDropEffects.Move);
+                //continues in UploadListControl.xaml.cs
             }
         }
     }

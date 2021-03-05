@@ -8,13 +8,13 @@
              d:DesignWidth="800"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              xmlns:validators="clr-namespace:Drexel.VidUp.UI.Validators"
+             xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing.Common"
              x:Name="UCUpload"
-             MouseDown="CUpload_MouseMoved"
              AllowDrop="True">
     <GroupBox Padding="0" x:Name="GroupBox" Margin="4" VerticalAlignment="Top" >
         <GroupBox.Header >
             <StackPanel Orientation="Horizontal" Margin="0">
-                <TextBlock Text="{Binding YtTitle, Mode=OneWay}" Margin="2" Width="599" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding YtTitle, Mode=OneWay}" Margin="2" Width="599" TextWrapping="Wrap" MouseDown="CUpload_MouseMoved" />
                 <Button x:Name="Minimize" Padding="0" Width="17" Height="20"  ToolTip="Minimize." ToolTipService.ShowDuration="60000"  Content="_" Style="{StaticResource MaterialDesignOutlinedButtonEx}" BorderBrush="Transparent" Foreground="Black" Click="minimizeClick" Visibility="Collapsed" />
             </StackPanel>
         </GroupBox.Header>
@@ -27,16 +27,16 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="5*"></RowDefinition>
-                <RowDefinition Height="5*"/>
-                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="17*"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="17*"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
-                <RowDefinition MinHeight="30" Height="10*"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
+                <RowDefinition MinHeight="30"></RowDefinition>
             </Grid.RowDefinitions>
             <Canvas Grid.Row="0" Grid.ColumnSpan="3" Margin="1 0 1 0">
                 <Canvas.Background>
@@ -51,11 +51,14 @@
             <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="0,5,6,5"  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                 <materialDesign:PopupBox  StaysOpen="False" >
                     <StackPanel>
-                        <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" />
-                        <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" />
-                        <Button Content="Remove Template" Command="{Binding NoTemplateCommand}" CommandParameter="{Binding Guid}" />
+                        <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding ResetStateCommandEnabled}" />
+                        <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
+                        <Button Content="Remove Template" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="template" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Playlist" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Video Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="videolanguage" IsEnabled="{Binding ControlsEnabled}" />
+                        <Button Content="Remove Category" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="category" IsEnabled="{Binding ControlsEnabled}" />
                         <Separator/>
-                        <Button Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=UCUploads}" CommandParameter="{Binding Guid}"/>
+                        <Button Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=UCUploads}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
                     </StackPanel>
                 </materialDesign:PopupBox>
             </Button>
@@ -73,8 +76,8 @@
                 </Button>
                 <Label Content="Title: " Width="51" />
             </StackPanel>
-            <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-                <TextBox x:Name="Title" Width="497" IsEnabled="{Binding ControlsEnabled}" TextWrapping="Wrap" Margin="0 0 5 0">
+            <DockPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2">
+                <TextBox x:Name="Title" Width="405" IsEnabled="{Binding ControlsEnabled}" TextWrapping="Wrap" Margin="0 0 5 0">
                     <TextBox.Text>
                         <Binding Path="Title" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" Delay="500" >
                             <Binding.ValidationRules>
@@ -83,13 +86,17 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
-            </StackPanel>
-            <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 5 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Label Content="{Binding TitleCharacterCount, Mode=OneWay}" Background="{Binding TitleColor, Mode=OneWay}" Width="33" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" VerticalAlignment="Top" />
+                    <Label Content="/ 100" Width="50" Height="20" Padding="0 1 0 0" Margin="4 3 0 0" VerticalAlignment="Top" />
+                </StackPanel>
+            </DockPanel>
+            <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                 <Label Content="Thumbnail: " Width="68" />
                 <materialDesign:PackIcon Kind="Warning" ToolTip="Thumbnail does not exist!" ToolTipService.ShowDuration="60000" Visibility="{Binding ThumbnailFilePath, Mode=OneWay, Converter={converters:StringIsNullOrFileExistsCollapsedConverter}}" Margin="0 4 5 0" Background="Transparent" />
             </StackPanel>
-            <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
+            <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                 <Label Padding="0 4 4 4" Width="425">
                     <TextBlock Text="{Binding ThumbnailFilePath, Mode=OneWay}" TextWrapping="Wrap" />
                 </Label>
@@ -98,14 +105,19 @@
                 </Button>
                 <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0 0 0 0" Padding="0" Width="70" Height="25" IsEnabled="{Binding ControlsEnabled}" Content="Browse"/>
             </StackPanel>
-            <StackPanel  Grid.Row="5" Grid.ColumnSpan="3" Orientation="Vertical">
-                <StackPanel  Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <StackPanel  Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical">
+                <DockPanel>
                     <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset description to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="description" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Description: " Width="71" HorizontalAlignment="Left" />
-                </StackPanel>
-                <TextBox x:Name="Description" TextWrapping="Wrap" AcceptsReturn="True" MaxLength="5000"
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Label Content="{Binding DescriptionCharacterCount }" Background="{Binding DescriptionColor, Mode=OneWay}" Width="33" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" VerticalAlignment="Top" />
+                        <Label Content="{Binding MaxDescriptionCharacters}" Width="50" Height="20" Padding="0 1 0 0" Margin="4 3 0 0"  VerticalAlignment="Top" />
+                    </StackPanel>
+
+                </DockPanel>
+                <TextBox x:Name="Description" TextWrapping="Wrap" AcceptsReturn="True"
                          Width="615" MaxHeight ="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus">
                     <TextBox.Text>
                         <Binding Path="Description" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" Delay="500" >
@@ -116,14 +128,18 @@
                     </TextBox.Text>
                 </TextBox>
             </StackPanel>
-            <StackPanel  Grid.Row="6" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="3">
-                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
+            <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Vertical" Grid.ColumnSpan="3">
+                <DockPanel>
                     <Button  Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset tags to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="tags" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Tags: " Width="35" />
-                    <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                </StackPanel>
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Label Content="{Binding TagsCharacterCount }" Background="{Binding TagsColor, Mode=OneWay}" Width="33" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" VerticalAlignment="Top" />
+                        <Label Content="/ 500" Width="50" Padding="0 1 0 0" Margin="4 3 0 0" VerticalAlignment="Top" />
+                    </StackPanel>
+                </DockPanel>
                 <TextBox x:Name="Tags" TextWrapping="Wrap" Width="615" MaxHeight="25" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ControlsEnabled}" GotFocus="controlGotFocus" LostFocus="controlLostFocus">
                     <TextBox.Text>
                         <Binding Path="TagsAsString" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" Delay="500" >
@@ -134,51 +150,80 @@
                     </TextBox.Text>
                 </TextBox>
             </StackPanel>
-            <StackPanel Grid.Row="7" Grid.Column="0"  Orientation="Horizontal">
+            <StackPanel Grid.Row="6" Grid.Column="0"  Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset visibility to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="visibility" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
-                <Label Content="Visbility: " Width="110" />
+                <Label Content="Visibility: " Width="110" />
             </StackPanel>
-            <ComboBox Grid.Row="7" Grid.Column="1"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding Visibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+            <ComboBox Grid.Row="6" Grid.Column="1"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
 
-            <StackPanel  Grid.Row="7" Grid.Column="2" Orientation="Horizontal">
+            <StackPanel  Grid.Row="6" Grid.Column="2" Orientation="Horizontal">
                 <ToggleButton IsChecked="{Binding PublishAt}" IsEnabled="{Binding ControlsEnabled}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
                 <Label Content="Publish At: " Width="77" />
-                <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAt}" DisplayDateStart="{Binding PublishAtFirstDate, Mode=OneWay}" Margin="0 3 0 0" />
-                <!--Binding OneWay because setting is handled by event. -->
-                <ComboBox SelectedItem="{Binding PublishAtTime, Mode=OneWay}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="10 0 0 0" DropDownClosed="ComboBoxQuarterHourSelect_DropDownClosed" IsEnabled="{Binding PublishAt}" />
+                <DatePicker Width="100" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" Margin="0 3 0 0">
+                    <!--
+                    <DatePicker.Resources>
+                        <Style x:Key="MaterialDesignDatePickerTextBox"
+                               TargetType="DatePickerTextBox"
+                               BasedOn="{StaticResource MaterialDesignDatePickerTextBox}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </Style>
+                    </DatePicker.Resources>
+                    -->
+                </DatePicker>
+                <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="8 0 0 0" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" />
             </StackPanel>
 
-            <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset all values to template values." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="all" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Template: " Width="66" />
-                <!--Binding OneWay because setting is handled by event. -->
             </StackPanel>
             <!-- Selected Template is clearable through burger menu. -->
-            <ComboBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding SelectedTemplate, Mode=OneWay}" ItemsSource="{Binding DataContext.ObservableTemplateViewModels, ElementName=UCUploads}" DisplayMemberPath="Name" Width="190" DropDownClosed="ComboBoxTemplateSelect_DropDownClosed" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
-            <StackPanel Grid.Row="8" Grid.Column="3" Grid.ColumnSpan="2" Orientation="Horizontal">
-                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist ID to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+            <ComboBox Grid.Row="7" Grid.Column="1" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+
+            <DockPanel Grid.Row="7" Grid.Column="3" Grid.ColumnSpan="2">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
-                <Label Content="Playlist ID: " Width="63" />
-                <materialDesign:PackIcon Kind="HelpOutline" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="The playlist ID can be taken from the playlist URL after the list URL parameter, e.g. https://www.youtube.com/watch?v=VideoID&amp;list=PlaylistID." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                <TextBox Width="185" IsEnabled="{Binding ControlsEnabled}" Text="{Binding PlaylistId}" TextWrapping="Wrap" Margin="0 0 5 0" />
+                <Label Content="Playlist: " Width="47" />
+                <Image Source="../Images/list-auto-grey.png" Width="14" Height="14" ToolTip="Playlist will be set after publication." ToolTipService.ShowDuration="60000" Visibility="{Binding ShowPlaylistHint, Mode=OneWay}" />
+                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="203" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Right" Margin="0 0 7 0" />
+            </DockPanel>
+
+            <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset video language to template values." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="videolanguage" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+                    <materialDesign:PackIcon Kind="Refresh" />
+                </Button>
+                <Label Content="V. Lang.: " Width="66" />
             </StackPanel>
+            <!-- Selected Template is clearable through burger menu. -->
+            <ComboBox Grid.Row="8" Grid.Column="1" SelectedItem="{Binding SelectedVideoLanguage}" ItemsSource="{Binding VideoLanguages}" DisplayMemberPath="EnglishName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+
+            <StackPanel Grid.Row="8" Grid.Column="3" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset category to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="category" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+                    <materialDesign:PackIcon Kind="Refresh" />
+                </Button>
+                <Label Content="Category: " Width="68" />
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="203" IsEnabled="{Binding ControlsEnabled}" />
+            </StackPanel>
+
             <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />
-                <materialDesign:PackIcon Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="0 4 0 0" Background="Transparent" />
+                <materialDesign:PackIcon Width="20" Height="20" Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="7 2 0 0" Background="Red" />
             </StackPanel>
             <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal">
-                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="100" Margin="0 0 40 0" />
+
+                <ProgressBar Width="20" Height="20" Background="{Binding UploadStatusColor}" Foreground="LimeGreen" materialDesign:TransitionAssist.DisableTransitions="True" IsIndeterminate="{Binding UploadStatusColorAnimation}"  Margin ="0 0 2 6" />
+                <Label Content="{Binding UploadStatus, Mode=OneWay, Converter={converters:EnumConverter}}" Width="100" Margin="0 0 18 0" />
                 <Label Content="Upload Started: " Width="90" />
             </StackPanel>
             <StackPanel Grid.Row="9" Grid.Column="2" Orientation="Horizontal">
@@ -190,12 +235,11 @@
             </StackPanel>
 
             <Label Grid.Row="10" Grid.Column="0" Content="File Size: " Width="110" />
-            <Label Grid.Row="10" Grid.Column="1"  Content="{Binding FileSizeInMegaByte}"  Width="100"  HorizontalAlignment="Left" />
+            <Label Grid.Row="10" Grid.Column="1" Content="{Binding FileSizeInMegaByte}"  Background="{Binding FileSizeColor, Mode=OneWay}" Width="67" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" HorizontalAlignment="Left" VerticalAlignment="top" />
             <Label Grid.Row="10" Grid.Column="1" Content="Uploaded: " Width="90" HorizontalAlignment="Right" />
             <Label Grid.Row="10" Grid.Column="2" Content="{Binding UploadedInMegaByte}" Width="100" HorizontalAlignment="Left" />
 
         </Grid>
-
 
     </GroupBox>
 </UserControl>

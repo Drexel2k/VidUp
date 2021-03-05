@@ -1,26 +1,34 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.JSON;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
+using Drexel.VidUp.Utils;
 using MaterialDesignThemes.Wpf;
-
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-
+    //todo: move ribbon properties to separate view model
     public class TemplateViewModel : INotifyPropertyChanged
     {
+        private TemplateList templateList;
         private Template template;
+
+        private ObservableTemplateViewModels observableTemplateViewModels;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
+
+        private TemplateComboboxViewModel selectedTemplate;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private GenericCommand newTemplateCommand;
+        private GenericCommand deleteCommand;
+        private GenericCommand removeComboBoxValueCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetCommand;
         private GenericCommand openPublishAtCommand;
@@ -44,6 +52,98 @@ namespace Drexel.VidUp.UI.ViewModels
                     //all properties changed
                     this.raisePropertyChanged(null);
                 }
+            }
+        }
+
+        public bool TemplateSet
+        {
+            get => this.template != null;
+        }
+
+        public ObservableTemplateViewModels ObservableTemplateViewModels
+        {
+            get
+            {
+                return this.observableTemplateViewModels;
+            }
+        }
+
+        public ObservablePlaylistViewModels ObservablePlaylistViewModels
+        {
+            get
+            {
+                return this.observablePlaylistViewModels;
+            }
+        }
+
+        public TemplateComboboxViewModel SelectedTemplate
+        {
+            get
+            {
+                return this.selectedTemplate;
+            }
+            set
+            {
+                if (this.selectedTemplate != value)
+                {
+                    this.selectedTemplate = value;
+                    if (value != null)
+                    {
+                        this.Template = value.Template;
+                    }
+                    else
+                    {
+                        this.Template = null;
+                    }
+
+                    this.raisePropertyChanged("SelectedTemplate");
+                }
+            }
+        }
+
+        public PlaylistComboboxViewModel SelectedPlaylist
+        {
+            get
+            {
+                return this.template != null ? this.observablePlaylistViewModels.GetViewModel(this.template.Playlist) : null;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    this.template.Playlist = null;
+                }
+                else
+                {
+                    this.template.Playlist = value.Playlist;
+                }
+
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SelectedPlaylist");
+            }
+        }
+
+        public GenericCommand NewTemplateCommand
+        {
+            get
+            {
+                return this.newTemplateCommand;
+            }
+        }
+
+        public GenericCommand DeleteCommand
+        {
+            get
+            {
+                return this.deleteCommand;
+            }
+        }
+
+        public GenericCommand RemoveComboBoxValueCommand
+        {
+            get
+            {
+                return this.removeComboBoxValueCommand;
             }
         }
 
@@ -91,7 +191,8 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Name = value;
-                this.raisePropertyChangedAndSerializeTemplateList("Name");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("Name");
             }
         }
 
@@ -101,7 +202,8 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Title = value;
-                this.raisePropertyChangedAndSerializeTemplateList("YtTitle");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("Title");
 
             }
         }
@@ -111,7 +213,8 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Description = value;
-                this.raisePropertyChangedAndSerializeTemplateList("YtDescription");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("Description");
 
             }
         }
@@ -122,16 +225,27 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.Tags = new List<string>(value.Split(','));
-                this.raisePropertyChangedAndSerializeTemplateList("TagsAsString");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("TagsAsString");
             }
         }
-        public Visibility Visibility 
+        public Visibility SelectedVisibility 
         { 
             get => this.template != null ? this.template.YtVisibility : Visibility.Private;
             set
             {
+                if (value != Visibility.Private && this.template.YtVisibility == Visibility.Private)
+                {
+                    if (this.template.UsePublishAtSchedule)
+                    {
+                        this.template.UsePublishAtSchedule = false;
+                    }
+                }
+
                 this.template.YtVisibility = value;
-                this.raisePropertyChangedAndSerializeTemplateList("YtVisibility");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("UsePublishAtSchedule");
+                this.raisePropertyChanged("SelectedVisibility");
             }
         }
 
@@ -172,9 +286,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("LastImageFilePathAdded");
 
                 this.template.ImageFilePathForEditing = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
 
                 this.raisePropertyChanged("ImageBitmap");
-                this.raisePropertyChangedAndSerializeTemplateList("ImageFilePathForEditing");
+                this.raisePropertyChanged("ImageFilePathForEditing");
             }
         }
 
@@ -182,13 +297,26 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get => this.lastImageFilePathAdded;
         }
+
         public string RootFolderPath 
         { 
             get => this.template != null ? this.template.RootFolderPath : null;
             set
             {
                 this.template.RootFolderPath = value;
-                this.raisePropertyChangedAndSerializeTemplateList("RootFolderPath");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("RootFolderPath");
+            }
+        }
+
+        public string PartOfFileName
+        {
+            get => this.template != null ? this.template.PartOfFileName : null;
+            set
+            {
+                this.template.PartOfFileName = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("PartOfFileName");
             }
         }
 
@@ -198,7 +326,8 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.ThumbnailFolderPath = value;
-                this.raisePropertyChangedAndSerializeTemplateList("ThumbnailFolderPath");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("ThumbnailFolderPath");
             }
         }
 
@@ -211,8 +340,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.lastThumbnailFallbackFilePathAdded = value;
                 this.raisePropertyChanged("LastThumbnailFallbackFilePathAdded");
                 this.template.ThumbnailFallbackFilePath = value;
-
-                this.raisePropertyChangedAndSerializeTemplateList("ThumbnailFallbackFilePath");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("ThumbnailFallbackFilePath");
             }
         }
 
@@ -227,8 +356,64 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.IsDefault = value;
-                this.raisePropertyChangedAndSerializeTemplateList("IsDefault");
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("IsDefault");
             }
+        }
+
+        public bool UsePublishAtSchedule
+        {
+            get => this.template != null && this.template.UsePublishAtSchedule;
+            set
+            {
+                if (value && !this.template.UsePublishAtSchedule)
+                {
+                    if (this.template.YtVisibility != Visibility.Private)
+                    {
+                        this.template.YtVisibility = Visibility.Private;
+                    }
+                }
+
+                this.template.UsePublishAtSchedule = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SelectedVisibility");
+                this.raisePropertyChanged("UsePublishAtSchedule");
+            }
+        }
+
+        public bool SetPlaylistAfterPublication
+        {
+            get => this.template != null && this.template.SetPlaylistAfterPublication;
+            set
+            {
+                this.template.SetPlaylistAfterPublication = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SetPlaylistAfterPublication");
+            }
+        }
+
+        public Array TemplateModes
+        {
+            get
+            {
+                return Enum.GetValues(typeof(TemplateMode));
+            }
+        }
+
+        public TemplateMode SelectedTemplateMode
+        {
+            get => this.template != null ? this.template.TemplateMode : TemplateMode.FolderBased;
+            set
+            {
+                this.template.TemplateMode = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SelectedTemplateMode");
+            }
+        }
+
+        public List<CultureInfo> VideoLanguages
+        {
+            get => Cultures.RelevantCultureInfos;
         }
 
         public bool UsePlaceholderFile
@@ -251,30 +436,61 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string PlaylistId
+        public CultureInfo SelectedVideoLanguage
         {
-            get => this.template != null ? this.template.PlaylistId : null;
+            get => this.template != null ? this.template.VideoLanguage : null;
             set
             {
-                this.template.PlaylistId = value;
-                this.raisePropertyChangedAndSerializeTemplateList("PlaylistId");
+                this.template.VideoLanguage = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SelectedVideoLanguage");
             }
         }
 
-        public bool UsePublishAtSchedule
+        public Category[] Categories
         {
-            get => this.template != null && this.template.UsePublishAtSchedule;
+            get => Category.Categories;
+        }
+
+        public Category SelectedCategory
+        {
+            get => this.template != null ? this.template.Category : null;
             set
             {
-                this.template.UsePublishAtSchedule = value;
-                this.raisePropertyChangedAndSerializeTemplateList("UsePublishAtSchedule");
+                this.template.Category = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SelectedCategory");
             }
         }
 
         #endregion properties
 
-        public TemplateViewModel()
+        public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
         {
+            if(templateList == null)
+            {
+                throw new ArgumentException("TemplateList must not be null.");
+            }
+
+            if(observableTemplateViewModels == null)
+            {
+                throw new ArgumentException("ObservableTemplateViewModels must not be null.");
+            }
+
+            if (observablePlaylistViewModels == null)
+            {
+                throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
+            }
+
+            this.templateList = templateList;
+            this.observableTemplateViewModels = observableTemplateViewModels;
+            this.observablePlaylistViewModels = observablePlaylistViewModels;
+
+            this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
+
+            this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialog);
+            this.deleteCommand = new GenericCommand(this.DeleteTemplate);
+            this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
             this.openPublishAtCommand = new GenericCommand(this.openPublishAt);
@@ -287,6 +503,71 @@ namespace Drexel.VidUp.UI.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public async void OpenNewTemplateDialog(object obj)
+        {
+            var view = new NewTemplateControl
+            {
+                DataContext = new NewTemplateViewModel(Settings.SettingsInstance.TemplateImageFolder)
+            };
+
+            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+            if (result)
+            {
+                NewTemplateViewModel data = (NewTemplateViewModel) view.DataContext;
+                Template template = new Template(data.Name, data.ImageFilePath, data.TemplateMode, data.RootFolderPath, data.PartOfFileName, this.templateList);
+                this.AddTemplate(template);
+
+            }
+        }
+
+        public void DeleteTemplate(Object guid)
+        {       
+            Template template = this.templateList.GetTemplate(System.Guid.Parse((string)guid));
+
+            //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
+            //will set the SelectedTemplate to null which causes problems if there are templates left
+            if (this.observableTemplateViewModels.TemplateCount > 1)
+            {
+                if (this.observableTemplateViewModels[0].Template == template)
+                {
+                    this.SelectedTemplate = this.observableTemplateViewModels[1];
+                }
+                else
+                {
+                    this.SelectedTemplate = this.observableTemplateViewModels[0];
+                }
+            }
+            else
+            {
+                this.SelectedTemplate = null;
+            }
+
+            this.templateList.Remove(template);
+
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+        }
+
+
+        private void removeComboBoxValue(object parameter)
+        {
+            switch (parameter)
+            {
+                case "playlist":
+                    this.SelectedPlaylist = null;
+                    break;
+                case "videolanguage":
+                    this.SelectedVideoLanguage = null;
+                    break;
+                case "category":
+                    this.SelectedCategory = null;
+                    break;
+                default:
+                    throw new InvalidOperationException("No parameter for removeComboBoxValue specified.");
+                    break;
             }
         }
 
@@ -372,19 +653,26 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 PublishAtScheduleViewModel data = (PublishAtScheduleViewModel)view.DataContext;
                 this.template.PublishAtSchedule = data.Schedule;
-                JsonSerialization.SerializeTemplateList();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
         }
 
-        private void raisePropertyChangedAndSerializeTemplateList(string propertyName)
-        {
-            this.raisePropertyChanged(propertyName);
-            this.SerializeTemplateList();
-        }
+        //private void raisePropertyChangedAndSerializeTemplateList(string propertyName)
+        //{
+        //    this.raisePropertyChanged(propertyName);
+        //    JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+        //}
 
-        public void SerializeTemplateList()
+        //exposed for testing
+        public void AddTemplate(Template template)
         {
-            JsonSerialization.SerializeTemplateList();
+            List<Template> list = new List<Template>();
+            list.Add(template);
+            this.templateList.AddTemplates(list);
+
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+
+            this.SelectedTemplate = new TemplateComboboxViewModel(template);
         }
     }
 }

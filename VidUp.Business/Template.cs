@@ -1,12 +1,10 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using Newtonsoft.Json;
-
-#endregion
 
 namespace Drexel.VidUp.Business
 {
@@ -34,7 +32,11 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string imageFilePath;
         [JsonProperty]
+        private TemplateMode templateMode;
+        [JsonProperty]
         private string rootFolderPath;
+        [JsonProperty]
+        private string partOfFileName;
         [JsonProperty]
         private string thumbnailFolderPath;
         [JsonProperty]
@@ -51,68 +53,31 @@ namespace Drexel.VidUp.Business
         private bool usePublishAtSchedule;
         [JsonProperty]
         private Schedule publishAtSchedule;
+        [JsonProperty] 
+        private bool setPlaylistAfterPublication;
+        [JsonProperty]
+        private CultureInfo videoLanguage;
+        [JsonProperty]
+        private Category category;
 
         private TemplateList templateList;
 
-
-
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public Template()
-        {
-            this.uploads = new List<Upload>();
-            this.tags = new List<string>();
-        }
-
-        public Template(string name, string imagefilePath, string rootFolderPath, TemplateList templateList)
-        {
-            if(templateList == null)
-            {
-                throw new ArgumentException("templateList must not be null.");
-            }
-
-            this.guid = Guid.NewGuid();
-            this.Name = name;
-            this.templateList = templateList;
-            this.ImageFilePathForEditing = imagefilePath;
-            this.rootFolderPath = rootFolderPath;
-            this.uploads = new List<Upload>();
-            this.tags = new List<string>();
-            this.created = DateTime.Now;
-            this.lastModified = this.created;
-            this.visibility = Visibility.Private;
-        }
-
-        public void SetTemplateReferenceToUploads()
-        {
-            if (this.uploads == null)
-            {
-                this.uploads = new List<Upload>();
-            }
-
-            foreach (Upload upload in this.uploads)
-            {
-                upload.Template = this;
-            }
-        }
-
         #region properties
-        public Guid Guid { get => guid; }
-        public DateTime Created { get => created; }
+        public Guid Guid { get => this.guid; }
+        public DateTime Created { get => this.created; }
 
         public DateTime LastModified
         {
             get => this.lastModified;
-        }
-
-        private DateTime lastModifiedInternal
-        {
-            set
+            private set
             {
                 this.lastModified = value;
                 this.raisePropertyChanged("LastModified");
             }
         }
+
         public string Name
         {
             get
@@ -120,24 +85,20 @@ namespace Drexel.VidUp.Business
                 return this.name;
             }
             set
-             {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentException("Template name must not be null or empty.", "name");
-                }
-
-                this.name = value;
-                this.lastModifiedInternal = DateTime.Now;
+            {
+                this.setName(value);
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("Name");
             }
         }
+
         public string Title
         {
             get => this.title;
             set 
             {
                 this.title = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("Title");
             }
         }
@@ -147,7 +108,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.description = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("Description");
             }
         }
@@ -158,7 +119,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.tags = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("Tags");
             }
         }
@@ -169,7 +130,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.visibility = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("YtVisibility");
             }
         }
@@ -189,8 +150,22 @@ namespace Drexel.VidUp.Business
                 string oldFilePath = this.imageFilePath;
                 this.imageFilePath = newFilePath;
                 
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("ImageFilePathForEditing", oldFilePath, value);
+            }
+        }
+
+        private void setImageFilePath(string imageFilePath)
+        {}
+
+        public TemplateMode TemplateMode
+        {
+            get => this.templateMode;
+            set
+            {
+                this.templateMode = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("TemplateMode");
             }
         }
 
@@ -200,8 +175,19 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.rootFolderPath = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("RootFolderPath");
+            }
+        }
+
+        public string PartOfFileName
+        {
+            get => this.partOfFileName;
+            set
+            {
+                this.partOfFileName = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("PartOfFileName");
             }
         }
 
@@ -211,7 +197,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.thumbnailFolderPath = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("ThumbnailFolderPath");
             }
         }
@@ -224,7 +210,7 @@ namespace Drexel.VidUp.Business
                 string oldValue = this.thumbnailFallbackFilePath;
                 string filePath = this.templateList.CopyThumbnailFallbackToStorageFolder(value);
                 this.thumbnailFallbackFilePath = filePath;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("ThumbnailFallbackFilePath", oldValue, value);
             }
         }
@@ -235,7 +221,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.isDefault = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("IsDefault");
             }
         }
@@ -264,23 +250,14 @@ namespace Drexel.VidUp.Business
 
         public List<Upload> Uploads { get => this.uploads; }
 
-        public TemplateList TemplateList
-        { 
-            set
-            {
-                //todo: move to deseralization und remove property
-                this.templateList = value;
-            }
-        }
-
-        public string PlaylistId
+        public Playlist Playlist
         {
-            get => this.playlistId;
+            get => this.playlist;
             set
             {
-                this.playlistId = value;
-                this.lastModifiedInternal = DateTime.Now;
-                this.raisePropertyChanged("PlaylistId");
+                this.playlist = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("Playlist");
             }
         }
 
@@ -298,7 +275,7 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.usePublishAtSchedule = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("UsePublishAtSchedule");
             }
         }
@@ -309,12 +286,87 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.publishAtSchedule = value;
-                this.lastModifiedInternal = DateTime.Now;
+                this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("PublishAtSchedule");
             }
         }
 
+        public bool SetPlaylistAfterPublication
+        {
+            get => this.setPlaylistAfterPublication;
+            set
+            {
+                this.setPlaylistAfterPublication = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("SetPlaylistAfterPublication");
+            }
+        }
+
+        public CultureInfo VideoLanguage
+        {
+            get => this.videoLanguage;
+            set
+            {
+                this.videoLanguage = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("VideoLanguage");
+            }
+        }
+
+        public Category Category
+        {
+            get => this.category;
+            set
+            {
+                this.category = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("Category");
+            }
+        }
+
         #endregion properties
+
+        [JsonConstructor]
+        private Template()
+        {
+        }
+        //for fake templates(e.g. All and None Templates for filter)
+        public Template(string name)
+        {
+            this.name = name;
+        }
+
+        public Template(string name, string imagefilePath, TemplateMode templateMode, string rootFolderPath, string partOfFileName, TemplateList templateList)
+        {
+            if (templateList == null)
+            {
+                throw new ArgumentException("templateList must not be null.");
+            }
+
+            this.guid = Guid.NewGuid();
+            this.setName(name);
+            this.templateList = templateList;
+            this.imageFilePath = this.templateList.CopyTemplateImageToStorageFolder(imagefilePath);
+            this.templateMode = templateMode;
+            this.rootFolderPath = rootFolderPath;
+            this.partOfFileName = partOfFileName;
+            this.uploads = new List<Upload>();
+            this.tags = new List<string>();
+            this.created = DateTime.Now;
+            this.lastModified = this.created;
+            this.visibility = Visibility.Private;
+        }
+
+        private void setName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Template name must not be null or empty.", "name");
+            }
+
+            this.name = name;
+        }
+
         private string getImageFilePath()
         {
             if (string.IsNullOrWhiteSpace(this.imageFilePath) || !File.Exists(this.imageFilePath))
@@ -328,7 +380,11 @@ namespace Drexel.VidUp.Business
         public void AddUpload(Upload upload)
         {
             this.uploads.Add(upload);
-            this.raisePropertyChanged("Uploads");
+        }
+
+        public void RemoveUpload(Upload upload)
+        {
+            this.uploads.Remove(upload);
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -348,6 +404,59 @@ namespace Drexel.VidUp.Business
             {
                 handler(this, new PropertyChangedEventArgsEx(propertyName, oldValue, newValue));
             }
+        }
+
+        //sets new daily/weekly/monthly UploadedUntil on schedule
+        public void SetScheduleProgress()
+        {
+            if (this.UsePublishAtSchedule && this.uploads.Count > 0)
+            {
+                List<Upload> relevantUploads = this.uploads.FindAll(upload =>
+                    (upload.UploadStart == null || upload.UploadStart > this.PublishAtSchedule.IgnoreUploadsBefore) &&
+                    upload.UploadStatus == UplStatus.Finished);
+
+                relevantUploads = relevantUploads.FindAll(upload => upload.PublishAt > this.publishAtSchedule.UploadedUntil);
+                relevantUploads.Sort(Template.compareUploadPublishAtDates);
+
+                DateTime nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
+                foreach (Upload upload in relevantUploads)
+                {
+                    if (upload.PublishAt == nextDate)
+                    {
+                        this.publishAtSchedule.UploadedUntil = nextDate;
+                        nextDate = this.publishAtSchedule.GetNextDateTime(DateTime.MinValue);
+                    }
+
+                    if (upload.PublishAt > nextDate)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
+        public void SetStartDateOnTemplateSchedule(DateTime startDate)
+        {
+            if (this.PublishAtSchedule != null)
+            {
+                this.PublishAtSchedule.IgnoreUploadsBefore = DateTime.Now;
+                this.PublishAtSchedule.StartDate = startDate;
+            }
+        }
+
+        private static int compareUploadPublishAtDates(Upload upload1, Upload upload2)
+        {
+            if (upload1.PublishAt > upload2.PublishAt)
+            {
+                return 1;
+            }
+
+            if (upload1.PublishAt < upload2.PublishAt)
+            {
+                return -1;
+            }
+
+            return 0;
         }
     }
 }

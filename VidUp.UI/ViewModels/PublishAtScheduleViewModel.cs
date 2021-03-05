@@ -23,11 +23,11 @@ namespace Drexel.VidUp.UI.ViewModels
         private QuarterHourViewModels quarterHourViewModelsEmptyStartValue;
         private QuarterHourViewModels quarterHourViewModels;
 
-
-        private Dictionary<int, QuarterHourViewModel[]> dailyDayTimesViewModels;
+        private bool[] dailyDays;
+        private Dictionary<int, TimeSpan?[]> dailyDayTimes;
 
         private bool[] weeklyDays;
-        private Dictionary<DayOfWeek, QuarterHourViewModel[]> weeklyDayTimesViewModels;
+        private Dictionary<DayOfWeek, TimeSpan?[]> weeklyDayTimes;
 
         private bool[] monthlyMonthDateBasedDates;
 
@@ -141,11 +141,54 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool DailyDay2Active
+        {
+            get => this.dailyDays[1];
+            set => this.dailyDays[1] = value;
+        }
+
+        public bool DailyDay3Active
+        {
+            get => this.dailyDays[2];
+            set => this.dailyDays[2] = value;
+        }
+
+        public bool DailyDay2ActiveEnabled
+        {
+            get
+            {
+                if (!this.schedule.DailyHasAdvancedSchedule)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        public bool DailyDay3ActiveEnabled
+        {
+            get
+            {
+                if (!this.schedule.DailyHasAdvancedSchedule)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         public bool DailyDay1Time1Enabled
         {
             get
             {
                 if (!this.schedule.DailyHasAdvancedSchedule)
+                {
+                    return false;
+                }
+
+                if (!this.schedule.DailyGetDayActive(0))
                 {
                     return false;
                 }
@@ -163,6 +206,11 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
+                if (!this.schedule.DailyGetDayActive(0))
+                {
+                    return false;
+                }
+
                 return true;
             }
         }
@@ -176,7 +224,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (this.schedule.DailyDayTimes[0][1] != null)
+                if (!this.schedule.DailyGetDayActive(0))
+                {
+                    return false;
+                }
+
+                if (this.schedule.DailyGetDayTime(0, 1) != null)
                 {
                     return true;
                 }
@@ -194,6 +247,11 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
+                if (!this.schedule.DailyGetDayActive(1))
+                {
+                    return false;
+                }
+
                 return true;
             }
         }
@@ -207,12 +265,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (this.schedule.DailyDayTimes.ContainsKey(1) && this.schedule.DailyDayTimes[1][0] != null)
+                if (!this.schedule.DailyGetDayActive(1))
                 {
-                    return true;
+                    return false;
                 }
 
-                return false;
+                return true;
             }
         }
 
@@ -225,12 +283,17 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (this.schedule.DailyDayTimes.ContainsKey(1) && this.schedule.DailyDayTimes[1][1] != null && this.schedule.DailyDayTimes[1][0] != null)
+                if (!this.schedule.DailyGetDayActive(1))
                 {
-                    return true;
+                    return false;
                 }
 
-                return false;
+                if (this.schedule.DailyGetDayTime(1, 1) == null)
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
 
@@ -243,12 +306,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (this.schedule.DailyDayTimes.ContainsKey(1) && this.schedule.DailyDayTimes[1][0] != null)
+                if (!this.schedule.DailyGetDayActive(2))
                 {
-                    return true;
+                    return false;
                 }
 
-                return false;
+                return true;
             }
         }
 
@@ -261,12 +324,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (this.schedule.DailyDayTimes.ContainsKey(2) && this.schedule.DailyDayTimes[2][0] != null)
+                if (!this.schedule.DailyGetDayActive(2))
                 {
-                    return true;
+                    return false;
                 }
 
-                return false;
+                return true;
             }
         }
 
@@ -279,12 +342,17 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (this.schedule.DailyDayTimes.ContainsKey(2) && this.schedule.DailyDayTimes[2][1] != null && this.schedule.DailyDayTimes[2][0] != null)
+                if (!this.schedule.DailyGetDayActive(2))
                 {
-                    return true;
+                    return false;
                 }
 
-                return false;
+                if (this.schedule.DailyGetDayTime(2, 1) == null)
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
 
@@ -292,11 +360,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[0][0];
+                if (!this.dailyDayTimes.ContainsKey(0))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.dailyDayTimes[0][0]);
             }
             set
             {
-                this.dailyDayTimesViewModels[0][0] = value;
+                this.dailyDayTimes[0][0] = value.QuarterHour;
             }
         }
 
@@ -304,11 +377,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[0][1];
+                if (!this.dailyDayTimes.ContainsKey(0))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.dailyDayTimes[0][1]);
             }
             set
             {
-                this.dailyDayTimesViewModels[0][1] = value;
+                this.dailyDayTimes[0][1] = value.QuarterHour;
             }
         }
 
@@ -316,11 +394,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[0][2];
+                if (!this.dailyDayTimes.ContainsKey(0))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.dailyDayTimes[0][2]);
             }
             set
             {
-                this.dailyDayTimesViewModels[0][2] = value;
+                this.dailyDayTimes[0][2] = value.QuarterHour;
             }
         }
 
@@ -328,11 +411,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[1][0];
+                if (!this.dailyDayTimes.ContainsKey(1))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.dailyDayTimes[1][0]);
             }
             set
             {
-                this.dailyDayTimesViewModels[1][0] = value;
+                this.dailyDayTimes[1][0] = value.QuarterHour;
             }
         }
 
@@ -340,11 +428,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[1][1];
+                if (!this.dailyDayTimes.ContainsKey(1))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.dailyDayTimes[1][1]);
             }
             set
             {
-                this.dailyDayTimesViewModels[1][1] = value;
+                this.dailyDayTimes[1][1] = value.QuarterHour;
             }
         }
 
@@ -352,11 +445,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[1][2];
+                if (!this.dailyDayTimes.ContainsKey(1))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.dailyDayTimes[1][2]);
             }
             set
             {
-                this.dailyDayTimesViewModels[1][2] = value;
+                this.dailyDayTimes[1][2] = value.QuarterHour;
             }
         }
 
@@ -364,11 +462,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[2][0];
+                if (!this.dailyDayTimes.ContainsKey(2))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.dailyDayTimes[2][0]);
             }
             set
             {
-                this.dailyDayTimesViewModels[2][0] = value;
+                this.dailyDayTimes[2][0] = value.QuarterHour;
             }
         }
 
@@ -376,11 +479,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[2][1];
+                if (!this.dailyDayTimes.ContainsKey(2))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.dailyDayTimes[2][1]);
             }
             set
             {
-                this.dailyDayTimesViewModels[2][1] = value;
+                this.dailyDayTimes[2][1] = value.QuarterHour;
             }
         }
 
@@ -388,11 +496,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.dailyDayTimesViewModels[2][2];
+                if (!this.dailyDayTimes.ContainsKey(2))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.dailyDayTimes[2][2]);
             }
             set
             {
-                this.dailyDayTimesViewModels[2][2] = value;
+                this.dailyDayTimes[2][2] = value.QuarterHour;
             }
         }
 
@@ -439,7 +552,16 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.schedule.WeeklyHasAdvancedSchedule = value;
-                this.raisePropertyChanged("WeeklyHasAdvancedSchedule");
+
+                //if advanced day times didn't contain activated days yet.
+                if (value)
+                {
+                    this.weeklyCheckDayTimesViewModels();
+                }
+
+                this.validate = false;
+                this.raisePropertyChangedAllWeekly();
+                this.validate = true;
                 this.weeklyAdjustControlEnablement();
             }
         }
@@ -491,7 +613,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[0])
+                if (!this.schedule.WeeklyGetWeekDayActive(0))
                 {
                     return false;
                 }
@@ -509,7 +631,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[0])
+                if (!this.schedule.WeeklyGetWeekDayActive(0))
                 {
                     return false;
                 }
@@ -527,12 +649,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[0])
+                if (!this.schedule.WeeklyGetWeekDayActive(0))
                 {
                     return false;
                 }
 
-                if (this.schedule.WeeklyDayTimes[DayOfWeek.Monday][1] == null)
+                if (this.schedule.WeeklyGetDayTime(DayOfWeek.Monday, 1) == null)
                 {
                     return false;
                 }
@@ -550,7 +672,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[1])
+                if (!this.schedule.WeeklyGetWeekDayActive(1))
                 {
                     return false;
                 }
@@ -568,7 +690,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[1])
+                if (!this.schedule.WeeklyGetWeekDayActive(1))
                 {
                     return false;
                 }
@@ -586,12 +708,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[1])
+                if (!this.schedule.WeeklyGetWeekDayActive(1))
                 {
                     return false;
                 }
 
-                if (this.schedule.WeeklyDayTimes[DayOfWeek.Tuesday][1] == null)
+                if (this.schedule.WeeklyGetDayTime(DayOfWeek.Tuesday, 1) == null)
                 {
                     return false;
                 }
@@ -608,7 +730,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[2])
+                if (!this.schedule.WeeklyGetWeekDayActive(2))
                 {
                     return false;
                 }
@@ -626,7 +748,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[2])
+                if (!this.schedule.WeeklyGetWeekDayActive(2))
                 {
                     return false;
                 }
@@ -644,12 +766,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[2])
+                if (!this.schedule.WeeklyGetWeekDayActive(2))
                 {
                     return false;
                 }
 
-                if (this.schedule.WeeklyDayTimes[DayOfWeek.Wednesday][1] == null)
+                if (this.schedule.WeeklyGetDayTime(DayOfWeek.Wednesday, 1) == null)
                 {
                     return false;
                 }
@@ -667,7 +789,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[3])
+                if (!this.schedule.WeeklyGetWeekDayActive(3))
                 {
                     return false;
                 }
@@ -685,7 +807,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[3])
+                if (!this.schedule.WeeklyGetWeekDayActive(3))
                 {
                     return false;
                 }
@@ -703,12 +825,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[3])
+                if (!this.schedule.WeeklyGetWeekDayActive(3))
                 {
                     return false;
                 }
 
-                if (this.schedule.WeeklyDayTimes[DayOfWeek.Thursday][1] == null)
+                if (this.schedule.WeeklyGetDayTime(DayOfWeek.Thursday, 1) == null)
                 {
                     return false;
                 }
@@ -726,7 +848,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[4])
+                if (!this.schedule.WeeklyGetWeekDayActive(4))
                 {
                     return false;
                 }
@@ -744,7 +866,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[4])
+                if (!this.schedule.WeeklyGetWeekDayActive(4))
                 {
                     return false;
                 }
@@ -762,12 +884,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[4])
+                if (!this.schedule.WeeklyGetWeekDayActive(4))
                 {
                     return false;
                 }
 
-                if (this.schedule.WeeklyDayTimes[DayOfWeek.Friday][1] == null)
+                if (this.schedule.WeeklyGetDayTime(DayOfWeek.Friday, 1) == null)
                 {
                     return false;
                 }
@@ -785,7 +907,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[5])
+                if (!this.schedule.WeeklyGetWeekDayActive(5))
                 {
                     return false;
                 }
@@ -803,7 +925,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[5])
+                if (!this.schedule.WeeklyGetWeekDayActive(5))
                 {
                     return false;
                 }
@@ -821,12 +943,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[5])
+                if (!this.schedule.WeeklyGetWeekDayActive(5))
                 {
                     return false;
                 }
 
-                if (this.schedule.WeeklyDayTimes[DayOfWeek.Saturday][1] == null)
+                if (this.schedule.WeeklyGetDayTime(DayOfWeek.Saturday, 1) == null)
                 {
                     return false;
                 }
@@ -844,7 +966,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[6])
+                if (!this.schedule.WeeklyGetWeekDayActive(6))
                 {
                     return false;
                 }
@@ -862,7 +984,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[6])
+                if (!this.schedule.WeeklyGetWeekDayActive(6))
                 {
                     return false;
                 }
@@ -880,12 +1002,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     return false;
                 }
 
-                if (!this.schedule.WeeklyDays[6])
+                if (!this.schedule.WeeklyGetWeekDayActive(6))
                 {
                     return false;
                 }
 
-                if (this.schedule.WeeklyDayTimes[DayOfWeek.Sunday][1] == null)
+                if (this.schedule.WeeklyGetDayTime(DayOfWeek.Sunday, 1) == null)
                 {
                     return false;
                 }
@@ -899,11 +1021,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Monday][0];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Monday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Monday][0]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Monday][0] = value;
+                this.weeklyDayTimes[DayOfWeek.Monday][0] = value.QuarterHour;
             }
         }
 
@@ -911,11 +1038,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Monday][1];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Monday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Monday][1]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Monday][1] = value;
+                this.weeklyDayTimes[DayOfWeek.Monday][1] = value.QuarterHour;
             }
         }
 
@@ -923,11 +1055,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Monday][2];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Monday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Monday][2]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Monday][2] = value;
+                this.weeklyDayTimes[DayOfWeek.Monday][2] = value.QuarterHour;
             }
         }
 
@@ -935,11 +1072,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Tuesday][0];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Tuesday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Tuesday][0]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Tuesday][0] = value;
+                this.weeklyDayTimes[DayOfWeek.Tuesday][0] = value.QuarterHour;
             }
         }
 
@@ -947,11 +1089,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Tuesday][1];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Tuesday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Tuesday][1]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Tuesday][1] = value;
+                this.weeklyDayTimes[DayOfWeek.Tuesday][1] = value.QuarterHour;
             }
         }
 
@@ -959,11 +1106,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Tuesday][2];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Tuesday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Tuesday][2]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Tuesday][2] = value;
+                this.weeklyDayTimes[DayOfWeek.Tuesday][2] = value.QuarterHour;
             }
         }
 
@@ -971,11 +1123,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Wednesday][0];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Wednesday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Wednesday][0]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Wednesday][0] = value;
+                this.weeklyDayTimes[DayOfWeek.Wednesday][0] = value.QuarterHour;
             }
         }
 
@@ -983,11 +1140,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Wednesday][1];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Wednesday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Wednesday][1]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Wednesday][1] = value;
+                this.weeklyDayTimes[DayOfWeek.Wednesday][1] = value.QuarterHour;
             }
         }
 
@@ -995,11 +1157,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Wednesday][2];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Wednesday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Wednesday][2]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Wednesday][2] = value;
+                this.weeklyDayTimes[DayOfWeek.Wednesday][2] = value.QuarterHour;
             }
         }
 
@@ -1007,11 +1174,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Thursday][0];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Thursday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Thursday][0]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Thursday][0] = value;
+                this.weeklyDayTimes[DayOfWeek.Thursday][0] = value.QuarterHour;
             }
         }
 
@@ -1019,11 +1191,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Thursday][1];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Thursday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Thursday][1]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Thursday][1] = value;
+                this.weeklyDayTimes[DayOfWeek.Thursday][1] = value.QuarterHour;
             }
         }
 
@@ -1031,11 +1208,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Thursday][2];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Thursday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Thursday][2]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Thursday][2] = value;
+                this.weeklyDayTimes[DayOfWeek.Thursday][2] = value.QuarterHour;
             }
         }
 
@@ -1043,11 +1225,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Friday][0];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Friday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Friday][0]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Friday][0] = value;
+                this.weeklyDayTimes[DayOfWeek.Friday][0] = value.QuarterHour;
             }
         }
 
@@ -1055,11 +1242,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Friday][1];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Friday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Friday][1]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Friday][1] = value;
+                this.weeklyDayTimes[DayOfWeek.Friday][1] = value.QuarterHour;
             }
         }
 
@@ -1067,11 +1259,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Friday][2];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Friday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Friday][2]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Friday][2] = value;
+                this.weeklyDayTimes[DayOfWeek.Friday][2] = value.QuarterHour;
             }
         }
 
@@ -1079,11 +1276,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Saturday][0];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Saturday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Saturday][0]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Saturday][0] = value;
+                this.weeklyDayTimes[DayOfWeek.Saturday][0] = value.QuarterHour;
             }
         }
 
@@ -1091,11 +1293,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Saturday][1];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Saturday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Saturday][1]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Saturday][1] = value;
+                this.weeklyDayTimes[DayOfWeek.Saturday][1] = value.QuarterHour;
             }
         }
 
@@ -1103,11 +1310,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Saturday][2];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Saturday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Saturday][2]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Saturday][2] = value;
+                this.weeklyDayTimes[DayOfWeek.Saturday][2] = value.QuarterHour;
             }
         }
 
@@ -1115,11 +1327,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Sunday][0];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Sunday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModels.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Sunday][0]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Sunday][0] = value;
+                this.weeklyDayTimes[DayOfWeek.Sunday][0] = value.QuarterHour;
             }
         }
 
@@ -1127,11 +1344,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Sunday][1];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Sunday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Sunday][1]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Sunday][1] = value;
+                this.weeklyDayTimes[DayOfWeek.Sunday][1] = value.QuarterHour;
             }
         }
 
@@ -1139,11 +1361,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.weeklyDayTimesViewModels[DayOfWeek.Sunday][2];
+                if (!this.weeklyDayTimes.ContainsKey(DayOfWeek.Sunday))
+                {
+                    return null;
+                }
+
+                return this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(this.weeklyDayTimes[DayOfWeek.Sunday][2]);
             }
             set
             {
-                this.weeklyDayTimesViewModels[DayOfWeek.Sunday][2] = value;
+                this.weeklyDayTimes[DayOfWeek.Sunday][2] = value.QuarterHour;
             }
         }
 
@@ -1190,7 +1417,24 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.schedule.MonthlyHasAdvancedSchedule = value;
-                this.raisePropertyChanged("MonthlyHasAdvancedSchedule");
+
+                //if advanced day times didn't contain activated days yet.
+                if (value)
+                {
+                    if (this.schedule.MonthlyDateBased)
+                    {
+                        this.monthlyMonthDateBasedCheckDayTimesViewModels();
+                    }
+                    else
+                    {
+                        this.monthlyMonthRelativeBasedCheckDayTimesViewModels();
+                    }
+                }
+
+                this.validate = false;
+                this.raisePropertyChangedAllMonthly();
+                this.validate = true;
+
                 this.monthlyAdjustControlEnablement();
             }
         }
@@ -1199,14 +1443,19 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
+                if (!this.schedule.MonthlyHasAdvancedSchedule)
+                {
+                    return false;
+                }
+
                 if (this.schedule.MonthlyDateBased)
                 {
-                    return this.schedule.MonthlyHasAdvancedSchedule && this.schedule.MonthlyMonthDateBasedDates[this.monthlyMonthDateBasedDay.Day - 1];
+                    return this.schedule.MonthlyMonthDateBasedGetDayActive(this.monthlyMonthDateBasedDay.Day - 1);
                 }
                 else
                 {
-                    return this.schedule.MonthlyHasAdvancedSchedule && this.schedule.MonthlyMonthRelativeBasedCombinations.Exists(
-                        mrc => mrc.DayPosition == this.monthlyMonthRelativeBasedDayPosition && mrc.DayOfWeek == this.monthlyMonthRelativeBasedDay);
+                    return  this.schedule.MonthlyMonthRelativeBasedCombinations.Where(
+                        mrc => mrc.DayPosition == this.monthlyMonthRelativeBasedDayPosition && mrc.DayOfWeek == this.monthlyMonthRelativeBasedDay).ToArray().Length > 0;
                 }
             }
         }
@@ -1215,14 +1464,19 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
+                if (!this.schedule.MonthlyHasAdvancedSchedule)
+                {
+                    return false;
+                }
+
                 if (this.schedule.MonthlyDateBased)
                 {
-                    return this.schedule.MonthlyHasAdvancedSchedule && this.schedule.MonthlyMonthDateBasedDates[this.monthlyMonthDateBasedDay.Day - 1];
+                    return this.schedule.MonthlyMonthDateBasedGetDayActive(this.monthlyMonthDateBasedDay.Day - 1);
                 }
                 else
                 {
-                    return this.schedule.MonthlyHasAdvancedSchedule && this.schedule.MonthlyMonthRelativeBasedCombinations.Exists(
-                        mrc => mrc.DayPosition == this.monthlyMonthRelativeBasedDayPosition && mrc.DayOfWeek == this.monthlyMonthRelativeBasedDay);
+                    return this.schedule.MonthlyMonthRelativeBasedCombinations.Where(
+                        mrc => mrc.DayPosition == this.monthlyMonthRelativeBasedDayPosition && mrc.DayOfWeek == this.monthlyMonthRelativeBasedDay).ToArray().Length > 0;
                 }
             }
         }
@@ -1238,31 +1492,13 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (this.schedule.MonthlyDateBased)
                 {
-                    if (!this.schedule.MonthlyMonthDateBasedDayTimes.ContainsKey(this.monthlyMonthDateBasedDay.Day - 1))
-                    {
-                        return false;
-                    }
-
-                    if (this.schedule.MonthlyMonthDateBasedDayTimes[this.monthlyMonthDateBasedDay.Day - 1][1] != null)
-                    {
-                        return true;
-                    }
-
-                    return false;
+                    return this.schedule.MonthlyMonthDateBasedGetDayActive(this.monthlyMonthDateBasedDay.Day - 1) && this.schedule.MonthlyMonthDateBasedGetDayTime(this.monthlyMonthDateBasedDay.Day - 1, 1) != null;
                 }
                 else
                 {
-                    TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimesFromSchedule(
-                        this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-                    if (timeSpans != null)
-                    {
-                        if (timeSpans[1] != null)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
+                    return this.schedule.MonthlyMonthRelativeBasedCombinations.Where(
+                        mrc => mrc.DayPosition == this.monthlyMonthRelativeBasedDayPosition && mrc.DayOfWeek == this.monthlyMonthRelativeBasedDay).ToArray().Length > 0 && 
+                           this.schedule.MonthlyMonthRelativeBasedGetDayTime(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay, 1) != null;
                 }
             }
         }
@@ -1283,7 +1519,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimesFromViewModel(
+                    TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimes(
                         this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
 
                     if (timeSpans == null)
@@ -1304,7 +1540,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 else
                 {
                     TimeSpan?[] timeSpans =
-                        this.getMonthRelativeBasedTimesFromViewModel(this.monthlyMonthRelativeBasedDayPosition,
+                        this.getMonthRelativeBasedTimes(this.monthlyMonthRelativeBasedDayPosition,
                             this.monthlyMonthRelativeBasedDay);
                     timeSpans[0] = value.QuarterHour;
                 }
@@ -1327,7 +1563,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimesFromViewModel(
+                    TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimes(
                         this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
 
                     if (timeSpans == null)
@@ -1348,7 +1584,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 else
                 {
                     TimeSpan?[] timeSpans =
-                        this.getMonthRelativeBasedTimesFromViewModel(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                        this.getMonthRelativeBasedTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
                     timeSpans[1] = value.QuarterHour;
                 }
             }
@@ -1370,7 +1606,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimesFromViewModel(
+                    TimeSpan?[] timeSpans = this.getMonthRelativeBasedTimes(
                         this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
 
                     if (timeSpans == null)
@@ -1391,34 +1627,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 else
                 {
                     TimeSpan?[] timeSpans =
-                        this.getMonthRelativeBasedTimesFromViewModel(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                        this.getMonthRelativeBasedTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
                     timeSpans[2] = value.QuarterHour;
                 }
             }
         }
 
-        private TimeSpan?[] getMonthRelativeBasedTimesFromSchedule(DayPosition dayPosition, DayOfWeek day)
-        {
-            MonthRelativeCombination[] combinations =
-                this.schedule.MonthlyMonthRelativeBasedDayTimes.Keys.Where(key =>
-                    key.DayPosition == dayPosition &&
-                    key.DayOfWeek == day).ToArray();
-
-            int count = combinations.Length;
-            if (count > 1)
-            {
-                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
-            }
-
-            if (count <= 0)
-            {
-                return null;
-            }
-
-            return this.schedule.MonthlyMonthRelativeBasedDayTimes[combinations[0]];
-        }
-
-        private TimeSpan?[] getMonthRelativeBasedTimesFromViewModel(DayPosition dayPosition, DayOfWeek day)
+        private TimeSpan?[] getMonthRelativeBasedTimes(DayPosition dayPosition, DayOfWeek day)
         {
             MonthRelativeCombination[] combinations =
                 this.monthlyMonthRelativeBasedDayTimes.Keys.Where(key =>
@@ -1439,7 +1654,7 @@ namespace Drexel.VidUp.UI.ViewModels
             return this.monthlyMonthRelativeBasedDayTimes[combinations[0]];
         }
 
-        private MonthRelativeCombination getMonthRelativeBasedCombinationFromViewModel(DayPosition dayPosition, DayOfWeek day)
+        private MonthRelativeCombination monthlyMonthRelativeBasedGetCombination(DayPosition dayPosition, DayOfWeek day)
         {
             MonthRelativeCombination[] combinations =
                 this.monthlyMonthRelativeBasedCombinations.Where(key =>
@@ -1460,73 +1675,10 @@ namespace Drexel.VidUp.UI.ViewModels
             return combinations[0];
         }
 
-        private MonthRelativeCombination getMonthRelativeBasedCombinationFromViewModelDayTimes(DayPosition dayPosition, DayOfWeek day)
+        private MonthRelativeCombination monthlyMonthRelativeBasedGetKeyFromDayTimes(DayPosition dayPosition, DayOfWeek day)
         {
             MonthRelativeCombination[] combinations =
                 this.monthlyMonthRelativeBasedDayTimes.Keys.Where(key =>
-                    key.DayPosition == dayPosition &&
-                    key.DayOfWeek == day).ToArray();
-
-            int count = combinations.Length;
-            if (count > 1)
-            {
-                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
-            }
-
-            if (count <= 0)
-            {
-                return null;
-            }
-
-            return combinations[0];
-        }
-
-        private MonthRelativeCombination getMonthRelativeBasedCombinationFromScheduleDayTimes(DayPosition dayPosition, DayOfWeek day)
-        {
-            MonthRelativeCombination[] combinations =
-                this.schedule.MonthlyMonthRelativeBasedDayTimes.Keys.Where(key =>
-                    key.DayPosition == dayPosition &&
-                    key.DayOfWeek == day).ToArray();
-
-            int count = combinations.Length;
-            if (count > 1)
-            {
-                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
-            }
-
-            if (count <= 0)
-            {
-                return null;
-            }
-
-            return combinations[0];
-        }
-
-        private MonthRelativeCombinationViewModel getMonthRelativeBasedCombinationViewModel(DayPosition dayPosition, DayOfWeek day)
-        {
-            MonthRelativeCombinationViewModel[] combinationViewModels =
-                this.monthlyMonthRelativeBasedCombinationViewModels.Where(key =>
-                    key.DayPosition == dayPosition &&
-                    key.DayOfWeek == day).ToArray();
-
-            int count = combinationViewModels.Length;
-            if (count > 1)
-            {
-                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
-            }
-
-            if (count <= 0)
-            {
-                return null;
-            }
-
-            return combinationViewModels[0];
-        }
-
-        private MonthRelativeCombination getMonthRelativeBasedCombinationFromSchedule(DayPosition dayPosition, DayOfWeek day)
-        {
-            MonthRelativeCombination[] combinations =
-                this.schedule.MonthlyMonthRelativeBasedCombinations.Where(key =>
                     key.DayPosition == dayPosition &&
                     key.DayOfWeek == day).ToArray();
 
@@ -1677,21 +1829,18 @@ namespace Drexel.VidUp.UI.ViewModels
                         if (!this.monthlyMonthRelativeBasedCombinations.Exists(
                             combi => combi.DayPosition == this.monthlyMonthRelativeBasedDayPosition && combi.DayOfWeek == this.monthlyMonthRelativeBasedDay))
                         {
-                            MonthRelativeCombination monthRelativeCombination = this.getMonthRelativeBasedCombinationFromViewModelDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                            MonthRelativeCombination monthRelativeCombination = this.monthlyMonthRelativeBasedGetKeyFromDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
                             if (monthRelativeCombination == null)
                             {
                                 monthRelativeCombination = new MonthRelativeCombination(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
                             }
 
                             this.monthlyMonthRelativeBasedCombinations.Add(monthRelativeCombination);
-                            MonthRelativeCombinationViewModel monthRelativeCombinationViewModel = new MonthRelativeCombinationViewModel(monthRelativeCombination);
-                            this.monthlyMonthRelativeBasedCombinationViewModels.Add(monthRelativeCombinationViewModel);
-                            this.monthlyMonthRelativeBasedCombination = monthRelativeCombinationViewModel;
                         }
                     }
                     else
                     {
-                        MonthRelativeCombination monthRelativeCombination = this.getMonthRelativeBasedCombinationFromViewModel(
+                        MonthRelativeCombination monthRelativeCombination = this.monthlyMonthRelativeBasedGetCombination(
                                 this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
                         this.monthlyMonthRelativeBasedCombinations.Remove(monthRelativeCombination);
                     }
@@ -1717,17 +1866,22 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (value == 0)
                 {
                     this.schedule.MonthlyDateBased = true;
+                    if (this.schedule.MonthlyHasAdvancedSchedule)
+                    {
+                        this.monthlyMonthDateBasedCheckDayTimesViewModels();
+                    }
                 }
                 else
                 {
                     this.schedule.MonthlyDateBased = false;
+                    if (this.schedule.MonthlyHasAdvancedSchedule)
+                    {
+                        this.monthlyMonthRelativeBasedCheckDayTimesViewModels();
+                    }
                 }
 
                 this.validate = false;
-                this.raisePropertyChanged("MonthlyMonthDateBasedIndex");
-                this.raisePropertyChanged("MonthlyMonthDateBasedVisible");
-                this.raisePropertyChanged("MonthlyMonthRelativeBasedVisible");
-                this.raisePropertyChanged("MonthlyActive");
+                this.raisePropertyChangedAllMonthly();
                 this.validate = true;
             }
         }
@@ -1787,28 +1941,23 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void initializeDailyViewModels()
         {
-            this.dailyDayTimesViewModels = new Dictionary<int, QuarterHourViewModel[]>();
-            this.dailyDayTimesViewModels.Add(0, new QuarterHourViewModel[3]);
-            this.dailyDayTimesViewModels.Add(1, new QuarterHourViewModel[3]);
-            this.dailyDayTimesViewModels.Add(2, new QuarterHourViewModel[3]);
-
+            this.dailyDays = new bool[3];
             for (int day = 0; day < 3; day++)
             {
+                this.dailyDays[day] = this.schedule.DailyGetDayActive(day);
+            }
+
+            this.dailyDayTimes = new Dictionary<int, TimeSpan?[]>();
+
+            foreach (int dayIndex in this.schedule.DailyDaysWithDayTimes)
+            {
+                TimeSpan?[] times = new TimeSpan?[3];
                 for (int slot = 0; slot < 3; slot++)
                 {
-                    if (day == 0 && slot == 0)
-                    {
-                        this.dailyDayTimesViewModels[day][slot] =
-                            this.quarterHourViewModels.GetQuarterHourViewModel(
-                                this.schedule.DailyDayTimes.ContainsKey(day) ? this.schedule.DailyDayTimes[day][slot] : null);
-                    }
-                    else
-                    {
-                        this.dailyDayTimesViewModels[day][slot] =
-                            this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(
-                                this.schedule.DailyDayTimes.ContainsKey(day) ? this.schedule.DailyDayTimes[day][slot] : null);
-                    }
+                    times[slot] = this.schedule.DailyGetDayTime(dayIndex, slot);
                 }
+
+                this.dailyDayTimes.Add(dayIndex, times);
             }
         }
 
@@ -1817,35 +1966,20 @@ namespace Drexel.VidUp.UI.ViewModels
             this.weeklyDays = new bool[7];
             for (int day = 0; day < 7; day++)
             {
-                this.weeklyDays[day] = this.schedule.WeeklyDays[day];
+                this.weeklyDays[day] = this.schedule.WeeklyGetWeekDayActive(day);
             }
 
-            this.weeklyDayTimesViewModels = new Dictionary<DayOfWeek, QuarterHourViewModel[]>();
-            this.weeklyDayTimesViewModels[DayOfWeek.Monday] = new QuarterHourViewModel[3];
-            this.weeklyDayTimesViewModels[DayOfWeek.Tuesday] = new QuarterHourViewModel[3];
-            this.weeklyDayTimesViewModels[DayOfWeek.Wednesday] = new QuarterHourViewModel[3];
-            this.weeklyDayTimesViewModels[DayOfWeek.Thursday] = new QuarterHourViewModel[3];
-            this.weeklyDayTimesViewModels[DayOfWeek.Friday] = new QuarterHourViewModel[3];
-            this.weeklyDayTimesViewModels[DayOfWeek.Saturday] = new QuarterHourViewModel[3];
-            this.weeklyDayTimesViewModels[DayOfWeek.Sunday] = new QuarterHourViewModel[3];
-            Array days = Enum.GetValues(typeof(DayOfWeek));
-            foreach (DayOfWeek day in days)
+            this.weeklyDayTimes = new Dictionary<DayOfWeek, TimeSpan?[]>();
+
+            foreach (DayOfWeek dayOfWeek in this.schedule.WeeklyDaysWithDayTimes)
             {
+                TimeSpan?[] times = new TimeSpan?[3];
                 for (int slot = 0; slot < 3; slot++)
                 {
-                    if (slot == 0)
-                    {
-                        this.weeklyDayTimesViewModels[day][slot] =
-                            this.quarterHourViewModels.GetQuarterHourViewModel(
-                                this.schedule.WeeklyDayTimes.ContainsKey(day) ? this.schedule.WeeklyDayTimes[day][slot] : null);
-                    }
-                    else
-                    {
-                        this.weeklyDayTimesViewModels[day][slot] =
-                            this.quarterHourViewModelsEmptyStartValue.GetQuarterHourViewModel(
-                                this.schedule.WeeklyDayTimes.ContainsKey(day) ? this.schedule.WeeklyDayTimes[day][slot] : null);
-                    }
+                    times[slot] = this.schedule.WeeklyGetDayTime(dayOfWeek, slot);
                 }
+
+                this.weeklyDayTimes.Add(dayOfWeek, times);
             }
         }
 
@@ -1854,15 +1988,25 @@ namespace Drexel.VidUp.UI.ViewModels
             this.monthlyMonthDateBasedDates = new bool[31];
             this.monthlyMonthDateBasedDayViewModels = new List<MonthDayViewModel>(31);
             this.monthlyMonthDateBasedDayTimes = new Dictionary<int, TimeSpan?[]>();
-            for (int day = 0; day <= 30; day++)
+            for (int dayIndex = 0; dayIndex <= 30; dayIndex++)
             {
-                this.monthlyMonthDateBasedDates[day] = this.schedule.MonthlyMonthDateBasedDates[day];
+                this.monthlyMonthDateBasedDates[dayIndex] = this.schedule.MonthlyMonthDateBasedGetDayActive(dayIndex);
 
-                MonthDayViewModel monthDayViewModel = new MonthDayViewModel(day + 1);
-                if (this.monthlyMonthDateBasedDates[day])
+                MonthDayViewModel monthDayViewModel = new MonthDayViewModel(dayIndex + 1);
+                if (this.monthlyMonthDateBasedDates[dayIndex])
                 {
                     monthDayViewModel.Active = true;
-                    this.monthlyMonthDateBasedDayTimes.Add(day, this.schedule.MonthlyMonthDateBasedDayTimes[day].ToArray());
+                }
+
+                if (this.schedule.MonthlyMonthDateBasedDaysWithDayTimes.Contains(dayIndex))
+                {
+                    TimeSpan?[] times = new TimeSpan?[3];
+                    for (int timeIndex = 0; timeIndex < 3; timeIndex++)
+                    {
+                        times[timeIndex] = this.schedule.MonthlyMonthDateBasedGetDayTime(dayIndex, timeIndex);
+                    }
+
+                    this.monthlyMonthDateBasedDayTimes.Add(dayIndex, times);
                 }
 
                 this.monthlyMonthDateBasedDayViewModels.Add(monthDayViewModel);
@@ -1884,23 +2028,21 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.monthlyMonthRelativeBasedCombinationViewModels.Add(new MonthRelativeCombinationViewModel(monthRelativeCombinationInner));
             }
 
-            foreach (KeyValuePair<MonthRelativeCombination, TimeSpan?[]> scheduleMonthlyMonthRelativeBasedDayTime in this.schedule.MonthlyMonthRelativeBasedDayTimes)
+            foreach (MonthRelativeCombination monthRelativeCombinationSchedule in this.schedule.MonthlyMonthRelativeBasedCombinationsWithDayTimes)
             {
                 MonthRelativeCombination monthRelativeCombination =
-                    this.getMonthRelativeBasedCombinationFromViewModel(scheduleMonthlyMonthRelativeBasedDayTime.Key.DayPosition, scheduleMonthlyMonthRelativeBasedDayTime.Key.DayOfWeek);
+                    this.monthlyMonthRelativeBasedGetCombination(monthRelativeCombinationSchedule.DayPosition, monthRelativeCombinationSchedule.DayOfWeek);
 
                 if (monthRelativeCombination == null)
                 {
-                    monthRelativeCombination = new MonthRelativeCombination(scheduleMonthlyMonthRelativeBasedDayTime.Key.DayPosition, scheduleMonthlyMonthRelativeBasedDayTime.Key.DayOfWeek);
+                    monthRelativeCombination = new MonthRelativeCombination(monthRelativeCombinationSchedule.DayPosition, monthRelativeCombinationSchedule.DayOfWeek);
                 }
 
                 TimeSpan?[] newTimeSpans = new TimeSpan?[3];
                 for (int index = 0; index < 3; index++)
                 {
-                    if (scheduleMonthlyMonthRelativeBasedDayTime.Value[index] != null)
-                    {
-                        newTimeSpans[index] = scheduleMonthlyMonthRelativeBasedDayTime.Value[index];
-                    }
+                    newTimeSpans[index] = this.schedule.MonthlyMonthRelativeBasedGetDayTime(
+                        monthRelativeCombinationSchedule.DayPosition, monthRelativeCombinationSchedule.DayOfWeek, index);
                 }
 
                 this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, newTimeSpans);
@@ -1940,7 +2082,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("MonthlyMonthDateBasedVisible");
             this.raisePropertyChanged("MonthlyMonthRelativeBasedVisible"); 
             this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
-            //this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
+            this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
             this.raisePropertyChanged("MonthlyHasAdvancedSchedule");
             this.raisePropertyChanged("MonthlyActive");
             this.raisePropertyChanged("MonthlyTime1");
@@ -1988,6 +2130,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("DailyDayFrequency");
             this.raisePropertyChanged("DailyDefaultTime");
             this.raisePropertyChanged("DailyHasAdvancedSchedule");
+            this.raisePropertyChanged("DailyDay2Active");
+            this.raisePropertyChanged("DailyDay3Active");
             this.raisePropertyChanged("DailyDay1Time1");
             this.raisePropertyChanged("DailyDay1Time2");
             this.raisePropertyChanged("DailyDay1Time3");
@@ -2002,6 +2146,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private void dailyAdjustControlEnablement()
         {
             this.raisePropertyChanged("DailyDefaultTimeEnabled");
+            this.raisePropertyChanged("DailyDay2ActiveEnabled");
+            this.raisePropertyChanged("DailyDay3ActiveEnabled");
             this.raisePropertyChanged("DailyDay1Time1Enabled");
             this.raisePropertyChanged("DailyDay1Time2Enabled");
             this.raisePropertyChanged("DailyDay1Time3Enabled");
@@ -2056,8 +2202,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-
-        //todo: move integrity logic to Schedule class
         public string this[string propertyName]
         {
             get
@@ -2080,6 +2224,9 @@ namespace Drexel.VidUp.UI.ViewModels
                     case "DailyDay3Time2":
                     case "DailyDay3Time3":
                         return this.validateDailyTimes(propertyName);
+                    case "DailyDay2Active":
+                    case "DailyDay3Active":
+                        return this.validateDailyActive(propertyName);
                     #endregion daily
                     #region weekly
                     case "WeeklyMondayActive":
@@ -2128,548 +2275,366 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        private string validateDailyActive(string propertyName)
+        {
+            int dayIndex = Convert.ToInt32(propertyName.Substring(8, 1)) - 1;
+
+            try
+            {
+                this.schedule.DailySetDayActive(dayIndex, this.dailyDays[dayIndex]);
+                if (dayIndex > 0 && this.dailyDays[dayIndex])
+                {
+                    if (this.schedule.DailyHasAdvancedSchedule)
+                    {
+                        if (!this.dailyDayTimes.ContainsKey(dayIndex))
+                        {
+                            TimeSpan?[] times = new TimeSpan?[3];
+                            for (int timeIndex = 0; timeIndex <= 2; timeIndex++)
+                            {
+                                times[timeIndex] = this.schedule.DailyGetDayTime(dayIndex, timeIndex);
+                            }
+
+                            this.dailyDayTimes.Add(dayIndex, times);
+                        }
+                    }
+                }
+
+                this.validate = false;
+                this.raisePropertyChanged(propertyName);
+                this.raisePropertyChanged("DailyDay2Time1");
+                this.raisePropertyChanged("DailyDay3Time1");
+                this.validate = true;
+                this.dailyAdjustControlEnablement();
+                return string.Empty;
+            }
+            catch (InvalidScheduleException e)
+            {
+                return e.Message;
+            }
+        }
+
         private string validateWeeklyActive(string propertyName)
         {
-            string day1 = propertyName.Substring(6, propertyName.Length - 12);
-            int dayIndex = this.getDayIndex(day1);
-            if (!this.weeklyDays[dayIndex])
-            {
-                int count = this.schedule.WeeklyDays.Count(v => v == true);
-                if (count < 2)
-                {
-                    return $"{day1} is the last active day and can't be disabled.";
-                }
-            }
+            string dayString = propertyName.Substring(6, propertyName.Length - 12);
+            DayOfWeek dayOfWeek = (DayOfWeek) Enum.Parse(typeof(DayOfWeek), dayString);
+            int dayIndex = Schedule.GetCorrectedDayIndex(dayOfWeek);
 
-            this.schedule.WeeklyDays[dayIndex] = this.weeklyDays[dayIndex];
-            this.validate = false;
-            this.raisePropertyChanged(propertyName);
-            this.validate = true;
-            this.weeklyAdjustControlEnablement();
-            return string.Empty;
+            try
+            {
+                this.schedule.WeeklySetDayActive(dayIndex, this.weeklyDays[dayIndex]);
+
+                if (this.schedule.WeeklyHasAdvancedSchedule)
+                {
+                    if (!this.weeklyDayTimes.ContainsKey(dayOfWeek))
+                    {
+                        TimeSpan?[] times = new TimeSpan?[3];
+                        for (int timeIndex = 0; timeIndex <= 2; timeIndex++)
+                        {
+                            times[timeIndex] = this.schedule.WeeklyGetDayTime(dayOfWeek, timeIndex);
+                        }
+
+                        this.weeklyDayTimes.Add(dayOfWeek, times);
+                    }
+                }
+
+                this.validate = false;
+                this.raisePropertyChanged(propertyName);
+                this.raisePropertyChanged($"Weekly{dayString}Time1");
+                this.raisePropertyChanged($"Weekly{dayString}Time2");
+                this.raisePropertyChanged($"Weekly{dayString}Time3");
+                this.validate = true;
+                this.weeklyAdjustControlEnablement();
+                return string.Empty;
+            }
+            catch (InvalidScheduleException e)
+            {
+                return e.Message;
+            }
         }
 
         private string validateDailyTimes(string propertyName)
         {
-            switch (propertyName)
+            int dayIndex = Convert.ToInt32(propertyName.Substring(8, 1)) - 1;
+            int timeIndex = Convert.ToInt32(propertyName.Substring(13, 1)) - 1;
+            try
             {
-                case "DailyDay1Time1":
-                    if (this.dailyDayTimesViewModels[0][0].QuarterHour >= this.schedule.DailyDayTimes[0][1])
-                    {
-                        return "Day 1 Time 1 must be smaller than Day 1 Time 2.";
-                    }
-                    else
-                    {
-                        this.schedule.DailyDayTimes[0][0] = this.dailyDayTimesViewModels[0][0].QuarterHour;
-                        this.validate = false;
-                        this.raisePropertyChanged(propertyName);
-                        this.validate = true;
-                        return string.Empty;
-                    }
-                case "DailyDay1Time2":
-                    if (this.dailyDayTimesViewModels[0][1].QuarterHour == null)
-                    {
-                        if (this.schedule.DailyDayTimes[0][2] != null)
-                        {
-                            return "Day 1 Time 2 must not have a value if Day 1 Time 3 has no value.";
-                        }
-                    }
-                    else
-                    {
-                        if (this.dailyDayTimesViewModels[0][1].QuarterHour <= this.schedule.DailyDayTimes[0][0] ||
-                            (this.schedule.DailyDayTimes[0][2] != null &&
-                             this.dailyDayTimesViewModels[0][1].QuarterHour >= this.schedule.DailyDayTimes[0][2]))
-                        {
-                            return "Day 1 Time 2 must be greater than Day 1 Time 1 and smaller than Day 1 Time 3.";
-                        }
-                    }
-
-                    this.schedule.DailyDayTimes[0][1] = this.dailyDayTimesViewModels[0][1].QuarterHour;
-                    this.validate = false;
-                    this.raisePropertyChanged(propertyName);
-                    this.validate = true;
-                    this.dailyAdjustControlEnablement();
-                    return string.Empty;
-                case "DailyDay1Time3":
-                    if (this.dailyDayTimesViewModels[0][2].QuarterHour <= this.schedule.DailyDayTimes[0][1])
-                    {
-                        return "Day 1 Time 3 must be greater than Day 1 Time 2.";
-                    }
-                    else
-                    {
-                        this.schedule.DailyDayTimes[0][2] = this.dailyDayTimesViewModels[0][2].QuarterHour;
-                        this.validate = false;
-                        this.raisePropertyChanged(propertyName);
-                        this.validate = true;
-                        this.dailyAdjustControlEnablement();
-                        return string.Empty;
-                    }
-                case "DailyDay2Time1":
-                    if (this.dailyDayTimesViewModels[1][0].QuarterHour == null)
-                    {
-                        if (this.DailyDay2Time2.QuarterHour != null || this.DailyDay3Time1.QuarterHour != null)
-                        {
-                            return "Day 2 Time 2 or Day 3 Time 1 must not have a value if Day 2 Time 1 has no value.";
-                        }
-
-                        this.schedule.DailyDayTimes.Remove(1);
-                    }
-                    else
-                    {
-                        TimeSpan?[] timeSpans;
-                        if (this.schedule.DailyDayTimes.TryGetValue(1, out timeSpans))
-                        {
-                            if (this.dailyDayTimesViewModels[1][0].QuarterHour >= this.schedule.DailyDayTimes[1][1])
-                            {
-                                return "Day 2 Time 1 must be smaller than Day 2 Time 2.";
-                            }
-                        }
-                        else
-                        {
-                            timeSpans = new TimeSpan?[3];
-                            this.schedule.DailyDayTimes.Add(1, timeSpans);
-                        }
-
-                        timeSpans[0] = this.dailyDayTimesViewModels[1][0].QuarterHour;
-                    }
-
-                    this.validate = false;
-                    this.raisePropertyChanged(propertyName);
-                    this.validate = true;
-                    this.dailyAdjustControlEnablement();
-                    return string.Empty;
-                case "DailyDay2Time2":
-                    if (this.dailyDayTimesViewModels[1][1].QuarterHour == null)
-                    {
-                        if (this.schedule.DailyDayTimes[1][2] != null)
-                        {
-                            return "Day 2 Time 3 must not have a value if Day 2 Time 2 has no value.";
-                        }
-                    }
-                    else
-                    {
-                        if (this.dailyDayTimesViewModels[1][1].QuarterHour <= this.schedule.DailyDayTimes[1][0] ||
-                            (this.schedule.DailyDayTimes[1][2] != null &&
-                             this.dailyDayTimesViewModels[1][1].QuarterHour >= this.schedule.DailyDayTimes[1][2]))
-                        {
-                            return "Day 2 Time 2 must be greater than Day 2 Time 1 and smaller than Day 2 Time 3.";
-                        }
-                    }
-
-                    this.schedule.DailyDayTimes[1][1] = this.dailyDayTimesViewModels[1][1].QuarterHour;
-                    this.validate = false;
-                    this.raisePropertyChanged(propertyName);
-                    this.validate = true;
-                    this.dailyAdjustControlEnablement();
-                    return string.Empty;
-                case "DailyDay2Time3":
-                    if (this.dailyDayTimesViewModels[1][2].QuarterHour <= this.schedule.DailyDayTimes[1][1])
-                    {
-                        return "Day 2 Time 3 must be greater than Day 2 Time 2.";
-                    }
-                    else
-                    {
-                        this.schedule.DailyDayTimes[1][2] = this.dailyDayTimesViewModels[1][2].QuarterHour;
-                        this.validate = false;
-                        this.raisePropertyChanged(propertyName);
-                        this.validate = true;
-                        this.dailyAdjustControlEnablement();
-                        return string.Empty;
-                    }
-                case "DailyDay3Time1":
-                    if (this.dailyDayTimesViewModels[2][0].QuarterHour == null)
-                    {
-                        if (this.DailyDay3Time2.QuarterHour != null)
-                        {
-                            return "Day 3 Time 1 must not have a value if Day 3 Time 2 has no value.";
-                        }
-
-                        this.schedule.DailyDayTimes.Remove(2);
-                    }
-                    else
-                    {
-                        TimeSpan?[] timeSpans;
-                        if (this.schedule.DailyDayTimes.TryGetValue(2, out timeSpans))
-                        {
-                            if (this.dailyDayTimesViewModels[2][0].QuarterHour >= this.schedule.DailyDayTimes[2][1])
-                            {
-                                return "Day 3 Time 1 must be smaller than Day 3 Time 2.";
-                            }
-                        }
-                        else
-                        {
-                            timeSpans = new TimeSpan?[3];
-                            this.schedule.DailyDayTimes.Add(2, timeSpans);
-                        }
-
-                        timeSpans[0] = this.dailyDayTimesViewModels[2][0].QuarterHour;
-                    }
-
-                    this.validate = false;
-                    this.raisePropertyChanged(propertyName);
-                    this.validate = true;
-                    this.dailyAdjustControlEnablement();
-                    return string.Empty;
-                case "DailyDay3Time2":
-                    if (this.dailyDayTimesViewModels[2][1].QuarterHour == null)
-                    {
-                        if (this.schedule.DailyDayTimes[2][2] != null)
-                        {
-                            return "Day 3 Time 3 must not have a value if Day 3 Time 2 has no value.";
-                        }
-                    }
-                    else
-                    {
-                        if (this.dailyDayTimesViewModels[2][1].QuarterHour <= this.schedule.DailyDayTimes[2][0] ||
-                            (this.schedule.DailyDayTimes[2][2] != null &&
-                             this.dailyDayTimesViewModels[2][1].QuarterHour >= this.schedule.DailyDayTimes[2][2]))
-                        {
-                            return "Day 3 Time 2 must be greater than Day 3 Time 1 and smaller than Day 3 Time 3.";
-                        }
-                    }
-
-                    this.schedule.DailyDayTimes[2][1] = this.dailyDayTimesViewModels[2][1].QuarterHour;
-                    this.validate = false;
-                    this.raisePropertyChanged(propertyName);
-                    this.validate = true;
-                    this.dailyAdjustControlEnablement();
-                    return string.Empty;
-                case "DailyDay3Time3":
-                    if (this.dailyDayTimesViewModels[2][2].QuarterHour <= this.schedule.DailyDayTimes[2][1])
-                    {
-                        return "Day 3 Time 3 must be greater than Day 3 Time 2.";
-                    }
-                    else
-                    {
-                        this.schedule.DailyDayTimes[2][2] = this.dailyDayTimesViewModels[2][2].QuarterHour;
-                        this.validate = false;
-                        this.raisePropertyChanged(propertyName);
-                        this.validate = true;
-                        this.dailyAdjustControlEnablement();
-                        return string.Empty;
-                    }
-                default:
-                    throw new ArgumentException("Unknown property to validate.");
+                this.schedule.DailySetDayTime(dayIndex, timeIndex, this.dailyDayTimes[dayIndex][timeIndex]);
+                this.validate = false;
+                this.raisePropertyChanged(propertyName);
+                this.validate = true;
+                this.dailyAdjustControlEnablement();
+                return string.Empty;
+            }
+            catch (InvalidScheduleException e)
+            {
+                return e.Message;
             }
         }
 
         private string validateWeeklyTimes(string propertyName)
         {
             string dayString = propertyName.Substring(6, propertyName.Length - 11);
-            DayOfWeek day2 = (DayOfWeek) Enum.Parse(typeof(DayOfWeek), dayString);
-            int index = Convert.ToInt32(propertyName.Substring(propertyName.Length - 1, 1)) - 1;
-            if (index == 0)
+            DayOfWeek day = (DayOfWeek) Enum.Parse(typeof(DayOfWeek), dayString);
+            int timeIndex = Convert.ToInt32(propertyName.Substring(propertyName.Length - 1, 1)) - 1;
+            
+            try
             {
-                if (this.schedule.WeeklyDayTimes[day2][index + 1] != null &&
-                    this.weeklyDayTimesViewModels[day2][index].QuarterHour >= this.schedule.WeeklyDayTimes[day2][index + 1])
-                {
-                    return $"{dayString} Time 1 must be smaller than {dayString} Time 2.";
-                }
+                this.schedule.WeeklySetDayTime(day, timeIndex, this.weeklyDayTimes[day][timeIndex]);
+                this.validate = false;
+                this.raisePropertyChanged(propertyName);
+                this.validate = true;
+                this.weeklyAdjustControlEnablement();
+                return string.Empty;
             }
-
-            if (index == 1)
+            catch (InvalidScheduleException e)
             {
-                if (this.weeklyDayTimesViewModels[day2][index].QuarterHour == null)
+                return e.Message;
+            }
+        }
+
+        private void weeklyCheckDayTimesViewModels()
+        {
+            for (int dayIndex = 0; dayIndex < 7; dayIndex++)
+            {
+                if (this.schedule.WeeklyGetWeekDayActive(dayIndex))
                 {
-                    if (this.schedule.WeeklyDayTimes[day2][index + 1] != null)
+                    DayOfWeek dayOfWeek = Schedule.GetDayOfWeekFromDayIndex(dayIndex);
+                    if (!this.weeklyDayTimes.ContainsKey(dayOfWeek))
                     {
-                        return $"{dayString} Time 3 must not have a value if {dayString} Time 2 has no value.";
+                        TimeSpan?[] times = new TimeSpan?[3];
+                        for (int timeIndex = 0; timeIndex <= 2; timeIndex++)
+                        {
+                            times[timeIndex] = this.schedule.WeeklyGetDayTime(dayOfWeek, timeIndex);
+                        }
+
+                        this.weeklyDayTimes.Add(dayOfWeek, times);
                     }
                 }
-                else
+            }
+        }
+
+        private void monthlyMonthRelativeBasedCheckDayTimesViewModels()
+        {
+            foreach (MonthRelativeCombination monthRelativeCombination in this.schedule.MonthlyMonthRelativeBasedCombinations)
+            {
+                if (this.monthlyMonthRelativeBasedGetKeyFromDayTimes(
+                    monthRelativeCombination.DayPosition, monthRelativeCombination.DayOfWeek) == null)
                 {
-                    if (this.weeklyDayTimesViewModels[day2][index].QuarterHour <=
-                        this.schedule.WeeklyDayTimes[day2][index - 1] ||
-                        (this.schedule.WeeklyDayTimes[day2][index + 1] != null &&
-                         this.weeklyDayTimesViewModels[day2][index].QuarterHour >=
-                         this.schedule.WeeklyDayTimes[day2][index + 1]))
+                    TimeSpan?[] times = new TimeSpan?[3];
+                    for (int timeIndex = 0; timeIndex <= 2; timeIndex++)
                     {
-                        return
-                            $"{dayString} Time 2 must be greater than {dayString} Time 1 and smaller than {dayString} Time 3.";
+                        times[timeIndex] = this.schedule.MonthlyMonthRelativeBasedGetDayTime(
+                                monthRelativeCombination.DayPosition, monthRelativeCombination.DayOfWeek, timeIndex);
+                    }
+
+                    this.monthlyMonthRelativeBasedDayTimes.Add(this.monthlyMonthRelativeBasedGetCombination(
+                        monthRelativeCombination.DayPosition, monthRelativeCombination.DayOfWeek), times);
+                }
+            }
+        }
+
+        private void monthlyMonthDateBasedCheckDayTimesViewModels()
+        {
+            for (int dayIndex = 0; dayIndex <= 30; dayIndex++)
+            {
+                if (this.schedule.MonthlyMonthDateBasedGetDayActive(dayIndex))
+                {
+                    if (!this.monthlyMonthDateBasedDayTimes.ContainsKey(dayIndex))
+                    {
+                        TimeSpan?[] times = new TimeSpan?[3];
+                        for (int timeIndex = 0; timeIndex <= 2; timeIndex++)
+                        {
+                            times[timeIndex] = this.schedule.MonthlyMonthDateBasedGetDayTime(dayIndex, timeIndex);
+                        }
+
+                        this.monthlyMonthDateBasedDayTimes.Add(dayIndex, times);
                     }
                 }
             }
-
-            if (index == 2)
-            {
-                if (this.weeklyDayTimesViewModels[day2][index].QuarterHour != null &&
-                    this.weeklyDayTimesViewModels[day2][index].QuarterHour <= this.schedule.WeeklyDayTimes[day2][index - 1])
-                {
-                    return $"{dayString} Time 3 must be greater than {dayString} Time 2.";
-                }
-            }
-
-            this.schedule.WeeklyDayTimes[day2][index] = this.weeklyDayTimesViewModels[day2][index].QuarterHour;
-            this.validate = false;
-            this.raisePropertyChanged(propertyName);
-            this.validate = true;
-            this.weeklyAdjustControlEnablement();
-            return string.Empty;
         }
 
         private string validateMonthlyActive(string propertyName)
         {
             if (this.schedule.MonthlyDateBased)
             {
-                int dayIndex2 = this.monthlyMonthDateBasedDay.Day - 1;
-                if (!this.monthlyMonthDateBasedDates[dayIndex2])
+                int dayIndex = this.monthlyMonthDateBasedDay.Day - 1;
+
+                try
                 {
-                    int count = this.schedule.MonthlyMonthDateBasedDates.Count(dayActive =>
-                        dayActive == true);
-                    if (this.schedule.MonthlyMonthDateBasedDates.Count(dayActive => dayActive == true) <= 1)
+                    this.schedule.MonthlyMonthDateBasedSetDayActive(dayIndex, this.monthlyMonthDateBasedDates[dayIndex]);
+
+                    if (this.schedule.MonthlyHasAdvancedSchedule)
                     {
-                        //as MontlyActive state can be change by selection of other controls, we need to revert the change, to prevent inconsistent data.
-                        this.monthlyMonthDateBasedDates[dayIndex2] = true;
-                        return $"{this.monthlyMonthDateBasedDay.Day}. is the last active day and can't be disabled.";
+                        if (!this.monthlyMonthDateBasedDayTimes.ContainsKey(dayIndex))
+                        {
+                            TimeSpan?[] times = new TimeSpan?[3];
+                            for (int timeIndex = 0; timeIndex <= 2; timeIndex++)
+                            {
+                                times[timeIndex] = this.schedule.MonthlyMonthDateBasedGetDayTime(dayIndex, timeIndex);
+                            }
+
+                            this.monthlyMonthDateBasedDayTimes.Add(dayIndex, times);
+                        }
                     }
+
+                    this.validate = false;
+                    this.raisePropertyChanged(propertyName);
+                    this.raisePropertyChanged("MonthlyTime1");
+                    this.raisePropertyChanged("MonthlyTime2");
+                    this.raisePropertyChanged("MonthlyTime3");
+                    this.validate = true;
+                    this.monthlyAdjustControlEnablement();
+                    return string.Empty;
                 }
-
-                this.schedule.MonthlyMonthDateBasedDates[dayIndex2] = this.monthlyMonthDateBasedDates[dayIndex2];
-
-                if (this.monthlyMonthDateBasedDates[dayIndex2])
+                catch (InvalidScheduleException e)
                 {
-                    if (!this.monthlyMonthDateBasedDayTimes.ContainsKey(this.monthlyMonthDateBasedDay.Day - 1))
-                    {
-                        this.monthlyMonthDateBasedDayTimes.Add(this.monthlyMonthDateBasedDay.Day - 1, new TimeSpan?[3]);
-                        this.monthlyMonthDateBasedDayTimes[this.monthlyMonthDateBasedDay.Day - 1][0] = new TimeSpan();
-                        this.schedule.MonthlyMonthDateBasedDayTimes.Add(this.monthlyMonthDateBasedDay.Day - 1,
-                            new TimeSpan?[3]);
-                        this.schedule.MonthlyMonthDateBasedDayTimes[this.monthlyMonthDateBasedDay.Day - 1][0] = new TimeSpan();
-                    }
+                    //as MonthlyActive state can be change by selection of other controls, we need to revert the change, to prevent inconsistent data.
+                    this.monthlyMonthDateBasedDates[dayIndex] = !this.monthlyMonthDateBasedDates[dayIndex];
+                    return e.Message;
                 }
-
-                this.validate = false;
-                this.raisePropertyChanged(propertyName);
-                this.raisePropertyChanged("MonthlyTime1");
-                this.raisePropertyChanged("MonthlyTime2");
-                this.raisePropertyChanged("MonthlyTime3");
-                this.validate = true;
-                this.monthlyAdjustControlEnablement();
-                return string.Empty;
             }
             else
             {
-                if (!this.monthlyMonthRelativeBasedCombinations.Exists(
-                    combi => combi.DayPosition == this.monthlyMonthRelativeBasedDayPosition &&
-                             combi.DayOfWeek == this.monthlyMonthRelativeBasedDay))
+                try
                 {
-                    if (this.schedule.MonthlyMonthRelativeBasedCombinations.Count <= 1)
-                    {
-                        //as MontlyActive state can be change by selection of other controls, we need to revert the change, to prevent inconsistent data.
-                        MonthRelativeCombination monthRelativeCombination =
-                            this.getMonthRelativeBasedCombinationFromViewModelDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                    bool active = this.monthlyMonthRelativeBasedCombinations.Exists(
+                        combi => combi.DayPosition == this.monthlyMonthRelativeBasedDayPosition && combi.DayOfWeek == this.monthlyMonthRelativeBasedDay);
 
-                        this.monthlyMonthRelativeBasedCombinations.Add(monthRelativeCombination);
-                        return "Cannot remove last relative day position.";
+                    this.schedule.MonthlyMonthRelativeBasedSetDayActive(
+                        this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay, active);
+
+                    if (!active)
+                    {
+                        MonthRelativeCombinationViewModel monthRelativeCombinationViewModel = 
+                            this.monthlyMonthRelativeBasedGetCombinationViewModel(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+
+                        //to avoid to have an empty combobox selected item. change needs to be raised to view before item is removed.
+                        if (this.monthlyMonthRelativeBasedCombination == monthRelativeCombinationViewModel)
+                        {
+                            if (this.monthlyMonthRelativeBasedCombinationViewModels[0] != monthlyMonthRelativeBasedCombination)
+                            {
+                                this.monthlyMonthRelativeBasedCombination = this.monthlyMonthRelativeBasedCombinationViewModels[0];
+                            }
+                            else
+                            {
+                                this.monthlyMonthRelativeBasedCombination = this.monthlyMonthRelativeBasedCombinationViewModels[1];
+                            }
+                        }
+
+                        this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
+                        this.monthlyMonthRelativeBasedCombinationViewModels.Remove(monthRelativeCombinationViewModel);
+                    }
+                    else
+                    {
+
+                        MonthRelativeCombination monthRelativeCombination = this.monthlyMonthRelativeBasedGetCombination(
+                                this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+
+                        if (this.schedule.MonthlyHasAdvancedSchedule)
+                        {
+                            if (!this.monthlyMonthRelativeBasedDayTimes.ContainsKey(monthRelativeCombination))
+                            {
+                                this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombination, new TimeSpan?[3]);
+                                this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombination][0] = new TimeSpan();
+                            }
+                        }
+
+                        MonthRelativeCombinationViewModel monthRelativeCombinationViewModel = new MonthRelativeCombinationViewModel(monthRelativeCombination);
+                        this.monthlyMonthRelativeBasedCombination = monthRelativeCombinationViewModel;
+                        this.MonthlyMonthRelativeBasedCombinationViewModels.Add(monthRelativeCombinationViewModel);
                     }
 
-                    MonthRelativeCombination monthRelativeCombinationFromSchedule = this.getMonthRelativeBasedCombinationFromSchedule(
-                        this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-                    this.schedule.MonthlyMonthRelativeBasedCombinations.Remove(monthRelativeCombinationFromSchedule);
 
-                    MonthRelativeCombinationViewModel monthRelativeCombinationViewModel = this.getMonthRelativeBasedCombinationViewModel(
-                        this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-
-                    //to avoid to have an empty combobox selected item. change needs to be raised to view bevore item is removed.
-                    if (this.monthlyMonthRelativeBasedCombination == monthRelativeCombinationViewModel)
-                    {
-                        if (this.monthlyMonthRelativeBasedCombinationViewModels[0] != monthlyMonthRelativeBasedCombination)
-                        {
-                            this.monthlyMonthRelativeBasedCombination = this.monthlyMonthRelativeBasedCombinationViewModels[0];
-                        }
-                        else
-                        {
-                            this.monthlyMonthRelativeBasedCombination = this.monthlyMonthRelativeBasedCombinationViewModels[1];
-                        }
-                    }
+                    this.validate = false;
+                    this.raisePropertyChanged(propertyName);
 
                     this.raisePropertyChanged("MonthlyMonthRelativeBasedCombination");
-
-                    this.monthlyMonthRelativeBasedCombinationViewModels.Remove(monthRelativeCombinationViewModel);
+                    this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
+                    this.raisePropertyChanged("MonthlyTime1");
+                    this.raisePropertyChanged("MonthlyTime2");
+                    this.raisePropertyChanged("MonthlyTime3");
+                    this.validate = true;
+                    this.monthlyAdjustControlEnablement();
+                    return string.Empty;
                 }
-                else
+                catch (InvalidScheduleException e)
                 {
-                    MonthRelativeCombination monthRelativeCombinationFromViewModel = this.getMonthRelativeBasedCombinationFromViewModel(
-                        this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-
-                    MonthRelativeCombination monthRelativeCombinationForSchedule =
-                        this.getMonthRelativeBasedCombinationFromScheduleDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-
-                    if (monthRelativeCombinationForSchedule == null)
+                    //as MonthlyActive state can be change by selection of other controls, we need to revert the change, to prevent inconsistent data.
+                    MonthRelativeCombination monthRelativeCombination = this.monthlyMonthRelativeBasedGetCombination(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                    if (monthRelativeCombination == null)
                     {
-                        monthRelativeCombinationForSchedule = new MonthRelativeCombination(
-                            this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
+                        this.monthlyMonthRelativeBasedCombinations.Add(this.monthlyMonthRelativeBasedGetKeyFromDayTimes(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay));
+                    }
+                    else
+                    {
+                        this.monthlyMonthRelativeBasedCombinations.Remove(monthRelativeCombination);
                     }
 
-                    //schedule.MonthlyMonthRelativeBasedCombinations can already contain the combination
-                    //if this is reversion of trying to delete the last combination entry
-                    if (!this.schedule.MonthlyMonthRelativeBasedCombinations.Contains(monthRelativeCombinationForSchedule))
-                    {
-                        this.schedule.MonthlyMonthRelativeBasedCombinations.Add(monthRelativeCombinationForSchedule);
-                    }
-
-                    if (!this.monthlyMonthRelativeBasedDayTimes.ContainsKey(monthRelativeCombinationFromViewModel))
-                    {
-                        if (!this.monthlyMonthRelativeBasedDayTimes.ContainsKey(monthRelativeCombinationFromViewModel))
-                        {
-                            this.monthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationFromViewModel, new TimeSpan?[3]);
-                            this.monthlyMonthRelativeBasedDayTimes[monthRelativeCombinationFromViewModel][0] = new TimeSpan();
-
-                            this.schedule.MonthlyMonthRelativeBasedDayTimes.Add(monthRelativeCombinationForSchedule, new TimeSpan?[3]);
-                            this.schedule.MonthlyMonthRelativeBasedDayTimes[monthRelativeCombinationForSchedule][0] = new TimeSpan();
-                        }
-                    }
+                    return e.Message;
                 }
-
-                this.validate = false;
-                this.raisePropertyChanged(propertyName);
-
-                //this.raisePropertyChanged("MonthlyMonthRelativeBasedCombinationViewModels");
-                this.raisePropertyChanged("MonthlyTime1");
-                this.raisePropertyChanged("MonthlyTime2");
-                this.raisePropertyChanged("MonthlyTime3");
-                this.validate = true;
-                this.monthlyAdjustControlEnablement();
-                return string.Empty;
             }
         }
 
         private string validateMonthlyTimes(string propertyName)
         {
-            int index2 = Convert.ToInt32(propertyName.Substring(11, 1)) - 1;
+            int timeIndex = Convert.ToInt32(propertyName.Substring(11, 1)) - 1;
             if (this.schedule.MonthlyDateBased)
             {
-                int dayIndex3 = this.monthlyMonthDateBasedDay.Day - 1;
-                if (index2 == 0)
+                try
                 {
-                    if (this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2 + 1] != null &&
-                        this.monthlyMonthDateBasedDayTimes[dayIndex3][index2] >=
-                        this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2 + 1])
-                    {
-                        return $"Monthly Time 1 must be smaller than monthly Time 2.";
-                    }
-                }
+                    int dayIndex = this.monthlyMonthDateBasedDay.Day - 1;
+                    this.schedule.MonthlyMonthDateBasedSetDayTime(dayIndex, timeIndex, this.monthlyMonthDateBasedDayTimes[dayIndex][timeIndex]);
+                    this.validate = false;
+                    this.raisePropertyChanged(propertyName);
+                    this.validate = true;
+                    this.monthlyAdjustControlEnablement();
 
-                if (index2 == 1)
+                    return string.Empty;
+                }
+                catch (InvalidScheduleException e)
                 {
-                    if (this.monthlyMonthDateBasedDayTimes[dayIndex3][index2] == null)
-                    {
-                        if (this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2 + 1] != null)
-                        {
-                            return
-                                $"Monthly Time 3 must not have a value if monthly Time 2 has no value.";
-                        }
-                    }
-                    else
-                    {
-                        if (this.monthlyMonthDateBasedDayTimes[dayIndex3][index2] <=
-                            this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2 - 1] ||
-                            (this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2 + 1] != null &&
-                             this.monthlyMonthDateBasedDayTimes[dayIndex3][index2] >=
-                             this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2 + 1]))
-                        {
-                            return
-                                $"Monthly Time 2 must be greater than monthly Time 1 and smaller than monthly Time 3.";
-                        }
-                    }
+                    return e.Message;
                 }
-
-                if (index2 == 2)
-                {
-                    if (this.monthlyMonthDateBasedDayTimes[dayIndex3][index2] != null &&
-                        this.monthlyMonthDateBasedDayTimes[dayIndex3][index2] <=
-                        this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2 - 1])
-                    {
-                        return $"Monthly Time 3 must be greater than monthly Time 2.";
-                    }
-                }
-
-                this.schedule.MonthlyMonthDateBasedDayTimes[dayIndex3][index2] =
-                    this.monthlyMonthDateBasedDayTimes[dayIndex3][index2];
-                this.validate = false;
-                this.raisePropertyChanged(propertyName);
-                this.validate = true;
-                this.monthlyAdjustControlEnablement();
-
-                return string.Empty;
             }
             else
             {
-                TimeSpan?[] timeSpansViewModel = this.getMonthRelativeBasedTimesFromViewModel(
-                    this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-                TimeSpan?[] timeSpansSchedule = this.getMonthRelativeBasedTimesFromSchedule(
-                    this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay);
-
-                if (index2 == 0)
+                try
                 {
-                    if (timeSpansSchedule[index2 + 1] != null &&
-                        timeSpansViewModel[index2] >= timeSpansSchedule[index2 + 1])
-                    {
-                        return $"Monthly Time 1 must be smaller than monthly Time 2.";
-                    }
-                }
+                    this.schedule.MonthlyMonthRelativeBasedSetDayTime(this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay, timeIndex, this.getMonthRelativeBasedTimes(
+                        this.monthlyMonthRelativeBasedDayPosition, this.monthlyMonthRelativeBasedDay)[timeIndex]);
+                    this.validate = false;
+                    this.raisePropertyChanged(propertyName);
+                    this.validate = true;
+                    this.monthlyAdjustControlEnablement();
 
-                if (index2 == 1)
+                    return string.Empty;
+                }
+                catch (InvalidScheduleException e)
                 {
-                    if (timeSpansViewModel[index2] == null)
-                    {
-                        if (timeSpansSchedule[index2 + 1] != null)
-                        {
-                            return
-                                $"Monthly Time 3 must not have a value if monthly Time 2 has no value.";
-                        }
-                    }
-                    else
-                    {
-                        if (timeSpansViewModel[index2] <= timeSpansSchedule[index2 - 1] ||
-                            (timeSpansSchedule[index2 + 1] != null && timeSpansViewModel[index2] >= timeSpansSchedule[index2 + 1]))
-                        {
-                            return
-                                $"Monthly Time 2 must be greater than monthly Time 1 and smaller than monthly Time 3.";
-                        }
-                    }
+                    return e.Message;
                 }
-
-                if (index2 == 2)
-                {
-                    if (timeSpansViewModel[index2] != null &&
-                        timeSpansViewModel[index2] <= timeSpansSchedule[index2 - 1])
-                    {
-                        return $"Monthly Time 3 must be greater than monthly Time 2.";
-                    }
-                }
-
-                timeSpansSchedule[index2] = timeSpansViewModel[index2];
-                this.validate = false;
-                this.raisePropertyChanged(propertyName);
-                this.validate = true;
-                this.monthlyAdjustControlEnablement();
-
-                return string.Empty;
             }
         }
 
-        private int getDayIndex(string day)
+        private MonthRelativeCombinationViewModel monthlyMonthRelativeBasedGetCombinationViewModel(DayPosition dayPosition, DayOfWeek day)
         {
-            switch (day)
+            MonthRelativeCombinationViewModel[] combinationViewModels =
+                this.monthlyMonthRelativeBasedCombinationViewModels.Where(key =>
+                    key.DayPosition == dayPosition &&
+                    key.DayOfWeek == day).ToArray();
+
+            int count = combinationViewModels.Length;
+            if (count > 1)
             {
-                case "Monday":
-                    return 0;
-                case "Tuesday":
-                    return 1;
-                case "Wednesday":
-                    return 2;
-                case "Thursday":
-                    return 3;
-                case "Friday":
-                    return 4;
-                case "Saturday":
-                    return 5;
-                case "Sunday":
-                    return 6;
-                default:
-                    throw new ArgumentException("Day not found.");
+                throw new ArgumentOutOfRangeException("Unexpected MonthRelativeCombination count.");
             }
+
+            if (count <= 0)
+            {
+                return null;
+            }
+
+            return combinationViewModels[0];
         }
 
         public string Error

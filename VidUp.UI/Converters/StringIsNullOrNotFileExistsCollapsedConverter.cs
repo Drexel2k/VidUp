@@ -1,12 +1,9 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
 using System.Windows.Markup;
-
-#endregion
+using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.UI.Converters
 {
@@ -26,19 +23,25 @@ namespace Drexel.VidUp.UI.Converters
                 return "Collapsed";
             }
 
-            string targetFolder = null;
-
+            string targetFolder;
+            string parameterInternal = parameter as string;
             //parameter is source folder to ignore
-            if (parameter != null)
+            if (parameterInternal == null)
             {
-                if (parameter is string)
-                {
-                    targetFolder = (string)parameter;
-                }
-                else
-                {
-                    throw new ArgumentException("Parameter is no string.");
-                }
+                throw new ArgumentException("Parameter is no string.");
+            }
+
+            if (parameterInternal == "image")
+            {
+                targetFolder = Settings.SettingsInstance.TemplateImageFolder;
+            }
+            else if (parameterInternal == "fallbackthumb")
+            {
+                targetFolder = Settings.SettingsInstance.ThumbnailFallbackImageFolder;
+            }
+            else
+            {
+                throw new ArgumentException("Unexpected parameter string.");
             }
 
             if (value is string)

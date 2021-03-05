@@ -1,9 +1,5 @@
-﻿#region
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
-
-#endregion
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -14,7 +10,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return Assembly.GetExecutingAssembly().GetName().Version.ToString(); ;
+                return Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
             }
 
         }

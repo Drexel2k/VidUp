@@ -1,10 +1,6 @@
-﻿#region
-
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Drexel.VidUp.UI.ViewModels;
-
-#endregion
 
 namespace Drexel.VidUp.UI.Controls
 {
