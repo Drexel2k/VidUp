@@ -171,31 +171,26 @@
                     <StackPanel  Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Use placeholder file: " Width="195" />
                         <ToggleButton IsChecked="{Binding UsePlaceholderFile}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
-                        <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1"  ToolTip="If checked, VidUp will look for a .txt file that matches the video's file name (without extension) in the template's video or thumbnail folder and use its contents for placeholders instead of the video's file name." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1"  ToolTip="If checked, VidUp will look for a .txt file that matches the video's file name (without extension) in the template's video or thumbnail folder and use its contents for placeholders instead of the video's file name." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="Use placeholders for description: " Width="195" />
-                        <ToggleButton IsChecked="{Binding UsePlaceholdersForDescription}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
-                        <materialDesign:PackIcon Kind="HelpOutline" Grid.Column="1"  ToolTip="If checked, VidUp will replace placeholders in the video's description, in addition to its title." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
-                    </StackPanel>
-                    <StackPanel  Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
+                    <StackPanel  Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Description: " Width="75" HorizontalAlignment="Left" />
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="As on title, you can use the same placeholders." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <TextBox Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="200" MaxHeight ="200" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="4" Grid.ColumnSpan="2" Orientation="Vertical">
+                    <StackPanel  Grid.Row="3" Grid.ColumnSpan="2" Orientation="Vertical">
                         <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
                             <Label Content="Tags: " Width="38" />
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'. As on title, you can use the same placeholders." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <TextBox Text="{Binding TagsAsString, UpdateSourceTrigger=PropertyChanged, Delay=500}" TextWrapping="Wrap" Width="615" MinHeight="100" MaxHeight ="100" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
                         <Label Content="Visbility: " Width="110" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="5" Grid.Column="1" Orientation="Horizontal">
+                    <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
                         <ComboBox  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding Visibility}" Width="100">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -204,7 +199,7 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </StackPanel>
-                    <StackPanel  Grid.Row="6" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Horizontal">
                         <ToggleButton IsChecked="{Binding UsePublishAtSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <!--<Button Command="{Binding OpenPublishAtCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" Margin="4 4 0 0" Width="60" Height="20" Padding="0" Content="Edit" VerticalContentAlignment="Top" />-->
                         <Label Content="Publish At Schedule" Width="116" HorizontalAlignment="Left" />

@@ -460,7 +460,7 @@ namespace Drexel.VidUp.Business
 
                     Regex regex = new Regex(@"#([^#]+)#");
                     int matchIndex = 0;
-                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
+                    foreach (Match match in regex.Matches(getPlaceholderContents()))
                     {
                         for (int tagIndex = 0; tagIndex < this.tags.Count; tagIndex++)
                         {
@@ -490,7 +490,7 @@ namespace Drexel.VidUp.Business
                     this.description = this.template.Description;
                     Regex regex = new Regex(@"#([^#]+)#");
                     int matchIndex = 0;
-                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
+                    foreach (Match match in regex.Matches(getPlaceholderContents()))
                     {
                         this.description = this.description.Replace("#" + matchIndex + "#", match.Groups[1].Value);
 
@@ -715,20 +715,20 @@ namespace Drexel.VidUp.Business
                         }
                     }
                 }
+            }
 
-                foreach (string currentFile in Directory.GetFiles(Path.GetDirectoryName(this.filePath)))
+            foreach (string currentFile in Directory.GetFiles(Path.GetDirectoryName(this.filePath)))
+            {
+                if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower() && Path.GetFullPath(currentFile).ToLower() != Path.GetFullPath(this.filePath).ToLower())
                 {
-                    if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower() && Path.GetFullPath(currentFile).ToLower() != Path.GetFullPath(this.filePath).ToLower())
+                    if (Path.GetExtension(currentFile).Equals(extension))
                     {
-                        if (Path.GetExtension(currentFile).Equals(extension))
-                        {
-                            return File.ReadAllText(currentFile);
-                        }
+                        return File.ReadAllText(currentFile);
                     }
                 }
             }
 
-            return null;
+            return string.Empty;
         }
 
 

@@ -422,17 +422,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.template.UsePlaceholderFile = value;
-                this.raisePropertyChangedAndSerializeTemplateList("UsePlaceholderFile");
-            }
-        }
-
-        public bool UsePlaceholdersForDescription
-        {
-            get => this.template != null ? this.template.UsePlaceholdersForDescription : false;
-            set
-            {
-                this.template.UsePlaceholdersForDescription = value;
-                this.raisePropertyChangedAndSerializeTemplateList("UsePlaceholderFile");
+                this.raisePropertyChanged("UsePlaceholderFile");
             }
         }
 
