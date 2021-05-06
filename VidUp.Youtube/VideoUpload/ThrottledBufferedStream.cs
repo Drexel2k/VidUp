@@ -191,6 +191,12 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
             this.throttle(currentTicks);
 
+            //clean history
+            foreach (var outdatedEntry in this.bytesPerTick.Where(kvp => kvp.Key < currentTicks - ThrottledBufferedStream.keepHistoryForInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds).ToArray())
+            {
+                this.bytesPerTick.Remove(outdatedEntry.Key);
+            }
+
             int bytesRead = this.readInternal(buffer, offset, count);
             this.position += bytesRead;
 
@@ -294,42 +300,42 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
         private void throttle(long currentTicks)
         {
-            // Make sure the buffer isn't empty.
-            if (this.maximumBytesPerSecondRead <= 0)
+            if (this.maximumBytesPerSecondRead > 0)
             {
-                return;
-            }
+                long historyTicks = currentTicks - ThrottledBufferedStream.historyForUploadInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds;
 
-            long historyTicks = currentTicks - ThrottledBufferedStream.historyForUploadInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds;
+                var historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks);
 
-            var historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks);
-
-            foreach (var outdatedEntry in this.bytesPerTick.Where(kvp => kvp.Key < currentTicks - ThrottledBufferedStream.keepHistoryForInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds).ToArray())
-            {
-                this.bytesPerTick.Remove(outdatedEntry.Key);
-            }
-
-            if (historyBytes.Count() > 1)
-            {
-                long byteCountRead = historyBytes.Sum(kvp => kvp.Value);
-
-                // Calculate the current bps.
-                long targetBytesInHistory = this.maximumBytesPerSecondRead * ThrottledBufferedStream.historyForUploadInSeconds;
-
-                // If the bps are more then the maximum bps, try to throttle.
-                if (byteCountRead > targetBytesInHistory)
+                if (historyBytes.Count() > 1)
                 {
-                    // Calculate the time to sleep.
-                    long bytesTooMuch = byteCountRead - targetBytesInHistory;
-                    float sleep = (float)bytesTooMuch / this.maximumBytesPerSecondRead;
-                    int toSleep = (int)(sleep * 1000);
+                    long byteCountRead = historyBytes.Sum(kvp => kvp.Value);
 
-                    if (toSleep > 1)
+                    // Calculate the current bps.
+                    long targetBytesInHistory = this.maximumBytesPerSecondRead * ThrottledBufferedStream.historyForUploadInSeconds;
+
+                    // If the bps are more then the maximum bps, try to throttle.
+                    if (byteCountRead > targetBytesInHistory)
                     {
-                        Thread.Sleep(toSleep);
-                    }
-                }
+                        // Calculate the time to sleep.
+                        long bytesTooMuch = byteCountRead - targetBytesInHistory;
+                        float sleep = (float)bytesTooMuch / this.maximumBytesPerSecondRead;
+                        int toSleep = (int)(sleep * 1000);
 
+                        if (toSleep > 1)
+                        {
+                            //ensure max sleep time 2 seconds, to continuously throttle down
+                            //on small numbers and ensure further gui display.
+                            //otherwise sleep times of several minutes would occur.
+                            if (toSleep > 2000)
+                            {
+                                toSleep = 2000;
+                            }
+
+                            Thread.Sleep(toSleep);
+                        }
+                    }
+
+                }
             }
         }
     }

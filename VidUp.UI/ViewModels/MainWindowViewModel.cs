@@ -247,11 +247,15 @@ namespace Drexel.VidUp.UI.ViewModels
                 value = value.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator, string.Empty);
                 if (long.TryParse(value, out long kiloBytesPerSecond))
                 {
-                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
-                    if (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond < 262144) // minimum 256 KiloBytes per second
+                    long newUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
+
+                    // minimum 32 KiloBytes per second
+                    if (newUploadInBytesPerSecond < 32768)
                     {
-                        ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
+                        newUploadInBytesPerSecond = 0;
                     }
+
+                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = newUploadInBytesPerSecond;
                 }
                 else
                 {

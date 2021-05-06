@@ -132,14 +132,26 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: Start uploading.");
                                 message = await client.PutAsync(upload.ResumableSessionUri, streamContent, cancellationToken);
+                                Tracer.Write("YoutubeVideoUploadService.Upload: Uploading finished.");
                             }
-                            catch (TaskCanceledException)
+                            catch (TaskCanceledException e)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload stopped by user.");
+                                if (e.InnerException is TimeoutException)
+                                {
+                                    Tracer.Write($"YoutubeVideoUploadService.Upload: Package {package} try {uploadTry} upload timeout.");
+                                    errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync Package {package} try {uploadTry} upload timeout.");
+                                    error = true;
+                                    uploadTry++;
+                                    continue;
+                                }
+                                else
+                                {
+                                    Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload stopped by user.");
 
-                                upload.UploadStatus = UplStatus.Stopped;
-                                uploadResult.VideoResult = VideoResult.Stopped;
-                                return uploadResult;
+                                    upload.UploadStatus = UplStatus.Stopped;
+                                    uploadResult.VideoResult = VideoResult.Stopped;
+                                    return uploadResult;
+                                }
                             }
                             catch (Exception e)
                             {
@@ -162,7 +174,10 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             }
                             else
                             {
+                                Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer.");
                                 string content = await message.Content.ReadAsStringAsync();
+                                Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer finished.");
+
                                 if (!message.IsSuccessStatusCode)
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code package {package} try {uploadTry}: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.");

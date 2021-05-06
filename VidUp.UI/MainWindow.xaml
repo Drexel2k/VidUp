@@ -4,7 +4,7 @@
                      xmlns:Fluent="urn:fluent-ribbon"
                      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                      Title="{Binding AppTitle}"
-                     Top="{Binding Path=WindowTop, Mode=TwoWay, Delay=500}"
+                     Top="{Binding WindowTop, Mode=TwoWay, Delay=500}"
                      Left="{Binding WindowLeft, Mode=TwoWay, Delay=500}"
                      Width="{Binding WindowWidth, Mode=TwoWay, Delay=500}" 
                      Height="{Binding WindowHeight, Mode=TwoWay, Delay=500}"
@@ -211,7 +211,7 @@
                     <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Action performed after all uploads are finished." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     <Label Content="Max Upload: " />
                     <TextBox Text="{Binding MaxUploadInKiloBytesPerSecond, UpdateSourceTrigger=PropertyChanged, Delay=500}" Width="70" />
-                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 256, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 32, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 </StackPanel>
                 <Grid>
                     <Grid.RowDefinitions>
