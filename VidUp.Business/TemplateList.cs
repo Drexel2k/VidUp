@@ -14,8 +14,8 @@ namespace Drexel.VidUp.Business
     {
         [JsonProperty]
         private List<Template> templates;
-        private string templateImageFolder;
-        private string thumbnailFallbackImageFolder;
+        private static string templateImageFolder;
+        private static string thumbnailFallbackImageFolder;
         private CheckFileUsage checkFileUsage;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -31,11 +31,8 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public TemplateList(List<Template> templates, string templateImageFolder, string thumbnailFallbackImageFolder)
+        public TemplateList(List<Template> templates)
         {
-            this.templateImageFolder = templateImageFolder;
-            this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
-
             this.templates = new List<Template>();
 
             if (templates != null)
@@ -91,7 +88,7 @@ namespace Drexel.VidUp.Business
             string thumbnailFileFolder = Path.GetDirectoryName(thumbnailFallbackFilePath);
             if (!string.IsNullOrWhiteSpace(thumbnailFileFolder))
             {
-                if (String.Compare(Path.GetFullPath(this.thumbnailFallbackImageFolder).TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (String.Compare(Path.GetFullPath(TemplateList.thumbnailFallbackImageFolder).TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;
                 }
@@ -180,7 +177,7 @@ namespace Drexel.VidUp.Business
         {
             foreach (Template template in templates)
             {
-                string newFilePath = this.CopyTemplateImageToStorageFolder(template.ImageFilePathForEditing);
+                string newFilePath = TemplateList.CopyTemplateImageToStorageFolder(template.ImageFilePathForEditing);
                 template.ImageFilePathForEditing = newFilePath;
                 template.PropertyChanged += this.templatePropertyChanged;
             }
@@ -191,17 +188,28 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
         }
 
-        public string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
+        public void SetFolderPaths(string templateImageFolder, string thumbnailFallbackImageFolder)
         {
-            return this.CopyImageToStorageFolder(thumbnailFallbackFilePath, this.thumbnailFallbackImageFolder);
+            if (TemplateList.templateImageFolder != null || TemplateList.thumbnailFallbackImageFolder != null)
+            {
+                throw new InvalidOperationException("TemplateList.templateImageFolder or TemplateList.thumbnailFallbackImageFolder may only be set once.");
+            }
+
+            TemplateList.templateImageFolder = templateImageFolder;
+            TemplateList.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        public string CopyTemplateImageToStorageFolder(string templateImageFilePath)
+        public static string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
         {
-            return this.CopyImageToStorageFolder(templateImageFilePath, this.templateImageFolder);
+            return TemplateList.CopyImageToStorageFolder(thumbnailFallbackFilePath, TemplateList.thumbnailFallbackImageFolder);
         }
 
-        public string CopyImageToStorageFolder(string imageFilePath, string storageFolder)
+        public static string CopyTemplateImageToStorageFolder(string templateImageFilePath)
+        {
+            return TemplateList.CopyImageToStorageFolder(templateImageFilePath, TemplateList.templateImageFolder);
+        }
+
+        public static string CopyImageToStorageFolder(string imageFilePath, string storageFolder)
         {
             if (!string.IsNullOrWhiteSpace(imageFilePath))
             {
@@ -215,7 +223,7 @@ namespace Drexel.VidUp.Business
                 string targetFilePath = Path.Combine(storageFolder, fileName);
                 if (File.Exists(targetFilePath))
                 {
-                    targetFilePath = this.addFileNameAppendix(fileName, storageFolder, 2);
+                    targetFilePath = TemplateList.addFileNameAppendix(fileName, storageFolder, 2);
                 }
 
                 File.Copy(imageFilePath, targetFilePath);
@@ -245,13 +253,13 @@ namespace Drexel.VidUp.Business
             return false;
         }
 
-        private string addFileNameAppendix(string fileName, string storageFolder, int appendix)
+        private static string addFileNameAppendix(string fileName, string storageFolder, int appendix)
         {
             string newfileName = string.Format("{0}{1}{2}", Path.GetFileNameWithoutExtension(fileName), appendix, Path.GetExtension(fileName));
             string targetFilePath = Path.Combine(storageFolder, newfileName);
             if (File.Exists(targetFilePath))
             {
-                targetFilePath = this.addFileNameAppendix(fileName, storageFolder, ++appendix);
+                targetFilePath = TemplateList.addFileNameAppendix(fileName, storageFolder, ++appendix);
             }
 
             return targetFilePath;
@@ -296,7 +304,7 @@ namespace Drexel.VidUp.Business
             if (imageFilePath != null)
             {
                 string imageFileFolder = Path.GetDirectoryName(imageFilePath);
-                if (String.Compare(Path.GetFullPath(this.templateImageFolder).TrimEnd('\\'), imageFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (String.Compare(Path.GetFullPath(TemplateList.templateImageFolder).TrimEnd('\\'), imageFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;
                 }

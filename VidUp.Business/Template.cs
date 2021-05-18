@@ -56,8 +56,6 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private Category category;
 
-        private TemplateList templateList;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region properties
@@ -141,7 +139,7 @@ namespace Drexel.VidUp.Business
             get => this.imageFilePath;
             set
             {
-                string newFilePath = this.templateList.CopyTemplateImageToStorageFolder(value);
+                string newFilePath = TemplateList.CopyTemplateImageToStorageFolder(value);
 
                 string oldFilePath = this.imageFilePath;
                 this.imageFilePath = newFilePath;
@@ -204,7 +202,7 @@ namespace Drexel.VidUp.Business
             set
             {
                 string oldValue = this.thumbnailFallbackFilePath;
-                string filePath = this.templateList.CopyThumbnailFallbackToStorageFolder(value);
+                string filePath = TemplateList.CopyThumbnailFallbackToStorageFolder(value);
                 this.thumbnailFallbackFilePath = filePath;
                 this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("ThumbnailFallbackFilePath", oldValue, value);
@@ -319,8 +317,7 @@ namespace Drexel.VidUp.Business
 
             this.guid = Guid.NewGuid();
             this.setName(name);
-            this.templateList = templateList;
-            this.imageFilePath = this.templateList.CopyTemplateImageToStorageFolder(imagefilePath);
+            this.imageFilePath = TemplateList.CopyTemplateImageToStorageFolder(imagefilePath);
             this.templateMode = templateMode;
             this.rootFolderPath = rootFolderPath;
             this.partOfFileName = partOfFileName;

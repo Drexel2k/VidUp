@@ -12,6 +12,9 @@ namespace Drexel.VidUp.Utils
         private bool trace;
 
         [JsonProperty]
+        private TraceLevel traceLevel;
+
+        [JsonProperty]
         private bool autoSetPlaylists;
 
         [JsonProperty]
@@ -36,6 +39,12 @@ namespace Drexel.VidUp.Utils
         {
             get => this.trace;
             set => this.trace = value;
+        }
+
+        public TraceLevel TraceLevel
+        {
+            get => this.traceLevel;
+            set => this.traceLevel = value;
         }
 
         public bool AutoSetPlaylists
@@ -100,6 +109,8 @@ namespace Drexel.VidUp.Utils
                 this.videoLanguagesFilter = value;
             }
         }
+
+
 
         [JsonConstructor]
         public UserSettings()

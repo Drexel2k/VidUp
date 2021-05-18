@@ -26,9 +26,11 @@ namespace Drexel.VidUp.Json.Settings
 
         public void DeserializeSettings()
         {
+            Tracer.Write($"JsonDeserializationSettings.DeserializeSettings: Start.");
             if (!File.Exists(this.settingsFilePath))
             {
                 DeserializationRepositorySettings.UserSettings = new UserSettings();
+                Tracer.Write($"JsonDeserializationSettings.DeserializeSettings: End, no settings storage file found.");
                 return;
             }
 
@@ -39,6 +41,8 @@ namespace Drexel.VidUp.Json.Settings
             {
                 DeserializationRepositorySettings.UserSettings = serializer.Deserialize<UserSettings>(reader);
             }
+
+            Tracer.Write($"JsonDeserializationSettings.DeserializeSettings: End.");
         }
     }
 }

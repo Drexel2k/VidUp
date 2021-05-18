@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="clr-namespace:Drexel.VidUp.UI"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              x:Name="UCSettings"
              IsEnabled="{Binding PlaylistSet}">
     <ScrollViewer HorizontalScrollBarVisibility="Auto" Margin="4">
@@ -30,11 +31,24 @@
                     <Grid.RowDefinitions>
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
+                    <StackPanel Orientation="Vertical"  Grid.Row="0" Grid.Column="0">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Enable Tracing " Width="87" />
+                            <ToggleButton IsChecked="{Binding Tracing}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Trace information in Documents\VidUp\trace.txt, may contain useful information on problems." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                         </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Trace Level " Width="87" />
+                            <ComboBox  ItemsSource="{Binding TraceLevels}" SelectedItem="{Binding SelectedTraceLevel}" Width="60" HorizontalAlignment="Left"  Margin="4 0 5 0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="3">
-                        <ToggleButton IsChecked="{Binding Tracing}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
-                        <Label Content="Enable Tracing " Width="87" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Trace information in Documents\VidUp\trace.txt, may contain useful information on problems." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Detailed logs also every serialization." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </GroupBox>
@@ -46,7 +60,7 @@
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Set used video languages to limit list in Video Language dropdown:" HorizontalAlignment="Left" Width="368" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Nothing selected means no filter at all." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Nothing selected means no filter at all." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Search: "/>

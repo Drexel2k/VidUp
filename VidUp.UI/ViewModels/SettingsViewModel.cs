@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -27,6 +28,25 @@ namespace Drexel.VidUp.UI.ViewModels
                 Settings.SettingsInstance.UserSettings.Trace = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
                 this.raisePropertyChanged("Tracing");
+            }
+        }
+
+        public TraceLevel SelectedTraceLevel
+        {
+            get { return Settings.SettingsInstance.UserSettings.TraceLevel; }
+            set
+            {
+                Settings.SettingsInstance.UserSettings.TraceLevel = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                this.raisePropertyChanged("SelectedTraceLevel");
+            }
+        }
+
+        public Array TraceLevels
+        {
+            get
+            {
+                return Enum.GetValues(typeof(TraceLevel));
             }
         }
 
