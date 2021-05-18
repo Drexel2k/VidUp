@@ -98,7 +98,8 @@ namespace Drexel.VidUp.Youtube
                 upload.UploadStatus = UplStatus.Uploading;
 
                 this.lastSerialization = DateTime.Now;
-                UploadResult uploadResult = await YoutubeVideoUploadService.Upload(upload, maxUploadInBytesPerSecond, updateUploadProgress, this.tokenSource.Token);
+                YoutubeVideoUploadService.MaxUploadInBytesPerSecond = maxUploadInBytesPerSecond;
+                UploadResult uploadResult = await YoutubeVideoUploadService.Upload(upload, updateUploadProgress, this.tokenSource.Token);
 
                 if (uploadResult.VideoResult == VideoResult.Finished)
                 {

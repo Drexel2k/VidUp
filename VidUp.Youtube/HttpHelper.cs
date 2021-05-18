@@ -76,24 +76,22 @@ namespace Drexel.VidUp.Youtube
             return streamContent;
         }
 
-        public static StreamContent GetStreamContentResumableUpload(Stream data, long orirginalLength, long startByteIndex, int chunkSize, string contentType)
+        public static StreamContent GetStreamContentResumableUpload(Stream data, long orirginalLength, long startByteIndex, string contentType)
         {
-            long lastByteIndex;
-            if (startByteIndex + chunkSize >= orirginalLength)
+            StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
+            content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+
+            if (startByteIndex <= 0)
             {
-                lastByteIndex = orirginalLength - 1;
+                content.Headers.ContentLength = orirginalLength;
             }
             else
             {
-                lastByteIndex = startByteIndex + chunkSize - 1;
+                long lastByteIndex = orirginalLength - 1;
+                string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, lastByteIndex, orirginalLength);
+                content.Headers.ContentLength = lastByteIndex - startByteIndex + 1;
+                content.Headers.Add("Content-Range", rangeString);
             }
-
-            string rangeString = string.Format("bytes {0}-{1}/{2}", startByteIndex, lastByteIndex, orirginalLength);
-
-            StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
-            content.Headers.ContentLength = lastByteIndex - startByteIndex + 1;
-            content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-            content.Headers.Add("Content-Range", rangeString);
 
             return content;
         }
