@@ -636,7 +636,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public List<CultureInfo> VideoLanguages
+        public List<CultureInfo> Languages
         {
             get => Cultures.RelevantCultureInfos;
         }
@@ -649,6 +649,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.VideoLanguage = value;
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("SelectedVideoLanguage");
+            }
+        }
+
+        public CultureInfo SelectedDescriptionLanguage
+        {
+            get => this.upload.DescriptionLanguage;
+            set
+            {
+                this.upload.DescriptionLanguage = value;
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("SelectedDescriptionLanguage");
             }
         }
 
@@ -729,6 +740,9 @@ namespace Drexel.VidUp.UI.ViewModels
                 case "videolanguage":
                     this.SelectedVideoLanguage = null;
                     break;
+                case "descriptionlanguage":
+                    this.SelectedDescriptionLanguage = null;
+                    break;
                 case "category":
                     this.SelectedCategory = null;
                     break;
@@ -788,6 +802,16 @@ namespace Drexel.VidUp.UI.ViewModels
             if (e.PropertyName == "UploadErrorMessage")
             {
                 this.raisePropertyChanged("UploadErrorMessage");
+            }
+
+            if (e.PropertyName == "VideoLanguage")
+            {
+                this.raisePropertyChanged("SelectedVideoLanguage");
+            }
+
+            if (e.PropertyName == "DescriptionLanguage")
+            {
+                this.raisePropertyChanged("SelectedDescriptionLanguage");
             }
         }
 
@@ -915,6 +939,10 @@ namespace Drexel.VidUp.UI.ViewModels
                     case "videolanguage":
                         this.upload.CopyVideoLanguageFromTemplate();
                         this.raisePropertyChanged("VideoLanguage");
+                        break;
+                    case "descriptionlanguage":
+                        this.upload.CopyDescriptionLanguageFromTemplate();
+                        this.raisePropertyChanged("DescriptionLanguage");
                         break;
                     case "category":
                         this.upload.CopyCategoryFromTemplate();

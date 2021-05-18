@@ -411,7 +411,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public List<CultureInfo> VideoLanguages
+        public List<CultureInfo> Languages
         {
             get => Cultures.RelevantCultureInfos;
         }
@@ -424,6 +424,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.template.VideoLanguage = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("SelectedVideoLanguage");
+            }
+        }
+
+        public CultureInfo SelectedDescriptionLanguage
+        {
+            get => this.template != null ? this.template.DescriptionLanguage : null;
+            set
+            {
+                this.template.DescriptionLanguage = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("SelectedDescriptionLanguage");
             }
         }
 
@@ -541,6 +552,9 @@ namespace Drexel.VidUp.UI.ViewModels
                     break;
                 case "videolanguage":
                     this.SelectedVideoLanguage = null;
+                    break;
+                case "descriptionlanguage":
+                    this.SelectedDescriptionLanguage = null;
                     break;
                 case "category":
                     this.SelectedCategory = null;

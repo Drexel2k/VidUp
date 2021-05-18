@@ -57,6 +57,8 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private CultureInfo videoLanguage;
         [JsonProperty]
+        private CultureInfo descriptionLanguage;
+        [JsonProperty]
         private Category category;
 
         private long fileLength;
@@ -360,6 +362,17 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public CultureInfo DescriptionLanguage
+        {
+            get => this.descriptionLanguage;
+            set
+            {
+                this.descriptionLanguage = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("DescriptionLanguage");
+            }
+        }
+
         public CultureInfo VideoLanguage
         {
             get => this.videoLanguage;
@@ -426,6 +439,7 @@ namespace Drexel.VidUp.Business
             this.copyVisibilityFromTemplateInternal();
             this.copyPlaylistFromTemplateInternal();
             this.copyVideoLanguageFromTemplateInternal();
+            this.copyDescriptionLanguageFromTemplateInternal();
             this.copyCategoryFromTemplateInternal();
         }
 
@@ -563,6 +577,22 @@ namespace Drexel.VidUp.Business
 
                 this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("VideoLanguage");
+            }
+        }
+
+        public void CopyDescriptionLanguageFromTemplate()
+        {
+            this.copyDescriptionLanguageFromTemplateInternal();
+        }
+
+        private void copyDescriptionLanguageFromTemplateInternal()
+        {
+            if (this.template != null)
+            {
+                this.descriptionLanguage = this.template.DescriptionLanguage;
+
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("DescriptionLanguage");
             }
         }
 

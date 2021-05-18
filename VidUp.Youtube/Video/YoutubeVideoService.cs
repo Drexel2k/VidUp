@@ -13,6 +13,7 @@ namespace Drexel.VidUp.Youtube.Video
     public class YoutubeVideoService
     {
         private static string videoEndpoint = "https://www.googleapis.com/youtube/v3/videos";
+
         public static async Task<Dictionary<string, bool>> IsPublic(List<string> videoIds)
         {
             Tracer.Write($"YoutubeVideoService.IsPublic: Start.");

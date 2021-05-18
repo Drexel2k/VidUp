@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -293,7 +292,8 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             video.Snippet.Title = upload.Title;
             video.Snippet.Description = upload.Description;
             video.Snippet.Tags = (upload.Tags != null ? upload.Tags : new List<string>()).ToArray();
-            video.Snippet.VideoLanguage = upload.VideoLanguage != null ? upload.VideoLanguage.Name : null;
+            video.Snippet.VideoLanguage = upload.VideoLanguage != null ? upload.VideoLanguage.Name.Replace('-', '_') : null; //works better with _, with - e.g. German (Switzerland) is not set at all, with _ it is set as German.
+            video.Snippet.DescriptionLanguage = upload.DescriptionLanguage != null ? upload.DescriptionLanguage.Name.Replace('-', '_') : null; //works better with _, with - e.g. German (Switzerland) is not set at all, with _ it is set as German.
             video.Snippet.Category = null;
             if (upload.Category != null)
             {

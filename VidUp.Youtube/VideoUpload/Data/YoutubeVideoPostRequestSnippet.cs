@@ -16,7 +16,10 @@ namespace Drexel.VidUp.Youtube.VideoUpload.Data
         [JsonProperty(PropertyName = "defaultAudioLanguage")]
         public string VideoLanguage { get; set; }
 
-        [JsonProperty(PropertyName = "categoryId")]
+        [JsonProperty(PropertyName = "defaultLanguage")]
+        public string DescriptionLanguage { get; set; }
+
+		[JsonProperty(PropertyName = "categoryId")]
         public int? Category { get; set; }
 	}
 }

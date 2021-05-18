@@ -54,6 +54,8 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private CultureInfo videoLanguage;
         [JsonProperty]
+        private CultureInfo descriptionLanguage;
+        [JsonProperty]
         private Category category;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -282,6 +284,17 @@ namespace Drexel.VidUp.Business
                 this.videoLanguage = value;
                 this.LastModified = DateTime.Now;
                 this.raisePropertyChanged("VideoLanguage");
+            }
+        }
+
+        public CultureInfo DescriptionLanguage
+        {
+            get => this.descriptionLanguage;
+            set
+            {
+                this.descriptionLanguage = value;
+                this.LastModified = DateTime.Now;
+                this.raisePropertyChanged("DescriptionLanguage");
             }
         }
 
