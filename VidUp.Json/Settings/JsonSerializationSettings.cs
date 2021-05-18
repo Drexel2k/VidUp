@@ -18,9 +18,9 @@ namespace Drexel.VidUp.Json.Settings
             this.settingsFilePath = Path.Combine(serializationFolder, "settings.json");
             this.userSettings = userSettings;
         }
+
         public void SerializeSettings()
         {
-            Tracer.Write($"JsonSerializationSettings.SerializeSettings: Start.", TraceLevel.Detailed);
             JsonSerializer serializer = new JsonSerializer();
             serializer.Converters.Add(new StringEnumConverter());
             serializer.Formatting = Formatting.Indented;
@@ -30,8 +30,6 @@ namespace Drexel.VidUp.Json.Settings
             {
                 serializer.Serialize(writer, this.userSettings);
             }
-
-            Tracer.Write($"JsonSerializationSettings.SerializeSettings: End.", TraceLevel.Detailed);
         }
     }
 }

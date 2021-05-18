@@ -346,10 +346,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.checkAppDataFolder();
 
-            Tracer.Write($"MainWindowViewModel.initialize: Start deserialization.");
             this.deserializeSettings();
             this.deserializeContent();
-            Tracer.Write($"MainWindowViewModel.initialize: End deserialization.");
 
             JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.SettingsInstance.StorageFolder, this.uploadList, this.templateList, this.playlistList);
             JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.UserSettings);
@@ -449,14 +447,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void deserializeSettings()
         {
-            Tracer.Write($"MainWindowViewModel.deserializeSettings: Start.");
-
             JsonDeserializationSettings deserializer = new JsonDeserializationSettings(Settings.SettingsInstance.StorageFolder);
             deserializer.DeserializeSettings();
             Settings.SettingsInstance.UserSettings = DeserializationRepositorySettings.UserSettings;
 
             DeserializationRepositorySettings.ClearRepositories();
-            Tracer.Write($"MainWindowViewModel.deserializeSettings: End.");
         }
 
         private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
