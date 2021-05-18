@@ -28,11 +28,11 @@ namespace Drexel.VidUp.Test
 
         private static void copyFile(string fullTestName, string testStorageFolder, string fileName)
         {
-            string templateListJsonFilePath =
+            string jsonFilePath =
                 Path.Combine(TestContext.CurrentContext.TestDirectory, "TestConfigs", fullTestName, fileName);
-            if (File.Exists(templateListJsonFilePath))
+            if (File.Exists(jsonFilePath))
             {
-                string json = File.ReadAllText(templateListJsonFilePath);
+                string json = File.ReadAllText(jsonFilePath);
                 json = json.Replace("{BaseDir}", TestContext.CurrentContext.TestDirectory.Replace("\\", "\\\\"));
                 File.WriteAllText(Path.Combine(testStorageFolder, fileName), json);
             }

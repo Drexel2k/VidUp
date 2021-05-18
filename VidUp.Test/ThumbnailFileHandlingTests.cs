@@ -1,13 +1,9 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.UI.ViewModels;
 using NUnit.Framework;
-
-#endregion
 
 namespace Drexel.VidUp.Test
 {

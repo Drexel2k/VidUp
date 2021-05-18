@@ -540,5 +540,10 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.taskbarStateInternal = TaskbarState.Normal;
         }
+
+        public void Close()
+        {
+            Tracer.Close();
+        }
     }
 }

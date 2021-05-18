@@ -31,5 +31,10 @@ namespace Drexel.VidUp.Utils
                 Trace.WriteLine("", "");
             }
         }
+
+        public static void Close()
+        {
+            Trace.Close();
+        }
     }
 }

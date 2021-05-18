@@ -98,6 +98,7 @@ namespace Drexel.VidUp.Test
             uploadList = null;
             templateList = null;
             playlistList = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -128,6 +129,7 @@ namespace Drexel.VidUp.Test
             uploadList = null;
             templateList = null;
             playlistList = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -201,6 +203,7 @@ namespace Drexel.VidUp.Test
             uploadList = null;
             templateList = null;
             playlistList = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -244,19 +247,20 @@ namespace Drexel.VidUp.Test
 
             mainWindowViewModel.TabNo = 2;
             PlaylistViewModel playlistViewModel = (PlaylistViewModel)mainWindowViewModel.CurrentViewModel;
-            playlistViewModel.AddPlaylist(new Playlist(BasicTests.testPlaylistName, BasicTests.testPlaylistId));
+            playlistViewModel.AddPlaylist(new Playlist(BasicTests.testPlaylistId, BasicTests.testPlaylistName));
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 0);
             Assert.IsTrue(playlistList.PlaylistCount == 1);
 
             Playlist playlist = playlistList.GetPlaylist(0);
-            Assert.IsTrue(playlist.Name == BasicTests.testPlaylistName);
+            Assert.IsTrue(playlist.Title == BasicTests.testPlaylistName);
             Assert.IsTrue(playlist.PlaylistId == BasicTests.testPlaylistId);
 
             uploadList = null;
             templateList = null;
             playlistList = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             Assert.IsTrue(!File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -273,7 +277,7 @@ namespace Drexel.VidUp.Test
             foreach (JObject jsonPlaylist in jArray.SelectTokens("$.[*]"))
             {
                 playistCount++;
-                string name = jsonPlaylist["name"].Value<string>();
+                string name = jsonPlaylist["title"].Value<string>();
                 string playlistId = jsonPlaylist["playlistId"].Value<string>();
                 if (name == BasicTests.testPlaylistName)
                 {
@@ -310,12 +314,12 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(upload.Tags.Count == 0);
             Assert.IsTrue(upload.ThumbnailFilePath == null);
             Assert.IsTrue(upload.Title == "video2");
-            Assert.IsTrue(upload.YtTitle == "video2");
             Assert.IsTrue(upload.Visibility == Visibility.Private);
 
             uploadList = null;
             templateList = null;
             playlistList = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -402,12 +406,12 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(upload.ThumbnailFilePath == null);
             //todo: add video with # placeholder
             Assert.IsTrue(upload.Title == BasicTests.testTemplateTitle);
-            Assert.IsTrue(upload.YtTitle == BasicTests.testTemplateTitle);
             Assert.IsTrue(upload.Visibility == Visibility.Private);
 
             uploadList = null;
             templateList = null;
             playlistList = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -499,7 +503,6 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadWithoutTemplateMatch.Tags.Count == 0);
             Assert.IsTrue(uploadWithoutTemplateMatch.ThumbnailFilePath == null);
             Assert.IsTrue(uploadWithoutTemplateMatch.Title == "video2");
-            Assert.IsTrue(uploadWithoutTemplateMatch.YtTitle == "video2");
             Assert.IsTrue(uploadWithoutTemplateMatch.Visibility == Visibility.Private);
 
             Assert.IsTrue(uploadWithTemplateMatch.Template == templateList.GetTemplate(0));
@@ -512,12 +515,12 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(uploadWithTemplateMatch.ThumbnailFilePath == null);
             //todo: add video with # placeholder
             Assert.IsTrue(uploadWithTemplateMatch.Title == BasicTests.testTemplateTitle);
-            Assert.IsTrue(uploadWithTemplateMatch.YtTitle == BasicTests.testTemplateTitle);
             Assert.IsTrue(uploadWithTemplateMatch.Visibility == Visibility.Private);
 
             uploadList = null;
             templateList = null;
             playlistList = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             Assert.IsTrue(File.Exists(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
@@ -839,6 +842,12 @@ namespace Drexel.VidUp.Test
             Template template = templateList.GetTemplate(0);
             Assert.IsTrue(template.Uploads.Count == 1);
             Assert.IsTrue(template.Uploads[0].Guid != Guid.Parse(uploadGuid));
+
+            uploadList = null;
+            templateList = null;
+            playlistList = null;
+            mainWindowViewModel.Close();
+            mainWindowViewModel = null;
 
             JArray jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(BaseSettings.StorageFolder, "uploads.json")));
 

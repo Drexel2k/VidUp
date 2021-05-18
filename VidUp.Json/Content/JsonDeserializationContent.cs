@@ -232,7 +232,6 @@ namespace Drexel.VidUp.Json.Content
         {
             Tracer.Write($"JsonDeserializationContent.createTemplateListToRepository: Start.");
             DeserializationRepositoryContent.TemplateList = new TemplateList(this.templates);
-            DeserializationRepositoryContent.TemplateList.SetFolderPaths(this.templateImageFolder, this.thumbnailFallbackImageFolder);
             Tracer.Write($"JsonDeserializationContent.createTemplateListToRepository: End.");
         }
 

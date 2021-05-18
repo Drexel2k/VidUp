@@ -44,5 +44,10 @@ namespace Drexel.VidUp.UI
             uploadListViewModel.AddUploads(uploads);
             Tracer.Write($"MainWindow.fileDrop: End.");
         }
+
+        private void closed(object sender, EventArgs e)
+        {
+            ((MainWindowViewModel) this.DataContext).Close();
+        }
     }
 }

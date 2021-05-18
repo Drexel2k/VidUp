@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
@@ -14,8 +15,6 @@ namespace Drexel.VidUp.Business
     {
         [JsonProperty]
         private List<Template> templates;
-        private static string templateImageFolder;
-        private static string thumbnailFallbackImageFolder;
         private CheckFileUsage checkFileUsage;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -88,7 +87,8 @@ namespace Drexel.VidUp.Business
             string thumbnailFileFolder = Path.GetDirectoryName(thumbnailFallbackFilePath);
             if (!string.IsNullOrWhiteSpace(thumbnailFileFolder))
             {
-                if (String.Compare(Path.GetFullPath(TemplateList.thumbnailFallbackImageFolder).TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (String.Compare(Path.GetFullPath(Settings.SettingsInstance.ThumbnailFallbackImageFolder)
+                        .TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;
                 }
@@ -188,25 +188,14 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
         }
 
-        public void SetFolderPaths(string templateImageFolder, string thumbnailFallbackImageFolder)
-        {
-            if (TemplateList.templateImageFolder != null || TemplateList.thumbnailFallbackImageFolder != null)
-            {
-                throw new InvalidOperationException("TemplateList.templateImageFolder or TemplateList.thumbnailFallbackImageFolder may only be set once.");
-            }
-
-            TemplateList.templateImageFolder = templateImageFolder;
-            TemplateList.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
-        }
-
         public static string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
         {
-            return TemplateList.CopyImageToStorageFolder(thumbnailFallbackFilePath, TemplateList.thumbnailFallbackImageFolder);
+            return TemplateList.CopyImageToStorageFolder(thumbnailFallbackFilePath, Settings.SettingsInstance.ThumbnailFallbackImageFolder);
         }
 
         public static string CopyTemplateImageToStorageFolder(string templateImageFilePath)
         {
-            return TemplateList.CopyImageToStorageFolder(templateImageFilePath, TemplateList.templateImageFolder);
+            return TemplateList.CopyImageToStorageFolder(templateImageFilePath, Settings.SettingsInstance.TemplateImageFolder);
         }
 
         public static string CopyImageToStorageFolder(string imageFilePath, string storageFolder)
@@ -304,7 +293,8 @@ namespace Drexel.VidUp.Business
             if (imageFilePath != null)
             {
                 string imageFileFolder = Path.GetDirectoryName(imageFilePath);
-                if (String.Compare(Path.GetFullPath(TemplateList.templateImageFolder).TrimEnd('\\'), imageFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
+                if (String.Compare(Path.GetFullPath(Settings.SettingsInstance.TemplateImageFolder)
+                        .TrimEnd('\\'), imageFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;
                 }

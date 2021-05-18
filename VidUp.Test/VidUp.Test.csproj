@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net5.0-windows7.0</TargetFramework>
     <RootNamespace>Drexel.VidUp.Test</RootNamespace>
     <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
@@ -9,21 +9,172 @@
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Platforms>AnyCPU;x86</Platforms>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\Debug\x64\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <OutputPath>bin\Debug\x86\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <OutputPath>bin\Release\x86\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>bin\Release\x64\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="TestAssets\image1.png" />
+    <None Remove="TestAssets\image2.png" />
+    <None Remove="TestAssets\image3.png" />
+    <None Remove="TestAssets\image4.png" />
+    <None Remove="TestAssets\image5.png" />
+    <None Remove="TestAssets\thumbs\videowithimageinthumbfolder.png" />
+    <None Remove="TestAssets\video1.mkv" />
+    <None Remove="TestAssets\video10.mkv" />
+    <None Remove="TestAssets\video2.mkv" />
+    <None Remove="TestAssets\video3.mkv" />
+    <None Remove="TestAssets\video4.mkv" />
+    <None Remove="TestAssets\video5.mkv" />
+    <None Remove="TestAssets\video6.mkv" />
+    <None Remove="TestAssets\video7.mkv" />
+    <None Remove="TestAssets\video8.mkv" />
+    <None Remove="TestAssets\video9.mkv" />
+    <None Remove="TestAssets\videowithimageinsamefolder.mkv" />
+    <None Remove="TestAssets\videowithimageinsamefolder.png" />
+    <None Remove="TestAssets\videowithimageinthumbfolder.mkv" />
+    <None Remove="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\playlistlist.json" />
+    <None Remove="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\templatelist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\playlistlist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\templatelist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\uploadlist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\uploads.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\playlistlist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\templatelist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\uploadlist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\uploads.json" />
+    <None Remove="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\templatelist.json" />
+    <None Remove="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\uploadlist.json" />
+    <None Remove="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\uploads.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\VidUp.UI\AssemblyInfo\CommonAssemblyInfo.cs" Link="AssemblyInfo\CommonAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="NUnit" Version="3.13.0" />
+    <Content Include="TestAssets\image1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\image2.png">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\image3.png">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\image4.png">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\image5.png">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\thumbs\videowithimageinthumbfolder.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video10.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video1.mkv">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video2.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video3.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video4.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video5.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video6.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video7.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video8.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\video9.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\videowithimageinsamefolder.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\videowithimageinsamefolder.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestAssets\videowithimageinthumbfolder.mkv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\playlistlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\templatelist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\playlistlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\templatelist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\uploadlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\uploads.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\playlistlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\templatelist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\uploadlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\uploads.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\templatelist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\uploadlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\uploads.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VidUp.Business\VidUp.Business.csproj" />
     <ProjectReference Include="..\VidUp.UI\VidUp.UI.csproj" />
-    <ProjectReference Include="..\VidUp.Utils\VidUp.Utils.csproj" />
   </ItemGroup>
 
 </Project>

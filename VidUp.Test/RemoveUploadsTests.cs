@@ -1,6 +1,4 @@
-﻿#region
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Drexel.VidUp.UI.ViewModels;
@@ -8,8 +6,6 @@ using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
-
-#endregion
 
 namespace Drexel.VidUp.Test
 {
@@ -84,6 +80,7 @@ namespace Drexel.VidUp.Test
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
@@ -290,6 +287,7 @@ namespace Drexel.VidUp.Test
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template789FilterGuid);
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
@@ -403,6 +401,7 @@ namespace Drexel.VidUp.Test
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "None");
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
@@ -490,6 +489,7 @@ namespace Drexel.VidUp.Test
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template234FilterGuid);
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
@@ -590,6 +590,7 @@ namespace Drexel.VidUp.Test
 
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             //all uploads ready to uplaod shall be removed
@@ -842,6 +843,7 @@ namespace Drexel.VidUp.Test
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template456Guid);
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
@@ -1012,6 +1014,7 @@ namespace Drexel.VidUp.Test
                 uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "All");
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
+            mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
             //all uploads not finished shall be removed

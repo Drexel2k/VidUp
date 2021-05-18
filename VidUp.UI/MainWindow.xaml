@@ -14,7 +14,7 @@
                      xmlns:local="clr-namespace:Drexel.VidUp.UI"
                      xmlns:system="clr-namespace:System;assembly=mscorlib"
                      x:Name="CMainWindow"
-                     Icon="images/vidup.ico">
+                     Icon="images/vidup.ico" Closed="closed">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo ProgressValue="{Binding Mode=OneWay, Path=TotalProgressPercentage}" ProgressState="{Binding Mode=OneWay, Path=TaskbarItemProgressState}" />
     </Window.TaskbarItemInfo>
