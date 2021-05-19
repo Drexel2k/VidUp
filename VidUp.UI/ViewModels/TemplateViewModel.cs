@@ -416,6 +416,27 @@ namespace Drexel.VidUp.UI.ViewModels
             get => Cultures.RelevantCultureInfos;
         }
 
+        public bool UsePlaceholderFile
+        {
+            get => this.template != null ? this.template.UsePlaceholderFile : false;
+            set
+            {
+                this.template.UsePlaceholderFile = value;
+                this.raisePropertyChanged("UsePlaceholderFile");
+            }
+        }
+
+        public string PlaceholderFolderPath
+        {
+            get => this.template != null ? this.template.PlaceholderFolderPath : null;
+            set
+            {
+                this.template.PlaceholderFolderPath = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("PlaceholderFolderPath");
+            }
+        }
+
         public CultureInfo SelectedVideoLanguage
         {
             get => this.template != null ? this.template.VideoLanguage : null;
@@ -610,6 +631,17 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.ThumbnailFallbackFilePath = fileDialog.FileName;
                 }
             }
+
+            if ((string)parameter == "placeholder")
+            {
+                FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+                DialogResult result = folderDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    this.PlaceholderFolderPath = folderDialog.SelectedPath;
+                }
+            }
         }
 
         private void resetValue(object parameter)
@@ -632,6 +664,11 @@ namespace Drexel.VidUp.UI.ViewModels
             if ((string)parameter == "thumbfallback")
             {
                 this.ThumbnailFallbackFilePath = null;
+            }
+
+            if ((string)parameter == "placeholder")
+            {
+                this.PlaceholderFolderPath = null;
             }
         }
 

@@ -474,7 +474,7 @@ namespace Drexel.VidUp.Business
 
                     Regex regex = new Regex(@"#([^#]+)#");
                     int matchIndex = 0;
-                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
+                    foreach (Match match in regex.Matches(this.getPlaceholderContents()))
                     {
                         for (int tagIndex = 0; tagIndex < this.tags.Count; tagIndex++)
                         {
@@ -504,7 +504,7 @@ namespace Drexel.VidUp.Business
                     this.description = this.template.Description;
                     Regex regex = new Regex(@"#([^#]+)#");
                     int matchIndex = 0;
-                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
+                    foreach (Match match in regex.Matches(this.getPlaceholderContents()))
                     {
                         this.description = this.description.Replace("#" + matchIndex + "#", match.Groups[1].Value);
 
@@ -531,7 +531,7 @@ namespace Drexel.VidUp.Business
                     this.title = this.Template.Title;
                     Regex regex = new Regex(@"#([^#]+)#");
                     int matchIndex = 0;
-                    foreach (Match match in regex.Matches(Path.GetFileName(this.FilePath)))
+                    foreach (Match match in regex.Matches(this.getPlaceholderContents()))
                     {
                         this.title = this.title.Replace("#" + matchIndex + "#", match.Groups[1].Value);
 
@@ -722,6 +722,44 @@ namespace Drexel.VidUp.Business
             this.LastModified = DateTime.Now;
             this.raisePropertyChanged("ThumbnailFilePath", oldFilePath, this.thumbnailFilePath);
         }
+
+        private string getPlaceholderContents()
+        {
+            // since we already know there's a template if this code is called, no need to null check the template
+            if (this.template.UsePlaceholderFile)
+            {
+                string extension = ".txt";
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();
+
+                if (!string.IsNullOrWhiteSpace(this.template.PlaceholderFolderPath) && Directory.Exists(this.template.PlaceholderFolderPath))
+                {
+                    foreach (string currentFile in Directory.GetFiles(this.template.PlaceholderFolderPath))
+                    {
+                        if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower())
+                        {
+                            if (Path.GetExtension(currentFile).Equals(extension))
+                            {
+                                return File.ReadAllText(currentFile);
+                            }
+                        }
+                    }
+                }
+
+                foreach (string currentFile in Directory.GetFiles(Path.GetDirectoryName(this.filePath)))
+                {
+                    if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower() && Path.GetFullPath(currentFile).ToLower() != Path.GetFullPath(this.filePath).ToLower())
+                    {
+                        if (Path.GetExtension(currentFile).Equals(extension))
+                        {
+                            return File.ReadAllText(currentFile);
+                        }
+                    }
+                }
+            }
+
+            return Path.GetFileName(this.FilePath);
+        }
+
 
         private string getImagePath()
         {
