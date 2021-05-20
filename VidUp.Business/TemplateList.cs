@@ -40,45 +40,10 @@ namespace Drexel.VidUp.Business
 
                 foreach(Template template in templates)
                 {
-                    template.PropertyChanged += templatePropertyChanged;
+                    template.ThumbnailFallbackFilePathChanged += (sender, args) => this.thumbnailFallbackFilePathChanged(args);
+                    template.ImageFilePathForEditingChanged += (sender, args) => this.imageFilePathForEditingChanged(args);
+                    template.IsDefaultChanged += (sender, args) => this.isDefaultChanged(sender);
                 }
-            }
-        }
-
-        private void templatePropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "IsDefault")
-            {
-                Template template = (Template)sender;
-                if (sender != null)
-                {
-                    if (template.IsDefault == true)
-                    {
-                        foreach (Template template2 in this.templates)
-                        {
-                            if (template2 != template && template2.IsDefault)
-                            {
-                                template2.IsDefault = false;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (e.PropertyName == "ThumbnailFallbackFilePath")
-            {
-                PropertyChangedEventArgsEx args = (PropertyChangedEventArgsEx)e;
-
-                string oldValue = (string)args.OldValue;
-                this.deleteThumbnailFallbackIfPossible(oldValue);
-            }
-
-            if (e.PropertyName == "ImageFilePathForEditing")
-            {
-                PropertyChangedEventArgsEx args = (PropertyChangedEventArgsEx)e;
-
-                string oldValue = (string)args.OldValue;
-                this.deleteImageIfPossible(oldValue);
             }
         }
 
@@ -179,7 +144,9 @@ namespace Drexel.VidUp.Business
             {
                 string newFilePath = TemplateList.CopyTemplateImageToStorageFolder(template.ImageFilePathForEditing);
                 template.ImageFilePathForEditing = newFilePath;
-                template.PropertyChanged += this.templatePropertyChanged;
+                template.ThumbnailFallbackFilePathChanged += (sender, args) => this.thumbnailFallbackFilePathChanged(args);
+                template.ImageFilePathForEditingChanged += (sender, args) => this.imageFilePathForEditingChanged(args);
+                template.IsDefaultChanged += (sender, args) => this.isDefaultChanged(sender);
             }
 
             this.templates.AddRange(templates);
@@ -188,6 +155,34 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
         }
 
+        private void isDefaultChanged(object sender)
+        {
+            Template template = (Template)sender;
+            if (sender != null)
+            {
+                if (template.IsDefault)
+                {
+                    foreach (Template template2 in this.templates)
+                    {
+                        if (template2 != template && template2.IsDefault)
+                        {
+                            template2.IsDefault = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void imageFilePathForEditingChanged(OldValueArgs args)
+        {
+            this.deleteImageIfPossible(args.OldValue);
+        }
+
+        private void thumbnailFallbackFilePathChanged(OldValueArgs args)
+        {
+            this.deleteThumbnailFallbackIfPossible(args.OldValue);
+        }
+        
         public static string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
         {
             return TemplateList.CopyImageToStorageFolder(thumbnailFallbackFilePath, Settings.SettingsInstance.ThumbnailFallbackImageFolder);
@@ -262,7 +257,6 @@ namespace Drexel.VidUp.Business
         public void Remove(Template template)
         {
             this.templates.Remove(template);
-            template.PropertyChanged -= this.templatePropertyChanged;
 
             this.deleteThumbnailFallbackIfPossible(template.ThumbnailFallbackFilePath);
             this.deleteImageIfPossible(template.ImageFilePathForEditing);

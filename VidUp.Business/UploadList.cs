@@ -133,9 +133,9 @@ namespace Drexel.VidUp.Business
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        private void thumbnailChanged(object sender, ThumbnailChangedEventArgs args)
+        private void thumbnailChanged(object sender, OldValueArgs args)
         {
-            this.DeleteThumbnailIfPossible(args.OldThumbnailFilePath);
+            this.DeleteThumbnailFallbackIfPossible(args.OldValue);
         }
 
         public void AddUploads(List<Upload> uploads)
@@ -192,7 +192,7 @@ namespace Drexel.VidUp.Business
                     upload.Template = null;
                 }
 
-                this.DeleteThumbnailIfPossible(upload.ThumbnailFilePath);
+                this.DeleteThumbnailFallbackIfPossible(upload.ThumbnailFilePath);
             }
 
             this.raiseNotifyPropertyChanged("TotalBytesToUpload");
@@ -204,7 +204,7 @@ namespace Drexel.VidUp.Business
         }
 
         //deletes fallback thumbnail if not in use anymore.
-        public void DeleteThumbnailIfPossible(string thumbnailFilePath)
+        public void DeleteThumbnailFallbackIfPossible(string thumbnailFilePath)
         {
             string thumbnailFileFolder = Path.GetDirectoryName(thumbnailFilePath);
 

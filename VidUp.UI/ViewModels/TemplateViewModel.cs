@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
+using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
 using MaterialDesignThemes.Wpf;
 
@@ -193,6 +194,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.template.Name = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("Name");
+                EventAggregator.Instance.Publish<TemplateDisplayPropertyChangedMessage>(new TemplateDisplayPropertyChangedMessage("name"));
             }
         }
 
@@ -358,6 +360,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.template.IsDefault = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("IsDefault");
+                EventAggregator.Instance.Publish<TemplateDisplayPropertyChangedMessage>(new TemplateDisplayPropertyChangedMessage("default"));
             }
         }
 

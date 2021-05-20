@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
 {
+
     [JsonObject(MemberSerialization=MemberSerialization.OptIn)]
     public class Upload
     {
@@ -64,7 +65,7 @@ namespace Drexel.VidUp.Business
 
         private long fileLength;
 
-        public event ThumbnailChangedHandler ThumbnailChanged;
+        public event OldValueHandler ThumbnailChanged;
 
         public Guid Guid { get => this.guid; }
         public DateTime Created { get => this.created; }
@@ -223,10 +224,10 @@ namespace Drexel.VidUp.Business
 
         private void onThumbnailChanged(string oldFilePath)
         {
-            ThumbnailChangedHandler handler = this.ThumbnailChanged;
+            OldValueHandler handler = this.ThumbnailChanged;
             if (handler != null)
             {
-                handler(this, new ThumbnailChangedEventArgs(oldFilePath));
+                handler(this, new OldValueArgs(oldFilePath));
             }
         }
 
@@ -814,6 +815,4 @@ namespace Drexel.VidUp.Business
             }
         }
     }
-
-    public delegate void ThumbnailChangedHandler(object sender, ThumbnailChangedEventArgs args);
 }

@@ -9,12 +9,15 @@ using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.PlaylistItem;
 using Drexel.VidUp.Youtube.Thumbnail;
-using Drexel.VidUp.Youtube.Video;
 using Drexel.VidUp.Youtube.VideoUpload;
 
 
 namespace Drexel.VidUp.Youtube
 {
+    public delegate void ResumableSessionUriSetHandler(object sender, ResumableSessionUriSetArgs args);
+
+    public delegate void UploadChangedHandler(object sender, UploadChangedArgs args);
+
     public class Uploader
     {
         private UploadList uploadList;
@@ -230,8 +233,4 @@ namespace Drexel.VidUp.Youtube
             this.tokenSource.Cancel();
         }
     }
-
-    public delegate void ResumableSessionUriSetHandler(object sender, ResumableSessionUriSetArgs args);
-
-    public delegate void UploadChangedHandler(object sender, UploadChangedArgs args);
 }

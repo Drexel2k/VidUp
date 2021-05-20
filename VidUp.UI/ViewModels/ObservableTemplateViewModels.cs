@@ -75,6 +75,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     TemplateComboboxViewModel oldViewModel = this.templateComboboxViewModels.Find(viewModel => viewModel.Template == template);
                     int index = this.templateComboboxViewModels.IndexOf(oldViewModel);
                     this.templateComboboxViewModels.Remove(oldViewModel);
+                    oldViewModel.Dispose();
                     this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldViewModel, index));
                 }
 

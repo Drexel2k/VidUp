@@ -367,7 +367,7 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.PropertyChanged += this.uploadListViewModelOnPropertyChanged;
             uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
             uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
-            EventAggregator.Instance.Subscribe<BytesSentMessage>(this.uploadListViewModelOnUploadStatsUpdated);
+            EventAggregator.Instance.Subscribe<BytesSentMessage>(this.updateStats);
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
@@ -526,7 +526,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void uploadListViewModelOnUploadStatsUpdated(BytesSentMessage bytesSentMessage)
+        private void updateStats(BytesSentMessage bytesSentMessage)
         {
             this.updateStats();
         }

@@ -1,12 +1,15 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.UI.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
 
-    public class TemplateComboboxViewModel : INotifyPropertyChanged
+    public class TemplateComboboxViewModel : INotifyPropertyChanged, IDisposable
     {
         private Template template;
+        private Subscription templateDisplayPropertyChangedSubscription;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Template Template
@@ -15,28 +18,13 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 return this.template;
             }
-            set
-            {
-                if (this.template != null)
-                {
-                    this.template.PropertyChanged -= templatePropertyChanged;
-                }
-
-                this.template = value;
-
-                if (this.template != null)
-                {
-                    this.template.PropertyChanged += templatePropertyChanged;
-                }
-
-                this.raisePropertyChanged(string.Empty);
-            }
         }
 
         public string Guid
         {
             get => this.template != null ? this.template.Guid.ToString() : string.Empty;
         }
+
         public string NameWithDefaultIndicator
         {
             get
@@ -66,20 +54,14 @@ namespace Drexel.VidUp.UI.ViewModels
         public TemplateComboboxViewModel(Template template)
         {
             this.template = template;
-
-            if (template != null)
-            {
-                this.template.PropertyChanged += templatePropertyChanged;
-            }
+            this.templateDisplayPropertyChangedSubscription =
+                EventAggregator.Instance.Subscribe<TemplateDisplayPropertyChangedMessage>(this.onTemplateDisplayPropertyChanged);
         }
 
-        private void templatePropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void onTemplateDisplayPropertyChanged(TemplateDisplayPropertyChangedMessage templateDisplayPropertyChangedMessage)
         {
-            if(e.PropertyName == "Name" || e.PropertyName == "IsDefault")
-            {
-                this.raisePropertyChanged("Name");
-                this.raisePropertyChanged("NameWithDefaultIndicator");
-            }
+            this.raisePropertyChanged("Name");
+            this.raisePropertyChanged("NameWithDefaultIndicator");
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -89,6 +71,14 @@ namespace Drexel.VidUp.UI.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public void Dispose()
+        {
+            if (this.templateDisplayPropertyChangedSubscription != null)
+            {
+                this.templateDisplayPropertyChangedSubscription.Dispose();
             }
         }
     }
