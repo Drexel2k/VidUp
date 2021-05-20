@@ -11,10 +11,13 @@ using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.Converters;
 using Drexel.VidUp.UI.Definitions;
 using Drexel.VidUp.UI.DllImport;
+using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Utils.EventAggregation;
 using Drexel.VidUp.Youtube;
 using MaterialDesignThemes.Wpf;
+using EnumConverter = Drexel.VidUp.UI.Converters.EnumConverter;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -41,6 +44,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand resetRecalculatePublishAtStartDateCommand;
         private GenericCommand deleteUploadsCommand;
         private GenericCommand resetUploadsCommand;
+        private GenericCommand resetAttributeCommand;
 
         private UploadStatus uploadStatus = UploadStatus.NotUploading;
         private Uploader uploader;
@@ -54,13 +58,16 @@ namespace Drexel.VidUp.UI.ViewModels
         private string resetWithSelectedUploadStatus = "Paused";
         private TemplateComboboxViewModel resetWithSelectedTemplate;
 
+        private UploadTemplateAttribute resetAttributeSelectedAttribute = UploadTemplateAttribute.All;
+        private TemplateComboboxViewModel resetAttributeSelectedTemplate;
+
         private TemplateComboboxViewModel recalculatePublishAtSelectedTemplate;
         private DateTime? recalculatePublishAtStartDate;
-        
+        private Upload currentUpload;
 
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
         public event EventHandler<UploadFinishedEventArgs> UploadFinished;
-        public event EventHandler UploadStatsUpdated;
+        //public event EventHandler UploadStatsUpdated;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public GenericCommand DeleteCommand
@@ -126,6 +133,16 @@ namespace Drexel.VidUp.UI.ViewModels
                 return this.resetUploadsCommand;
             }
         }
+
+        public GenericCommand ResetAttributeCommand
+        {
+            get
+            {
+                return this.resetAttributeCommand;
+            }
+        }
+
+        
 
         public ObservableUploadViewModels ObservableUploadViewModels
         {
@@ -292,6 +309,46 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public Array ResetAttributeAttributes
+        {
+            get
+            {
+                return Enum.GetValues(typeof(UploadTemplateAttribute));
+            }
+        }
+
+        public UploadTemplateAttribute ResetAttributeSelectedAttribute
+        {
+            get
+            {
+                return this.resetAttributeSelectedAttribute;
+            }
+            set
+            {
+                if (this.resetAttributeSelectedAttribute != value)
+                {
+                    this.resetAttributeSelectedAttribute = value;
+                    this.raisePropertyChanged("ResetAttributeSelectedAttribute");
+                }
+            }
+        }
+
+        public TemplateComboboxViewModel ResetAttributeSelectedTemplate
+        {
+            get
+            {
+                return this.resetAttributeSelectedTemplate;
+            }
+            set
+            {
+                if (this.resetAttributeSelectedTemplate != value)
+                {
+                    this.resetAttributeSelectedTemplate = value;
+                    this.raisePropertyChanged("ResetAttributeSelectedTemplate");
+                }
+            }
+        }
+
         public string ResetWithSelectedUploadStatus
         {
             get
@@ -338,6 +395,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.recalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAll[0];
             this.deleteSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
             this.resetWithSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
+            this.resetAttributeSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
 
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads);
 
@@ -349,6 +407,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.resetRecalculatePublishAtStartDateCommand = new GenericCommand(this.resetRecalculatePublishAtStartDate);
             this.deleteUploadsCommand = new GenericCommand(this.deleteUploads);
             this.resetUploadsCommand = new GenericCommand(this.resetUploads);
+            this.resetAttributeCommand = new GenericCommand(this.resetAttribute);
         }
 
         //need to change the template filter combobox selected item, if this template is deleted. So the selected
@@ -399,12 +458,22 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void onUploadStatsUpdated()
         {
-            EventHandler handler = this.UploadStatsUpdated;
+            EventAggregator.Instance.Publish<BytesSentMessage>(new BytesSentMessage(this.currentUpload));
+        }
 
-            if (handler != null)
-            {
-                handler(this, null);
-            }
+        private void onUploadStatusChanged(Upload upload)
+        {
+            EventAggregator.Instance.Publish(new UploadStatusChangedMessage(upload));
+        }
+
+        private void onUploadChanged(UploadChangedArgs uploadChangedArgs)
+        {
+            this.currentUpload = uploadChangedArgs.Upload;
+        }
+
+        private void onResumableSessionUriSet(ResumableSessionUriSetArgs resumableSessionUriSetArgs)
+        {
+            EventAggregator.Instance.Publish(new ResumableSessionUriChangedMessage(this.currentUpload));
         }
 
         public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
@@ -472,6 +541,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.uploader = new Uploader(this.uploadList);
                 this.uploader.UploadStatsUpdated += (sender, args) => this.onUploadStatsUpdated();
+                this.uploader.UploadStatusChanged += (sender, args) => this.onUploadStatusChanged(this.currentUpload);
+                this.uploader.UploadChanged += (sender, args) => this.onUploadChanged(args);
+                this.uploader.ResumableSessionUriSet += (sender, args) => this.onResumableSessionUriSet(args);
                 UploaderResult uploadResult = await uploader.Upload(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
                 bool uploadStopped = uploader.UploadStopped;
                 this.uploader = null;
@@ -542,7 +614,7 @@ namespace Drexel.VidUp.UI.ViewModels
             bool reset = true;
 
             //skip dialog on testing
-            if (!(bool)skipDialog)
+            if (!skipDialog)
             {
                 ConfirmControl control = new ConfirmControl(
                     $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.");
@@ -554,6 +626,104 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.resetUploads();
             }
+        }
+
+        private async void resetAttribute(object parameter)
+        {
+            ConfirmControl control = new ConfirmControl(
+                $"Do you really want to reset attributes to template value with attribute = '{new EnumConverter().Convert(this.resetAttributeSelectedAttribute, typeof(string), null, CultureInfo.CurrentCulture)}' on all uploads with template = '{this.resetAttributeSelectedTemplate.Template.Name}' ?");
+
+            bool reset = (bool)await DialogHost.Show(control, "RootDialog");
+            
+
+            if (reset)
+            {
+                this.resetAttributes();
+            }
+        }
+
+        private void resetAttributes()
+        {
+            Predicate<Upload>[] predicates = new Predicate<Upload>[2];
+
+
+            predicates[0] = upload => string.IsNullOrWhiteSpace(upload.ResumableSessionUri);
+            if (this.resetAttributeSelectedTemplate.Template.Name == "All")
+            {
+                predicates[1] = upload => true;
+            }
+            else if (this.resetAttributeSelectedTemplate.Template.Name == "None")
+            {
+                predicates[1] = upload => upload.Template == null;
+            }
+            else
+            {
+                predicates[1] = upload => upload.Template == this.resetAttributeSelectedTemplate.Template;
+            }
+
+            List<Upload> uploads = this.uploadList.Uploads.Where(upload => PredicateCombiner.And(predicates)(upload)).ToList();
+
+            //set all puplish at dates to null so that existing values don't block potential dates
+            if (this.resetAttributeSelectedAttribute == UploadTemplateAttribute.All ||
+                this.resetAttributeSelectedAttribute == UploadTemplateAttribute.PublishAt)
+            {
+                foreach (Upload upload in uploads)
+                {
+                    upload.PublishAt = null;
+                }
+            }
+
+            foreach (Upload upload in uploads)
+            {
+                switch (this.resetAttributeSelectedAttribute)
+                {
+                    case UploadTemplateAttribute.All:
+                        upload.CopyTemplateValues();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "all"));
+                        break;
+                    case UploadTemplateAttribute.Title:
+                        upload.CopyTitleFromTemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "title"));
+                        break;
+                    case UploadTemplateAttribute.Description:
+                        upload.CopyDescriptionFromTemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "description"));
+                        break;
+                    case UploadTemplateAttribute.Tags:
+                        upload.CopyTagsFromtemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "tags"));
+                        break;
+                    case UploadTemplateAttribute.Visibility:
+                        upload.CopyVisibilityFromTemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "visibility"));
+                        break;
+                    case UploadTemplateAttribute.VideoLanguage:
+                        upload.CopyVideoLanguageFromTemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "videoLanguage"));
+                        break;
+                    case UploadTemplateAttribute.DescriptionLanguage:
+                        upload.CopyDescriptionLanguageFromTemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "descriptionLanguage"));
+                        break;
+                    case UploadTemplateAttribute.PublishAt:
+                        upload.AutoSetPublishAtDateTime();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "publishAt"));
+                        break;
+                    case UploadTemplateAttribute.Playlist:
+                        upload.CopyPlaylistFromTemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "playlist"));
+                        break;
+                    case UploadTemplateAttribute.Category:
+                        upload.CopyCategoryFromTemplate();
+                        EventAggregator.Instance.Publish(new AttributeResetMessage(upload, "category"));
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                        break;
+                }
+            }
+
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
         private void recalculatePublishAt(object obj)
@@ -719,7 +889,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     if (resetToStatus == UplStatus.Stopped)
                     {
-                        //uplaod cannot be stopped if it hasn't been started
+                        //upload cannot be stopped if it hasn't been started
                         if (string.IsNullOrWhiteSpace(upload.ResumableSessionUri))
                         {
                             continue;
@@ -727,6 +897,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
 
                     upload.UploadStatus = resetToStatus;
+                    EventAggregator.Instance.Publish(new UploadStatusChangedMessage(upload));
                 }
             }
 

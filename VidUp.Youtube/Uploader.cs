@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube.PlaylistItem;
+using Drexel.VidUp.Youtube.Thumbnail;
 using Drexel.VidUp.Youtube.Video;
 using Drexel.VidUp.Youtube.VideoUpload;
 
@@ -30,6 +32,9 @@ namespace Drexel.VidUp.Youtube
         private DateTime lastSerialization;
 
         public event EventHandler UploadStatsUpdated;
+        public event EventHandler UploadStatusChanged;
+        public event UploadChangedHandler UploadChanged;
+        public event ResumableSessionUriSetHandler ResumableSessionUriSet;
 
         public long MaxUploadInBytesPerSecond
         {
@@ -63,6 +68,36 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
+        private void onUploadStatusChanged()
+        {
+            EventHandler handler = this.UploadStatusChanged;
+
+            if (handler != null)
+            {
+                handler(this, null);
+            }
+        }
+
+        private void onUploadChanged(Upload upload)
+        {
+            UploadChangedHandler handler = this.UploadChanged;
+
+            if (handler != null)
+            {
+                handler(this, new UploadChangedArgs(upload));
+            }
+        }
+
+        private void onResumableSessionUriSet()
+        {
+            ResumableSessionUriSetHandler handler = this.ResumableSessionUriSet;
+
+            if (handler != null)
+            {
+                handler(this, new ResumableSessionUriSetArgs());
+            }
+        }
+
         public async Task<UploaderResult> Upload(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
         {
             Tracer.Write($"Uploader.Upload: Start with resumeUploads: {resumeUploads}, maxUploadInBytesPerSecond: {maxUploadInBytesPerSecond}.");
@@ -92,16 +127,22 @@ namespace Drexel.VidUp.Youtube
 
             while (upload != null)
             {
+                this.onUploadChanged(upload);
                 uploadsOfSession.Add(upload);
                 this.uploadStats.InitializeNewUpload(upload, this.resumeUploads ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable : this.uploadList.RemainingBytesOfFilesToUpload);
 
                 upload.UploadStatus = UplStatus.Uploading;
+                this.onUploadStatusChanged();
 
                 this.lastSerialization = DateTime.Now;
                 YoutubeVideoUploadService.MaxUploadInBytesPerSecond = maxUploadInBytesPerSecond;
-                UploadResult uploadResult = await YoutubeVideoUploadService.Upload(upload, updateUploadProgress, this.tokenSource.Token);
+                UploadResult videoResult = await YoutubeVideoUploadService.Upload(upload, this.updateUploadProgress, this.resumableSessionUriSet, this.tokenSource.Token);
+                this.onUploadStatusChanged();
 
-                if (uploadResult.VideoResult == VideoResult.Finished)
+                await YoutubeThumbnailService.AddThumbnail(upload);
+                await YoutubePlaylistItemService.AddToPlaylist(upload);
+
+                if (videoResult == UploadResult.Finished)
                 {
                     oneUploadFinished = true;
                 }
@@ -111,7 +152,7 @@ namespace Drexel.VidUp.Youtube
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-                if (uploadResult.VideoResult == VideoResult.Stopped)
+                if (videoResult == UploadResult.Stopped)
                 {
                     this.uploadStopped = true;
                     break;
@@ -178,9 +219,19 @@ namespace Drexel.VidUp.Youtube
             this.onUploadStatsUpdated();
         }
 
+        private void resumableSessionUriSet()
+        {
+            this.onResumableSessionUriSet();
+        }
+
+
         public void StopUpload()
         {
             this.tokenSource.Cancel();
         }
     }
+
+    public delegate void ResumableSessionUriSetHandler(object sender, ResumableSessionUriSetArgs args);
+
+    public delegate void UploadChangedHandler(object sender, UploadChangedArgs args);
 }

@@ -28,7 +28,6 @@ namespace Drexel.VidUp.Utils
                 }
 
                 Trace.WriteLine($"{DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff")}: {text}");
-                Trace.WriteLine("", "");
             }
         }
 

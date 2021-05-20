@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.PlaylistItem;
-using Drexel.VidUp.Youtube.Thumbnail;
 using Drexel.VidUp.Youtube.VideoUpload.Data;
 using HeyRed.Mime;
 using Newtonsoft.Json;
@@ -24,6 +22,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
         //to set max upload speed while running
         private static ThrottledBufferedStream stream = null;
         private static long maxUploadInBytesPerSecond = 0;
+
         public static long MaxUploadInBytesPerSecond
         {
             set
@@ -37,18 +36,11 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             }
         }
 
-        public static async Task<UploadResult> Upload(Upload upload, Action<YoutubeUploadStats> updateUploadProgress, CancellationToken cancellationToken)
+        public static async Task<UploadResult> Upload(Upload upload, Action<YoutubeUploadStats> updateUploadProgress, Action resumableSessionUriSet, CancellationToken cancellationToken)
         {
             Tracer.Write($"YoutubeVideoUploadService.Upload: Start with upload: {upload.FilePath}, maxUploadInBytesPerSecond: {YoutubeVideoUploadService.maxUploadInBytesPerSecond}.");
 
             upload.UploadErrorMessage = string.Empty;
-
-            UploadResult uploadResult = new UploadResult()
-            {
-                VideoResult = VideoResult.Failed,
-                ThumbnailSuccessFull = false,
-                PlaylistSuccessFull = false
-            };
 
             if (!File.Exists(upload.FilePath))
             {
@@ -56,20 +48,19 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                 upload.UploadErrorMessage = "File does not exist. ";
                 upload.UploadStatus = UplStatus.Failed;
-                return uploadResult;
+                return UploadResult.Failed;
             }
 
             StringBuilder errors = new StringBuilder();
             try
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Initialize upload.");
-                long uploadByteIndex = await YoutubeVideoUploadService.initializeUpload(upload);
+                long uploadByteIndex = await YoutubeVideoUploadService.initializeUpload(upload, resumableSessionUriSet);
                 long lastUploadByteIndexBeforeError = uploadByteIndex;
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Initial uploadByteIndex: {uploadByteIndex}.");
 
                 upload.BytesSent = uploadByteIndex;
-                long initialBytesSent = uploadByteIndex;
 
                 YoutubeUploadStats stats = new YoutubeUploadStats();
                 FileStream fileStream;
@@ -103,7 +94,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                                 upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Upload not successful after 3 tries for uploadByteIndex {uploadByteIndex}. Errors: {errors.ToString()}. ";
                                 upload.UploadStatus = UplStatus.Failed;
-                                return uploadResult;
+                                return UploadResult.Failed;
                             }
 
                             error = false;
@@ -156,8 +147,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                                     Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload stopped by user.");
 
                                     upload.UploadStatus = UplStatus.Stopped;
-                                    uploadResult.VideoResult = VideoResult.Stopped;
-                                    return uploadResult;
+                                    return UploadResult.Stopped;
                                 }
                             }
                             catch (Exception e)
@@ -195,7 +185,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             updateUploadProgress(stats);
 
                             upload.UploadStatus = UplStatus.Finished;
-                            uploadResult.VideoResult = VideoResult.Finished;
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with uploadByteIndex {uploadByteIndex}, video id {upload.VideoId}.");
                         }
                     }
@@ -208,17 +197,14 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                 upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Unexpected Exception: : {e.GetType().ToString()}: {e.Message}. ";
                 upload.UploadStatus = UplStatus.Failed;
-                return uploadResult;
+                return UploadResult.Failed;
             }
 
-            uploadResult.ThumbnailSuccessFull = await YoutubeThumbnailService.AddThumbnail(upload);
-            uploadResult.PlaylistSuccessFull = await YoutubePlaylistItemService.AddToPlaylist(upload);
-
             Tracer.Write($"YoutubeVideoUploadService.Upload: End.");
-            return uploadResult;
+            return UploadResult.Finished;
         }
 
-        private static async Task<long> initializeUpload(Upload upload)
+        private static async Task<long> initializeUpload(Upload upload, Action resumableSessionUriSet)
         {
             Tracer.Write($"YoutubeVideoUploadService.initializeUpload: Start.");
 
@@ -227,6 +213,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Requesting new upload/new resumable session uri.");
                 await YoutubeVideoUploadService.requestNewUpload(upload);
+                resumableSessionUriSet();
             }
             else
             {
@@ -288,7 +275,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             video.Snippet = new YoutubeVideoPostRequestSnippet();
             video.Snippet.Title = upload.Title;
             video.Snippet.Description = upload.Description;
-            video.Snippet.Tags = (upload.Tags != null ? upload.Tags : new List<string>()).ToArray();
+            video.Snippet.Tags = upload.Tags != null ? upload.Tags.ToArray() : new List<string>().ToArray();
             video.Snippet.VideoLanguage = upload.VideoLanguage != null ? upload.VideoLanguage.Name.Replace('-', '_') : null; //works better with _, with - e.g. German (Switzerland) is not set at all, with _ it is set as German.
             video.Snippet.DescriptionLanguage = upload.DescriptionLanguage != null ? upload.DescriptionLanguage.Name.Replace('-', '_') : null; //works better with _, with - e.g. German (Switzerland) is not set at all, with _ it is set as German.
             video.Snippet.Category = null;

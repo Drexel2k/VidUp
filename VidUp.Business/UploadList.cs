@@ -14,7 +14,7 @@ namespace Drexel.VidUp.Business
     public delegate bool CheckFileUsage(string filePath);
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class UploadList : INotifyCollectionChanged, INotifyPropertyChanged, IEnumerable<Upload>
+    public class UploadList : INotifyCollectionChanged, IEnumerable<Upload>
     {
         [JsonProperty]
         private List<Upload> uploads;
@@ -123,13 +123,19 @@ namespace Drexel.VidUp.Business
             if (uploads != null)
             {
                 this.uploads = uploads;
-                foreach (Upload upload in this.uploads)
+
+                foreach (Upload upload in uploads)
                 {
-                    upload.PropertyChanged += uploadPropertyChanged;
+                    upload.ThumbnailChanged += this.thumbnailChanged;
                 }
             }
 
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
+        }
+
+        private void thumbnailChanged(object sender, ThumbnailChangedEventArgs args)
+        {
+            this.DeleteThumbnailIfPossible(args.OldThumbnailFilePath);
         }
 
         public void AddUploads(List<Upload> uploads)
@@ -158,8 +164,6 @@ namespace Drexel.VidUp.Business
                         Tracer.Write($"UploadList.AddUploads: No default template found.");
                     }
                 }
-
-                upload.PropertyChanged += uploadPropertyChanged;
             }
 
             this.uploads.AddRange(uploads);
@@ -188,9 +192,7 @@ namespace Drexel.VidUp.Business
                     upload.Template = null;
                 }
 
-                upload.PropertyChanged -= this.uploadPropertyChanged;
-
-                this.deleteThumbnailIfPossible(upload.ThumbnailFilePath);
+                this.DeleteThumbnailIfPossible(upload.ThumbnailFilePath);
             }
 
             this.raiseNotifyPropertyChanged("TotalBytesToUpload");
@@ -201,43 +203,22 @@ namespace Drexel.VidUp.Business
             Tracer.Write($"UploadList.DeleteUploads: Ende.");
         }
 
-        private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "UploadStatus")
-            {
-                this.raiseNotifyPropertyChanged("TotalBytesToUpload");
-                this.raiseNotifyPropertyChanged("TotalBytesToUploadRemaining");
-                this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
-                this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
-            }
-
-            if (e.PropertyName == "ThumbnailFilePath")
-            {
-                PropertyChangedEventArgsEx args = (PropertyChangedEventArgsEx)e;
-
-                string oldValue = (string)args.OldValue;
-
-                this.deleteThumbnailIfPossible(oldValue);
-            }
-
-            if (e.PropertyName == "BytesSent")
-            {
-                this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
-                this.raiseNotifyPropertyChanged("TotalBytesToUploadRemaining");
-            }
-        }
-
-        private void deleteThumbnailIfPossible(string thumbnailFilePath)
+        //deletes fallback thumbnail if not in use anymore.
+        public void DeleteThumbnailIfPossible(string thumbnailFilePath)
         {
             string thumbnailFileFolder = Path.GetDirectoryName(thumbnailFilePath);
+
             if (!string.IsNullOrWhiteSpace(thumbnailFileFolder))
             {
+                //check if folder of thumbnail is fallbackfolder
                 if (String.Compare(Path.GetFullPath(this.thumbnailFallbackImageFolder).TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;
                 }
 
+
                 bool found = false;
+                //check if thumbnail is in use by another upload
                 foreach (Upload upload in this.uploads)
                 {
                     if (upload.ThumbnailFilePath != null)
@@ -250,6 +231,7 @@ namespace Drexel.VidUp.Business
                     }
                 }
 
+                //check if template with thumbnail exist
                 if (!found)
                 {
                     if (this.checkFileUsage != null)
@@ -258,6 +240,7 @@ namespace Drexel.VidUp.Business
                     }
                 }
 
+                //delete if no usage found
                 if (!found)
                 {
                     if (File.Exists(thumbnailFilePath))

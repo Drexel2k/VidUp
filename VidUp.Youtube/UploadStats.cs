@@ -1,10 +1,6 @@
-﻿#region
-
-using System;
+﻿using System;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
-
-#endregion
 
 namespace Drexel.VidUp.Youtube
 {

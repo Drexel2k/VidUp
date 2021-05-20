@@ -12,6 +12,7 @@ using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Definitions;
 using Drexel.VidUp.UI.DllImport;
+using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
@@ -366,12 +367,22 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.PropertyChanged += this.uploadListViewModelOnPropertyChanged;
             uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
             uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
-            uploadListViewModel.UploadStatsUpdated += this.uploadListViewModelOnUploadStatsUpdated;
+            EventAggregator.Instance.Subscribe<BytesSentMessage>(this.uploadListViewModelOnUploadStatsUpdated);
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
             this.viewModels[3] = new SettingsViewModel();
             this.viewModels[4] = new VidUpViewModel();
+
+            EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
+        }
+
+        private void uploadStatusChanged(UploadStatusChangedMessage uploadStatusChangedMessage)
+        {
+            this.raisePropertyChanged("TotalBytesToUpload"); 
+            this.raisePropertyChanged("TotalBytesToUploadRemaining");
+            this.raisePropertyChanged("TotalBytesToUploadIncludingResumable");
+            this.raisePropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
         }
 
         private void uploadListViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -515,7 +526,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void uploadListViewModelOnUploadStatsUpdated(object sender, EventArgs e)
+        private void uploadListViewModelOnUploadStatsUpdated(BytesSentMessage bytesSentMessage)
         {
             this.updateStats();
         }

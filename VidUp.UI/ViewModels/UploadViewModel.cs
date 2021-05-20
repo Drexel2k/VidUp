@@ -8,11 +8,13 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
+using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Utils.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    public class UploadViewModel : INotifyPropertyChanged
+    public class UploadViewModel : INotifyPropertyChanged, IDisposable
     {
         private Upload upload;
         private QuarterHourViewModels quarterHourViewModels;
@@ -29,6 +31,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
         //need for determination of upload status color
         private bool resumeUploads;
+
+        private Subscription attributeResetSubscription;
+        private Subscription bytesSentSubscription;
+        private Subscription uploadStatusChangedSubscription;
+        private Subscription resumableSessionUriChangedSubscription;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -155,7 +162,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 return false;
             }
         }
-
 
         public string FilePath
         {
@@ -362,9 +368,8 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get => string.Join(",", this.upload.Tags);
             set
-            {
-                this.upload.Tags.Clear();
-                this.upload.Tags.AddRange(value.Split(','));
+            { ;
+                this.upload.SetTags(value.Split(','));
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("TagsAsString");
                 this.raisePropertyChanged("TagsColor");
@@ -408,28 +413,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.Visibility;
             set
             {
-                this.setSelectedVisibilityInternal(value, true);
-            }
-        }
-
-        private void setSelectedVisibilityInternal(Visibility value, bool serialize)
-        {
-            if (value != Visibility.Private && this.SelectedVisibility == Visibility.Private)
-            {
-                if (this.PublishAt)
-                {
-                    this.setPublishAtInternal(false, false);
-                }
-            }
-
-            this.upload.Visibility = value;
-
-            if (serialize)
-            {
+                this.upload.Visibility = value;
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("PublishAt");
+                this.raisePropertyChanged("PublishAtDate");
+                this.raisePropertyChanged("PublishAtTime");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+                this.raisePropertyChanged("SelectedVisibility");
             }
-
-            this.raisePropertyChanged("SelectedVisibility");
         }
 
         public PlaylistComboboxViewModel SelectedPlaylist
@@ -529,41 +520,22 @@ namespace Drexel.VidUp.UI.ViewModels
 
             set
             {
-                this.setPublishAtInternal(value, true);
-            }
-        }
-
-        private void setPublishAtInternal(bool value, bool serialize)
-        {
-            if (value && !this.PublishAt)
-            {
-                if (this.SelectedVisibility != Visibility.Private)
+                if (value)
                 {
-                    this.SelectedVisibility = Visibility.Private;
+                    this.upload.ResetPublishAt();
                 }
-            }
+                else
+                {
+                    this.upload.PublishAt = null;
+                }
 
-            if (value)
-            {
-                //default publish at is 24 hour in the future
-                this.upload.PublishAt = QuarterHourCalculator.GetRoundedToNextQuarterHour
-                (new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour,
-                    DateTime.Now.Minute, 0).AddHours(24));
-            }
-            else
-            {
-                this.upload.PublishAt = null;
-            }
-
-            if (serialize)
-            {
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("PublishAt");
+                this.raisePropertyChanged("PublishAtDate");
+                this.raisePropertyChanged("PublishAtTime");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+                this.raisePropertyChanged("SelectedVisibility");
             }
-
-            this.raisePropertyChanged("PublishAt");
-            this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-            this.raisePropertyChanged("PublishAtTime");
-            this.raisePropertyChanged("PublishAtDate");
         }
 
         public QuarterHourViewModel PublishAtTime
@@ -611,6 +583,7 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         public Upload Upload { get => this.upload;  }
+
         public string ThumbnailFilePath
         {
             get
@@ -705,7 +678,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.upload = upload;
-            this.upload.PropertyChanged += this.uploadPropertyChanged;
+            //this.upload.PropertyChanged += this.uploadPropertyChanged;
 
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
@@ -719,6 +692,123 @@ namespace Drexel.VidUp.UI.ViewModels
             this.openFileDialogCommand = new GenericCommand(this.openThumbnailDialog);
             this.resetThumbnailCommand = new GenericCommand(this.resetThumbnail);
             this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateValue);
+
+            this.attributeResetSubscription = EventAggregator.Instance.Subscribe<AttributeResetMessage>(this.attributeReset);
+            this.bytesSentSubscription = EventAggregator.Instance.Subscribe<BytesSentMessage>(this.bytesSent);
+            this.uploadStatusChangedSubscription = EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
+            this.resumableSessionUriChangedSubscription = EventAggregator.Instance.Subscribe<ResumableSessionUriChangedMessage>(this.resumableSessionUriChanged);
+        }
+
+
+        private void attributeReset(AttributeResetMessage attributeResetMessage)
+        {
+            if (attributeResetMessage.Upload == this.upload)
+            {
+                if (attributeResetMessage.Attribute == "all")
+                {
+                    this.raisePropertyChanged(null);
+                }
+
+                if (attributeResetMessage.Attribute == "title")
+                {
+                    this.raisePropertyChanged("Title");
+                    this.raisePropertyChanged("YtTitle");
+                    this.raisePropertyChanged("TitleColor");
+                    this.raisePropertyChanged("TitleCharacterCount");
+                    this.raisePropertyChanged("ResetStateCommandEnabled");
+                }
+
+                if (attributeResetMessage.Attribute == "description")
+                {
+                    this.raisePropertyChanged("Description");
+                    this.raisePropertyChanged("DescriptionColor");
+                    this.raisePropertyChanged("DescriptionCharacterCount");
+                    this.raisePropertyChanged("ResetStateCommandEnabled");
+                }
+
+                if (attributeResetMessage.Attribute == "tags")
+                {
+                    this.raisePropertyChanged("TagsAsString");
+                    this.raisePropertyChanged("TagsColor");
+                    this.raisePropertyChanged("TagsCharacterCount");
+                    this.raisePropertyChanged("ResetStateCommandEnabled");
+                }
+
+                if (attributeResetMessage.Attribute == "visibility")
+                {
+                    this.raisePropertyChanged("SelectedVisibility");
+                }
+
+                if (attributeResetMessage.Attribute == "videoLanguage")
+                {
+                    this.raisePropertyChanged("SelectedVideoLanguage");
+                }
+
+                if (attributeResetMessage.Attribute == "descriptionLanguage")
+                {
+                    this.raisePropertyChanged("SelectedDescriptionLanguage");
+                }
+
+                if (attributeResetMessage.Attribute == "publishAt")
+                {
+                    this.raisePropertyChanged("PublishAt");
+                    this.raisePropertyChanged("PublishAtDate");
+                    this.raisePropertyChanged("PublishAtTime");
+                    this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+                    this.raisePropertyChanged("SelectedVisibility");
+                }
+
+                if (attributeResetMessage.Attribute == "playlist")
+                {
+                    this.raisePropertyChanged("SelectedPlaylist");
+                    this.raisePropertyChanged("ShowPlaylistHint");
+                }
+
+                if (attributeResetMessage.Attribute == "category")
+                {
+                    this.raisePropertyChanged("SelectedCategory");
+                }
+            }
+        }
+
+        private void bytesSent(BytesSentMessage bytesSentMessage)
+        {
+            if (bytesSentMessage.Upload == this.upload)
+            {
+                this.raisePropertyChanged("UploadedInMegaByte");
+            }
+        }
+
+        private void bytesSent(ResumableSessionUriChangedMessage resumableSessionUriChangedMessage)
+        {
+            if (resumableSessionUriChangedMessage.Upload == this.upload)
+            {
+                this.raisePropertyChanged("ControlsEnabled");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+            }
+        }
+
+        private void uploadStatusChanged(UploadStatusChangedMessage uploadStatusChangedMessage)
+        {
+            if (uploadStatusChangedMessage.Upload == this.upload)
+            {
+                this.raisePropertyChanged("UploadStatus");
+                this.raisePropertyChanged("UploadStatusColor");
+                this.raisePropertyChanged("UploadStatusColorAnimation");
+                this.raisePropertyChanged("UploadStart");
+                this.raisePropertyChanged("UploadEnd");
+                this.raisePropertyChanged("StateCommandsEnabled");
+                this.raisePropertyChanged("ResetStateCommandEnabled");
+                this.raisePropertyChanged("UploadErrorMessage");
+                this.raisePropertyChanged("ControlsEnabled");
+                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+            }
+        }
+
+        private void resumableSessionUriChanged(ResumableSessionUriChangedMessage obj)
+        {
+            this.raisePropertyChanged("ControlsEnabled");
+            this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
         }
 
         private void removeComboBoxValue(object parameter)
@@ -749,69 +839,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 default:
                     throw new InvalidOperationException("No parameter for removeComboBoxValue specified.");
                     break;
-            }
-        }
-
-        private void uploadPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "UploadStatus")
-            {
-                this.raisePropertyChanged("UploadStatus");
-                this.raisePropertyChanged("UploadStatusColor");
-                this.raisePropertyChanged("UploadStatusColorAnimation");
-                this.raisePropertyChanged("UploadStart");
-                this.raisePropertyChanged("UploadEnd");
-                this.raisePropertyChanged("StateCommandsEnabled");
-                this.raisePropertyChanged("ResetStateCommandEnabled");
-            }
-
-            if (e.PropertyName == "ResumableSessionUri")
-            {
-                this.raisePropertyChanged("ControlsEnabled");
-                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-            }
-
-            if (e.PropertyName == "BytesSent")
-            {
-                this.raisePropertyChanged("UploadedInMegaByte");
-            }
-
-            if (e.PropertyName == "PublishAt")
-            {
-                this.raisePropertyChanged("PublishAt");
-                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-                this.raisePropertyChanged("PublishAtTime");
-                this.raisePropertyChanged("PublishAtDate");
-            }
-
-            if (e.PropertyName == "Title")
-            {
-                this.raisePropertyChanged("ResetStateCommandEnabled");
-            }
-
-            if (e.PropertyName == "Description")
-            {
-                this.raisePropertyChanged("ResetStateCommandEnabled");
-            }
-
-            if (e.PropertyName == "Tags")
-            {
-                this.raisePropertyChanged("ResetStateCommandEnabled");
-            }
-
-            if (e.PropertyName == "UploadErrorMessage")
-            {
-                this.raisePropertyChanged("UploadErrorMessage");
-            }
-
-            if (e.PropertyName == "VideoLanguage")
-            {
-                this.raisePropertyChanged("SelectedVideoLanguage");
-            }
-
-            if (e.PropertyName == "DescriptionLanguage")
-            {
-                this.raisePropertyChanged("SelectedDescriptionLanguage");
             }
         }
 
@@ -848,6 +875,19 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+
+            this.raisePropertyChanged("UploadStatus");
+            this.raisePropertyChanged("UploadStatusColor");
+            this.raisePropertyChanged("UploadStatusColorAnimation");
+            this.raisePropertyChanged("UploadedInMegaByte");
+            this.raisePropertyChanged("UploadStart");
+            this.raisePropertyChanged("UploadEnd");
+            this.raisePropertyChanged("UploadErrorMessage");
+            this.raisePropertyChanged("StateCommandsEnabled");
+            this.raisePropertyChanged("ResetStateCommandEnabled");
+            this.raisePropertyChanged("ControlsEnabled");
+            this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+
             return true;
         }
 
@@ -855,6 +895,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.upload.UploadStatus = UplStatus.Paused;
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            this.raisePropertyChanged("UploadStatus");
         }
 
         private void openThumbnailDialog(object parameter)
@@ -906,6 +947,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 return;
             }
 
+            string oldFilePath = this.upload.ThumbnailFilePath;
             this.ThumbnailFilePath = null;
         }
 
@@ -917,7 +959,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     case "title":
                         this.upload.CopyTitleFromTemplate();
-                        this.raisePropertyChanged("Title");
                         this.raisePropertyChanged("YtTitle");
                         break;
                     case "description":
@@ -944,6 +985,14 @@ namespace Drexel.VidUp.UI.ViewModels
                         this.upload.CopyDescriptionLanguageFromTemplate();
                         this.raisePropertyChanged("DescriptionLanguage");
                         break;
+                    case "publishat":
+                        this.upload.AutoSetPublishAtDateTime();
+                        this.raisePropertyChanged("PublishAt");
+                        this.raisePropertyChanged("PublishAtDate");
+                        this.raisePropertyChanged("PublishAtTime");
+                        this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+                        this.raisePropertyChanged("SelectedVisibility");
+                        break;
                     case "category":
                         this.upload.CopyCategoryFromTemplate();
                         this.raisePropertyChanged("Category");
@@ -958,6 +1007,29 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            }
+        }
+
+        public void Dispose()
+        {
+            if (this.attributeResetSubscription != null)
+            {
+                this.attributeResetSubscription.Dispose();
+            }
+
+            if (this.bytesSentSubscription != null)
+            {
+                this.bytesSentSubscription.Dispose();
+            }
+
+            if (this.uploadStatusChangedSubscription != null)
+            {
+                this.uploadStatusChangedSubscription.Dispose();
+            }
+
+            if (this.resumableSessionUriChangedSubscription != null)
+            {
+                this.resumableSessionUriChangedSubscription.Dispose();
             }
         }
     }

@@ -1,8 +1,4 @@
-﻿#region
-
-using System.ComponentModel;
-
-#endregion
+﻿using System.ComponentModel;
 
 namespace Drexel.VidUp.Business
 {

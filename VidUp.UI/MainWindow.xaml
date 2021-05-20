@@ -53,24 +53,24 @@
                 <!--Tabs-->
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[0]}" Header="Upload" >
                     <Fluent:RibbonGroupBox Header="Add Uploads">
-                        <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="images/file-plus.png" Command="{Binding AddUploadCommand}" />
+                        <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FilePlus}" Command="{Binding AddUploadCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Drag&amp;Drop Files Here">
                         <Image Source="images/dragdrop.png" Drop="fileDrop" AllowDrop="True" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Upload">
-                        <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="images/upload.png"  Command="{Binding StartUploadingCommand}" />
+                        <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon UploadMultiple}"  Command="{Binding StartUploadingCommand}" />
                         <StackPanel Orientation="Horizontal">
                             <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding DataContext.AppStatus, Converter={converters:AppStatusIsUploadingConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                                 <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
                             </Fluent:CheckBox>
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
-                        <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="images/stop-upload.png"  Command="{Binding StopUploadingCommand}" />
+                        <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon Stop}"  Command="{Binding StopUploadingCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Recalculate Publish At Dates">
 
-                        <Fluent:Button Grid.Row="0" Grid.Column="0" Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/calendar.png" Command="{Binding RecalculatePublishAtCommand}" />
+                        <Fluent:Button Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon Calendar}" Command="{Binding RecalculatePublishAtCommand}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -99,7 +99,7 @@
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
                         <!-- CommandParamter is to enable testing -->
-                        <Fluent:Button Header="Delete Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="images/file-minus.png" Command="{Binding DeleteUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                        <Fluent:Button Header="Delete Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FileRemove}" Command="{Binding DeleteUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -121,10 +121,10 @@
                             <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding DeleteSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
                         </Grid>
                     </Fluent:RibbonGroupBox>
-                    <Fluent:RibbonGroupBox Header="Reset Uploads">
+                    <Fluent:RibbonGroupBox Header="Reset Upload Status">
                         <!-- CommandParamter is to enable testing -->
                         <StackPanel Orientation="Horizontal">
-                        <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="images/reset.png" Command="{Binding ResetUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                            <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon BackupRestore}" Command="{Binding ResetUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
                         <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetToUploadStatuses}" SelectedItem="{Binding ResetToSelectedUploadStatus}" Width="150">
                             <Fluent:ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -154,21 +154,38 @@
                             <Fluent:ComboBox Grid.Row="1" Grid.Column="1" IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding ResetWithSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
                         </Grid>
                     </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Reset To Template Values">
+                        <!-- CommandParameter is to enable testing -->
+                        <StackPanel Orientation="Horizontal">
+                            <Fluent:Button Header="Reset Attribute: " SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FileRestore}" Command="{Binding ResetAttributeCommand}" />
+                            <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetAttributeAttributes}" SelectedItem="{Binding ResetAttributeSelectedAttribute}" Width="150">
+                                <Fluent:ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                                    </DataTemplate>
+                                </Fluent:ComboBox.ItemTemplate>
+                            </Fluent:ComboBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="5 2 0 0" Width="106">With Template:</TextBlock>
+                            <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ObservableTemplateViewModelsInclAllNone}" SelectedItem="{Binding ResetAttributeSelectedTemplate}" DisplayMemberPath="Name" Width="150"/>
+                        </StackPanel>
+                    </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[1]}" Header="Templates" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
                         <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="NameWithDefaultIndicator" IsEditable="False" />
-                        <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="images/file-document-box-plus.png" Command="{Binding NewTemplateCommand}" />
+                        <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxPlus}" Command="{Binding NewTemplateCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[2]}" Header="Playlists" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
-                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/list-edit.png" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" IsEditable="False" />
-                        <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="images/list-plus.png" Command="{Binding NewPlaylistCommand}" />
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon playlistedit}" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" IsEditable="False" />
+                        <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon playlistplus}" Command="{Binding NewPlaylistCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Update" VerticalContentAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:Button Header="Set Playlists" SizeDefinition="Middle,Middle,Small" Icon="images/list-auto.png"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
+                            <Fluent:Button Header="Set Playlists" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon PlaylistCheck}"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlists to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
@@ -183,10 +200,10 @@
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[4]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">
-                        <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="images/handshake48.png" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
+                        <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="{materialDesign:PackIcon Handshake, 36}" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="About">
-                        <Fluent:Button Header="About" SizeDefinition="Middle,Middle,Small" Icon="images/about.png"  Command="{Binding AboutCommand}" />
+                        <Fluent:Button Header="About" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon InformationOutline}"  Command="{Binding AboutCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
             </Fluent:Ribbon>

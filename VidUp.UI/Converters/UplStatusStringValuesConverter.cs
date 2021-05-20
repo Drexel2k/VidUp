@@ -39,6 +39,7 @@ namespace Drexel.VidUp.UI.Converters
                     }
                 }
             }
+
             return value;
         }
 

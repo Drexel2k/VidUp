@@ -73,6 +73,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     UploadViewModel oldViewModel = this.uploadViewModels.Find(viewModel => viewModel.Upload == upload);
                     int index = this.uploadViewModels.IndexOf(oldViewModel);
+                    oldViewModel.Dispose();
                     this.uploadViewModels.Remove(oldViewModel);
                     this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldViewModel, index));
                 }
