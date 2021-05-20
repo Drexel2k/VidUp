@@ -27,6 +27,7 @@ namespace Drexel.VidUp.Test
         private static Upload u1;
 
         private static TemplateList templateList;
+        private static MainWindowViewModel mainWindowViewModel;
 
         [OneTimeSetUp]
         public static void Initialize()
@@ -44,11 +45,11 @@ namespace Drexel.VidUp.Test
             BaseSettings.SubFolder = String.Empty;
             ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath = Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image1.png");
             ThumbnailFileHandlingTests.thumbNailFallbackFileExistedImage12TargetFilePath = Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image12.png");
-            
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix,null, out _, out ThumbnailFileHandlingTests.templateList, out _);
-            ThumbnailFileHandlingTests.uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            mainWindowViewModel.TabNo = 1;
-            ThumbnailFileHandlingTests.templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;
+
+            ThumbnailFileHandlingTests.mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix,null, out _, out ThumbnailFileHandlingTests.templateList, out _);
+            ThumbnailFileHandlingTests.uploadListViewModel = (UploadListViewModel)ThumbnailFileHandlingTests.mainWindowViewModel.CurrentViewModel;
+            ThumbnailFileHandlingTests.mainWindowViewModel.TabNo = 1;
+            ThumbnailFileHandlingTests.templateViewModel = (TemplateViewModel)ThumbnailFileHandlingTests.mainWindowViewModel.CurrentViewModel;
 
             Directory.CreateDirectory(ThumbnailFileHandlingTests.t1RootFolder);
             Directory.CreateDirectory(Path.Combine(ThumbnailFileHandlingTests.t1RootFolder, "videos"));
@@ -68,6 +69,8 @@ namespace Drexel.VidUp.Test
         {
             ThumbnailFileHandlingTests.templateViewModel = null;
             ThumbnailFileHandlingTests.uploadListViewModel = null;
+            ThumbnailFileHandlingTests.mainWindowViewModel.Close();
+            ThumbnailFileHandlingTests.mainWindowViewModel = null;
 
             if (Directory.Exists(BaseSettings.StorageFolder))
             {

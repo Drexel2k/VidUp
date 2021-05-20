@@ -126,14 +126,14 @@ namespace Drexel.VidUp.Business
 
                 foreach (Upload upload in uploads)
                 {
-                    upload.ThumbnailChanged += this.thumbnailChanged;
+                    upload.ThumbnailChanged += this.onThumbnailChanged;
                 }
             }
 
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        private void thumbnailChanged(object sender, OldValueArgs args)
+        private void onThumbnailChanged(object sender, OldValueArgs args)
         {
             this.DeleteThumbnailFallbackIfPossible(args.OldValue);
         }
@@ -164,6 +164,8 @@ namespace Drexel.VidUp.Business
                         Tracer.Write($"UploadList.AddUploads: No default template found.");
                     }
                 }
+
+                upload.ThumbnailChanged += (sender, args) => this.onThumbnailChanged(sender, args);
             }
 
             this.uploads.AddRange(uploads);
