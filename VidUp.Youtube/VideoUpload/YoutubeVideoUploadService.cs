@@ -37,7 +37,35 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             }
         }
 
-        public static async Task<UploadResult> Upload(Upload upload, Action<YoutubeUploadStats> updateUploadProgress, Action resumableSessionUriSet, CancellationToken cancellationToken)
+        public static long CurrentSpeedInBytesPerSecond
+        {
+            get
+            {
+                ThrottledBufferedStream stream = YoutubeVideoUploadService.stream;
+                if (stream != null)
+                {
+                    return stream.CurrentSpeedInBytesPerSecond;
+                }
+
+                return 0;
+            }
+        }
+
+        public static long CurrentPosition
+        {
+            get
+            {
+                ThrottledBufferedStream stream = YoutubeVideoUploadService.stream;
+                if (stream != null)
+                {
+                    return stream.Position;
+                }
+
+                return 0;
+            }
+        }
+
+        public static async Task<UploadResult> Upload(Upload upload, Action<Upload> resumableSessionUriSet, CancellationToken cancellationToken)
         {
             Tracer.Write($"YoutubeVideoUploadService.Upload: Start with upload: {upload.FilePath}, maxUploadInBytesPerSecond: {YoutubeVideoUploadService.maxUploadInBytesPerSecond}.");
 
@@ -66,12 +94,11 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Initial uploadByteIndex: {upload.BytesSent}.");
 
-                YoutubeUploadStats stats = new YoutubeUploadStats();
                 FileStream fileStream;
                 ThrottledBufferedStream inputStream;
 
                 using (fileStream = new FileStream(upload.FilePath, FileMode.Open))
-                using (inputStream = new ThrottledBufferedStream(fileStream, YoutubeVideoUploadService.maxUploadInBytesPerSecond, updateUploadProgress, stats, upload))
+                using (inputStream = new ThrottledBufferedStream(fileStream, YoutubeVideoUploadService.maxUploadInBytesPerSecond))
                 {
                     YoutubeVideoUploadService.stream = inputStream;
                     inputStream.Position = upload.BytesSent;
@@ -105,7 +132,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                             //HttpClient disposed inputStream...
                             fileStream = new FileStream(upload.FilePath, FileMode.Open);
-                            inputStream = new ThrottledBufferedStream(fileStream, YoutubeVideoUploadService.maxUploadInBytesPerSecond, updateUploadProgress, stats, upload);
+                            inputStream = new ThrottledBufferedStream(fileStream, YoutubeVideoUploadService.maxUploadInBytesPerSecond);
                             YoutubeVideoUploadService.stream = inputStream;
 
                             //give a little time on IOException, e.g. to await router redial in on 24h disconnect
@@ -188,9 +215,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             upload.VideoId = response.Id;
 
                             //last stats update to reach 0 bytes and time left.
-                            stats.CurrentSpeedInBytesPerSecond = 1;
                             upload.BytesSent = inputStream.Position;
-                            updateUploadProgress(stats);
 
                             upload.UploadStatus = UplStatus.Finished;
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with uploadByteIndex {lastUploadByteIndexBeforeError}, video id {upload.VideoId}.");
@@ -212,7 +237,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             return UploadResult.Finished;
         }
 
-        private static async Task<bool> initializeUpload(Upload upload, Action resumableSessionUriSet)
+        private static async Task<bool> initializeUpload(Upload upload, Action<Upload> resumableSessionUriSet)
         {
             Tracer.Write($"YoutubeVideoUploadService.initializeUpload: Start.");
 
@@ -224,7 +249,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     return false;
                 }
 
-                resumableSessionUriSet();
+                resumableSessionUriSet(upload);
             }
             else
             {

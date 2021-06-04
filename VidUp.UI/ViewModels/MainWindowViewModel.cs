@@ -369,7 +369,6 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.PropertyChanged += this.uploadListViewModelOnPropertyChanged;
             uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
             uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
-            EventAggregator.Instance.Subscribe<BytesSentMessage>(this.updateStats);
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
@@ -377,14 +376,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.viewModels[4] = new VidUpViewModel();
 
             EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
-        }
-
-        private void uploadStatusChanged(UploadStatusChangedMessage uploadStatusChangedMessage)
-        {
-            this.raisePropertyChanged("TotalBytesToUpload"); 
-            this.raisePropertyChanged("TotalBytesToUploadRemaining");
-            this.raisePropertyChanged("TotalBytesToUploadIncludingResumable");
-            this.raisePropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
+            EventAggregator.Instance.Subscribe<UploadStatsChangedMessage>(this.uploadStatsChanged);
         }
 
         private void uploadListViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -509,8 +501,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-
-
         private void checkAppDataFolder()
         {
             if(!Directory.Exists(Settings.SettingsInstance.StorageFolder))
@@ -549,11 +539,16 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             if (e.PropertyName == "TotalBytesToUpload")
             {
-                this.raisePropertyChanged("TotalMbLeft");
+                this.updateStats();
             }
         }
 
-        private void updateStats(BytesSentMessage bytesSentMessage)
+        private void uploadStatsChanged(UploadStatsChangedMessage uploadStatsChangedMessage)
+        {
+            this.updateStats();
+        }
+
+        private void uploadStatusChanged(UploadStatusChangedMessage uploadStatusChangedMessage)
         {
             this.updateStats();
         }

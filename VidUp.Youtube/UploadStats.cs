@@ -8,8 +8,6 @@ namespace Drexel.VidUp.Youtube
     {
         private bool uploadFinished;
 
-        private DateTime currentUploadStart = DateTime.MinValue;
-
         //sum of potentially bytes to upload of all uploads already handled in this session, independent form result.
         private long sessionBytesUploadedFinishedUploads;
 
@@ -20,14 +18,16 @@ namespace Drexel.VidUp.Youtube
         private long sessionTotalBytesToUploadRemaining;
 
         //total file size in bytes of uploads to be uploaded of upload list, either with or without uploads to resume, depending on setting. Changes when upload list (add or remove uploads or change status of upload) changes.
-        private long sessionTotalBytesOfFilesToUpload;
+        //private long sessionTotalBytesOfFilesToUpload;
 
         //total bytes to upload left, either with or without uploads to resume, depending on setting, change on bytes sent.
         private long currentTotalBytesLeftRemaining;
 
         private long currentUploadSpeedInBytesPerSecond;
 
-        private Upload upload;
+        private long currentUploadFileLength;
+
+        private long currentUploadBytesSent;
 
 
         public float TotalProgressPercentage
@@ -40,7 +40,7 @@ namespace Drexel.VidUp.Youtube
                 }
                 else
                 {
-                    return (this.sessionBytesUploadedFinishedUploads + (this.upload.BytesSent - this.currentUploadBytesResumed)) / (float)this.sessionTotalBytesToUploadRemaining;
+                    return (this.sessionBytesUploadedFinishedUploads + (this.currentUploadBytesSent - this.currentUploadBytesResumed)) / (float)this.sessionTotalBytesToUploadRemaining;
                 }
             } 
         }
@@ -51,7 +51,7 @@ namespace Drexel.VidUp.Youtube
             {
                 if (this.currentUploadSpeedInBytesPerSecond > 0)
                 {
-                    float seconds = (this.upload.FileLength - this.upload.BytesSent) / (float) this.currentUploadSpeedInBytesPerSecond;
+                    float seconds = (this.currentUploadFileLength - this.currentUploadBytesSent) / (float) this.currentUploadSpeedInBytesPerSecond;
                     return TimeSpan.FromSeconds(seconds);
                 }
 
@@ -62,14 +62,14 @@ namespace Drexel.VidUp.Youtube
         {
             get
             {
-                return (int)((float)(this.upload.FileLength - this.upload.BytesSent) / Constants.ByteMegaByteFactor);
+                return (int)((float)(this.currentUploadFileLength - this.currentUploadBytesSent) / Constants.ByteMegaByteFactor);
             }
         }
         public int CurrentFilePercent
         { 
             get
             {
-                return (int)((float)this.upload.BytesSent / this.upload.FileLength * 100);
+                return (int)((float)this.currentUploadBytesSent / this.currentUploadFileLength * 100);
             }
         }
 
@@ -97,13 +97,6 @@ namespace Drexel.VidUp.Youtube
                 
         }
 
-        public long CurrentTotalBytesLeftRemaining
-        {
-            set
-            {
-                this.currentTotalBytesLeftRemaining = value;
-            }
-        }
         public long CurrentSpeedInBytesPerSecond
         {
             set
@@ -132,25 +125,31 @@ namespace Drexel.VidUp.Youtube
         {
         }
 
-        public void UploadsChanged(long sessionTotalBytesOfFilesToUpload, long sessionTotalBytesToUploadRemaining)
+        public void UpdateStats(long currentUploadBytesSent, long currentTotalBytesLeftRemaining)
+        {
+
+            this.currentUploadBytesSent = currentUploadBytesSent;
+            this.currentTotalBytesLeftRemaining = currentTotalBytesLeftRemaining;
+        }
+
+        public void UploadsChanged(long sessionTotalBytesToUploadRemaining)
         {
             this.sessionBytesUploadedFinishedUploads = 0;
             this.sessionTotalBytesToUploadRemaining = sessionTotalBytesToUploadRemaining;
-            this.sessionTotalBytesOfFilesToUpload = sessionTotalBytesOfFilesToUpload;
+            //this.sessionTotalBytesOfFilesToUpload = sessionTotalBytesOfFilesToUpload;
             this.currentTotalBytesLeftRemaining = sessionTotalBytesToUploadRemaining;
         }
 
-        public void InitializeNewUpload(Upload upload, long currentTotalBytesLeftRemaining)
+        public void InitializeNewUpload(long currentUploadFileLength, long currentUploadBytesSent, long currentTotalBytesLeftRemaining)
         {
-            this.currentUploadStart = DateTime.Now;
-            this.upload = upload;
-            this.currentUploadBytesResumed = this.upload.BytesSent;
+            this.currentUploadFileLength = currentUploadFileLength;
+            this.currentUploadBytesResumed = currentUploadBytesSent;
             this.currentTotalBytesLeftRemaining = currentTotalBytesLeftRemaining;
         }
 
         public void FinishUpload()
         {
-            this.sessionBytesUploadedFinishedUploads += this.upload.FileLength - this.currentUploadBytesResumed;
+            this.sessionBytesUploadedFinishedUploads += this.currentUploadFileLength - this.currentUploadBytesResumed;
         }
     }
 }

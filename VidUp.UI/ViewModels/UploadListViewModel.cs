@@ -14,7 +14,6 @@ using Drexel.VidUp.UI.DllImport;
 using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Utils.EventAggregation;
 using Drexel.VidUp.Youtube;
 using MaterialDesignThemes.Wpf;
 using EnumConverter = Drexel.VidUp.UI.Converters.EnumConverter;
@@ -63,11 +62,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private TemplateComboboxViewModel recalculatePublishAtSelectedTemplate;
         private DateTime? recalculatePublishAtStartDate;
-        private Upload currentUpload;
 
+        //todo: add to event aggregator maybe
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
         public event EventHandler<UploadFinishedEventArgs> UploadFinished;
-        //public event EventHandler UploadStatsUpdated;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public GenericCommand DeleteCommand
@@ -456,9 +454,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void onUploadStatsUpdated()
+        private void onUploadBytesSent(Upload upload)
         {
-            EventAggregator.Instance.Publish<BytesSentMessage>(new BytesSentMessage(this.currentUpload));
+            EventAggregator.Instance.Publish(new BytesSentMessage(upload));
         }
 
         private void onUploadStatusChanged(Upload upload)
@@ -466,14 +464,14 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Publish(new UploadStatusChangedMessage(upload));
         }
 
-        private void onUploadChanged(UploadChangedArgs uploadChangedArgs)
+        private void onResumableSessionUriSet(Upload upload)
         {
-            this.currentUpload = uploadChangedArgs.Upload;
+            EventAggregator.Instance.Publish(new ResumableSessionUriChangedMessage(upload));
         }
 
-        private void onResumableSessionUriSet(ResumableSessionUriSetArgs resumableSessionUriSetArgs)
-        {
-            EventAggregator.Instance.Publish(new ResumableSessionUriChangedMessage(this.currentUpload));
+        private void onUploadStatsUpdated()
+        { 
+            EventAggregator.Instance.Publish(new UploadStatsChangedMessage());
         }
 
         public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
@@ -540,20 +538,15 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.onUploadStarted(new UploadStartedEventArgs(uploadStats));
 
                 this.uploader = new Uploader(this.uploadList);
-                this.uploader.UploadStatsUpdated += (sender, args) => this.onUploadStatsUpdated();
-                this.uploader.UploadStatusChanged += (sender, args) => this.onUploadStatusChanged(this.currentUpload);
-                this.uploader.UploadChanged += (sender, args) => this.onUploadChanged(args);
-                this.uploader.ResumableSessionUriSet += (sender, args) => this.onResumableSessionUriSet(args);
+                this.uploader.UploadBytesSent += (sender, upload) => this.onUploadBytesSent(upload);
+                this.uploader.UploadStatusChanged += (sender, upload) => this.onUploadStatusChanged(upload);
+                this.uploader.ResumableSessionUriSet += (sender, upload) => this.onResumableSessionUriSet(upload);
+                this.uploader.UploadStatsUpdated += (sender) => this.onUploadStatsUpdated();
                 UploaderResult uploadResult = await uploader.Upload(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
                 bool uploadStopped = uploader.UploadStopped;
                 this.uploader = null;
 
                 this.uploadStatus = UploadStatus.NotUploading;
-
-                if (uploadResult != UploaderResult.NothingDone)
-                {
-                    this.onUploadStatsUpdated();
-                }
 
                 PowerSavingHelper.EnablePowerSaving();
 

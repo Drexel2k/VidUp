@@ -1,6 +1,6 @@
 ﻿using Drexel.VidUp.Business;
 
-namespace Drexel.VidUp.Utils.EventAggregation
+namespace Drexel.VidUp.UI.EventAggregation
 {
     public class AttributeResetMessage
     {

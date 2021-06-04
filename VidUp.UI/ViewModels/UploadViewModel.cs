@@ -10,7 +10,6 @@ using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Utils.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -445,7 +444,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string FileSizeInMegaByte
         {
-            get => $"{((float)this.upload.FileLength / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
+            get => $"{((int)((float)this.upload.FileLength / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} MB";
         }
 
         public SolidColorBrush FileSizeColor
@@ -465,7 +464,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string UploadedInMegaByte
         {
-            get => $"{((float)this.upload.BytesSent / Constants.ByteMegaByteFactor).ToString("N0", CultureInfo.CurrentCulture)} MB";
+            get => $"{((int)((float)this.upload.BytesSent / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} MB";
         }
 
         public string UploadErrorMessage
@@ -887,6 +886,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("ResetStateCommandEnabled");
             this.raisePropertyChanged("ControlsEnabled");
             this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+
+            EventAggregator.Instance.Publish(new UploadStatusChangedMessage(this.upload));
 
             return true;
         }

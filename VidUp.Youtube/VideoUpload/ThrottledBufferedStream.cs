@@ -15,12 +15,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
         private const int keepHistoryForInSeconds = 30;
         private const int historyForStatsInSeconds = 20;
 
-        private DateTime lastStatsUpdate;
-        private static TimeSpan twoSeconds = new TimeSpan(0, 0, 2);
-        private Action<YoutubeUploadStats> updateUploadProgress;
-        private YoutubeUploadStats stats;
-        private Upload upload;
-
         private Stream baseStream;
         private long maximumBytesPerSecondRead;
         private Dictionary<long, int> bytesPerTick = new Dictionary<long, int>();
@@ -44,12 +38,18 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             get
             {
                 long historyTicks = currentTicks - ThrottledBufferedStream.historyForStatsInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds;
-                var historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks).ToList();
+                KeyValuePair<long, int>[] historyBytes;
+                long minTick;
+                lock (this.bytesPerTick)
+                {
+                    historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks).ToArray();
+                    minTick = this.bytesPerTick.Min(kvp => kvp.Key);
+                }
+
                 int sum = historyBytes.Sum(historyByte => historyByte.Value);
 
-                long minTick = this.bytesPerTick.Min(kvp => kvp.Key);
-                if (minTick > this.currentTicks - ThrottledBufferedStream.historyForStatsInSeconds *
-                    ThrottledBufferedStream.tickMultiplierForSeconds)
+
+                if (minTick > this.currentTicks - ThrottledBufferedStream.historyForStatsInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds)
                 {
                     TimeSpan duration = DateTime.Now - new DateTime(minTick);
                     return (int) ((sum / duration.TotalMilliseconds) * 1000);
@@ -122,7 +122,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             }
         }
 
-        public ThrottledBufferedStream(Stream baseStream, long maximumBytesPerSecond, Action<YoutubeUploadStats> updateUploadProgress, YoutubeUploadStats stats, Upload upload)
+        public ThrottledBufferedStream(Stream baseStream, long maximumBytesPerSecond)
         {
             if (ThrottledBufferedStream.historyForUploadInSeconds > ThrottledBufferedStream.keepHistoryForInSeconds)
             {
@@ -145,11 +145,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     maximumBytesPerSecond, "The maximum number of bytes per second can't be negatie.");
             }
 
-            this.updateUploadProgress = updateUploadProgress;
-            this.stats = stats;
-            this.upload = upload;
-            this.lastStatsUpdate = DateTime.Now;
-
             this.baseStream = baseStream;
             this.maximumBytesPerSecondRead = maximumBytesPerSecond;
             this.position = this.baseStream.Position;
@@ -162,7 +157,12 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (count <= 0)
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException("count", "Count cannot be negative.");
+            }
+
+            if (count == 0)
             {
                 return 0;
             }
@@ -182,39 +182,34 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 throw new ArgumentOutOfRangeException("offset", "Offset cannot be negative.");
             }
 
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException("count", "Count cannot be negative.");
-            }
-
             long currentTicks = this.currentTicks;
 
             this.throttle(currentTicks);
 
             //clean history
-            foreach (var outdatedEntry in this.bytesPerTick.Where(kvp => kvp.Key < currentTicks - ThrottledBufferedStream.keepHistoryForInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds).ToArray())
+
+            KeyValuePair<long, int>[] outdatedEntries = this.bytesPerTick.Where(kvp => kvp.Key < currentTicks - ThrottledBufferedStream.keepHistoryForInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds).ToArray();
+            lock (this.bytesPerTick)
             {
-                this.bytesPerTick.Remove(outdatedEntry.Key);
+                foreach (var outdatedEntry in outdatedEntries)
+                {
+                    this.bytesPerTick.Remove(outdatedEntry.Key);
+                }
             }
 
             int bytesRead = this.readInternal(buffer, offset, count);
             this.position += bytesRead;
 
-            if (this.bytesPerTick.ContainsKey(currentTicks))
+            lock (this.bytesPerTick)
             {
-                this.bytesPerTick[currentTicks] += bytesRead;
-            }
-            else
-            {
-                this.bytesPerTick.Add(currentTicks, bytesRead);
-            }
-
-            if (DateTime.Now - this.lastStatsUpdate > ThrottledBufferedStream.twoSeconds)
-            {
-                stats.CurrentSpeedInBytesPerSecond = this.CurrentSpeedInBytesPerSecond;
-                upload.BytesSent = this.position;
-                this.updateUploadProgress(stats);
-                this.lastStatsUpdate = DateTime.Now;
+                if (this.bytesPerTick.ContainsKey(currentTicks))
+                {
+                    this.bytesPerTick[currentTicks] += bytesRead;
+                }
+                else
+                {
+                    this.bytesPerTick.Add(currentTicks, bytesRead);
+                }
             }
 
             return bytesRead;
@@ -252,8 +247,8 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                 count -= bytesLeft;
 
-                //bytesLeft=bytesRead
-                return bytesLeft += this.readInternal(buffer, offset + bytesLeft, count);
+                //bytes read = initial bytes left in buffer (which were read before) + bytes read from refilled buffer
+                return bytesLeft + this.readInternal(buffer, offset + bytesLeft, count);
             }
         }
 
@@ -304,9 +299,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 long historyTicks = currentTicks - ThrottledBufferedStream.historyForUploadInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds;
 
-                var historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks);
+                var historyBytes = this.bytesPerTick.Where(kvp => kvp.Key > historyTicks).ToArray();
 
-                if (historyBytes.Count() > 1)
+                if (historyBytes.Length > 1)
                 {
                     long byteCountRead = historyBytes.Sum(kvp => kvp.Value);
 

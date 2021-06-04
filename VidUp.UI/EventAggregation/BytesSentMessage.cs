@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Drexel.VidUp.Business;
+﻿using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.EventAggregation
 {
