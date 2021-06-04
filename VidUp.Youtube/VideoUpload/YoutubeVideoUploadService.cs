@@ -256,9 +256,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     using (StreamContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length))
                     using (HttpResponseMessage message = await client.PutAsync(upload.ResumableSessionUri, content))
                     {
-                        string httpContent = await message.Content.ReadAsStringAsync();
-                        if (!message.IsSuccessStatusCode)
+                        if (message.IsSuccessStatusCode && message.StatusCode != HttpStatusCode.PermanentRedirect)
                         {
+                            string httpContent = await message.Content.ReadAsStringAsync();
                             Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {httpContent}.");
                             throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {httpContent}.");
                         }
