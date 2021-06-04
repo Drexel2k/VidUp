@@ -18,48 +18,51 @@ namespace Drexel.VidUp.Json.Content
         private string templateListFilePath;
         private string allUploadsFilePath;
 
-        private string templateImageFolder;
         private string thumbnailFallbackImageFolder;
 
         public static List<Upload> AllUploads { get; set; }
         private List<Template> templates { get; set; }
         private List<Guid> uploadListGuids { get; set; }
 
-        public JsonDeserializationContent(string serializationFolder, string templateImageFolder, string thumbnailFallbackImageFolder)
+        public JsonDeserializationContent(string serializationFolder, string thumbnailFallbackImageFolder)
         {
             this.playlistListFilePath = Path.Combine(serializationFolder, "playlistlist.json");
             this.uploadListFilePath = Path.Combine(serializationFolder, "uploadlist.json");
             this.templateListFilePath = Path.Combine(serializationFolder, "templatelist.json");
             this.allUploadsFilePath = Path.Combine(serializationFolder, "uploads.json");
 
-            this.templateImageFolder = templateImageFolder;
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        public void Deserialize()
+        public ReSerialize Deserialize()
         {
+            ReSerialize reSerialize = new ReSerialize();
+            
             Tracer.Write($"JsonDeserializationContent.Deserialize: Start.");
-            this.deserializePlaylistList();
-            this.deserializeAllUploads();
-            this.deserializeTemplateList();
+            reSerialize.PlaylistList = this.deserializePlaylistList();
+            reSerialize.AllUploads = this.deserializeAllUploads();
+            reSerialize.TemplateList = this.deserializeTemplateList();
             this.setTemplateOnUploads();
-            this.deserializeUploadListGuids();
+            reSerialize.UploadList = this.deserializeUploadListGuids();
             this.createTemplateListToRepository();
             this.createUploadListToRepository();
             this.checkConsistency();
             Tracer.Write($"JsonDeserializationContent.Deserialize: End.");
+
+            return reSerialize;
         }
 
-        private void deserializePlaylistList()
+        private bool deserializePlaylistList()
         {
             Tracer.Write($"JsonDeserializationContent.deserializePlaylistList: Start.");
             if (!File.Exists(this.playlistListFilePath))
             {
                 DeserializationRepositoryContent.PlaylistList = new PlaylistList(null);
                 Tracer.Write($"JsonDeserializationContent.deserializePlaylistList: End, no playlist storage file found.");
-                return;
+                return false;
             }
 
+            //todo: remove compatibility ode
             JsonSerializer serializer = new JsonSerializer();
             serializer.MissingMemberHandling = MissingMemberHandling.Error;
 
@@ -88,15 +91,16 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonDeserializationContent.deserializePlaylistList: End.");
+            return error;
         }
 
-        private void deserializeAllUploads()
+        private bool deserializeAllUploads()
         {
             Tracer.Write($"JsonDeserializationContent.deserializeAllUploads: Start.");
             if (!File.Exists(this.allUploadsFilePath))
             {
                 Tracer.Write($"JsonDeserializationContent.deserializeAllUploads: End, no all uploads storage file found.");
-                return;
+                return false;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -115,15 +119,17 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonDeserializationContent.deserializeAllUploads: End.");
+
+            return false;
         }
 
-        private void deserializeTemplateList()
+        private bool deserializeTemplateList()
         {
             Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: Start.");
             if (!File.Exists(this.templateListFilePath))
             {
                 Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: End, no template list storage file found.");
-                return;
+                return false;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -143,6 +149,8 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: End.");
+
+            return false;
         }
 
         //setting templates on uploads by reading json again
@@ -188,13 +196,13 @@ namespace Drexel.VidUp.Json.Content
             Tracer.Write($"JsonDeserializationContent.setTemplateOnUploads: End.");
         }
 
-        private void deserializeUploadListGuids()
+        private bool deserializeUploadListGuids()
         {
             Tracer.Write($"JsonDeserializationContent.deserializeUploadListGuids: Start.");
             if (!File.Exists(this.uploadListFilePath))
             {
                 Tracer.Write($"JsonDeserializationContent.deserializeUploadListGuids: End, no upload list guid storage file found.");
-                return;
+                return false;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -209,6 +217,8 @@ namespace Drexel.VidUp.Json.Content
             this.uploadListGuids = guids.Guids;
 
             Tracer.Write($"JsonDeserializationContent.deserializeUploadListGuids: End.");
+
+            return false;
         }
 
         private void createUploadListToRepository()

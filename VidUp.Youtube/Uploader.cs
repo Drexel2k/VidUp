@@ -142,8 +142,11 @@ namespace Drexel.VidUp.Youtube
                 UploadResult videoResult = await YoutubeVideoUploadService.Upload(upload, this.updateUploadProgress, this.resumableSessionUriSet, this.tokenSource.Token);
                 this.onUploadStatusChanged();
 
-                await YoutubeThumbnailService.AddThumbnail(upload);
-                await YoutubePlaylistItemService.AddToPlaylist(upload);
+                if (videoResult == UploadResult.Finished)
+                {
+                    await YoutubeThumbnailService.AddThumbnail(upload);
+                    await YoutubePlaylistItemService.AddToPlaylist(upload);
+                }
 
                 if (videoResult == UploadResult.Finished)
                 {

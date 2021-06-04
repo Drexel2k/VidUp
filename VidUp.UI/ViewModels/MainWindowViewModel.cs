@@ -348,10 +348,12 @@ namespace Drexel.VidUp.UI.ViewModels
             this.checkAppDataFolder();
 
             this.deserializeSettings();
-            this.deserializeContent();
+            ReSerialize reSerialize = this.deserializeContent();
 
             JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.SettingsInstance.StorageFolder, this.uploadList, this.templateList, this.playlistList);
             JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.UserSettings);
+
+            this.reSerialize(reSerialize);
 
             uploadList = this.uploadList;
             templateList = this.templateList;
@@ -433,13 +435,13 @@ namespace Drexel.VidUp.UI.ViewModels
             timer.Start();
         }
 
-        private void deserializeContent()
+        private ReSerialize deserializeContent()
         {
             Tracer.Write($"MainWindowViewModel.deserializeContent: Start.");
             JsonDeserializationContent deserializer = new JsonDeserializationContent(
-                Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.TemplateImageFolder, Settings.SettingsInstance.ThumbnailFallbackImageFolder);
+                Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.ThumbnailFallbackImageFolder);
             YoutubeAuthentication.SerializationFolder = Settings.SettingsInstance.StorageFolder;
-            deserializer.Deserialize();
+            ReSerialize reSerialize = deserializer.Deserialize();
             this.templateList = DeserializationRepositoryContent.TemplateList;
             this.templateList.CollectionChanged += this.templateListCollectionChanged;
             
@@ -454,6 +456,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             DeserializationRepositoryContent.ClearRepositories();
             Tracer.Write($"MainWindowViewModel.deserializeContent: End.");
+
+            return reSerialize;
         }
 
         private void deserializeSettings()
@@ -463,6 +467,29 @@ namespace Drexel.VidUp.UI.ViewModels
             Settings.SettingsInstance.UserSettings = DeserializationRepositorySettings.UserSettings;
 
             DeserializationRepositorySettings.ClearRepositories();
+        }
+
+        private void reSerialize(ReSerialize reSerialize)
+        {
+            if (reSerialize.AllUploads)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            }
+
+            if (reSerialize.UploadList)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeUploadList();
+            }
+
+            if (reSerialize.TemplateList)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+            }
+
+            if (reSerialize.PlaylistList)
+            {
+                JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+            }
         }
 
         private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
