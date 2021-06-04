@@ -45,17 +45,18 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpClient.PostAsync Exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpClient.PostAsync Exception: {e.GetType().ToString()}: {e.Message}.";
+                        upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpClient.PostAsync Exception: {e.GetType().ToString()}: {e.Message}.\n";
                         return false;
                     }
 
                     using (message)
+                    using (message.Content)
                     {
                         string content = await message.Content.ReadAsStringAsync();
                         if (!message.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.");
-                            upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.";
+                            Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
+                            upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.\n";
                             return false;
                         }
                     }
@@ -122,14 +123,15 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
             }
 
             using (message)
+            using (message.Content)
             {
                 string content = await message.Content.ReadAsStringAsync();
                 if (!message.IsSuccessStatusCode)
                 {
                     if (message.StatusCode != HttpStatusCode.NotFound)
                     {
-                        Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.");
-                        throw new HttpRequestException($"Http error status code: {message.StatusCode}, message {message.ReasonPhrase}, content {content}.");
+                        Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
+                        throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {content}.");
                     }
                     else
                     {

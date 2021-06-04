@@ -34,17 +34,18 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.PostAsync Exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpClient.PutAsync Exception: {e.GetType().ToString()}: {e.Message}.";
+                        upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpClient.PutAsync Exception: {e.GetType().ToString()}: {e.Message}.\n";
                         return false;
                     }
 
                     using (message)
+                    using (message.Content)
                     {
                         string content = await message.Content.ReadAsStringAsync();
                         if (!message.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.");
-                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {message.StatusCode} with message {message.ReasonPhrase} and content {content}.";
+                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
+                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.\n";
                             return false;
                         }
                     }
