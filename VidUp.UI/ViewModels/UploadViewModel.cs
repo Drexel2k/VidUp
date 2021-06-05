@@ -203,6 +203,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 //if template changes all values are set to template values
                 this.raisePropertyChanged(null);
             }
