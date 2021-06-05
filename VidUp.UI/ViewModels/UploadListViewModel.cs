@@ -399,13 +399,13 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.deleteCommand = new GenericCommand(this.DeleteUpload);
             this.addUploadCommand = new GenericCommand(this.openUploadDialog);
-            this.startUploadingCommand = new GenericCommand(this.startUploading);
+            this.startUploadingCommand = new GenericCommand(this.startUploadingAsync);
             this.stopUploadingCommand = new GenericCommand(this.stopUploading);
             this.recalculatePublishAtCommand = new GenericCommand(this.recalculatePublishAt);
             this.resetRecalculatePublishAtStartDateCommand = new GenericCommand(this.resetRecalculatePublishAtStartDate);
-            this.deleteUploadsCommand = new GenericCommand(this.deleteUploads);
-            this.resetUploadsCommand = new GenericCommand(this.resetUploads);
-            this.resetAttributeCommand = new GenericCommand(this.resetAttribute);
+            this.deleteUploadsCommand = new GenericCommand(this.deleteUploadsAsync);
+            this.resetUploadsCommand = new GenericCommand(this.resetUploadsAsync);
+            this.resetAttributeCommand = new GenericCommand(this.resetAttributeAsync);
         }
 
         //need to change the template filter combobox selected item, if this template is deleted. So the selected
@@ -526,7 +526,7 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"UploadListViewModel.AddUploads: End.");
         }
 
-        private async void startUploading(object obj)
+        private async void startUploadingAsync(object obj)
         {
             if (this.uploadStatus == UploadStatus.NotUploading)
             {
@@ -542,7 +542,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.uploader.UploadStatusChanged += (sender, upload) => this.onUploadStatusChanged(upload);
                 this.uploader.ResumableSessionUriSet += (sender, upload) => this.onResumableSessionUriSet(upload);
                 this.uploader.UploadStatsUpdated += (sender) => this.onUploadStatsUpdated();
-                UploaderResult uploadResult = await uploader.Upload(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond);
+                UploaderResult uploadResult = await uploader.UploadAsync(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond).ConfigureAwait(false);
                 bool uploadStopped = uploader.UploadStopped;
                 this.uploader = null;
 
@@ -568,7 +568,7 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         //parameter skips dialog for testing
-        private async void deleteUploads(object parameter)
+        private async void deleteUploadsAsync(object parameter)
         {
             Tracer.Write($"UploadListViewModel.deleteUploads(object parameter): Start.");
             bool skipDialog = (bool)parameter;
@@ -601,7 +601,7 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         //parameter skips dialog for testing
-        private async void resetUploads(object parameter)
+        private async void resetUploadsAsync(object parameter)
         {
             bool skipDialog = (bool)parameter;
             bool reset = true;
@@ -612,7 +612,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 ConfirmControl control = new ConfirmControl(
                     $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.");
 
-                reset = (bool)await DialogHost.Show(control, "RootDialog");
+                reset = (bool)await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
             }
 
             if (reset)
@@ -621,12 +621,12 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private async void resetAttribute(object parameter)
+        private async void resetAttributeAsync(object parameter)
         {
             ConfirmControl control = new ConfirmControl(
                 $"Do you really want to reset attributes to template value with attribute = '{new EnumConverter().Convert(this.resetAttributeSelectedAttribute, typeof(string), null, CultureInfo.CurrentCulture)}' on all uploads with template = '{this.resetAttributeSelectedTemplate.Template.Name}' ?");
 
-            bool reset = (bool)await DialogHost.Show(control, "RootDialog");
+            bool reset = (bool)await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
             
 
             if (reset)

@@ -121,7 +121,7 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        public async Task<UploaderResult> Upload(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
+        public async Task<UploaderResult> UploadAsync(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
         {
             Tracer.Write($"Uploader.Upload: Start with resumeUploads: {resumeUploads}, maxUploadInBytesPerSecond: {maxUploadInBytesPerSecond}.");
             this.uploadStats = uploadStats;
@@ -154,7 +154,6 @@ namespace Drexel.VidUp.Youtube
                 
                 while (upload != null)
                 {
-
                     this.currentUpload = upload;
                     this.onUploadChanged(upload);
                     uploadsOfSession.Add(upload);
@@ -166,15 +165,15 @@ namespace Drexel.VidUp.Youtube
                     this.lastSerialization = DateTime.Now;
                     YoutubeVideoUploadService.MaxUploadInBytesPerSecond = maxUploadInBytesPerSecond;
                     timer.Start();
-                    UploadResult videoResult = await YoutubeVideoUploadService.Upload(upload, this.resumableSessionUriSet, this.tokenSource.Token);
+                    UploadResult videoResult = await YoutubeVideoUploadService.UploadAsync(upload, this.resumableSessionUriSet, this.tokenSource.Token).ConfigureAwait(false);
                     timer.Stop();
                     this.onTimerElapsed();
                     this.onUploadStatusChanged(upload);
 
                     if (videoResult == UploadResult.Finished)
                     {
-                        await YoutubeThumbnailService.AddThumbnail(upload);
-                        await YoutubePlaylistItemService.AddToPlaylist(upload);
+                        await YoutubeThumbnailService.AddThumbnailAsync(upload).ConfigureAwait(false);
+                        await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
                     }
 
                     if (videoResult == UploadResult.Finished)

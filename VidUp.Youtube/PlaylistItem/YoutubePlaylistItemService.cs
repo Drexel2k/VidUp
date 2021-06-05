@@ -16,7 +16,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
         private static string playlistItemsEndpoint = "https://www.googleapis.com/youtube/v3/playlistItems";
         private static int maxResults = 50;
 
-        public static async Task<bool> AddToPlaylist(Upload upload)
+        public static async Task<bool> AddToPlaylistAsync(Upload upload)
         {
             Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: Start.");
 
@@ -32,7 +32,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
 
                 string contentJson = JsonConvert.SerializeObject(playlistItem);
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
                 using (ByteArrayContent byteContent = HttpHelper.GetStreamContent(contentJson, "application/json"))
                 {
                     HttpResponseMessage message;
@@ -40,7 +40,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                     try
                     {
                         Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: Add to Playlist.");
-                        message = await client.PostAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet", byteContent);
+                        message = await client.PostAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet", byteContent).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -52,7 +52,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                     using (message)
                     using (message.Content)
                     {
-                        string content = await message.Content.ReadAsStringAsync();
+                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                         if (!message.IsSuccessStatusCode)
                         {
                             Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
@@ -70,7 +70,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
             return true;
         }
 
-        public static async Task<Dictionary<string, List<string>>> GetPlaylistsContent(IEnumerable<string> playlistIds)
+        public static async Task<Dictionary<string, List<string>>> GetPlaylistsContentAsync(IEnumerable<string> playlistIds)
         {
             Tracer.Write($"YoutubePlaylistItemService.GetPlaylistsContent: Start.");
             Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
@@ -82,7 +82,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                 {
                     List<string> playlistResult = new List<string>();
 
-                    if (await YoutubePlaylistItemService.addPlaylistContentToResult(playlistId, null, playlistResult))
+                    if (await YoutubePlaylistItemService.addPlaylistContentToResultAsync(playlistId, null, playlistResult).ConfigureAwait(false))
                     {
                         result.Add(playlistId, playlistResult);
                     }
@@ -97,11 +97,11 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
             return result;
         }
 
-        private static async Task<bool> addPlaylistContentToResult(string playlistId, string pageToken, List<string> result)
+        private static async Task<bool> addPlaylistContentToResultAsync(string playlistId, string pageToken, List<string> result)
         {
             Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Start.");
 
-            HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+            HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
             HttpResponseMessage message;
 
             try
@@ -109,11 +109,11 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                 Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Get Playlist info.");
                 if (string.IsNullOrWhiteSpace(pageToken))
                 {
-                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}");
+                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}").ConfigureAwait(false);
                 }
                 else
                 {
-                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}&pageToken={pageToken}");
+                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}&pageToken={pageToken}").ConfigureAwait(false);
                 }
             }
             catch (Exception e)
@@ -125,7 +125,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
             using (message)
             using (message.Content)
             {
-                string content = await message.Content.ReadAsStringAsync();
+                string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!message.IsSuccessStatusCode)
                 {
                     if (message.StatusCode != HttpStatusCode.NotFound)
@@ -151,7 +151,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
 
                 if (!string.IsNullOrWhiteSpace(response.NextPageToken))
                 {
-                    return await YoutubePlaylistItemService.addPlaylistContentToResult(playlistId, response.NextPageToken, result);
+                    return await YoutubePlaylistItemService.addPlaylistContentToResultAsync(playlistId, response.NextPageToken, result).ConfigureAwait(false);
                 }
             }
 

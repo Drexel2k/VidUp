@@ -65,7 +65,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             }
         }
 
-        public static async Task<UploadResult> Upload(Upload upload, Action<Upload> resumableSessionUriSet, CancellationToken cancellationToken)
+        public static async Task<UploadResult> UploadAsync(Upload upload, Action<Upload> resumableSessionUriSet, CancellationToken cancellationToken)
         {
             Tracer.Write($"YoutubeVideoUploadService.Upload: Start with upload: {upload.FilePath}, maxUploadInBytesPerSecond: {YoutubeVideoUploadService.maxUploadInBytesPerSecond}.");
 
@@ -84,7 +84,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             try
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Initialize upload.");
-                if (!await YoutubeVideoUploadService.initializeUpload(upload, resumableSessionUriSet))
+                if (!await YoutubeVideoUploadService.initializeUploadAsync(upload, resumableSessionUriSet).ConfigureAwait(false))
                 {
                     return UploadResult.Failed;
                 }
@@ -104,7 +104,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     inputStream.Position = upload.BytesSent;
 
                     long fileLength = upload.FileLength;
-                    HttpClient client = await HttpHelper.GetAuthenticatedUploadClient();
+                    HttpClient client = await HttpHelper.GetAuthenticatedUploadClientAsync().ConfigureAwait(false);
                     
                     //on IOExceptions try 2 times more to upload the chunk.
                     //no response from the server shall be requested on IOException.
@@ -136,10 +136,10 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             YoutubeVideoUploadService.stream = inputStream;
 
                             //give a little time on IOException, e.g. to await router redial in on 24h disconnect
-                            await Task.Delay(TimeSpan.FromSeconds(2));
+                            await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
 
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Getting range due to upload retry.");
-                            if(!await YoutubeVideoUploadService.getUploadByteIndex(upload))
+                            if(!await YoutubeVideoUploadService.getUploadByteIndexAsync(upload).ConfigureAwait(false))
                             {
                                 return UploadResult.Failed;
                             }
@@ -163,7 +163,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             try
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: Start uploading.");
-                                message = await client.PutAsync(upload.ResumableSessionUri, streamContent, cancellationToken);
+                                message = await client.PutAsync(upload.ResumableSessionUri, streamContent, cancellationToken).ConfigureAwait(false);
                                 Tracer.Write("YoutubeVideoUploadService.Upload: Uploading finished.");
                             }
                             catch (TaskCanceledException e)
@@ -199,7 +199,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         using (message.Content)
                         {
                             Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer.");
-                            string content = await message.Content.ReadAsStringAsync();
+                            string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                             Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer finished.");
 
                             if (!message.IsSuccessStatusCode)
@@ -237,14 +237,14 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             return UploadResult.Finished;
         }
 
-        private static async Task<bool> initializeUpload(Upload upload, Action<Upload> resumableSessionUriSet)
+        private static async Task<bool> initializeUploadAsync(Upload upload, Action<Upload> resumableSessionUriSet)
         {
             Tracer.Write($"YoutubeVideoUploadService.initializeUpload: Start.");
 
             if (string.IsNullOrWhiteSpace(upload.ResumableSessionUri))
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Requesting new upload/new resumable session uri.");
-                if (!await YoutubeVideoUploadService.requestNewUpload(upload))
+                if (!await YoutubeVideoUploadService.requestNewUploadAsync(upload).ConfigureAwait(false))
                 {
                     return false;
                 }
@@ -255,7 +255,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Continue upload, getting range.");
 
-                if (!await YoutubeVideoUploadService.getUploadByteIndex(upload))
+                if (!await YoutubeVideoUploadService.getUploadByteIndexAsync(upload).ConfigureAwait(false))
                 {
                     return false;
                 }
@@ -265,7 +265,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             return true;
         }
 
-        private static async Task<bool> getUploadByteIndex(Upload upload)
+        private static async Task<bool> getUploadByteIndexAsync(Upload upload)
         {
             Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Start");
             short requestTry = 1;
@@ -275,15 +275,15 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                    HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
 
                     Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Requesting upload byte index.");
                     using (StreamContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length))
-                    using (HttpResponseMessage message = await client.PutAsync(upload.ResumableSessionUri, content))
+                    using (HttpResponseMessage message = await client.PutAsync(upload.ResumableSessionUri, content).ConfigureAwait(false))
                     {
                         if (message.IsSuccessStatusCode && message.StatusCode != HttpStatusCode.PermanentRedirect)
                         {
-                            string httpContent = await message.Content.ReadAsStringAsync();
+                            string httpContent = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                             Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {httpContent}.");
                             throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {httpContent}.");
                         }
@@ -312,7 +312,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         return false;
                     }
 
-                    await Task.Delay(TimeSpan.FromSeconds(2));
+                    await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
                     requestTry++;
                 }
             }
@@ -320,7 +320,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             throw new NotImplementedException("Should not happen.");
         }
 
-        private static async Task<bool> requestNewUpload(Upload upload)
+        private static async Task<bool> requestNewUploadAsync(Upload upload)
         {
             Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Start.");
             YoutubeVideoPostRequest video = new YoutubeVideoPostRequest();
@@ -371,7 +371,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                    HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
                     using (ByteArrayContent content = HttpHelper.GetStreamContent(contentJson, "application/json"))
                     {
                         content.Headers.Add("Slug", httpHeaderCompatibleString);
@@ -379,9 +379,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         content.Headers.Add("X-Upload-Content-Type", MimeTypesMap.GetMimeType(upload.FilePath));
 
                         Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload.");
-                        using (HttpResponseMessage message = await client.PostAsync($"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable", content))
+                        using (HttpResponseMessage message = await client.PostAsync($"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable", content).ConfigureAwait(false))
                         {
-                            string httpContent = await message.Content.ReadAsStringAsync();
+                            string httpContent = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (!message.IsSuccessStatusCode)
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {httpContent}.");
@@ -410,7 +410,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         return false;
                     }
 
-                    await Task.Delay(TimeSpan.FromSeconds(2));
+                    await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
                     requestTry++;
                 }
             }

@@ -195,9 +195,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.SelectedPlaylist = this.observablePlaylistViewModels.PlaylistCount > 0 ? this.observablePlaylistViewModels[0] : null;
 
-            this.newPlaylistCommand = new GenericCommand(this.OpenNewPlaylistDialog);
+            this.newPlaylistCommand = new GenericCommand(this.OpenNewPlaylistDialogAsync);
             this.deletePlaylistCommand = new GenericCommand(this.DeletePlaylist);
-            this.autoSetPlaylistsCommand = new GenericCommand(this.autoSetPlaylists);
+            this.autoSetPlaylistsCommand = new GenericCommand(this.autoSetPlaylistsAsync);
 
 
             this.autoSetPlaylistTimer = new Timer();
@@ -221,7 +221,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public async void OpenNewPlaylistDialog(object obj)
+        public async void OpenNewPlaylistDialogAsync(object obj)
         {
             var view = new NewPlaylistControl
             {
@@ -292,11 +292,11 @@ namespace Drexel.VidUp.UI.ViewModels
         private void autoSetPlaylistTimerElapsed(object sender, ElapsedEventArgs e)
         {
             Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: Start autosetting playlists.");
-            this.autoSetPlaylists(null);
+            this.autoSetPlaylistsAsync(null);
             Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: End autosetting playlists.");
         }
 
-        private async void autoSetPlaylists(object obj)
+        private async void autoSetPlaylistsAsync(object obj)
         {
             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Start.");
             lock (this.autoSetPlaylistsLock)
@@ -318,7 +318,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
                 //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
-                Dictionary<string, List<string>> playlistVideos = await this.getPlaylistsAndRemoveNotExistingPlaylists(playlistUploadsWithoutPlaylistMap);
+                Dictionary<string, List<string>> playlistVideos = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(playlistUploadsWithoutPlaylistMap).ConfigureAwait(false);
 
                 if (playlistUploadsWithoutPlaylistMap.Count > 0)
                 {
@@ -329,12 +329,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     if (playlistUploadsWithoutPlaylistMap.Count > 0)
                     {
                         Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on Youtube.");
-                        var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploads(playlistUploadsWithoutPlaylistMap);
+                        var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploadsAsync(playlistUploadsWithoutPlaylistMap).ConfigureAwait(false);
 
                         if (playlistUploadsWithoutPlaylistMap.Count > 0)
                         {
                             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads is public and add to playlist.");
-                            await this.addUploadsToPlaylistIfPublic(playlistUploadsWithoutPlaylistMap, videosPublicMap);
+                            await this.addUploadsToPlaylistIfPublicAsync(playlistUploadsWithoutPlaylistMap, videosPublicMap).ConfigureAwait(false);
                         }
                         else
                         {
@@ -404,9 +404,9 @@ namespace Drexel.VidUp.UI.ViewModels
             return playlistUploadsWithoutPlaylistMap;
         }
 
-        private async Task<Dictionary<string, List<string>>> getPlaylistsAndRemoveNotExistingPlaylists(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap)
+        private async Task<Dictionary<string, List<string>>> getPlaylistsAndRemoveNotExistingPlaylistsAsync(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap)
         {
-            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContent(playlistUploadsWithoutPlaylistMap.Keys.ToList());
+            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContentAsync(playlistUploadsWithoutPlaylistMap.Keys.ToList()).ConfigureAwait(false);
             if (playlistUploadsWithoutPlaylistMap.Count != playlistVideos.Count)
             {
                 KeyValuePair<string, List<Upload>>[] missingPlaylists = playlistUploadsWithoutPlaylistMap
@@ -452,11 +452,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private async Task<Dictionary<string, bool>> getPublicVideosAndRemoveNotExisingUploads(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap)
+        private async Task<Dictionary<string, bool>> getPublicVideosAndRemoveNotExisingUploadsAsync(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap)
         {
             List<string> noUploadsLeftPlaylists = new List<string>();
-            Dictionary<string, bool> videosPublicMap = await YoutubeVideoService.IsPublic(playlistUploadsWithoutPlaylistMap
-                .SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList());
+            Dictionary<string, bool> videosPublicMap = await YoutubeVideoService.IsPublicAsync(playlistUploadsWithoutPlaylistMap
+                .SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList()).ConfigureAwait(false);
 
             foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
             {
@@ -486,7 +486,7 @@ namespace Drexel.VidUp.UI.ViewModels
             return videosPublicMap;
         }
 
-        private async Task addUploadsToPlaylistIfPublic(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, bool> videosPublicMap)
+        private async Task addUploadsToPlaylistIfPublicAsync(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, bool> videosPublicMap)
         {
 
             foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
@@ -496,7 +496,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     if (videosPublicMap[upload.VideoId])
                     {
                         upload.Playlist = this.playlistList.GetPlaylist(playlistVideosWithoutPlaylist.Key);
-                        if (!await YoutubePlaylistItemService.AddToPlaylist(upload))
+                        if (!await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false))
                         {
                             upload.Playlist = null;
                         }
@@ -527,7 +527,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (span.TotalSeconds > this.intervalInSeconds)
             {
                 Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Starting autosetting playlists immediately.");
-                this.autoSetPlaylists(null);
+                this.autoSetPlaylistsAsync(null);
             }
             else
             {

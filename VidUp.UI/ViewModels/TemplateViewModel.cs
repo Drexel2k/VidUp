@@ -503,12 +503,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
 
-            this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialog);
+            this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialogAsync);
             this.deleteCommand = new GenericCommand(this.DeleteTemplate);
             this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
-            this.openPublishAtCommand = new GenericCommand(this.openPublishAt);
+            this.openPublishAtCommand = new GenericCommand(this.openPublishAtAsync);
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -521,7 +521,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public async void OpenNewTemplateDialog(object obj)
+        public async void OpenNewTemplateDialogAsync(object obj)
         {
             var view = new NewTemplateControl
             {
@@ -675,7 +675,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private async void openPublishAt(object obj)
+        private async void openPublishAtAsync(object obj)
         {
             var view = new PublishAtScheduleControl
             {

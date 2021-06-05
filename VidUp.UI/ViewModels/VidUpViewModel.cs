@@ -26,28 +26,28 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public VidUpViewModel()
         {
-            this.aboutCommand = new GenericCommand(this.openAboutDialog);
-            this.donateCommand = new GenericCommand(this.openDonateDialog);
+            this.aboutCommand = new GenericCommand(this.openAboutDialogAsync);
+            this.donateCommand = new GenericCommand(this.openDonateDialogAsync);
         }
 
-        private async void openAboutDialog(object obj)
+        private async void openAboutDialogAsync(object obj)
         {
             var view = new AboutControl
             {
                 DataContext = new AboutViewModel()
             };
 
-            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+            bool result = (bool)await DialogHost.Show(view, "RootDialog").ConfigureAwait(false);
         }
 
-        private async void openDonateDialog(object obj)
+        private async void openDonateDialogAsync(object obj)
         {
             var view = new DonateControl
             {
                 // DataContext = new DonateViewModel()
             };
 
-            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+            bool result = (bool)await DialogHost.Show(view, "RootDialog").ConfigureAwait(false);
         }
     }
 }

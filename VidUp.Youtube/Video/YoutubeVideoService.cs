@@ -14,7 +14,7 @@ namespace Drexel.VidUp.Youtube.Video
     {
         private static string videoEndpoint = "https://www.googleapis.com/youtube/v3/videos";
 
-        public static async Task<Dictionary<string, bool>> IsPublic(List<string> videoIds)
+        public static async Task<Dictionary<string, bool>> IsPublicAsync(List<string> videoIds)
         {
             Tracer.Write($"YoutubeVideoService.IsPublic: Start.");
             Dictionary<string, bool> result = new Dictionary<string, bool>();
@@ -23,7 +23,7 @@ namespace Drexel.VidUp.Youtube.Video
             {
                 Tracer.Write($"YoutubeVideoService.IsPublic: {videoIds.Count} Videos to check available.");
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
                 HttpResponseMessage message;
 
                 int batch = 0;
@@ -35,7 +35,7 @@ namespace Drexel.VidUp.Youtube.Video
                     try
                     {
                         Tracer.Write($"YoutubeVideoService.IsPublic: Get video information.");
-                        message = await client.GetAsync($"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}");
+                        message = await client.GetAsync($"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}").ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -46,7 +46,7 @@ namespace Drexel.VidUp.Youtube.Video
                     using (message)
                     using (message.Content)
                     {
-                        string content = await message.Content.ReadAsStringAsync();
+                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                         if (!message.IsSuccessStatusCode)
                         {
                             Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");

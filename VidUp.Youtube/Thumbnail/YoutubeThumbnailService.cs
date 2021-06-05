@@ -12,7 +12,7 @@ namespace Drexel.VidUp.Youtube.Thumbnail
     {
         private static string thumbnailEndpoint = "https://www.googleapis.com/upload/youtube/v3/thumbnails/set";
 
-        public static async Task<bool> AddThumbnail(Upload upload)
+        public static async Task<bool> AddThumbnailAsync(Upload upload)
         {
             Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Start.");
 
@@ -21,7 +21,7 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                 Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Video with thumbnail to add available.");
 
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
                 using (FileStream fs = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
                 using (StreamContent streamcontent = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
                 {
@@ -29,7 +29,7 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                     try
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Add thumbnail.");
-                        message = await client.PostAsync($"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}", streamcontent);
+                        message = await client.PostAsync($"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}", streamcontent).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -41,7 +41,7 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                     using (message)
                     using (message.Content)
                     {
-                        string content = await message.Content.ReadAsStringAsync();
+                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                         if (!message.IsSuccessStatusCode)
                         {
                             Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");

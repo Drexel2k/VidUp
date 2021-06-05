@@ -12,17 +12,17 @@ namespace Drexel.VidUp.Youtube.Playlist
     {
         private static string playlistsEndpoint = "https://www.googleapis.com/youtube/v3/playlists";
         private static int maxResults = 50;
-        public static async Task<List<Playlist>> GetPlaylists()
+        public static async Task<List<Playlist>> GetPlaylistsAsync()
         {
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: Start.");
             List<Playlist> result = new List<Playlist>();
-            await YoutubePlaylistService.addPlaylistsToResult(null, result);
+            await YoutubePlaylistService.addPlaylistsToResultAsync(null, result).ConfigureAwait(false);
             
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: End.");
             return result;
         }
 
-        private static async Task<List<Playlist>> addPlaylistsToResult(string pageToken, List<Playlist> result)
+        private static async Task<List<Playlist>> addPlaylistsToResultAsync(string pageToken, List<Playlist> result)
         {
             if (result == null)
             {
@@ -30,7 +30,7 @@ namespace Drexel.VidUp.Youtube.Playlist
             }
 
             Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Start, pageToken = { pageToken }.");
-            HttpClient client = await HttpHelper.GetAuthenticatedStandardClient();
+            HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
             HttpResponseMessage message;
 
             try
@@ -38,11 +38,11 @@ namespace Drexel.VidUp.Youtube.Playlist
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Get Playlists.");
                 if (string.IsNullOrWhiteSpace(pageToken))
                 {
-                    message = await client.GetAsync($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={ YoutubePlaylistService.maxResults }");
+                    message = await client.GetAsync($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={ YoutubePlaylistService.maxResults }").ConfigureAwait(false);
                 }
                 else
                 {
-                    message = await client.GetAsync($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={ YoutubePlaylistService.maxResults }&pageToken={pageToken}");
+                    message = await client.GetAsync($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={ YoutubePlaylistService.maxResults }&pageToken={pageToken}").ConfigureAwait(false);
                 }
             }
             catch (Exception e)
@@ -54,7 +54,7 @@ namespace Drexel.VidUp.Youtube.Playlist
             using (message)
             using(message.Content)
             {
-                string content = await message.Content.ReadAsStringAsync();
+                string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!message.IsSuccessStatusCode)
                 {
                     Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
@@ -73,7 +73,7 @@ namespace Drexel.VidUp.Youtube.Playlist
 
                 if (!string.IsNullOrWhiteSpace(response.NextPageToken))
                 {
-                    await YoutubePlaylistService.addPlaylistsToResult(response.NextPageToken, result);
+                    await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result).ConfigureAwait(false);
                 }
             }
 

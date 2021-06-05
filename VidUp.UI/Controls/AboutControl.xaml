@@ -22,7 +22,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0">Drexel's Vidup - A Youtube Video Uploader</TextBlock>
-        <TextBlock Grid.Row="1">Copyright (C) 2020  Drexel Development</TextBlock>
+        <TextBlock Grid.Row="1">Copyright (C) 2020-2021  Drexel Development</TextBlock>
         <TextBlock Grid.Row="2">Published under<LineBreak />AFFERO GENERAL PUBLIC LICENSE, see license.rtf</TextBlock>
         <TextBlock Grid.Row="3">drexel.development@gmail.com</TextBlock>
         <TextBlock Grid.Row="4">GitHub: <Hyperlink NavigateUri="https://github.com/Drexel2k/VidUp" RequestNavigate="hyperlinkRequestNavigate">https://github.com/Drexel2k/VidUp</Hyperlink></TextBlock>

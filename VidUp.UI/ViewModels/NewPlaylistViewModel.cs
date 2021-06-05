@@ -44,14 +44,14 @@ namespace Drexel.VidUp.UI.ViewModels
             this.selectedPlaylists = selectedPlaylists == null ? new List<string>() : selectedPlaylists;
             this.observablePlaylistSelectionViewModels = new ObservableCollection<PlaylistSelectionViewModel>();
             this.allPayPlaylistSelectionViewModels = new List<PlaylistSelectionViewModel>();
-            this.initializePlaylists();
+            this.initializePlaylistsAsync();
         }
 
-        private async Task initializePlaylists()
+        private async Task initializePlaylistsAsync()
         {
             try
             {
-                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylists();
+                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylistsAsync().ConfigureAwait(false);
 
                 foreach (Playlist playlist in playlists)
                 {

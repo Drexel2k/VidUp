@@ -47,14 +47,14 @@ namespace Drexel.VidUp.Youtube.Authentication
         }
 
         //get access token from API
-        public static async Task<AccessToken> GetNewAccessToken()
+        public static async Task<AccessToken> GetNewAccessTokenAsync()
         {
             //check for refresh token, if not there, get it
             if (string.IsNullOrWhiteSpace(YoutubeAuthentication.refreshToken))
             {
                 if (!YoutubeAuthentication.trySetRefreshToken())
                 {
-                    await YoutubeAuthentication.getRefreshToken();
+                    await YoutubeAuthentication.getRefreshTokenAsync().ConfigureAwait(false);
                 }
             }
 
@@ -75,10 +75,10 @@ namespace Drexel.VidUp.Youtube.Authentication
                 content.Headers.ContentLength = contentBytes.Length;
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, content))
+                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, content).ConfigureAwait(false))
                 {
                     message.EnsureSuccessStatusCode();
-                    Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync());
+                    Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
 
                     AccessToken accessToken = new AccessToken(tokenEndpointDecoded["access_token"],
                         DateTime.Now.AddSeconds(Convert.ToInt32(tokenEndpointDecoded["expires_in"])));
@@ -112,7 +112,7 @@ namespace Drexel.VidUp.Youtube.Authentication
         }
 
         //initial authentication, get refresh token from API
-        private static async Task getRefreshToken()
+        private static async Task getRefreshTokenAsync()
         {
             // Generates state and PKCE values.
             string state = randomDataBase64url(32);
@@ -147,7 +147,7 @@ namespace Drexel.VidUp.Youtube.Authentication
             Process.Start(ps);
 
             // Waits for the OAuth authorization response.
-            var context = await http.GetContextAsync();
+            var context = await http.GetContextAsync().ConfigureAwait(false);
 
             // Sends an HTTP response to the browser.
             var response = context.Response;
@@ -198,11 +198,11 @@ namespace Drexel.VidUp.Youtube.Authentication
                 content.Headers.ContentLength = contentBytes.Length;
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, content))
+                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, content).ConfigureAwait(false))
                 {
                     message.EnsureSuccessStatusCode();
 
-                    Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync());
+                    Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
                     YoutubeAuthentication.refreshToken = tokenEndpointDecoded["refresh_token"];
                     File.WriteAllText(YoutubeAuthentication.getRefreshTokenFilePath(), YoutubeAuthentication.refreshToken);
                 }
