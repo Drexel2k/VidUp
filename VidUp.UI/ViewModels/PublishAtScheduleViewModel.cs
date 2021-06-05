@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Forms.VisualStyles;
 using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.ViewModels

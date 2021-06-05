@@ -51,7 +51,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             try
             {
-                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylistsAsync().ConfigureAwait(false);
+                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylistsAsync();
 
                 foreach (Playlist playlist in playlists)
                 {
