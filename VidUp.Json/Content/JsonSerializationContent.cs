@@ -18,6 +18,8 @@ namespace Drexel.VidUp.Json.Content
         private TemplateList templateList;
         private PlaylistList playlistList;
 
+        private object allUploadsLock = new object();
+
         public static JsonSerializationContent JsonSerializer;
 
         public JsonSerializationContent(string serializationFolder, UploadList uploadList, TemplateList templateList, PlaylistList playlistList)
@@ -62,10 +64,13 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
             serializer.Formatting = Formatting.Indented;
 
-            using (StreamWriter sw = new StreamWriter(this.allUploadsFilePath))
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            lock(this.allUploadsLock)
             {
-                serializer.Serialize(writer, allUploads);
+                using (StreamWriter sw = new StreamWriter(this.allUploadsFilePath))
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    serializer.Serialize(writer, allUploads);
+                }
             }
 
             Tracer.Write($"JsonSerializationContent.SerializeAllUploads: End.", TraceLevel.Detailed);

@@ -112,7 +112,6 @@ namespace Drexel.VidUp.Youtube
         private void onUploadBytesSent(Upload upload)
         {
             UploadBytesSentHandler handler = this.UploadBytesSent;
-
             upload.BytesSent = YoutubeVideoUploadService.CurrentPosition;
 
             if (handler != null)
@@ -236,16 +235,11 @@ namespace Drexel.VidUp.Youtube
             this.onUploadBytesSent(this.currentUpload);
             this.updateUploadProgress();
             this.onUploadStatsUpdated();
+            this.serializeOnUpload();
         }
 
         private void updateUploadProgress()
         {
-            if ((DateTime.Now - this.lastSerialization).TotalSeconds >= Uploader.serializationInterval)
-            {
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                this.lastSerialization = DateTime.Now;
-            }
-
             //check if upload has been added or removed
             long totalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
             long delta = this.sessionTotalBytesOfFilesToUpload - (totalBytesOfFilesToUpload + this.uploadedLength);
@@ -260,6 +254,15 @@ namespace Drexel.VidUp.Youtube
                 this.resumeUploads ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable : this.uploadList.RemainingBytesOfFilesToUpload);
             //this.uploadStats.CurrentTotalBytesLeftRemaining = ;
             this.uploadStats.CurrentSpeedInBytesPerSecond = YoutubeVideoUploadService.CurrentSpeedInBytesPerSecond;
+        }
+
+        private void serializeOnUpload()
+        {
+            if ((DateTime.Now - this.lastSerialization).TotalSeconds >= Uploader.serializationInterval)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.lastSerialization = DateTime.Now;
+            }
         }
 
         private void resumableSessionUriSet(Upload upload)

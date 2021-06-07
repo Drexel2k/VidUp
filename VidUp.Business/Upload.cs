@@ -459,6 +459,7 @@ namespace Drexel.VidUp.Business
             this.copyVideoLanguageFromTemplateInternal();
             this.copyDescriptionLanguageFromTemplateInternal();
             this.copyCategoryFromTemplateInternal();
+            this.autoSetPublishAtDateTimeInteral();
         }
 
         public void CopyVisibilityFromTemplate()

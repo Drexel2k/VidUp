@@ -35,6 +35,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private Subscription bytesSentSubscription;
         private Subscription uploadStatusChangedSubscription;
         private Subscription resumableSessionUriChangedSubscription;
+        private Subscription publishAtChangedSubscription;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -415,11 +416,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.upload.Visibility = value;
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                this.raisePropertyChanged("PublishAt");
-                this.raisePropertyChanged("PublishAtDate");
-                this.raisePropertyChanged("PublishAtTime");
-                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-                this.raisePropertyChanged("SelectedVisibility");
+                this.raisePublishAtProperties();
             }
         }
 
@@ -530,11 +527,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                this.raisePropertyChanged("PublishAt");
-                this.raisePropertyChanged("PublishAtDate");
-                this.raisePropertyChanged("PublishAtTime");
-                this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-                this.raisePropertyChanged("SelectedVisibility");
+                this.raisePublishAtProperties();
             }
         }
 
@@ -697,8 +690,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.bytesSentSubscription = EventAggregator.Instance.Subscribe<BytesSentMessage>(this.bytesSent);
             this.uploadStatusChangedSubscription = EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
             this.resumableSessionUriChangedSubscription = EventAggregator.Instance.Subscribe<ResumableSessionUriChangedMessage>(this.resumableSessionUriChanged);
+            this.publishAtChangedSubscription = EventAggregator.Instance.Subscribe<PublishAtChangedMessage>(this.publishAtChanged);
         }
-
 
         private void attributeReset(AttributeResetMessage attributeResetMessage)
         {
@@ -751,11 +744,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (attributeResetMessage.Attribute == "publishAt")
                 {
-                    this.raisePropertyChanged("PublishAt");
-                    this.raisePropertyChanged("PublishAtDate");
-                    this.raisePropertyChanged("PublishAtTime");
-                    this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-                    this.raisePropertyChanged("SelectedVisibility");
+                    this.raisePublishAtProperties();
                 }
 
                 if (attributeResetMessage.Attribute == "playlist")
@@ -805,10 +794,27 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void resumableSessionUriChanged(ResumableSessionUriChangedMessage obj)
+        private void resumableSessionUriChanged(ResumableSessionUriChangedMessage resumableSessionUriChangedMessage)
         {
             this.raisePropertyChanged("ControlsEnabled");
             this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+        }
+
+        private void publishAtChanged(PublishAtChangedMessage publishAtChangedMessage)
+        {
+            if (this.upload == publishAtChangedMessage.Upload)
+            {
+                this.raisePublishAtProperties();
+            }
+        }
+
+        private void raisePublishAtProperties()
+        {
+            this.raisePropertyChanged("PublishAt");
+            this.raisePropertyChanged("PublishAtDate");
+            this.raisePropertyChanged("PublishAtTime");
+            this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+            this.raisePropertyChanged("SelectedVisibility");
         }
 
         private void removeComboBoxValue(object parameter)
@@ -1032,6 +1038,11 @@ namespace Drexel.VidUp.UI.ViewModels
             if (this.resumableSessionUriChangedSubscription != null)
             {
                 this.resumableSessionUriChangedSubscription.Dispose();
+            }
+
+            if (this.publishAtChangedSubscription != null)
+            {
+                this.publishAtChangedSubscription.Dispose();
             }
         }
     }

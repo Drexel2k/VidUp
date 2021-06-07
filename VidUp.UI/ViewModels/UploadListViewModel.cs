@@ -741,6 +741,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                     {
                         upload.AutoSetPublishAtDateTime();
+                        EventAggregator.Instance.Publish(new PublishAtChangedMessage(upload));
                     }
                 }
             }
@@ -766,9 +767,13 @@ namespace Drexel.VidUp.UI.ViewModels
                         upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                     {
                         upload.AutoSetPublishAtDateTime();
+                        EventAggregator.Instance.Publish(new PublishAtChangedMessage(upload));
                     }
                 }
             }
+
+            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
         private void resetRecalculatePublishAtStartDate(object obj)

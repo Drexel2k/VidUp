@@ -3,27 +3,32 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Drexel.VidUp.Business;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace Drexel.VidUp.Youtube.VideoUpload
 {
-    public class ThrottledBufferedStream : Stream, IDisposable
+    public class ThrottledBufferedStream : Stream
     {
         private const int historyForUploadInSeconds = 3;
-        private const int memoryBufferSizeInBytes = 20 * 1024 * 1024 ; //20 MegaByte
         private const long tickMultiplierForSeconds = 10000000;
         private const int keepHistoryForInSeconds = 30;
         private const int historyForStatsInSeconds = 20;
 
+        private BufferBlock<byte[]> readBuffer;
+        private BufferBlock<byte[]> memoryBuffer;
+        private int readCapacity = 40 * 1024 * 1024;
+        private const int maxBufferBlockCount = 6;
+
+        private byte[] currentData;
+        private int currentDataPosition;
+        private int currentDataSize = 10 * 1024 * 1024;
+
         private Stream baseStream;
+        private long position;
+
         private long maximumBytesPerSecondRead;
         private Dictionary<long, int> bytesPerTick = new Dictionary<long, int>();
-
-        private byte[] memoryBuffer = new byte[ThrottledBufferedStream.memoryBufferSizeInBytes];
-        private int bufferPosition = 0;
-        private int bytesInBuffer = 0;
-
-        private long position = 0;
 
         private long currentTicks
         {
@@ -37,6 +42,11 @@ namespace Drexel.VidUp.Youtube.VideoUpload
         {
             get
             {
+                if (this.bytesPerTick.Count <= 0)
+                {
+                    return 0;
+                }
+
                 long historyTicks = currentTicks - ThrottledBufferedStream.historyForStatsInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds;
                 KeyValuePair<long, int>[] historyBytes;
                 long minTick;
@@ -71,6 +81,11 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 if (this.maximumBytesPerSecondRead != value)
                 {
+                    if (value < 0)
+                    {
+                        throw new ArgumentOutOfRangeException("maximumBytesPerSecond", value, "The maximum number of bytes per second can't be negative.");
+                    }
+
                     this.maximumBytesPerSecondRead = value;
                 }
             }
@@ -88,7 +103,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
         {
             get
             {
-                return true;
+                return false;
             }
         }
 
@@ -96,7 +111,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
         {
             get
             {
-                return this.baseStream.CanWrite;
+                return false;
             }
         }
 
@@ -116,13 +131,11 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             }
             set
             {
-                this.bufferPosition = 0;
-                this.baseStream.Position = value;
-                this.position = value;
+                throw new NotSupportedException("Seeking not supported");
             }
         }
 
-        public ThrottledBufferedStream(Stream baseStream, long maximumBytesPerSecond)
+        public ThrottledBufferedStream(string filePath, long position, long maximumBytesPerSecond)
         {
             if (ThrottledBufferedStream.historyForUploadInSeconds > ThrottledBufferedStream.keepHistoryForInSeconds)
             {
@@ -134,20 +147,31 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 throw new InvalidOperationException("History not long enough for stats.");
             }
 
-            if (baseStream == null)
+            if (filePath == null)
             {
-                throw new ArgumentNullException("baseStream");
+                throw new ArgumentNullException("filePath");
             }
 
             if (maximumBytesPerSecond < 0)
             {
-                throw new ArgumentOutOfRangeException("maximumBytesPerSecond",
-                    maximumBytesPerSecond, "The maximum number of bytes per second can't be negatie.");
+                throw new ArgumentOutOfRangeException("maximumBytesPerSecond", maximumBytesPerSecond, "The maximum number of bytes per second can't be negative.");
             }
 
-            this.baseStream = baseStream;
+            this.baseStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            this.baseStream.Position = position;
+            this.position = position;
             this.maximumBytesPerSecondRead = maximumBytesPerSecond;
-            this.position = this.baseStream.Position;
+
+            DataflowBlockOptions readBufferOptions = new DataflowBlockOptions();
+            readBufferOptions.BoundedCapacity = 1;
+            this.readBuffer = new BufferBlock<byte[]>(readBufferOptions);
+
+            DataflowBlockOptions memoryBufferOptions = new DataflowBlockOptions();
+            memoryBufferOptions.BoundedCapacity = ThrottledBufferedStream.maxBufferBlockCount;
+            this.memoryBuffer = new BufferBlock<byte[]>(memoryBufferOptions);
+
+            Task.Run(this.fillReadBuffer);
+            Task.Run(this.fillMemoryBuffer);
         }
 
         public override void Flush()
@@ -187,7 +211,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             this.throttle(currentTicks);
 
             //clean history
-
             KeyValuePair<long, int>[] outdatedEntries = this.bytesPerTick.Where(kvp => kvp.Key < currentTicks - ThrottledBufferedStream.keepHistoryForInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds).ToArray();
             lock (this.bytesPerTick)
             {
@@ -215,63 +238,131 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             return bytesRead;
         }
 
+        private void fillReadBuffer()
+        {
+            while (true)
+            {
+                byte[] buffer = new byte[this.readCapacity];
+                int bytesRead = this.baseStream.Read(buffer, 0, this.readCapacity);
+                if (bytesRead == 0)
+                {
+                    this.readBuffer.Complete();
+                    return;
+                }
+
+                if (bytesRead < this.readCapacity)
+                {
+                    byte[] temp = new byte[bytesRead];
+                    Array.Copy(buffer, 0, temp, 0, bytesRead);
+                    buffer = temp;
+                }
+
+                Task<bool> task = this.readBuffer.SendAsync(buffer);
+
+                task.Wait();
+                if (!task.Result)
+                {
+                    throw new Exception("Could not process upload file.");
+                }
+            }
+        }
+
+        private void fillMemoryBuffer()
+        {
+            try
+            {
+                while (true)
+                {
+                    //blocks until data is received or throws InvalidOperationException if queue is empty and completed.
+                    byte[] buffer = this.readBuffer.Receive();
+
+                    int remainder;
+                    int limit = Math.DivRem(buffer.Length, (this.currentDataSize), out remainder) - 1;
+
+                    for (int i = 0; i <= limit; i++)
+                    {
+                        byte[] bufferSmall = new byte[this.currentDataSize];
+                        Array.Copy(buffer, this.currentDataSize * i, bufferSmall, 0, this.currentDataSize);
+                        Task<bool> task = memoryBuffer.SendAsync(bufferSmall);
+
+                        task.Wait();
+                        if (!task.Result)
+                        {
+                            throw new Exception("Could not process upload file.");
+                        }
+                    }
+
+                    if (remainder > 0)
+                    {
+                        byte[] bufferSmall = new byte[remainder];
+                        Array.Copy(buffer, this.currentDataSize * (limit + 1), bufferSmall, 0, remainder);
+                        Task<bool> task = memoryBuffer.SendAsync(bufferSmall);
+
+                        task.Wait();
+                        if (!task.Result)
+                        {
+                            throw new Exception("Could not process upload file.");
+                        }
+                    }
+                }
+            }
+            catch (InvalidOperationException e)
+            {
+                this.memoryBuffer.Complete();
+                return;
+            }
+        }
+
         private int readInternal(byte[] buffer, int offset, int count)
         {
-            if (this.bufferPosition == 0)
+            if (this.currentData == null || this.currentDataPosition == this.currentData.Length)
             {
-                this.bytesInBuffer = this.readNtexToBuffer();
-                if (this.bytesInBuffer == 0)
+                try
+                {
+                    //blocks until data is received or throws InvalidOperationException if queue is empty and completed.
+                    this.currentData = this.memoryBuffer.Receive();
+                    this.currentDataPosition = 0;
+                }
+                catch (InvalidOperationException e)
                 {
                     return 0;
                 }
             }
 
-            int bytesLeft = this.bytesInBuffer - this.bufferPosition;
-
-            if (count <= bytesLeft)
+            int bytesToRead = buffer.Length - offset;
+            if (bytesToRead > count)
             {
-                Array.Copy(this.memoryBuffer, this.bufferPosition, buffer, offset, count);
-                this.bufferPosition += count;
+                bytesToRead = count;
+            }
 
-                if (count == bytesLeft)
-                {
-                    this.bufferPosition = 0;
-                }
-
-                return count;
+            int bytesLeftInCurrentData = this.currentData.Length - this.currentDataPosition;
+            if (bytesToRead <= bytesLeftInCurrentData)
+            {
+                Array.Copy(this.currentData, this.currentDataPosition, buffer, offset, bytesToRead);
+                this.currentDataPosition += bytesToRead;
+                return bytesToRead;
             }
             else
             {
-                Array.Copy(this.memoryBuffer, this.bufferPosition, buffer, offset, bytesLeft);
-                this.bufferPosition = 0;
-
-                count -= bytesLeft;
-
-                //bytes read = initial bytes left in buffer (which were read before) + bytes read from refilled buffer
-                return bytesLeft + this.readInternal(buffer, offset + bytesLeft, count);
+                Array.Copy(this.currentData, this.currentDataPosition, buffer, offset, bytesLeftInCurrentData);
+                this.currentDataPosition += bytesLeftInCurrentData;
+                return bytesLeftInCurrentData;
             }
-        }
-
-        private int readNtexToBuffer()
-        {
-            return this.baseStream.Read(this.memoryBuffer, 0, ThrottledBufferedStream.memoryBufferSizeInBytes);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            this.bufferPosition = 0;
-            this.position = this.baseStream.Seek(offset, origin);
-            return this.position;
+            throw new NotSupportedException("Seeking not supported");
         }
 
         public override void SetLength(long value)
         {
-            this.baseStream.SetLength(value);
+            throw new NotSupportedException("Writing not supported");
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            this.baseStream.Write(buffer, offset, count);
+            throw new NotSupportedException("Writing not supported");
         }
 
         public override string ToString()
@@ -290,8 +381,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             this.baseStream.Dispose();
             base.Dispose(disposing);
         }
-
-
 
         private void throttle(long currentTicks)
         {
@@ -329,7 +418,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             Thread.Sleep(toSleep);
                         }
                     }
-
                 }
             }
         }
