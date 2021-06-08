@@ -27,7 +27,7 @@ namespace Drexel.VidUp.Youtube
 
         //buffer is set to constant value like 1024, 4096, 16384 etc.
         //eg. if set to 10240 buffer will be 16384.
-        private static int bufferSize = 16 * 1024;
+        private static int bufferSize = 32 * 1024;
 
         public static async Task<HttpClient> GetAuthenticatedStandardClientAsync()
         {
