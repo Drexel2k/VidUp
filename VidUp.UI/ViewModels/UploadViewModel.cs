@@ -995,11 +995,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                     case "publishat":
                         this.upload.AutoSetPublishAtDateTime();
-                        this.raisePropertyChanged("PublishAt");
-                        this.raisePropertyChanged("PublishAtDate");
-                        this.raisePropertyChanged("PublishAtTime");
-                        this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-                        this.raisePropertyChanged("SelectedVisibility");
+                        this.raisePublishAtProperties();
                         break;
                     case "category":
                         this.upload.CopyCategoryFromTemplate();

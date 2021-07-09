@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
+using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.PlaylistItem;
 using Drexel.VidUp.Youtube.Video;
@@ -209,6 +211,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists is enabled, setting up timer.");
                 this.calculateTimeAndSetAutoSetPlaylistsTimer();
             }
+            else
+            {
+                EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(true, "Auto setting playlists is disabled."));
+            }
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -308,27 +314,37 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.autoSettingPlaylists = true;
+                EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(true, "Auto setting playlists is running..."));
                 this.raisePropertyChanged("AutoSettingPlaylists");
             }
 
+            bool success = true;
+            StringBuilder message = new StringBuilder();
             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Get uploads without playlists but with autoset templates.");
             Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap = this.getPlaylistUploadsWithoutPlaylistMap();
 
             if (playlistUploadsWithoutPlaylistMap.Count > 0)
             {
+                int originalCount = playlistUploadsWithoutPlaylistMap.Count;
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
                 //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
                 Dictionary<string, List<string>> playlistVideos = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(playlistUploadsWithoutPlaylistMap).ConfigureAwait(false);
 
                 if (playlistUploadsWithoutPlaylistMap.Count > 0)
                 {
+                    if (originalCount != playlistUploadsWithoutPlaylistMap.Count)
+                    {
+                        success = false;
+                        message.AppendLine("At least one playlist doesn't exist on YoutTube.");
+                    }
+
                     Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads are already in playlist.");
                     this.removeUploadsAlreadyInPlaylist(playlistUploadsWithoutPlaylistMap, playlistVideos);
 
 
                     if (playlistUploadsWithoutPlaylistMap.Count > 0)
                     {
-                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on Youtube.");
+                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on YouTube.");
                         var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploadsAsync(playlistUploadsWithoutPlaylistMap).ConfigureAwait(false);
 
                         if (playlistUploadsWithoutPlaylistMap.Count > 0)
@@ -338,23 +354,30 @@ namespace Drexel.VidUp.UI.ViewModels
                         }
                         else
                         {
-                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after uploads exist check on Youtube.");
+                            success = false;
+                            message.AppendLine("Videos don't exist anymore on YouTube.");
+                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No uploads left after public/exist check on YouTube.");
                         }
                     }
                     else
                     {
-                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after uploads already in playlist check on Youtube.");
+                        success = false;
+                        message.AppendLine("All public videos were already in playlists.");
+                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after uploads already in playlist check on YouTube.");
                     }
 
                     JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 }
                 else
                 {
-                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after availability check on Youtube.");
+                    success = false;
+                    message.AppendLine("Playlists don't exist anymore on YouTube. ");
+                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after availability check on YouTube.");
                 }
             }
             else
             {
+                message.AppendLine("No uploads to add to playlists.");
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Nothing to do.");
             }
 
@@ -368,11 +391,14 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.autoSetPlaylistTimer.Stop();
                 //first call after constructor the timer can be less than interval.
                 this.autoSetPlaylistTimer.Interval = this.intervalInSeconds * 1000;
+                message.AppendLine($"Next auto set playlists: {DateTime.Now.AddMilliseconds(this.autoSetPlaylistTimer.Interval)}."); 
                 this.autoSetPlaylistTimer.Start();
             }
 
             this.autoSettingPlaylists = false;
             this.raisePropertyChanged("AutoSettingPlaylists");
+            EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(success, message.ToString().TrimEnd('\r', '\n')));
+
             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: End.");
         }
 
@@ -536,6 +562,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Scheduling autosetting playlists in {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds.");
 
                 this.autoSetPlaylistTimer.Interval = nextAutoSetPlaylists;
+                EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(true, $"Next auto setting playlists: {DateTime.Now.AddMilliseconds(this.autoSetPlaylistTimer.Interval)}."));
                 this.autoSetPlaylistTimer.Start();
             }
         }

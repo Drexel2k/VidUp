@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Windows.Media;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -39,6 +40,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateList templateList;
         private UploadList uploadList;
         private PlaylistList playlistList;
+        private string autoSettingPlaylistsText;
+        private Color autoSettingPlaylistsColor = MainWindowViewModel.blueColor;
+        private static Color blueColor = (Color) ColorConverter.ConvertFromString("#03a9f4");
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -324,6 +328,23 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool AutoSettingPlaylists
+        {
+            get => ((PlaylistViewModel)this.viewModels[2]).AutoSettingPlaylists;
+        }
+
+        public string AutoSettingPlaylistsText
+        {
+            get => this.autoSettingPlaylistsText;
+        }
+
+        public SolidColorBrush AutoSettingPlaylistsColor
+        {
+            get
+            {
+                return new SolidColorBrush(this.autoSettingPlaylistsColor);
+            }
+        }
 
         public MainWindowViewModel()
         {
@@ -359,6 +380,10 @@ namespace Drexel.VidUp.UI.ViewModels
             templateList = this.templateList;
             playlistList = this.playlistList;
 
+            EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
+            EventAggregator.Instance.Subscribe<UploadStatsChangedMessage>(this.uploadStatsChanged);
+            EventAggregator.Instance.Subscribe<AutoSettingPlaylistsStateChangedMessage>(this.autoSettingPlaylistsStateChanged);
+
             this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, false, false);
             this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true, true);
             this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, true, false);
@@ -374,9 +399,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
             this.viewModels[3] = new SettingsViewModel();
             this.viewModels[4] = new VidUpViewModel();
-
-            EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
-            EventAggregator.Instance.Subscribe<UploadStatsChangedMessage>(this.uploadStatsChanged);
         }
 
         private void uploadListViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -541,6 +563,16 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.updateStats();
             }
+        }
+
+        private void autoSettingPlaylistsStateChanged(AutoSettingPlaylistsStateChangedMessage autoSettingPlaylistsStateChangedMessage)
+        {
+            this.autoSettingPlaylistsColor = autoSettingPlaylistsStateChangedMessage.Success ? MainWindowViewModel.blueColor : Colors.Red;
+            this.autoSettingPlaylistsText = autoSettingPlaylistsStateChangedMessage.Message;
+
+            this.raisePropertyChanged("AutoSettingPlaylists");
+            this.raisePropertyChanged("AutoSettingPlaylistsText");
+            this.raisePropertyChanged("AutoSettingPlaylistsColor");
         }
 
         private void uploadStatsChanged(UploadStatsChangedMessage uploadStatsChangedMessage)
