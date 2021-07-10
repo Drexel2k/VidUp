@@ -513,6 +513,9 @@ namespace Drexel.VidUp.UI.ViewModels
         public void AddUploads(List<Upload> uploads)
         {
             Tracer.Write($"UploadListViewModel.AddUploads: Start, add {uploads.Count} uploads.");
+
+            uploads.Sort((u1, u2) => String.Compare(u1.FilePath, u2.FilePath, StringComparison.OrdinalIgnoreCase));
+
             this.uploadList.AddUploads(uploads);
 
             if (uploads.Any(upl => upl.Template != null))
