@@ -22,10 +22,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public bool Tracing
         {
-            get { return Settings.SettingsInstance.UserSettings.Trace; }
+            get { return Settings.Instance.UserSettings.Trace; }
             set
             {
-                Settings.SettingsInstance.UserSettings.Trace = value;
+                Settings.Instance.UserSettings.Trace = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
                 this.raisePropertyChanged("Tracing");
             }
@@ -33,10 +33,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public TraceLevel SelectedTraceLevel
         {
-            get { return Settings.SettingsInstance.UserSettings.TraceLevel; }
+            get { return Settings.Instance.UserSettings.TraceLevel; }
             set
             {
-                Settings.SettingsInstance.UserSettings.TraceLevel = value;
+                Settings.Instance.UserSettings.TraceLevel = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
                 this.raisePropertyChanged("SelectedTraceLevel");
             }
@@ -137,20 +137,20 @@ namespace Drexel.VidUp.UI.ViewModels
                 
                 List<CultureViewModel> checkedCultureViewModelsUpdated = this.observableCultureInfoViewModels.Where(cultureViewModel => cultureViewModel.IsChecked).ToList();
 
-                if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter == null)
+                if (Settings.Instance.UserSettings.VideoLanguagesFilter == null)
                 {
-                    Settings.SettingsInstance.UserSettings.VideoLanguagesFilter = new List<string>();
+                    Settings.Instance.UserSettings.VideoLanguagesFilter = new List<string>();
                 }
                 else
                 {
-                    Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Clear();
+                    Settings.Instance.UserSettings.VideoLanguagesFilter.Clear();
                 }
 
                 if (checkedCultureViewModelsUpdated.Count >= 0)
                 {
                     foreach (CultureViewModel cultureViewModelUpdated in checkedCultureViewModelsUpdated)
                     {
-                        Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Add(cultureViewModelUpdated.Name);
+                        Settings.Instance.UserSettings.VideoLanguagesFilter.Add(cultureViewModelUpdated.Name);
                     }
                 }
 
@@ -169,8 +169,8 @@ namespace Drexel.VidUp.UI.ViewModels
             foreach (CultureInfo cultureInfo in Cultures.AllCultureInfos)
             {
                 CultureViewModel cultureViewModel;
-                if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter != null &&
-                    Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Contains(cultureInfo.Name))
+                if (Settings.Instance.UserSettings.VideoLanguagesFilter != null &&
+                    Settings.Instance.UserSettings.VideoLanguagesFilter.Contains(cultureInfo.Name))
                 {
                     cultureViewModel = new CultureViewModel(cultureInfo, true);
                     cultureViewModel.PropertyChanged += cultureViewModelPropertyChanged;

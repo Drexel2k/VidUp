@@ -235,6 +235,11 @@
                         </ComboBox>
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Action performed after all uploads are finished." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         <Label Content="  |  " />
+                        <CheckBox IsChecked="{Binding PostPonePostUploadAction}" />
+                        <Label Content="Postpone PAA on process:" />
+                        <TextBox Text="{Binding PostPonePostUploadActionProcessName, UpdateSourceTrigger=PropertyChanged, Delay=500}" Width="150" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Postpones post upload action until process doesn't exist/app of this process is closed. Check for process runs every 5 minutes." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <Label Content="  |  " />
                         <Label Content="Max Upload: " />
                         <TextBox Text="{Binding MaxUploadInKiloBytesPerSecond, UpdateSourceTrigger=PropertyChanged, Delay=500}" Width="70" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 32, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />

@@ -13,7 +13,7 @@ namespace Drexel.VidUp.Utils
 
         private UserSettings userSettings;
 
-        public static Settings SettingsInstance { get; set; }
+        public static Settings Instance { get; set; }
         public string User { get => this.user; }
         public string StorageFolder { get => this.storageFolder; }
         public string TemplateImageFolder { get => this.templateImageFolder;  }

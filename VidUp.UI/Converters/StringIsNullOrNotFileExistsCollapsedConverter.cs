@@ -33,11 +33,11 @@ namespace Drexel.VidUp.UI.Converters
 
             if (parameterInternal == "image")
             {
-                targetFolder = Settings.SettingsInstance.TemplateImageFolder;
+                targetFolder = Settings.Instance.TemplateImageFolder;
             }
             else if (parameterInternal == "fallbackthumb")
             {
-                targetFolder = Settings.SettingsInstance.ThumbnailFallbackImageFolder;
+                targetFolder = Settings.Instance.ThumbnailFallbackImageFolder;
             }
             else
             {

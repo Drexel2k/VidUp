@@ -35,6 +35,9 @@ namespace Drexel.VidUp.Utils
         [JsonProperty]
         private List<string> videoLanguagesFilter;
 
+        [JsonProperty]
+        private string postPonePostUploadActionProcessName;
+
         public bool Trace
         {
             get => this.trace;
@@ -50,67 +53,50 @@ namespace Drexel.VidUp.Utils
         public bool AutoSetPlaylists
         {
             get => this.autoSetPlaylists;
-            set
-            {
-                this.autoSetPlaylists = value;
-            }
+            set => this.autoSetPlaylists = value;
         }
 
         public DateTime LastAutoAddToPlaylist
         {
             get => this.lastAutoAddToPlaylist;
-            set
-            {
-                this.lastAutoAddToPlaylist = value;
-            }
+            set => this.lastAutoAddToPlaylist = value;
         }
 
         public int? WindowWidth
         {
             get => this.windowWidth;
-            set
-            {
-                this.windowWidth = value;
-            }
+            set => this.windowWidth = value;
         }
 
         public int? WindowHeight
         {
             get => this.windowHeight;
-            set
-            {
-                this.windowHeight = value;
-            }
+            set => this.windowHeight = value;
         }
 
         public int? WindowLeft
         {
             get => this.windowLeft;
-            set
-            {
-                this.windowLeft = value;
-            }
+            set => this.windowLeft = value;
         }
 
         public int? WindowTop
         {
             get => this.windowTop;
-            set
-            {
-                this.windowTop = value;
-            }
+            set => this.windowTop = value;
         }
 
         public List<string> VideoLanguagesFilter
         {
             get => this.videoLanguagesFilter;
-            set
-            {
-                this.videoLanguagesFilter = value;
-            }
+            set => this.videoLanguagesFilter = value;
         }
 
-
+        public string PostPonePostUploadActionProcessName
+        {
+            get => this.postPonePostUploadActionProcessName;
+            set => this.postPonePostUploadActionProcessName = value;
+        }
 
         [JsonConstructor]
         public UserSettings()

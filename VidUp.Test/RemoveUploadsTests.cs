@@ -70,7 +70,7 @@ namespace Drexel.VidUp.Test
             MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -84,7 +84,7 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
-            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploads.json")));
+            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 9);
 
@@ -144,7 +144,7 @@ namespace Drexel.VidUp.Test
 
 
             //all finished uploads shall be removed from uploadlist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 7);
 
@@ -182,7 +182,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
 
             //uploads with assigned template shall remain left in template's uploads in templatelist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 6);
 
@@ -275,7 +275,7 @@ namespace Drexel.VidUp.Test
             MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -291,7 +291,7 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
-            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploads.json")));
+            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 10);
 
@@ -317,7 +317,7 @@ namespace Drexel.VidUp.Test
 
 
             //all finished uploads shall be removed from uploadlist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 9);
 
@@ -339,7 +339,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
 
             //uploads with assigned template shall remain left in template's uploads in templatelist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 6);
 
@@ -389,7 +389,7 @@ namespace Drexel.VidUp.Test
             MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -405,7 +405,7 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
-            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploads.json")));
+            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 9);
 
@@ -423,7 +423,7 @@ namespace Drexel.VidUp.Test
 
 
             //all finished uploads shall be removed from uploadlist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 9);
 
@@ -439,7 +439,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
 
             //uploads with assigned template shall remain left in template's uploads in templatelist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 6);
 
@@ -476,7 +476,7 @@ namespace Drexel.VidUp.Test
             MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -493,7 +493,7 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
-            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploads.json")));
+            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 9);
 
@@ -511,7 +511,7 @@ namespace Drexel.VidUp.Test
 
 
             //all finished uploads shall be removed from uploadlist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 9);
 
@@ -527,7 +527,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
 
             //uploads with assigned template shall remain left in template's uploads in templatelist.json after finished uploads are removed
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 6);
 
@@ -578,7 +578,7 @@ namespace Drexel.VidUp.Test
             MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -594,7 +594,7 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel = null;
 
             //all uploads ready to uplaod shall be removed
-            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploads.json")));
+            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 5);
 
@@ -659,7 +659,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
             
             //all ready to upload uploads shall be removed from uploadlist.json
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 5);
 
@@ -719,7 +719,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
 
             //uploads with assigned template shall be removed in template's uploads in templatelist.json
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 6);
 
@@ -830,7 +830,7 @@ namespace Drexel.VidUp.Test
             MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -847,7 +847,7 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel = null;
 
             //only uploads with assigned template and upload status finished shall remain left in uploads.json after finished uploads are removed
-            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploads.json")));
+            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 9);
 
@@ -885,7 +885,7 @@ namespace Drexel.VidUp.Test
 
 
             //all uploads from template shall be removed from uploadlist.json 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 8);
 
@@ -918,7 +918,7 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(!found);
 
             //uploads with assigned template shall remain left in template's uploads in templatelist.json 
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 6);
 
@@ -1001,7 +1001,7 @@ namespace Drexel.VidUp.Test
             MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
-            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
             foreach (JObject template in jArray.SelectTokens("$.[*]"))
             {
                 JArray uploadsJArray = (JArray)template.SelectToken("$.uploads");
@@ -1018,7 +1018,7 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel = null;
 
             //all uploads not finished shall be removed
-            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploads.json")));
+            jArray = (JArray)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploads.json")));
 
             Assert.IsTrue(jArray.Count == 2);
 
@@ -1063,12 +1063,12 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(found);
 
             //all ready to upload uploads shall be removed from uploadlist.json
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "uploadlist.json"))))["uploads"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "uploadlist.json"))))["uploads"];
 
             Assert.IsTrue(jArray.Count == 0);
 
             //uploads with assigned template shall be removed in template's uploads in templatelist.json
-            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.SettingsInstance.StorageFolder, "templatelist.json"))))["templates"];
+            jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
 
             Assert.IsTrue(jArray.Count == 6);
 

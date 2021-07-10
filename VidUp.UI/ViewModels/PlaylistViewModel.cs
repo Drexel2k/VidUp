@@ -163,10 +163,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public bool AutoSetPlaylists
         {
-            get => Settings.SettingsInstance.UserSettings.AutoSetPlaylists;
+            get => Settings.Instance.UserSettings.AutoSetPlaylists;
             set
             {
-                Settings.SettingsInstance.UserSettings.AutoSetPlaylists = value;
+                Settings.Instance.UserSettings.AutoSetPlaylists = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
                 this.setAutoSetPlaylistsTimer();
             }
@@ -206,7 +206,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.autoSetPlaylistTimer.AutoReset = false;
             this.autoSetPlaylistTimer.Elapsed += autoSetPlaylistTimerElapsed;
 
-            if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
+            if (Settings.Instance.UserSettings.AutoSetPlaylists)
             {
                 Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists is enabled, setting up timer.");
                 this.calculateTimeAndSetAutoSetPlaylistsTimer();
@@ -381,10 +381,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Nothing to do.");
             }
 
-            Settings.SettingsInstance.UserSettings.LastAutoAddToPlaylist = DateTime.Now;
+            Settings.Instance.UserSettings.LastAutoAddToPlaylist = DateTime.Now;
             JsonSerializationSettings.JsonSerializer.SerializeSettings();
 
-            if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
+            if (Settings.Instance.UserSettings.AutoSetPlaylists)
             {
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Autosetting playlists is enabled, setting timer to {this.interval.Days * 24 + this.interval.Hours}:{this.interval.Minutes}:{this.interval.Seconds} hours:minutes:seconds.");
                 //stop timer if triggered manually and restart
@@ -533,7 +533,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void setAutoSetPlaylistsTimer()
         {
-            if (Settings.SettingsInstance.UserSettings.AutoSetPlaylists)
+            if (Settings.Instance.UserSettings.AutoSetPlaylists)
             {
                 Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists enabled by user, setting up timer.");
                 this.calculateTimeAndSetAutoSetPlaylistsTimer();
@@ -547,7 +547,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void calculateTimeAndSetAutoSetPlaylistsTimer()
         {
-            TimeSpan span = DateTime.Now - Settings.SettingsInstance.UserSettings.LastAutoAddToPlaylist;
+            TimeSpan span = DateTime.Now - Settings.Instance.UserSettings.LastAutoAddToPlaylist;
             Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Last autoset is {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds ago.");
 
             if (span.TotalSeconds > this.intervalInSeconds)

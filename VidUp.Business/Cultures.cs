@@ -22,16 +22,16 @@ namespace Drexel.VidUp.Business
         public static void SetRelevantCultures()
         {
             Cultures.RelevantCultureInfos.Clear();
-            if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter == null || Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Count <= 0)
+            if (Settings.Instance.UserSettings.VideoLanguagesFilter == null || Settings.Instance.UserSettings.VideoLanguagesFilter.Count <= 0)
             {
                 Cultures.RelevantCultureInfos.AddRange(CultureInfo.GetCultures(CultureTypes.SpecificCultures));
 
             }
             else
             {
-                for (int i = 0; i < Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Count; i++)
+                for (int i = 0; i < Settings.Instance.UserSettings.VideoLanguagesFilter.Count; i++)
                 {
-                    Cultures.RelevantCultureInfos.Add(CultureInfo.GetCultureInfo(Settings.SettingsInstance.UserSettings.VideoLanguagesFilter[i]));
+                    Cultures.RelevantCultureInfos.Add(CultureInfo.GetCultureInfo(Settings.Instance.UserSettings.VideoLanguagesFilter[i]));
                 }
             }
 

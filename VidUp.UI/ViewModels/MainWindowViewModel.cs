@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Shell;
@@ -43,6 +45,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private string autoSettingPlaylistsText;
         private Color autoSettingPlaylistsColor = MainWindowViewModel.blueColor;
         private static Color blueColor = (Color) ColorConverter.ConvertFromString("#03a9f4");
+
+        private bool postPonePostUploadAction;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -290,40 +294,40 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public int? WindowTop
         {
-            get => Settings.SettingsInstance.UserSettings.WindowTop;
+            get => Settings.Instance.UserSettings.WindowTop;
             set
             {
-                Settings.SettingsInstance.UserSettings.WindowTop = value;
+                Settings.Instance.UserSettings.WindowTop = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
             }
         }
 
         public int? WindowLeft
         {
-            get => Settings.SettingsInstance.UserSettings.WindowLeft;
+            get => Settings.Instance.UserSettings.WindowLeft;
             set
             {
-                Settings.SettingsInstance.UserSettings.WindowLeft = value;
+                Settings.Instance.UserSettings.WindowLeft = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
             }
         }
 
         public int? WindowHeight
         {
-            get => Settings.SettingsInstance.UserSettings.WindowHeight;
+            get => Settings.Instance.UserSettings.WindowHeight;
             set
             {
-                Settings.SettingsInstance.UserSettings.WindowHeight = value;
+                Settings.Instance.UserSettings.WindowHeight = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
             }
         }
 
         public int? WindowWidth
         {
-            get => Settings.SettingsInstance.UserSettings.WindowWidth;
+            get => Settings.Instance.UserSettings.WindowWidth;
             set
             {
-                Settings.SettingsInstance.UserSettings.WindowWidth = value;
+                Settings.Instance.UserSettings.WindowWidth = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
             }
         }
@@ -346,6 +350,22 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool PostPonePostUploadAction
+        {
+            get => this.postPonePostUploadAction;
+            set => this.postPonePostUploadAction = value;
+        }
+
+        public string PostPonePostUploadActionProcessName
+        {
+            get => Settings.Instance.UserSettings.PostPonePostUploadActionProcessName;
+            set
+            {
+                Settings.Instance.UserSettings.PostPonePostUploadActionProcessName = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+            }
+        }
+
         public MainWindowViewModel()
         {
             this.initialize(null ,null, out _, out _, out _);
@@ -364,15 +384,15 @@ namespace Drexel.VidUp.UI.ViewModels
                 user = JsonDeserializationSettings.DeserializeUser();
             }
 
-            Settings.SettingsInstance = new Settings(user, subfolder);
+            Settings.Instance = new Settings(user, subfolder);
 
             this.checkAppDataFolder();
 
             this.deserializeSettings();
             ReSerialize reSerialize = this.deserializeContent();
 
-            JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.SettingsInstance.StorageFolder, this.uploadList, this.templateList, this.playlistList);
-            JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.UserSettings);
+            JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.Instance.StorageFolder, this.uploadList, this.templateList, this.playlistList);
+            JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.Instance.StorageFolder, Settings.Instance.UserSettings);
 
             this.reSerialize(reSerialize);
 
@@ -416,11 +436,32 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("AppStatus");
         }
 
-        private void uploadListViewModelOnUploadFinished(object sender, UploadFinishedEventArgs e)
+        private async void uploadListViewModelOnUploadFinished(object sender, UploadFinishedEventArgs e)
         {
             this.appStatus = AppStatus.Idle;
             this.uploadStats = null;
             this.raisePropertyChanged("AppStatus");
+
+            if (this.postUploadAction != PostUploadAction.None)
+            {
+                if (this.postPonePostUploadAction && !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostPonePostUploadActionProcessName))
+                {
+                    string processName = Path.GetFileNameWithoutExtension(Settings.Instance.UserSettings.PostPonePostUploadActionProcessName);
+                    bool processRunning = true;
+                    while (processRunning)
+                    {
+                        Process[] processes = Process.GetProcessesByName(processName);
+                        if (processes.Length > 0)
+                        {
+                            await Task.Delay(300000); //5 minutes
+                        }
+                        else
+                        {
+                            processRunning = false;
+                        }
+                    }
+                }
+            }
 
             if (e.OneUploadFinished && !e.UploadStopped)
             {
@@ -443,18 +484,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            System.Timers.Timer timer = new System.Timers.Timer(10000d);
-            timer.Elapsed += resetTaskBarAndStats;
-            timer.AutoReset = false;
-            timer.Start();
+            await Task.Delay(10000);
+            this.resetTaskbarItemInfo();
+            this.updateStats();
         }
 
         private ReSerialize deserializeContent()
         {
             Tracer.Write($"MainWindowViewModel.deserializeContent: Start.");
             JsonDeserializationContent deserializer = new JsonDeserializationContent(
-                Settings.SettingsInstance.StorageFolder, Settings.SettingsInstance.ThumbnailFallbackImageFolder);
-            YoutubeAuthentication.SerializationFolder = Settings.SettingsInstance.StorageFolder;
+                Settings.Instance.StorageFolder, Settings.Instance.ThumbnailFallbackImageFolder);
+            YoutubeAuthentication.SerializationFolder = Settings.Instance.StorageFolder;
             ReSerialize reSerialize = deserializer.Deserialize();
             this.templateList = DeserializationRepositoryContent.TemplateList;
             this.templateList.CollectionChanged += this.templateListCollectionChanged;
@@ -476,9 +516,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void deserializeSettings()
         {
-            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(Settings.SettingsInstance.StorageFolder);
+            JsonDeserializationSettings deserializer = new JsonDeserializationSettings(Settings.Instance.StorageFolder);
             deserializer.DeserializeSettings();
-            Settings.SettingsInstance.UserSettings = DeserializationRepositorySettings.UserSettings;
+            Settings.Instance.UserSettings = DeserializationRepositorySettings.UserSettings;
 
             DeserializationRepositorySettings.ClearRepositories();
         }
@@ -525,19 +565,19 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void checkAppDataFolder()
         {
-            if(!Directory.Exists(Settings.SettingsInstance.StorageFolder))
+            if(!Directory.Exists(Settings.Instance.StorageFolder))
             {
-                Directory.CreateDirectory(Settings.SettingsInstance.StorageFolder);
+                Directory.CreateDirectory(Settings.Instance.StorageFolder);
             }
 
-            if (!Directory.Exists(Settings.SettingsInstance.TemplateImageFolder))
+            if (!Directory.Exists(Settings.Instance.TemplateImageFolder))
             {
-                Directory.CreateDirectory(Settings.SettingsInstance.TemplateImageFolder);
+                Directory.CreateDirectory(Settings.Instance.TemplateImageFolder);
             }
 
-            if (!Directory.Exists(Settings.SettingsInstance.ThumbnailFallbackImageFolder))
+            if (!Directory.Exists(Settings.Instance.ThumbnailFallbackImageFolder))
             {
-                Directory.CreateDirectory(Settings.SettingsInstance.ThumbnailFallbackImageFolder);
+                Directory.CreateDirectory(Settings.Instance.ThumbnailFallbackImageFolder);
             }
         }
 
@@ -549,12 +589,6 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
-        }
-
-        private void resetTaskBarAndStats(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            this.resetTaskbarItemInfo();
-            this.updateStats();
         }
 
         private void uploadListPropertyChanged(object sender, PropertyChangedEventArgs e)

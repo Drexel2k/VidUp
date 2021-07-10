@@ -8,7 +8,7 @@ namespace Drexel.VidUp.Utils
     {
         static Tracer()
         {
-            FileStream traceFileStream = File.Open(Path.Combine(Settings.SettingsInstance.StorageFolder, "trace.txt"), FileMode.Create);
+            FileStream traceFileStream = File.Open(Path.Combine(Settings.Instance.StorageFolder, "trace.txt"), FileMode.Create);
             Trace.Listeners.Add(new TextWriterTraceListener(traceFileStream));
             Trace.AutoFlush = true;
         }
@@ -20,9 +20,9 @@ namespace Drexel.VidUp.Utils
 
         public static void Write(string text, TraceLevel traceLevel)
         {
-            if (Settings.SettingsInstance.UserSettings.Trace)
+            if (Settings.Instance.UserSettings.Trace)
             {
-                if (Settings.SettingsInstance.UserSettings.TraceLevel == TraceLevel.Normal && traceLevel == TraceLevel.Detailed)
+                if (Settings.Instance.UserSettings.TraceLevel == TraceLevel.Normal && traceLevel == TraceLevel.Detailed)
                 {
                     return;
                 }

@@ -52,7 +52,7 @@ namespace Drexel.VidUp.Business
             string thumbnailFileFolder = Path.GetDirectoryName(thumbnailFallbackFilePath);
             if (!string.IsNullOrWhiteSpace(thumbnailFileFolder))
             {
-                if (String.Compare(Path.GetFullPath(Settings.SettingsInstance.ThumbnailFallbackImageFolder)
+                if (String.Compare(Path.GetFullPath(Settings.Instance.ThumbnailFallbackImageFolder)
                         .TrimEnd('\\'), thumbnailFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;
@@ -185,12 +185,12 @@ namespace Drexel.VidUp.Business
         
         public static string CopyThumbnailFallbackToStorageFolder(string thumbnailFallbackFilePath)
         {
-            return TemplateList.CopyImageToStorageFolder(thumbnailFallbackFilePath, Settings.SettingsInstance.ThumbnailFallbackImageFolder);
+            return TemplateList.CopyImageToStorageFolder(thumbnailFallbackFilePath, Settings.Instance.ThumbnailFallbackImageFolder);
         }
 
         public static string CopyTemplateImageToStorageFolder(string templateImageFilePath)
         {
-            return TemplateList.CopyImageToStorageFolder(templateImageFilePath, Settings.SettingsInstance.TemplateImageFolder);
+            return TemplateList.CopyImageToStorageFolder(templateImageFilePath, Settings.Instance.TemplateImageFolder);
         }
 
         public static string CopyImageToStorageFolder(string imageFilePath, string storageFolder)
@@ -287,7 +287,7 @@ namespace Drexel.VidUp.Business
             if (imageFilePath != null)
             {
                 string imageFileFolder = Path.GetDirectoryName(imageFilePath);
-                if (String.Compare(Path.GetFullPath(Settings.SettingsInstance.TemplateImageFolder)
+                if (String.Compare(Path.GetFullPath(Settings.Instance.TemplateImageFolder)
                         .TrimEnd('\\'), imageFileFolder.TrimEnd('\\'), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     return;

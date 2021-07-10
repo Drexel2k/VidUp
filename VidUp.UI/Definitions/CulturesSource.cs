@@ -21,16 +21,16 @@ namespace Drexel.VidUp.UI.Definitions
         public static void SetRelevantCultures()
         {
             CulturesSource.RelevantCultureInfos.Clear();
-            if (Settings.SettingsInstance.UserSettings.VideoLanguagesFilter == null || Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Count <= 0)
+            if (Settings.Instance.UserSettings.VideoLanguagesFilter == null || Settings.Instance.UserSettings.VideoLanguagesFilter.Count <= 0)
             {
                 CulturesSource.RelevantCultureInfos.AddRange(CultureInfo.GetCultures(CultureTypes.SpecificCultures));
 
             }
             else
             {
-                for (int i = 0; i < Settings.SettingsInstance.UserSettings.VideoLanguagesFilter.Count; i++)
+                for (int i = 0; i < Settings.Instance.UserSettings.VideoLanguagesFilter.Count; i++)
                 {
-                    CulturesSource.RelevantCultureInfos.Add(CultureInfo.GetCultureInfo(Settings.SettingsInstance.UserSettings.VideoLanguagesFilter[i]));
+                    CulturesSource.RelevantCultureInfos.Add(CultureInfo.GetCultureInfo(Settings.Instance.UserSettings.VideoLanguagesFilter[i]));
                 }
             }
 
