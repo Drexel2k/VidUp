@@ -325,6 +325,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (playlistUploadsWithoutPlaylistMap.Count > 0)
             {
+                message.AppendLine($"{DateTime.Now} adding videos to playlists.");
                 int originalCount = playlistUploadsWithoutPlaylistMap.Count;
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
                 //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
@@ -377,7 +378,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
             else
             {
-                message.AppendLine("No uploads to add to playlists.");
+                message.AppendLine($"{DateTime.Now} no videos to add to playlists.");
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Nothing to do.");
             }
 
