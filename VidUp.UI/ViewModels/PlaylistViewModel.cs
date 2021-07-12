@@ -326,44 +326,59 @@ namespace Drexel.VidUp.UI.ViewModels
             if (playlistUploadsWithoutPlaylistMap.Count > 0)
             {
                 message.AppendLine($"{DateTime.Now} adding videos to playlists.");
-                int originalCount = playlistUploadsWithoutPlaylistMap.Count;
+                int originalPlaylistCount = playlistUploadsWithoutPlaylistMap.Count;
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
                 //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
                 Dictionary<string, List<string>> playlistVideos = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(playlistUploadsWithoutPlaylistMap).ConfigureAwait(false);
 
                 if (playlistUploadsWithoutPlaylistMap.Count > 0)
                 {
-                    if (originalCount != playlistUploadsWithoutPlaylistMap.Count)
+                    if (originalPlaylistCount != playlistUploadsWithoutPlaylistMap.Count)
                     {
                         success = false;
-                        message.AppendLine("At least one playlist doesn't exist on YoutTube.");
+                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one playlist was removed on YoutTube.");
+                        message.AppendLine("At least one playlist was removed on YouTube.");
                     }
 
                     Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads are already in playlist.");
-                    this.removeUploadsAlreadyInPlaylist(playlistUploadsWithoutPlaylistMap, playlistVideos);
-
+                    bool uploadAlreadyInPlaylist = !this.removeUploadsAlreadyInPlaylist(playlistUploadsWithoutPlaylistMap, playlistVideos);
 
                     if (playlistUploadsWithoutPlaylistMap.Count > 0)
                     {
+                        if (uploadAlreadyInPlaylist)
+                        {
+                            success = false;
+                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was already in playlist on YouTube.");
+                            message.AppendLine("At least one video to add to playlist was already in playlist on YouTube.");
+                        }
+
+                        int originalVideoCount = playlistUploadsWithoutPlaylistMap.Values.Sum(list => list.Count);
                         Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on YouTube.");
                         var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploadsAsync(playlistUploadsWithoutPlaylistMap).ConfigureAwait(false);
 
                         if (playlistUploadsWithoutPlaylistMap.Count > 0)
                         {
+                            if (originalVideoCount != videosPublicMap.Count)
+                            {
+                                success = false;
+                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was removed on YouTube.");
+                                message.AppendLine("At least one video to add to playlist was removed on YouTube.");
+                            }
+
                             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads is public and add to playlist.");
                             await this.addUploadsToPlaylistIfPublicAsync(playlistUploadsWithoutPlaylistMap, videosPublicMap).ConfigureAwait(false);
                         }
                         else
                         {
                             success = false;
-                            message.AppendLine("Videos don't exist anymore on YouTube.");
                             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No uploads left after public/exist check on YouTube.");
+                            message.AppendLine("All videos to add to playlists were removed on YouTube.");
                         }
                     }
                     else
                     {
                         success = false;
-                        message.AppendLine("All public videos were already in playlists.");
+                        message.AppendLine("All videos to add to playlists were already in playlist.");
                         Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after uploads already in playlist check on YouTube.");
                     }
 
@@ -372,14 +387,14 @@ namespace Drexel.VidUp.UI.ViewModels
                 else
                 {
                     success = false;
-                    message.AppendLine("Playlists don't exist anymore on YouTube. ");
                     Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after availability check on YouTube.");
+                    message.AppendLine("All playlists with videos to add were removed on YouTube. ");
                 }
             }
             else
             {
-                message.AppendLine($"{DateTime.Now} no videos to add to playlists.");
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Nothing to do.");
+                message.AppendLine($"{DateTime.Now} no videos to add to playlists.");
             }
 
             Settings.Instance.UserSettings.LastAutoAddToPlaylist = DateTime.Now;
@@ -450,8 +465,9 @@ namespace Drexel.VidUp.UI.ViewModels
             return playlistVideos;
         }
 
-        private void removeUploadsAlreadyInPlaylist(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, List<string>> playlistVideos)
+        private bool removeUploadsAlreadyInPlaylist(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, List<string>> playlistVideos)
         {
+            bool allVideosNotInPlaylist = true;
             //check if videos are already in playlist on YT.
             List<string> noUploadsLeftPlaylists = new List<string>();
             foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
@@ -466,6 +482,11 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                 }
 
+                if (uploadsToRemove.Count > 0)
+                {
+                    allVideosNotInPlaylist = false;
+                }
+
                 playlistVideosWithoutPlaylist.Value.RemoveAll(upload => uploadsToRemove.Contains(upload));
                 if (playlistVideosWithoutPlaylist.Value.Count <= 0)
                 {
@@ -477,6 +498,8 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 playlistUploadsWithoutPlaylistMap.Remove(playlistId);
             }
+
+            return allVideosNotInPlaylist;
         }
 
         private async Task<Dictionary<string, bool>> getPublicVideosAndRemoveNotExisingUploadsAsync(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap)
