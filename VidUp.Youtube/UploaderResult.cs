@@ -3,7 +3,7 @@
     public enum UploaderResult
     {
         NothingDone,
-        NoUploadFinished,
-        OneUploadFinished
+        NoDataSent,
+        DataSent
     }
 }

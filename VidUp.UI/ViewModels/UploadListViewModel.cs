@@ -531,7 +531,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async void startUploadingAsync(object obj)
         {
-            if (this.uploadStatus == UploadStatus.NotUploading && this.uploadList.UploadsOutstanding)
+            if (this.uploadStatus == UploadStatus.NotUploading)
             {
                 //prevent sleep mode
                 PowerSavingHelper.DisablePowerSaving();
@@ -554,7 +554,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 PowerSavingHelper.EnablePowerSaving();
 
                 //needs to be after PowerSavingHelper.EnablePowerSaving(); so that StandBy is not prevented.
-                this.onUploadFinished(new UploadFinishedEventArgs(uploadResult == UploaderResult.OneUploadFinished, uploadStopped));
+                this.onUploadFinished(new UploadFinishedEventArgs(uploadResult == UploaderResult.DataSent, uploadStopped));
             }
         }
 

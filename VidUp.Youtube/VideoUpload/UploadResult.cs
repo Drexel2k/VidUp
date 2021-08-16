@@ -2,8 +2,10 @@
 {
     public enum UploadResult
     {
-        Failed,
-        Stopped,
+        FailedWithoutDataSent,
+        FailedWithDataSent,
+        StoppedWithoutDataSent,
+        StoppedWithDataSent,
         Finished
     }
 }

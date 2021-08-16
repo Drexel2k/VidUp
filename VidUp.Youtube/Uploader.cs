@@ -28,8 +28,9 @@ namespace Drexel.VidUp.Youtube
     {
         private UploadList uploadList;
         //will be updated during upload when files are added or removed
+        //todo: change to file count
         private long sessionTotalBytesOfFilesToUpload = 0;
-        private long uploadedLength = 0;
+        private long uploadedLengthTotalFileSize = 0;
 
         private UploadStats uploadStats;
 
@@ -139,11 +140,11 @@ namespace Drexel.VidUp.Youtube
                 return UploaderResult.NothingDone;
             }
 
-            bool oneUploadFinished = false;
+            bool dataSent = false;
 
             this.sessionTotalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
             this.uploadStats.UploadsChanged(this.resumeUploads ? this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable : this.uploadList.RemainingBytesOfFilesToUpload);
-            this.uploadedLength = 0;
+            this.uploadedLengthTotalFileSize = 0;
 
             List<Upload> uploadsOfSession = new List<Upload>();
 
@@ -171,21 +172,23 @@ namespace Drexel.VidUp.Youtube
 
                     if (videoResult == UploadResult.Finished)
                     {
+                        dataSent = true;
                         await YoutubeThumbnailService.AddThumbnailAsync(upload).ConfigureAwait(false);
                         await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
                     }
 
-                    if (videoResult == UploadResult.Finished)
+                    if (videoResult == UploadResult.FailedWithDataSent ||
+                        videoResult == UploadResult.StoppedWithDataSent)
                     {
-                        oneUploadFinished = true;
+                        dataSent = true;
                     }
 
-                    this.uploadedLength += upload.FileLength;
+                    this.uploadedLengthTotalFileSize += upload.FileLength;
                     this.uploadStats.FinishUpload();
 
                     JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-                    if (videoResult == UploadResult.Stopped)
+                    if (videoResult == UploadResult.StoppedWithDataSent  || videoResult == UploadResult.StoppedWithoutDataSent)
                     {
                         this.uploadStopped = true;
                         break;
@@ -201,7 +204,7 @@ namespace Drexel.VidUp.Youtube
                 }
             }
 
-            if (oneUploadFinished)
+            if (dataSent)
             {
                 this.updateSchedules(uploadsOfSession);
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
@@ -212,7 +215,7 @@ namespace Drexel.VidUp.Youtube
             this.uploadStats = null;
 
             Tracer.Write($"Uploader.Upload: End.");
-            return oneUploadFinished ? UploaderResult.OneUploadFinished : UploaderResult.NoUploadFinished;
+            return dataSent ? UploaderResult.DataSent : UploaderResult.NoDataSent;
         }
 
         private void updateSchedules(List<Upload> finishedUploads)
@@ -242,7 +245,7 @@ namespace Drexel.VidUp.Youtube
         {
             //check if upload has been added or removed
             long totalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
-            long delta = this.sessionTotalBytesOfFilesToUpload - (totalBytesOfFilesToUpload + this.uploadedLength);
+            long delta = this.sessionTotalBytesOfFilesToUpload - (totalBytesOfFilesToUpload + this.uploadedLengthTotalFileSize);
             if (delta != 0)
             {
                 //delta is negative when files have been added

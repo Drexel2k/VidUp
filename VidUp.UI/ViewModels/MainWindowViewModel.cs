@@ -484,7 +484,7 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"MainWindowViewModel.doPostUploadAction: Start.");
 
             bool postponed = false;
-            if (this.postUploadAction != PostUploadAction.None && e.OneUploadFinished && !e.UploadStopped && this.appStatus == AppStatus.Idle)
+            if (this.postUploadAction != PostUploadAction.None && e.DataSent && !e.UploadStopped && this.appStatus == AppStatus.Idle)
             {
                 if (this.postponePostUploadAction &&
                     !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostponePostUploadActionProcessName))
@@ -520,7 +520,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             //Setting could be changed while waiting for postponing process to finish
-            if (this.postUploadAction != PostUploadAction.None && e.OneUploadFinished && !e.UploadStopped && this.appStatus == AppStatus.Idle)
+            if (this.postUploadAction != PostUploadAction.None && e.DataSent && !e.UploadStopped && this.appStatus == AppStatus.Idle)
             {
                 Tracer.Write($"MainWindowViewModel.doPostUploadAction: Performing post uplaod action {this.postUploadAction}.");
 
@@ -557,14 +557,14 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
 
-                if (e.OneUploadFinished != true)
+                if (e.DataSent != true)
                 {
-                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: No upload did finish normally.");
+                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: No data was sent during upload session.");
                 }
 
                 if (e.UploadStopped)
                 {
-                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: Upload was topped manually.");
+                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: Upload was stopped manually.");
                 }
             }
 

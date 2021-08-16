@@ -5,18 +5,18 @@ namespace Drexel.VidUp.UI.Events
 {
     public class UploadFinishedEventArgs : EventArgs
     {
-        private bool oneUploadFinished;
+        private bool dataSent;
         private bool uploadStopped;
 
-        public UploadFinishedEventArgs(bool oneUploadFinished, bool uploadStopped)
+        public UploadFinishedEventArgs(bool dataSent, bool uploadStopped)
         {
-            this.oneUploadFinished = oneUploadFinished;
+            this.dataSent = dataSent;
             this.uploadStopped = uploadStopped;
         }
 
-        public bool OneUploadFinished
+        public bool DataSent
         {
-            get => this.oneUploadFinished;
+            get => this.dataSent;
         }
 
         public bool UploadStopped

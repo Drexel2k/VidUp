@@ -77,7 +77,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                 upload.UploadErrorMessage = "File does not exist.\n";
                 upload.UploadStatus = UplStatus.Failed;
-                return UploadResult.Failed;
+                return UploadResult.FailedWithoutDataSent;
             }
 
             StringBuilder errors = new StringBuilder();
@@ -86,10 +86,10 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Initialize upload.");
                 if (!await YoutubeVideoUploadService.initializeUploadAsync(upload, resumableSessionUriSet).ConfigureAwait(false))
                 {
-                    return UploadResult.Failed;
+                    return UploadResult.FailedWithoutDataSent;
                 }
 
-
+                long initialUploadBytesSent = upload.BytesSent;
                 long lastUploadByteIndexBeforeError = upload.BytesSent;
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
@@ -122,7 +122,8 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                                 upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Upload not successful after 3 tries for uploadByteIndex {lastUploadByteIndexBeforeError}. Errors: {errors.ToString()}.";
                                 upload.UploadStatus = UplStatus.Failed;
-                                return UploadResult.Failed;
+
+                                return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, false);
                             }
 
                             error = false;
@@ -133,7 +134,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Getting range due to upload retry.");
                             if(!await YoutubeVideoUploadService.getUploadByteIndexAsync(upload).ConfigureAwait(false))
                             {
-                                return UploadResult.Failed;
+                                return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, false);
                             }
 
                             //HttpClient disposed inputStream...
@@ -174,8 +175,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload stopped by user.");
 
+                                    upload.BytesSent = inputStream.Position;
                                     upload.UploadStatus = UplStatus.Stopped;
-                                    return UploadResult.Stopped;
+                                    return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, true);
                                 }
                             }
                             catch (Exception e)
@@ -224,11 +226,32 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                 upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Unexpected Exception: : {e.GetType().ToString()}: {e.Message}.\n";
                 upload.UploadStatus = UplStatus.Failed;
-                return UploadResult.Failed;
+
+                return UploadResult.FailedWithoutDataSent;
             }
 
             Tracer.Write($"YoutubeVideoUploadService.Upload: End.");
             return UploadResult.Finished;
+        }
+
+        private static UploadResult getResult(long uploadBytesSent, long initialUploadByteSent, bool stopped)
+        {
+            if (uploadBytesSent - initialUploadByteSent > 1024 * 1024)
+            {
+                if (stopped)
+                {
+                    return UploadResult.StoppedWithDataSent;
+                }
+                
+                return UploadResult.FailedWithDataSent;
+            }
+
+            if (stopped)
+            {
+                return UploadResult.StoppedWithoutDataSent;
+            }
+
+            return UploadResult.FailedWithoutDataSent;
         }
 
         private static async Task<bool> initializeUploadAsync(Upload upload, Action<Upload> resumableSessionUriSet)
