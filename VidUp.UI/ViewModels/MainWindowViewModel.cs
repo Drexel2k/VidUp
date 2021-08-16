@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
@@ -20,6 +21,7 @@ using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using Drexel.VidUp.Youtube.Authentication;
+using TraceLevel = Drexel.VidUp.Utils.TraceLevel;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -46,7 +48,11 @@ namespace Drexel.VidUp.UI.ViewModels
         private Color autoSettingPlaylistsColor = MainWindowViewModel.blueColor;
         private static Color blueColor = (Color) ColorConverter.ConvertFromString("#03a9f4");
 
-        private bool postPonePostUploadAction;
+        private bool postponePostUploadAction;
+        
+        private object postUploadActionLock = new object();
+        private bool postUploadActionRunning = false;
+        private CancellationTokenSource postUploadActionCancellationTokenSource;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -350,18 +356,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public bool PostPonePostUploadAction
+        public bool PostponePostUploadAction
         {
-            get => this.postPonePostUploadAction;
-            set => this.postPonePostUploadAction = value;
+            get => this.postponePostUploadAction;
+            set => this.postponePostUploadAction = value;
         }
 
-        public string PostPonePostUploadActionProcessName
+        public string PostponePostUploadActionProcessName
         {
-            get => Settings.Instance.UserSettings.PostPonePostUploadActionProcessName;
+            get => Settings.Instance.UserSettings.PostponePostUploadActionProcessName;
             set
             {
-                Settings.Instance.UserSettings.PostPonePostUploadActionProcessName = value;
+                Settings.Instance.UserSettings.PostponePostUploadActionProcessName = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
             }
         }
@@ -433,38 +439,91 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.appStatus = AppStatus.Uploading;
             this.uploadStats = e.UploadStats;
+
+            lock (this.postUploadActionLock)
+            {
+                if (this.postUploadActionCancellationTokenSource != null)
+                {
+                    this.postUploadActionCancellationTokenSource.Cancel();
+                    this.postUploadActionCancellationTokenSource.Dispose();
+                    this.postUploadActionCancellationTokenSource = null;
+                }
+            }
+
             this.raisePropertyChanged("AppStatus");
         }
 
-        private async void uploadListViewModelOnUploadFinished(object sender, UploadFinishedEventArgs e)
+        private void uploadListViewModelOnUploadFinished(object sender, UploadFinishedEventArgs e)
         {
             this.appStatus = AppStatus.Idle;
             this.uploadStats = null;
             this.raisePropertyChanged("AppStatus");
 
-            if (this.postUploadAction != PostUploadAction.None)
+            CancellationToken cancellationToken;
+            lock (this.postUploadActionLock)
             {
-                if (this.postPonePostUploadAction && !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostPonePostUploadActionProcessName))
+                //this.postUploadActionCancellationTokenSource is cancelled and nulled on start of a new upload session,
+                //it should be always null here, if it is not the case, it would mean quick start of at least 2 upload sessions
+                //which call the finished event nearly simultaneously, then only one doPostUploadAction task is created.
+                if (this.postUploadActionCancellationTokenSource == null)
                 {
-                    string processName = Path.GetFileNameWithoutExtension(Settings.Instance.UserSettings.PostPonePostUploadActionProcessName);
+                    this.postUploadActionCancellationTokenSource = new CancellationTokenSource();
+                    cancellationToken = this.postUploadActionCancellationTokenSource.Token;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            doPostUploadAction(e, cancellationToken);
+        }
+
+        private async Task doPostUploadAction(UploadFinishedEventArgs e, CancellationToken cancellationToken)
+        {
+            Tracer.Write($"MainWindowViewModel.doPostUploadAction: Start.");
+
+            bool postponed = false;
+            if (this.postUploadAction != PostUploadAction.None && e.OneUploadFinished && !e.UploadStopped && this.appStatus == AppStatus.Idle)
+            {
+                if (this.postponePostUploadAction &&
+                    !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostponePostUploadActionProcessName))
+                {
+                    postponed = true;
+                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning post upload action.");
+                    string processName = Path.GetFileNameWithoutExtension(Settings.Instance.UserSettings.PostponePostUploadActionProcessName);
                     bool processRunning = true;
                     while (processRunning)
                     {
                         Process[] processes = Process.GetProcessesByName(processName);
                         if (processes.Length > 0)
                         {
-                            await Task.Delay(300000); //5 minutes
+                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning process found, delaying 5 minutes.", TraceLevel.Detailed);
+                            try
+                            {
+                                //await Task.Delay(10000, cancellationToken).ConfigureAwait(false); //10 seconds
+                                await Task.Delay(300000).ConfigureAwait(false); //5 minutes
+                            }
+                            catch (TaskCanceledException)
+                            {
+                                Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning canceled.");
+                                return;
+                            }
                         }
                         else
                         {
+                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning process '{processName}' not found.");
                             processRunning = false;
                         }
                     }
                 }
             }
 
-            if (e.OneUploadFinished && !e.UploadStopped)
+            //Setting could be changed while waiting for postponing process to finish
+            if (this.postUploadAction != PostUploadAction.None && e.OneUploadFinished && !e.UploadStopped && this.appStatus == AppStatus.Idle)
             {
+                Tracer.Write($"MainWindowViewModel.doPostUploadAction: Performing post uplaod action {this.postUploadAction}.");
+
                 switch (this.postUploadAction)
                 {
                     case PostUploadAction.SleepMode:
@@ -483,10 +542,37 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                 }
             }
+            else
+            {
+                if (this.postUploadAction == PostUploadAction.None)
+                {
+                    if (postponed)
+                    {
+                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: Post upload action was set to none while waiting for postponing process.");
+                    }
+                    else
+                    {
+                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: No post upload action to perform.");
+                    }
+                }
+
+
+                if (e.OneUploadFinished != true)
+                {
+                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: No upload did finish normally.");
+                }
+
+                if (e.UploadStopped)
+                {
+                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: Upload was topped manually.");
+                }
+            }
 
             await Task.Delay(10000);
             this.resetTaskbarItemInfo();
             this.updateStats();
+
+            Tracer.Write($"MainWindowViewModel.doPostUploadAction: End.");
         }
 
         private ReSerialize deserializeContent()

@@ -36,7 +36,7 @@ namespace Drexel.VidUp.Utils
         private List<string> videoLanguagesFilter;
 
         [JsonProperty]
-        private string postPonePostUploadActionProcessName;
+        private string postponePostUploadActionProcessName;
 
         public bool Trace
         {
@@ -92,10 +92,10 @@ namespace Drexel.VidUp.Utils
             set => this.videoLanguagesFilter = value;
         }
 
-        public string PostPonePostUploadActionProcessName
+        public string PostponePostUploadActionProcessName
         {
-            get => this.postPonePostUploadActionProcessName;
-            set => this.postPonePostUploadActionProcessName = value;
+            get => this.postponePostUploadActionProcessName;
+            set => this.postponePostUploadActionProcessName = value;
         }
 
         [JsonConstructor]
