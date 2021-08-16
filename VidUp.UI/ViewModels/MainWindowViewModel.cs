@@ -502,7 +502,7 @@ namespace Drexel.VidUp.UI.ViewModels
                             try
                             {
                                 //await Task.Delay(10000, cancellationToken).ConfigureAwait(false); //10 seconds
-                                await Task.Delay(300000).ConfigureAwait(false); //5 minutes
+                                await Task.Delay(300000, cancellationToken).ConfigureAwait(false); //5 minutes
                             }
                             catch (TaskCanceledException)
                             {
