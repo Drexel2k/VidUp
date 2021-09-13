@@ -470,7 +470,7 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 //add more helpful information if upload index couldn't be received.
-                if (this.upload.UploadErrorMessage.Contains("Getting upload byte index failed 3 times"))
+                if (this.upload.UploadErrorMessage != null && this.upload.UploadErrorMessage.Contains("Getting upload byte index failed 3 times"))
                 {
                     string message = "Couldn't get information form YouTube server where to continue the upload. Please restart the upload from beginning by resetting the upload until it is in state \"Ready for Upload\"\n\n";
                     message += this.upload.UploadErrorMessage;
