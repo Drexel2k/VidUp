@@ -8,7 +8,17 @@ namespace Drexel.VidUp.Utils
     {
         static Tracer()
         {
-            FileStream traceFileStream = File.Open(Path.Combine(Settings.Instance.StorageFolder, "trace.txt"), FileMode.Create);
+            string[] files = Directory.GetFiles(Settings.Instance.StorageFolder, "trace_*.txt");
+            if (files.Length > 4)
+            {
+                Array.Reverse(files);
+                for (int i = 4; i < files.Length; i++)
+                {
+                    File.Delete(files[i]);
+                }
+            }
+
+            FileStream traceFileStream = File.Open(Path.Combine(Settings.Instance.StorageFolder, $"trace_{DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss-fff")}.txt"), FileMode.Create);
             Trace.Listeners.Add(new TextWriterTraceListener(traceFileStream));
             Trace.AutoFlush = true;
         }

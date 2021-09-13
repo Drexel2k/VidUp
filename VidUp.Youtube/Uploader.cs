@@ -176,8 +176,7 @@ namespace Drexel.VidUp.Youtube
                         await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
                     }
 
-                    if (videoResult == UploadResult.FailedWithDataSent ||
-                        videoResult == UploadResult.StoppedWithDataSent)
+                    if (videoResult == UploadResult.FailedWithDataSent || videoResult == UploadResult.StoppedWithDataSent)
                     {
                         dataSent = true;
                     }

@@ -301,7 +301,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         if (message.StatusCode != HttpStatusCode.PermanentRedirect)
                         {
                             string httpContent = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {httpContent}.");
+                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {httpContent}.");
                             throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {httpContent}.");
                         }
 
@@ -318,7 +318,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 }
                 catch (Exception e)
                 {
-                    errors.AppendLine($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed: {e.Message}.");
+                    errors.AppendLine($"YoutubeVideoUploadService.getUploadByteIndex: Getting upload index failed: {e.Message}.");
                     Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Exception: {e.ToString()}.");
 
                     if (requestTry >= 3)
