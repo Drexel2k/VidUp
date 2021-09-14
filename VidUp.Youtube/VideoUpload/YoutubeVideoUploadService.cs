@@ -80,6 +80,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 return UploadResult.FailedWithoutDataSent;
             }
 
+            //todo: transform to error objects so that errors can be better interpreted
             StringBuilder errors = new StringBuilder();
             try
             {
@@ -129,7 +130,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             error = false;
 
                             //give a little time on IOException, e.g. to await router redial in on 24h disconnect
-                            await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+                            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Getting range due to upload retry.");
                             if(!await YoutubeVideoUploadService.getUploadByteIndexAsync(upload).ConfigureAwait(false))
@@ -306,15 +307,36 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         }
 
                         Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Read header.");
-                        string range = message.Headers.GetValues("Range").First();
-                        if (!string.IsNullOrWhiteSpace(range))
-                        {
-                            string[] parts = range.Split('-');
-                            upload.BytesSent = Convert.ToInt64(parts[1]) + 1;
-                        }
-                    }
 
-                    return true;
+                        try
+                        {
+                            string range = message.Headers.GetValues("Range").First();
+                            if (!string.IsNullOrWhiteSpace(range))
+                            {
+                                string[] parts = range.Split('-');
+                                upload.BytesSent = Convert.ToInt64(parts[1]) + 1;
+                            }
+
+                            return true;
+                        }
+                        catch (Exception e)
+                        {
+                            errors.AppendLine($"YoutubeVideoUploadService.getUploadByteIndex: Could not get range header: {e.Message}.");
+                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Range header exception: {e.ToString()}.");
+
+                            if (requestTry >= 3)
+                            {
+                                Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: End header, failed 3 times.");
+                                upload.UploadErrorMessage += $"YoutubeVideoUploadService.getUploadByteIndex: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
+                                upload.UploadStatus = UplStatus.Failed;
+                                return false;
+                            }
+
+                            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                            requestTry++;
+                        }
+
+                    }
                 }
                 catch (Exception e)
                 {
@@ -323,13 +345,13 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                     if (requestTry >= 3)
                     {
-                        Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: End, failed 3 times.");
+                        Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: End all, failed 3 times.");
                         upload.UploadErrorMessage += $"YoutubeVideoUploadService.getUploadByteIndex: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
                         upload.UploadStatus = UplStatus.Failed;
                         return false;
                     }
 
-                    await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                     requestTry++;
                 }
             }
@@ -427,7 +449,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         return false;
                     }
 
-                    await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                     requestTry++;
                 }
             }

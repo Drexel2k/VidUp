@@ -18,7 +18,7 @@ namespace Drexel.VidUp.Utils
                 }
             }
 
-            FileStream traceFileStream = File.Open(Path.Combine(Settings.Instance.StorageFolder, $"trace_{DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss-fff")}.txt"), FileMode.Create);
+            FileStream traceFileStream = File.Open(Path.Combine(Settings.Instance.StorageFolder, $"trace_{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")}.txt"), FileMode.Create);
             Trace.Listeners.Add(new TextWriterTraceListener(traceFileStream));
             Trace.AutoFlush = true;
         }
@@ -37,7 +37,7 @@ namespace Drexel.VidUp.Utils
                     return;
                 }
 
-                Trace.WriteLine($"{DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff")}: {text}");
+                Trace.WriteLine($"{DateTime.Now.ToString("dd.MM.yy HH:mm:ss.fff")}: {text}");
             }
         }
 
