@@ -19,6 +19,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private QuarterHourViewModels quarterHourViewModelsEmptyStartValue;
         private QuarterHourViewModels quarterHourViewModels;
 
+        private DateTime specificDateDateTime;
+
         private bool[] dailyDays;
         private Dictionary<int, TimeSpan?[]> dailyDayTimes;
 
@@ -90,6 +92,40 @@ namespace Drexel.VidUp.UI.ViewModels
                 return this.quarterHourViewModels;
             }
         }
+
+        #region specific
+        public DateTime SpecificDateFirstDate
+        {
+            get => DateTime.Now.AddDays(1).Date;
+        }
+
+        public DateTime SpecificDateDate
+        {
+            get => this.specificDateDateTime.Date;
+            set
+            {
+                this.specificDateDateTime = value.Add(this.specificDateDateTime.TimeOfDay);
+                this.raisePropertyChanged("SpecificDateDate");
+
+                //force validation of specific date quarter hour time control.
+                this.raisePropertyChanged("SpecificDateTime");
+            }
+        }
+
+        public QuarterHourViewModel SpecificDateTime
+        { 
+            get =>  this.quarterHourViewModels.GetQuarterHourViewModel(this.specificDateDateTime.TimeOfDay);
+            set
+            {
+                this.specificDateDateTime = this.specificDateDateTime.Date.Add(value.QuarterHour.Value);
+                this.raisePropertyChanged("SpecificDateTime");
+
+                //force validation of specific date date control.
+                this.raisePropertyChanged("SpecificDateDate");
+            }
+        }
+
+        #endregion
 
         #region daily
         public int DailyDayFrequency
@@ -1929,10 +1965,16 @@ namespace Drexel.VidUp.UI.ViewModels
             this.quarterHourViewModelsEmptyStartValue = new QuarterHourViewModels(true);
             this.quarterHourViewModels = new QuarterHourViewModels(false);
 
+            this.initializeSpecificDateViewModels();
             this.initializeDailyViewModels();
             this.initializeWeeklyViewModels();
             this.initializeMonthlyMonthDateBasedDayViewModels();
             this.initializeMonthlyMonthRelativeViewModels();
+        }
+
+        private void initializeSpecificDateViewModels()
+        {
+            this.specificDateDateTime = this.schedule.SpecificDateDateTime;
         }
 
         private void initializeDailyViewModels()
@@ -2209,6 +2251,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 switch (propertyName)
                 {
+                    #region specific
+                    case "SpecificDateDate":
+                    case "SpecificDateTime":
+                        return this.validateSpecificDate();
+                    #endregion
+
                     #region daily
                     case "DailyDay1Time1":
                     case "DailyDay1Time2":
@@ -2268,6 +2316,19 @@ namespace Drexel.VidUp.UI.ViewModels
                     default:
                         throw new ArgumentException("Unknown property to validate.");
                 }
+            }
+        }
+
+        private string validateSpecificDate()
+        {
+            try
+            {
+                this.schedule.SpecificDateDateTime = this.specificDateDateTime;
+                return string.Empty;
+            }
+            catch (InvalidScheduleException e)
+            {
+                return e.Message;
             }
         }
 

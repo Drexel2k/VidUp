@@ -413,7 +413,8 @@ namespace Drexel.VidUp.Business
         //sets new daily/weekly/monthly UploadedUntil on schedule
         public void SetScheduleProgress()
         {
-            if (this.UsePublishAtSchedule && this.uploads.Count > 0)
+            if (this.UsePublishAtSchedule && this.uploads.Count > 0 &&
+                this.publishAtSchedule != null && this.publishAtSchedule.ScheduleFrequency != ScheduleFrequency.SpecificDate)
             {
                 List<Upload> relevantUploads = this.uploads.FindAll(upload =>
                     (upload.UploadStart == null || upload.UploadStart > this.PublishAtSchedule.IgnoreUploadsBefore) &&

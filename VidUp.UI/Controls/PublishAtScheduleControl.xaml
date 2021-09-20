@@ -21,6 +21,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <GroupBox Grid.Row="0" Padding="0">
@@ -38,8 +39,13 @@
                     </Grid.RowDefinitions>
                    <DockPanel  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
                        <Label Content="Frequency: " Width="69" />
-                       <ComboBox ItemsSource="{Binding ScheduleFrequencies}" SelectedItem="{Binding ScheduleFrequency}" Width="190" >
-                       </ComboBox>
+                        <ComboBox ItemsSource="{Binding ScheduleFrequencies}" SelectedItem="{Binding ScheduleFrequency}" Width="190" >
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                            <Button Command="{Binding ResetCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 3 0" Width="80" Height="20" Padding="0" Content="Reset" />
                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 10 5" ToolTip="Resets all schedule setting, daily, weekly and monthly!" ToolTipService.ShowDuration="60000" Background="Transparent" />
@@ -49,7 +55,27 @@
 
             </GroupBox>
 
-            <GroupBox Grid.Row="1" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyDailyVisibleConverter}}">
+            <GroupBox Grid.Row="1" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencySpecificDateVisibleConverter}}">
+                <GroupBox.Header>
+                    <TextBlock Text="SPECIFIC DATE SETTINGS" Margin="2" />
+                </GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="On " Width="39" HorizontalAlignment="Left" />
+                    <DatePicker Width="125" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding SpecificDateDate, ValidatesOnDataErrors=True}" DisplayDateStart="{Binding SpecificDateFirstDate, Mode=OneWay}" HorizontalAlignment="Right">
+                        <DatePicker.Resources>
+                            <Style x:Key="MaterialDesignDatePickerTextBox"
+                                   TargetType="DatePickerTextBox"
+                                   BasedOn="{StaticResource MaterialDesignDatePickerTextBox}">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </Style>
+                        </DatePicker.Resources>
+                    </DatePicker>
+                    <Label Content="at " Width="39" HorizontalAlignment="Left" />
+                    <ComboBox  SelectedItem="{Binding SpecificDateTime, ValidatesOnDataErrors=True}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Row="2" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyDailyVisibleConverter}}">
                 <GroupBox.Header>
                     <TextBlock Text="DAILY SETTINGS" Margin="2" />
                 </GroupBox.Header>
@@ -114,7 +140,7 @@
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="2" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyWeeklyVisibleConverter}}">
+            <GroupBox Grid.Row="3" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyWeeklyVisibleConverter}}">
                 <GroupBox.Header>
                     <TextBlock Text="WEEKLY SETTINGS" Margin="2" />
                 </GroupBox.Header>
@@ -198,7 +224,7 @@
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="3" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyMonthlyVisibleConverter}}">
+            <GroupBox Grid.Row="4" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyMonthlyVisibleConverter}}">
                 <GroupBox.Header>
                     <TextBlock Text="MONTHLY SETTINGS" Margin="2" />
                 </GroupBox.Header>
@@ -282,7 +308,7 @@
                 </Grid>
             </GroupBox>
 
-            <StackPanel Orientation="Horizontal" Grid.Row="4"
+            <StackPanel Orientation="Horizontal" Grid.Row="5"
                         Margin="0 16 0 0">
                 <Button IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" >
                     <Button.CommandParameter>

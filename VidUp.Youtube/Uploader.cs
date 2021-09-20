@@ -218,7 +218,7 @@ namespace Drexel.VidUp.Youtube
 
         private void updateSchedules(List<Upload> finishedUploads)
         {
-            IEnumerable<Template> templates = finishedUploads.Select(upload => upload.Template).Distinct().Where(template => template != null);
+            Template[] templates = finishedUploads.Select(upload => upload.Template).Distinct().Where(template => template != null).ToArray();
 
             if (templates.Any())
             {

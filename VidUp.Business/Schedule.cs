@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
@@ -18,6 +19,9 @@ namespace Drexel.VidUp.Business
         private DateTime startDate;
         [JsonProperty]
         private DateTime uploadedUntil;
+
+        [JsonProperty]
+        private DateTime specificDateDateTime;
 
         [JsonProperty]
         private int dailyDayFrequency;
@@ -135,6 +139,20 @@ namespace Drexel.VidUp.Business
         {
             get => this.uploadedUntil;
             set => this.uploadedUntil = value;
+        }
+
+        public DateTime SpecificDateDateTime
+        {
+            get => this.specificDateDateTime;
+            set
+            {
+                if (value < DateTime.Now.AddDays(1))
+                {
+                    throw new InvalidScheduleException("Specific date must be at least 24 hours in the future.");
+                }
+
+                this.specificDateDateTime = value;
+            }
         }
 
         public int DailyDayFrequency
@@ -270,6 +288,8 @@ namespace Drexel.VidUp.Business
         {
             this.scheduleFrequency = schedule.ScheduleFrequency;
             this.startDate = schedule.StartDate;
+
+            this.specificDateDateTime = schedule.specificDateDateTime;
 
             this.dailyDayFrequency = schedule.DailyDayFrequency;
             this.dailyDefaultTime = schedule.DailyDefaultTime;
@@ -430,9 +450,15 @@ namespace Drexel.VidUp.Business
 
         private void resetAllSchedules()
         {
+            this.resetSpecificDateSchedule();
             this.resetDailySchedule();
             this.resetWeeklySchedule();
             this.resetMonthlySchedule();
+        }
+
+        private void resetSpecificDateSchedule()
+        {
+            this.specificDateDateTime = QuarterHourCalculator.GetRoundedToNextQuarterHour(DateTime.Now.AddDays(1));
         }
 
         private void resetDailySchedule()
@@ -1044,6 +1070,8 @@ namespace Drexel.VidUp.Business
         {
             switch (this.scheduleFrequency)
             {
+                case ScheduleFrequency.SpecificDate:
+                    return this.specificDateGetNextDateTime();
                 case ScheduleFrequency.Daily:
                     return this.dailyGetNextDateTime(dateTimeAfter);
                     break;
@@ -1063,6 +1091,28 @@ namespace Drexel.VidUp.Business
                 default:
                     throw new InvalidOperationException("Unexpected schedule frequency.");
                     break;
+            }
+        }
+
+        private DateTime specificDateGetNextDateTime()
+        {
+            DateTime in24Hours = DateTime.Now.AddDays(1);
+            if (this.specificDateDateTime >= in24Hours)
+            {
+                return this.specificDateDateTime;
+            }
+            else
+            {
+                DateTime tomorrow = DateTime.Now.Date.AddDays(1);
+                tomorrow = tomorrow.Add(this.specificDateDateTime.TimeOfDay);
+                if (tomorrow >= in24Hours)
+                {
+                    return tomorrow;
+                }
+                else
+                {
+                    return tomorrow.AddDays(1);
+                }
             }
         }
 

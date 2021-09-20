@@ -104,7 +104,7 @@ namespace Drexel.VidUp.Business
                     this.template = value;
                     this.copyTemplateValuesInternal();
                     this.autoSetThumbnail();
-                    this.autoSetPublishAtDateTimeInteral();
+                    this.autoSetPublishAtDateTimeInternal();
                 }
                 else
                 {
@@ -459,7 +459,7 @@ namespace Drexel.VidUp.Business
             this.copyVideoLanguageFromTemplateInternal();
             this.copyDescriptionLanguageFromTemplateInternal();
             this.copyCategoryFromTemplateInternal();
-            this.autoSetPublishAtDateTimeInteral();
+            this.autoSetPublishAtDateTimeInternal();
         }
 
         public void CopyVisibilityFromTemplate()
@@ -554,10 +554,6 @@ namespace Drexel.VidUp.Business
                         matchIndex++;
                     }
                 }
-                else
-                {
-                    this.title = string.Empty;
-                }
 
                 this.LastModified = DateTime.Now;
             }
@@ -632,10 +628,10 @@ namespace Drexel.VidUp.Business
 
         public void AutoSetPublishAtDateTime()
         {
-            this.autoSetPublishAtDateTimeInteral();
+            this.autoSetPublishAtDateTimeInternal();
         }
 
-        private void autoSetPublishAtDateTimeInteral()
+        private void autoSetPublishAtDateTimeInternal()
         {
             if (this.template == null)
             {
@@ -651,19 +647,26 @@ namespace Drexel.VidUp.Business
                 {
                     this.visibility = Visibility.Private;
 
-                    bool isFree = false;
                     DateTime nextPossibleDateTime = DateTime.MinValue;
-                    while (!isFree)
+                    if (this.template.PublishAtSchedule.ScheduleFrequency == ScheduleFrequency.SpecificDate)
                     {
                         nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(nextPossibleDateTime);
-
-                        IEnumerable<Upload> relevantUploads = this.Template.PublishAtSchedule.IgnoreUploadsBefore == null ?
-                            this.template.Uploads.Where(upload => upload != this).ToArray() :
-                            this.template.Uploads.Where(upload => upload != this && (upload.UploadStart == null || upload.UploadStart > upload.Template.PublishAtSchedule.IgnoreUploadsBefore)).ToArray();
-
-                        if (!relevantUploads.Any(upload => upload.PublishAt == nextPossibleDateTime))
+                    }
+                    else
+                    {
+                        bool isFree = false;
+                        while (!isFree)
                         {
-                            isFree = true;
+                            nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(nextPossibleDateTime);
+
+                            IEnumerable<Upload> relevantUploads = this.Template.PublishAtSchedule.IgnoreUploadsBefore == null ?
+                                this.template.Uploads.Where(upload => upload != this).ToArray() :
+                                this.template.Uploads.Where(upload => upload != this && (upload.UploadStart == null || upload.UploadStart > upload.Template.PublishAtSchedule.IgnoreUploadsBefore)).ToArray();
+
+                            if (!relevantUploads.Any(upload => upload.PublishAt == nextPossibleDateTime))
+                            {
+                                isFree = true;
+                            }
                         }
                     }
 
