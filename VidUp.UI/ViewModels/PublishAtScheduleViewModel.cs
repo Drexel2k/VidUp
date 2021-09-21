@@ -105,10 +105,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.specificDateDateTime = value.Add(this.specificDateDateTime.TimeOfDay);
-                this.raisePropertyChanged("SpecificDateDate");
-
-                //force validation of specific date quarter hour time control.
-                this.raisePropertyChanged("SpecificDateTime");
             }
         }
 
@@ -118,10 +114,6 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.specificDateDateTime = this.specificDateDateTime.Date.Add(value.QuarterHour.Value);
-                this.raisePropertyChanged("SpecificDateTime");
-
-                //force validation of specific date date control.
-                this.raisePropertyChanged("SpecificDateDate");
             }
         }
 
@@ -2254,7 +2246,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     #region specific
                     case "SpecificDateDate":
                     case "SpecificDateTime":
-                        return this.validateSpecificDate();
+                        return this.validateSpecificDate(propertyName);
                     #endregion
 
                     #region daily
@@ -2319,11 +2311,22 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private string validateSpecificDate()
+        private string validateSpecificDate(string propertyName)
         {
             try
             {
-                this.schedule.SpecificDateDateTime = this.specificDateDateTime;
+                if (propertyName == "SpecificDateDate")
+                {
+                    this.schedule.SpecificDateDateTime = this.specificDateDateTime.Date.Add(this.schedule.SpecificDateDateTime.TimeOfDay);
+                }
+                else
+                {
+                    this.schedule.SpecificDateDateTime = this.schedule.SpecificDateDateTime.Date.Add(this.specificDateDateTime.TimeOfDay);
+                }
+
+                this.validate = false;
+                this.raisePropertyChanged(propertyName);
+                this.validate = true;
                 return string.Empty;
             }
             catch (InvalidScheduleException e)
@@ -2339,6 +2342,10 @@ namespace Drexel.VidUp.UI.ViewModels
             try
             {
                 this.schedule.DailySetDayActive(dayIndex, this.dailyDays[dayIndex]);
+
+                //if a day was set to active, ensure view's data also contains times array for this day.
+                //if a schedule is newly created, time time arrays of the 2nd and 3rd day don't exist,
+                //arrays will be added when a day is activated for the first time.
                 if (dayIndex > 0 && this.dailyDays[dayIndex])
                 {
                     if (this.schedule.DailyHasAdvancedSchedule)
@@ -2358,6 +2365,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.validate = false;
                 this.raisePropertyChanged(propertyName);
+
+                //if a new times array was added for this day, ensure that data of first time slot is shown.
                 this.raisePropertyChanged("DailyDay2Time1");
                 this.raisePropertyChanged("DailyDay3Time1");
                 this.validate = true;

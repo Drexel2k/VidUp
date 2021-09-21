@@ -51,7 +51,6 @@ namespace Drexel.VidUp.UI.ViewModels
         private bool postponePostUploadAction;
         
         private object postUploadActionLock = new object();
-        private bool postUploadActionRunning = false;
         private CancellationTokenSource postUploadActionCancellationTokenSource;
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -26,8 +26,9 @@
                     <TextBlock Text="FOR VIDUP DISPLAY / SETTINGS" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
                         <ColumnDefinition Width="310"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
@@ -43,13 +44,13 @@
                         <RowDefinition MinHeight="30"></RowDefinition>
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <Canvas Grid.Row="0" Grid.ColumnSpan="2" Margin="1,0,1,0">
+                    <Canvas Grid.Row="0" Grid.ColumnSpan="3" Margin="1,0,1,0">
                         <Canvas.Background>
                             <ImageBrush ImageSource="{Binding ImageBitmap, Mode=OneWay}" Stretch="Fill" />
                         </Canvas.Background>
                     </Canvas>
 
-                    <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="3" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+                    <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="3" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
                             <StackPanel>
                                 <Button Content="Remove Playlist" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="playlist" />
@@ -62,12 +63,12 @@
                         </materialDesign:PopupBox>
                     </Button>
 
-                    <StackPanel  Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Name: " Width="115" />
                         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="400" TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Template Mode: " Width="115" />
                         <ComboBox ItemsSource="{Binding TemplateModes}" SelectedItem="{Binding SelectedTemplateMode}" Width="120" Margin="0 0 10 0">
                             <ComboBox.ItemTemplate>
@@ -79,7 +80,7 @@
                         <materialDesign:PackIcon Kind="HelpCircleOutline" ToolTip="Sets how the template is set automatically to a new upload, by folder path or by part of the file name." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}">
+                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}">
                         <Label Content="Project Root Folder:" Width="115" />
                         <Label Width="366" Margin="0 0 10 0">
                             <TextBlock Text="{Binding RootFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
@@ -91,13 +92,13 @@
                         <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFileNameBasedVisibleConverter}}">
+                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFileNameBasedVisibleConverter}}">
                         <Label Content="Part of File Name:" Width="115" />
                         <TextBox Text="{Binding PartOfFileName, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="400" TextWrapping="Wrap" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="To every file which is added with this text as part of its file name this template is assigned automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
-                    <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <DockPanel Width="491">
                             <Label Content="Image: " Width="115" />
                             <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback template images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastImageFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter=image}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
@@ -111,7 +112,7 @@
                         </Button>
                         <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0 " Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Thumbnail Folder: " Width="115" />
                         <Label Width="366" Margin="0 0 10 0">
                             <TextBlock Text="{Binding ThumbnailFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
@@ -122,7 +123,7 @@
                         </Button>
                         <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="6" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <DockPanel Width="491">
                             <Label Content="Fallback Thumbnail: " Width="115" />
                             <materialDesign:PackIcon DockPanel.Dock="Left" Kind="InfoCircleOutline" ToolTip="File did exist. Current file was renamed in VidUp's fallback thumbnail images folder." ToolTipService.ShowDuration="60000" Visibility="{Binding LastThumbnailFallbackFilePathAdded, Mode=OneWay, Converter={converters:StringIsNullOrNotFileExistsCollapsedConverter}, ConverterParameter=fallbackthumb}" Margin="0 4 0 4"  HorizontalAlignment="Left" Background="Transparent" />
@@ -137,13 +138,13 @@
                         <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumbfallback" Margin="0 4 0 0" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
 
-                    <StackPanel  Grid.Row="7" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Use placeholder file: " Width="115" />
                         <ToggleButton IsChecked="{Binding UsePlaceholderFile}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1"  ToolTip="If checked, VidUp will look for a .txt file that matches the video's file name (without extension) in the template's video or in the given placeholder folder and use its contents for placeholders instead of the video's file name. See help of title e.g." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
                     </StackPanel>
 
-                    <StackPanel  Grid.Row="8" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="8" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Placeholder Folder: " Width="115" />
                         <Label Width="366" Margin="0 0 10 0">
                             <TextBlock Text="{Binding PlaceholderFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
@@ -155,7 +156,7 @@
                         <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="placeholder" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
 
-                    <StackPanel  Grid.Row="9" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel  Grid.Row="9" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Default Template: " Width="115" />
                         <ToggleButton IsChecked="{Binding IsDefault}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline"  ToolTip="When a new video is added which doesn't belong to any project's root folder, this template is set automatically." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
@@ -165,13 +166,14 @@
 
             </GroupBox>
 
-            <GroupBox Grid.Row="1" Padding="0" Margin="0,10,0,0">
+            <GroupBox Grid.Row="1" Padding="0" Margin="0 10 0 0">
                 <GroupBox.Header>
                     <TextBlock Text="YOUTUBE STANDARD" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
                         <ColumnDefinition Width="310"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
@@ -183,29 +185,29 @@
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Title: " Width="115" />
                         <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="480" TextWrapping="Wrap" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="You can use placeholders #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
+                    <StackPanel Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Description: " Width="75" HorizontalAlignment="Left" />
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="As on title, you can use the same placeholders." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <TextBox Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" TextWrapping="Wrap" AcceptsReturn="True" Width="615" MinHeight="200" MaxHeight ="200" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
+                    <StackPanel Grid.Column="1"  Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
                         <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left">
                             <Label Content="Tags: " Width="38" />
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'. As on title, you can use the same placeholders." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <TextBox Text="{Binding TagsAsString, UpdateSourceTrigger=PropertyChanged, Delay=500}" TextWrapping="Wrap" Width="615" MinHeight="100" MaxHeight ="100" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
                         <Label Content="Visibility: " Width="110" />
                     </StackPanel>
-                    <StackPanel  Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+                    <StackPanel  Grid.Row="3" Grid.Column="2" Orientation="Horizontal">
                         <ComboBox  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="100">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -214,7 +216,7 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </StackPanel>
-                    <StackPanel  Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel  Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
                         <ToggleButton IsChecked="{Binding UsePublishAtSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <!--<Button Command="{Binding OpenPublishAtCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" Margin="4 4 0 0" Width="60" Height="20" Padding="0" Content="Edit" VerticalContentAlignment="Top" />-->
                         <Label Content="Publish At Schedule" Width="116" HorizontalAlignment="Left" />
@@ -225,13 +227,14 @@
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="2" Padding="0" Margin="0,10,0,0">
+            <GroupBox Grid.Row="2" Padding="0" Margin="0 10 0 0">
                 <GroupBox.Header>
                     <TextBlock Text="YOUTUBE ADVANCED" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
                         <ColumnDefinition Width="310"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
@@ -240,18 +243,18 @@
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Video Language: " Width="115" />
                         <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedVideoLanguage}" DisplayMemberPath="EnglishName" Width="165" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Language of the video's default audio track." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
                         <Label Content="Category: " Width="115" />
                         <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="180" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                         <Label Content="Descr. Language: " Width="115" />
                         <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedDescriptionLanguage}" DisplayMemberPath="EnglishName" Width="165" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Language of the video's title and description." ToolTipService.ShowDuration="60000" Background="Transparent" />
@@ -260,13 +263,14 @@
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="3" Padding="0" Margin="0,10,0,0">
+            <GroupBox Grid.Row="3" Padding="0" Margin="0 10 0 0">
                 <GroupBox.Header>
                     <TextBlock Text="YOUTUBE PLAYLIST" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
                         <ColumnDefinition Width="310"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
@@ -274,13 +278,13 @@
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Playlist: " Width="115" />
                         <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="180" />
 
                     </StackPanel>
 
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Grid.ColumnSpan="2">
 
                         <ToggleButton IsChecked="{Binding SetPlaylistAfterPublication}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="0 4 0 0" />
                         <Label Content="Set After Publication" Width="116" HorizontalAlignment="Left" />

@@ -29,17 +29,18 @@
                     <TextBlock Text="PUBLISH AT SCHEDULE FREQUENCY" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3" >
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
                         <ColumnDefinition Width="310"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
-                   <DockPanel  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                       <Label Content="Frequency: " Width="69" />
-                        <ComboBox ItemsSource="{Binding ScheduleFrequencies}" SelectedItem="{Binding ScheduleFrequency}" Width="190" >
+                   <DockPanel  Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2">
+                       <Label Content="Frequency: " Width="72" />
+                        <ComboBox ItemsSource="{Binding ScheduleFrequencies}" SelectedItem="{Binding ScheduleFrequency}" Width="190" Padding="6 4 6 6" VerticalAlignment="Top"  >
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -55,33 +56,45 @@
 
             </GroupBox>
 
-            <GroupBox Grid.Row="1" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencySpecificDateVisibleConverter}}">
+            <GroupBox Grid.Row="1" Padding="0" Margin="0 10 0 0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencySpecificDateVisibleConverter}}">
                 <GroupBox.Header>
                     <TextBlock Text="SPECIFIC DATE SETTINGS" Margin="2" />
                 </GroupBox.Header>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="On " Width="39" HorizontalAlignment="Left" />
-                    <DatePicker Width="125" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding SpecificDateDate, ValidatesOnDataErrors=True}" DisplayDateStart="{Binding SpecificDateFirstDate, Mode=OneWay}" HorizontalAlignment="Right">
-                        <DatePicker.Resources>
-                            <Style x:Key="MaterialDesignDatePickerTextBox"
-                                   TargetType="DatePickerTextBox"
-                                   BasedOn="{StaticResource MaterialDesignDatePickerTextBox}">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </Style>
-                        </DatePicker.Resources>
-                    </DatePicker>
-                    <Label Content="at " Width="39" HorizontalAlignment="Left" />
-                    <ComboBox  SelectedItem="{Binding SpecificDateTime, ValidatesOnDataErrors=True}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                </StackPanel>
+
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
+                        <ColumnDefinition Width="310"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                        <Label Content="On " Width="26" />
+                        <DatePicker Width="125" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding SpecificDateDate, ValidatesOnDataErrors=True}" DisplayDateStart="{Binding SpecificDateFirstDate, Mode=OneWay}" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="6 4 6 6">
+                            <DatePicker.Resources>
+                                <Style x:Key="MaterialDesignDatePickerTextBox"
+                                       TargetType="DatePickerTextBox"
+                                       BasedOn="{StaticResource MaterialDesignDatePickerTextBox}">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </Style>
+                            </DatePicker.Resources>
+                        </DatePicker>
+                        <Label Content="at " Width="19" />
+                        <ComboBox  SelectedItem="{Binding SpecificDateTime, ValidatesOnDataErrors=True}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" VerticalAlignment="Top" Padding="6 4 6 6" />
+                    </StackPanel>
+                </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="2" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyDailyVisibleConverter}}">
+            <GroupBox Grid.Row="2" Padding="0" Margin="0 10 0 0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyDailyVisibleConverter}}">
                 <GroupBox.Header>
                     <TextBlock Text="DAILY SETTINGS" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" x:Name="DailyGrid" >
+                <Grid Height="Auto" Width="620" x:Name="DailyGrid" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
                         <ColumnDefinition Width="80"></ColumnDefinition>
                         <ColumnDefinition Width="80"></ColumnDefinition>
                         <ColumnDefinition Width="80"></ColumnDefinition>
@@ -96,7 +109,7 @@
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" >
+                    <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" >
                         <Label Content="Every " Width="39" />
                         <TextBox Width="14">
                             <TextBox.Text>
@@ -108,52 +121,53 @@
                             </TextBox.Text>
                         </TextBox>
                         <Label Content=". day at " Width="55" />
-                        <ComboBox SelectedItem="{Binding DailyDefaultTime}" IsEnabled="{Binding DailyDefaultTimeEnabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="0" />
+                        <ComboBox SelectedItem="{Binding DailyDefaultTime}" IsEnabled="{Binding DailyDefaultTimeEnabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="0" Padding="6 4 6 6" VerticalAlignment="Top" />
                     </StackPanel>
-                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
+                    <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton IsChecked="{Binding DailyHasAdvancedSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <Label Content="Advanced Schedule " Width="121" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Alternating, rotating publish times can be defined for up to 3 days, up to 3 a day." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
-                    <Label Grid.Row="2" Grid.Column="0" Content="Day 1" Width="40" HorizontalAlignment="Left" Margin="0 5 0 0" />
-                    <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
+                    <Label Grid.Row="2" Grid.Column="1" Content="Day 1" Width="40" HorizontalAlignment="Left" Margin="0 5 0 0" />
+                    <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding DailyDay2Active, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2ActiveEnabled}" HorizontalAlignment="Left" Margin="4" />
                         <Label Content="Day 2" Width="40" HorizontalAlignment="Left" />
                     </StackPanel>
-                    <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
+                    <StackPanel Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding DailyDay3Active, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2ActiveEnabled}" HorizontalAlignment="Left" Margin="4" />
                         <Label Content="Day 3" Width="40" HorizontalAlignment="Left" />
                     </StackPanel>
 
-                    <ComboBox  Grid.Row="3" Grid.Column="0" Tag="1-1" SelectedItem="{Binding DailyDay1Time1, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay1Time1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="0" Tag="1-2" SelectedItem="{Binding DailyDay1Time2, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay1Time2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="0" Tag="1-3" SelectedItem="{Binding DailyDay1Time3, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay1Time3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="3" Grid.Column="1" Tag="1-1" SelectedItem="{Binding DailyDay1Time1, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay1Time1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0"  />
+                    <ComboBox Grid.Row="4" Grid.Column="1" Tag="1-2" SelectedItem="{Binding DailyDay1Time2, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay1Time2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="5" Grid.Column="1" Tag="1-3" SelectedItem="{Binding DailyDay1Time3, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay1Time3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="1" Tag="2-1" SelectedItem="{Binding DailyDay2Time1, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2Time1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="1" Tag="2-2" SelectedItem="{Binding DailyDay2Time2, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2Time2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="1" Tag="2-3" SelectedItem="{Binding DailyDay2Time3, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2Time3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="3" Grid.Column="2" Tag="2-1" SelectedItem="{Binding DailyDay2Time1, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2Time1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="4" Grid.Column="2" Tag="2-2" SelectedItem="{Binding DailyDay2Time2, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2Time2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="5" Grid.Column="2" Tag="2-3" SelectedItem="{Binding DailyDay2Time3, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay2Time3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="2" Tag="3-1" SelectedItem="{Binding DailyDay3Time1, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay3Time1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="2" Tag="3-2" SelectedItem="{Binding DailyDay3Time2, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay3Time2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="2" Tag="3-3" SelectedItem="{Binding DailyDay3Time3, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay3Time3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="3" Grid.Column="3" Tag="3-1" SelectedItem="{Binding DailyDay3Time1, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay3Time1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="4" Grid.Column="3" Tag="3-2" SelectedItem="{Binding DailyDay3Time2, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay3Time2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox Grid.Row="5" Grid.Column="3" Tag="3-3" SelectedItem="{Binding DailyDay3Time3, ValidatesOnDataErrors=True}" IsEnabled="{Binding DailyDay3Time3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="3" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyWeeklyVisibleConverter}}">
+            <GroupBox Grid.Row="3" Padding="2 0 0 0" Margin="0 10 0 0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyWeeklyVisibleConverter}}">
                 <GroupBox.Header>
                     <TextBlock Text="WEEKLY SETTINGS" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70"></ColumnDefinition>
-                        <ColumnDefinition Width="70"></ColumnDefinition>
-                        <ColumnDefinition Width="70"></ColumnDefinition>
-                        <ColumnDefinition Width="70"></ColumnDefinition>
-                        <ColumnDefinition Width="70"></ColumnDefinition>
-                        <ColumnDefinition Width="70"></ColumnDefinition>
-                        <ColumnDefinition Width="70"></ColumnDefinition>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -165,7 +179,7 @@
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" >
+                    <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" >
                         <Label Content="Every " Width="39" />
                         <TextBox Width="14">
                             <TextBox.Text>
@@ -177,60 +191,61 @@
                             </TextBox.Text>
                         </TextBox>
                         <Label Content=". week at " Width="60" />
-                        <ComboBox SelectedItem="{Binding WeeklyDefaultTime}" IsEnabled="{Binding WeeklyDefaultTimeEnabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="0" />
+                        <ComboBox SelectedItem="{Binding WeeklyDefaultTime}" IsEnabled="{Binding WeeklyDefaultTimeEnabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="0" VerticalAlignment="Top" Padding="6 4 6 6" />
                     </StackPanel>
 
-                    <ToggleButton Grid.Row="1" Grid.Column="0" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyMondayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">M</ToggleButton>
-                    <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyTuesdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">T</ToggleButton>
-                    <ToggleButton Grid.Row="1" Grid.Column="2" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyWednesdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">W</ToggleButton>
-                    <ToggleButton Grid.Row="1" Grid.Column="3" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyThursdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">T</ToggleButton>
-                    <ToggleButton Grid.Row="1" Grid.Column="4" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyFridayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">F</ToggleButton>
-                    <ToggleButton Grid.Row="1" Grid.Column="5" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklySaturdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">S</ToggleButton>
-                    <ToggleButton Grid.Row="1" Grid.Column="6" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklySundayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">S</ToggleButton>
+                    <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyMondayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">M</ToggleButton>
+                    <ToggleButton Grid.Row="1" Grid.Column="2" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyTuesdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">T</ToggleButton>
+                    <ToggleButton Grid.Row="1" Grid.Column="3" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyWednesdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">W</ToggleButton>
+                    <ToggleButton Grid.Row="1" Grid.Column="4" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyThursdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">T</ToggleButton>
+                    <ToggleButton Grid.Row="1" Grid.Column="5" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyFridayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">F</ToggleButton>
+                    <ToggleButton Grid.Row="1" Grid.Column="6" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklySaturdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">S</ToggleButton>
+                    <ToggleButton Grid.Row="1" Grid.Column="7" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklySundayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">S</ToggleButton>
 
-                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
+                    <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton IsChecked="{Binding WeeklyHasAdvancedSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <Label Content="Advanced Schedule " Width="121" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Up to 3 publish times per day can be set." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
-                    <ComboBox  Grid.Row="3" Grid.Column="0" SelectedItem="{Binding WeeklyMondayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyMondayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="0" SelectedItem="{Binding WeeklyMondayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyMondayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="0" SelectedItem="{Binding WeeklyMondayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyMondayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="3" Grid.Column="1" SelectedItem="{Binding WeeklyMondayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyMondayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="4" Grid.Column="1" SelectedItem="{Binding WeeklyMondayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyMondayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="5" Grid.Column="1" SelectedItem="{Binding WeeklyMondayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyMondayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="1" SelectedItem="{Binding WeeklyTuesdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyTuesdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="1" SelectedItem="{Binding WeeklyTuesdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyTuesdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="1" SelectedItem="{Binding WeeklyTuesdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyTuesdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="3" Grid.Column="2" SelectedItem="{Binding WeeklyTuesdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyTuesdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="4" Grid.Column="2" SelectedItem="{Binding WeeklyTuesdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyTuesdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="5" Grid.Column="2" SelectedItem="{Binding WeeklyTuesdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyTuesdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="2" SelectedItem="{Binding WeeklyWednesdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyWednesdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="2" SelectedItem="{Binding WeeklyWednesdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyWednesdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="2" SelectedItem="{Binding WeeklyWednesdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyWednesdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="3" Grid.Column="3" SelectedItem="{Binding WeeklyWednesdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyWednesdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="4" Grid.Column="3" SelectedItem="{Binding WeeklyWednesdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyWednesdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="5" Grid.Column="3" SelectedItem="{Binding WeeklyWednesdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyWednesdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="3" SelectedItem="{Binding WeeklyThursdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyThursdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="3" SelectedItem="{Binding WeeklyThursdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyThursdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="3" SelectedItem="{Binding WeeklyThursdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyThursdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="3" Grid.Column="4" SelectedItem="{Binding WeeklyThursdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyThursdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="4" Grid.Column="4" SelectedItem="{Binding WeeklyThursdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyThursdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="5" Grid.Column="4" SelectedItem="{Binding WeeklyThursdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyThursdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="4" SelectedItem="{Binding WeeklyFridayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyFridayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="4" SelectedItem="{Binding WeeklyFridayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyFridayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="4" SelectedItem="{Binding WeeklyFridayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyFridayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="3" Grid.Column="5" SelectedItem="{Binding WeeklyFridayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyFridayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="4" Grid.Column="5" SelectedItem="{Binding WeeklyFridayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyFridayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="5" Grid.Column="5" SelectedItem="{Binding WeeklyFridayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklyFridayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="5" SelectedItem="{Binding WeeklySaturdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySaturdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="5" SelectedItem="{Binding WeeklySaturdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySaturdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="5" SelectedItem="{Binding WeeklySaturdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySaturdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="3" Grid.Column="6" SelectedItem="{Binding WeeklySaturdayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySaturdayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="4" Grid.Column="6" SelectedItem="{Binding WeeklySaturdayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySaturdayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="5" Grid.Column="6" SelectedItem="{Binding WeeklySaturdayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySaturdayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
 
-                    <ComboBox  Grid.Row="3" Grid.Column="6" SelectedItem="{Binding WeeklySundayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySundayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="4" Grid.Column="6" SelectedItem="{Binding WeeklySundayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySundayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
-                    <ComboBox  Grid.Row="5" Grid.Column="6" SelectedItem="{Binding WeeklySundayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySundayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="3" Grid.Column="7" SelectedItem="{Binding WeeklySundayTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySundayTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="4" Grid.Column="7" SelectedItem="{Binding WeeklySundayTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySundayTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
+                    <ComboBox  Grid.Row="5" Grid.Column="7" SelectedItem="{Binding WeeklySundayTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding WeeklySundayTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" />
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="4" Padding="0" Margin="0,10,0,0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyMonthlyVisibleConverter}}">
+            <GroupBox Grid.Row="4" Padding="0" Margin="0 10 0 0" Visibility="{Binding ScheduleFrequency, Converter={converters:FrequencyMonthlyVisibleConverter}}">
                 <GroupBox.Header>
                     <TextBlock Text="MONTHLY SETTINGS" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"></ColumnDefinition>
                         <ColumnDefinition Width="200"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
@@ -243,7 +258,7 @@
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" >
+                    <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" >
                         <Label Content="Every " Width="39" />
                         <TextBox Width="14">
                             <TextBox.Text>
@@ -255,16 +270,16 @@
                             </TextBox.Text>
                         </TextBox>
                         <Label Content=". month at " Width="70" />
-                        <ComboBox SelectedItem="{Binding MonthlyDefaultTime}" IsEnabled="{Binding MonthlyDefaultTimeEnabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="0" />
+                        <ComboBox SelectedItem="{Binding MonthlyDefaultTime}" IsEnabled="{Binding MonthlyDefaultTimeEnabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="0" VerticalAlignment="Top" Padding="6 4 6 6" />
                     </StackPanel>
 
-                    <DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" >
-                        <ComboBox SelectedIndex="{Binding MonthlyMonthDateBasedIndex}" Margin="4 0 10 0">
+                    <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" >
+                        <ComboBox SelectedIndex="{Binding MonthlyMonthDateBasedIndex}" Margin="4 0 10 0" VerticalAlignment="Top" Padding="6 4 6 6">
                             <ComboBoxItem>Date Based</ComboBoxItem>
                             <ComboBoxItem>Relative</ComboBoxItem>
                         </ComboBox>
 
-                        <ComboBox SelectedItem="{Binding MonthlyMonthDateBasedDay}" ItemsSource="{Binding MonthlyMonthDateBasedDayViewModels}" Visibility="{Binding MonthlyMonthDateBasedVisible}" Margin="0 0 10 0">
+                        <ComboBox SelectedItem="{Binding MonthlyMonthDateBasedDay}" ItemsSource="{Binding MonthlyMonthDateBasedDayViewModels}" Visibility="{Binding MonthlyMonthDateBasedVisible}" Margin="0 0 10 0" VerticalAlignment="Top" Padding="6 4 6 6">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Day}">
@@ -284,27 +299,24 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
 
-                        <ComboBox ItemsSource="{Binding MonthlyMonthRelativeBasedDayPositions}" SelectedItem="{Binding MonthlyMonthRelativeBasedDayPosition}" Visibility="{Binding MonthlyMonthRelativeBasedVisible}" Margin="0 0 10 0" />
-                        <ComboBox ItemsSource="{Binding MonthlyMonthRelativeBasedDays}" SelectedItem="{Binding MonthlyMonthRelativeBasedDay}" Visibility="{Binding MonthlyMonthRelativeBasedVisible}" Margin="0 0 10 0" />
+                        <ComboBox ItemsSource="{Binding MonthlyMonthRelativeBasedDayPositions}" SelectedItem="{Binding MonthlyMonthRelativeBasedDayPosition}" Visibility="{Binding MonthlyMonthRelativeBasedVisible}" Margin="0 0 10 0" VerticalAlignment="Top" Padding="6 4 6 6" />
+                        <ComboBox ItemsSource="{Binding MonthlyMonthRelativeBasedDays}" SelectedItem="{Binding MonthlyMonthRelativeBasedDay}" Visibility="{Binding MonthlyMonthRelativeBasedVisible}" Margin="0 0 10 0" VerticalAlignment="Top" Padding="6 4 6 6" />
                         <ToggleButton IsChecked="{Binding MonthlyActive, ValidatesOnDataErrors=True}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="0 7 10 0" />
                         <StackPanel Orientation="Horizontal" Margin="0 0 5 0" HorizontalAlignment="Right">
                             <Label Content="Existing Combinations: " Visibility="{Binding MonthlyMonthRelativeBasedVisible}" Width="145" />
-                            <ComboBox SelectedIndex="0" SelectedItem="{Binding MonthlyMonthRelativeBasedCombination}" ItemsSource="{Binding MonthlyMonthRelativeBasedCombinationViewModels}" DisplayMemberPath="MonthRelativeCombinationString" Visibility="{Binding MonthlyMonthRelativeBasedVisible}" Width="140" />
+                            <ComboBox SelectedIndex="0" SelectedItem="{Binding MonthlyMonthRelativeBasedCombination}" ItemsSource="{Binding MonthlyMonthRelativeBasedCombinationViewModels}" DisplayMemberPath="MonthRelativeCombinationString" Visibility="{Binding MonthlyMonthRelativeBasedVisible}" Width="140"  VerticalAlignment="Top" Padding="6 4 6 6" />
                         </StackPanel>
 
                     </DockPanel>
-                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
+                    <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0 5 0 0">
                         <ToggleButton IsChecked="{Binding MonthlyHasAdvancedSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <Label Content="Advanced Schedule " Width="121" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Up to 3 publish times per day can be set." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
-
-
-                    <ComboBox  Grid.Row="3" Grid.Column="0" SelectedItem="{Binding MonthlyTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding MonthlyTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" HorizontalAlignment="Left" />
-                    <ComboBox  Grid.Row="4" Grid.Column="0" SelectedItem="{Binding MonthlyTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding MonthlyTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" HorizontalAlignment="Left" />
-                    <ComboBox  Grid.Row="5" Grid.Column="0" SelectedItem="{Binding MonthlyTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding MonthlyTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" HorizontalAlignment="Left" />
-                    
+                    <ComboBox  Grid.Row="3" Grid.Column="1" SelectedItem="{Binding MonthlyTime1, ValidatesOnDataErrors=True}" IsEnabled="{Binding MonthlyTime1Enabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" HorizontalAlignment="Left" />
+                    <ComboBox  Grid.Row="4" Grid.Column="1" SelectedItem="{Binding MonthlyTime2, ValidatesOnDataErrors=True}" IsEnabled="{Binding MonthlyTime2Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" HorizontalAlignment="Left" />
+                    <ComboBox  Grid.Row="5" Grid.Column="1" SelectedItem="{Binding MonthlyTime3, ValidatesOnDataErrors=True}" IsEnabled="{Binding MonthlyTime3Enabled}" ItemsSource="{Binding QuarterHourViewModelsEmptyStartValue}" DisplayMemberPath="QuarterHourAs24hString" Width="65" Margin="4 0 2 0" HorizontalAlignment="Left" />
                 </Grid>
             </GroupBox>
 

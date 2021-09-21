@@ -24,14 +24,15 @@
                     <TextBlock Text="GENERAL" Margin="2" />
                 </GroupBox.Header>
 
-                <Grid Height="Auto" Width="620" >
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <StackPanel Orientation="Vertical"  Grid.Row="0" Grid.Column="0">
+                    <StackPanel Orientation="Vertical"  Grid.Row="0" Grid.Column="1">
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Enable Tracing " Width="87" />
                             <ToggleButton IsChecked="{Binding Tracing}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
@@ -53,31 +54,40 @@
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="1" Padding="0" Margin="0,10,0,0">
+            <GroupBox Grid.Row="1" Padding="0" Margin="0 10 0 0">
                 <GroupBox.Header>
                     <TextBlock Text="VIDEO LANGUAGE FILTER" Margin="2" />
                 </GroupBox.Header>
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Set used video languages to limit list in Video Language dropdown:" HorizontalAlignment="Left" Width="368" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Nothing selected means no filter at all." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Search: "/>
-                        <TextBox x:Name="Title" Width="150"  Text="{Binding SearchText, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
-                    </StackPanel>
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Margin="0 0 0 3">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Set used video languages to limit list in Video Language dropdown:" HorizontalAlignment="Left" Width="368" />
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Nothing selected means no filter at all." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Search: "/>
+                                <TextBox x:Name="Title" Width="150"  Text="{Binding SearchText, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
+                            </StackPanel>
 
-                    <ListView MaxHeight="300" MinWidth="500" ItemsSource="{Binding ObservableCultureInfoViewModels}" HorizontalAlignment="Left" HorizontalContentAlignment="Left">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <ToggleButton IsChecked="{Binding IsChecked}" />
-                                    <Label Content="{Binding DisplayName}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </StackPanel>
+                            <ListView MaxHeight="300" MinWidth="500" ItemsSource="{Binding ObservableCultureInfoViewModels}" HorizontalAlignment="Left" HorizontalContentAlignment="Left">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <ToggleButton IsChecked="{Binding IsChecked}" />
+                                            <Label Content="{Binding DisplayName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                </Grid>
             </GroupBox>
         </Grid>
     </ScrollViewer>
