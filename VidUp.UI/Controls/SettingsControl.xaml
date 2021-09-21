@@ -40,7 +40,7 @@
                          </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Trace Level " Width="87" />
-                            <ComboBox  ItemsSource="{Binding TraceLevels}" SelectedItem="{Binding SelectedTraceLevel}" Width="60" HorizontalAlignment="Left"  Margin="4 0 5 0">
+                            <ComboBox  ItemsSource="{Binding TraceLevels}" SelectedItem="{Binding SelectedTraceLevel}" Width="80" HorizontalAlignment="Left"  Margin="4 0 5 0" Padding="6 4 6 6" VerticalAlignment="Top">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>

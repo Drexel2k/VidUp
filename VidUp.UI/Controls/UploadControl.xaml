@@ -159,7 +159,7 @@
                 </Button>
                 <Label Content="Visibility: " Width="110" />
             </StackPanel>
-            <ComboBox Grid.Row="6" Grid.Column="2"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left">
+            <ComboBox Grid.Row="6" Grid.Column="2"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -173,7 +173,7 @@
                 </Button>
                 <ToggleButton IsChecked="{Binding PublishAt}" IsEnabled="{Binding ControlsEnabled}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
                 <Label Content="Publish At: " Width="77" />
-                <DatePicker Width="83" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" Margin="0 3 0 0">
+                <DatePicker Width="83" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding PublishAtDate}" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}"  VerticalAlignment="Top" Height="26" >
                     <!--
                     <DatePicker.Resources>
                         <Style x:Key="MaterialDesignDatePickerTextBox"
@@ -184,7 +184,7 @@
                     </DatePicker.Resources>
                     -->
                 </DatePicker>
-                <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="8 0 0 0" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" />
+                <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="8 0 0 0" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" VerticalAlignment="Top" Padding="6 4 6 6" />
             </StackPanel>
 
             <StackPanel Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
@@ -194,7 +194,7 @@
                 <Label Content="Template: " Width="66" />
             </StackPanel>
             <!-- Selected Template is clearable through burger menu. -->
-            <ComboBox Grid.Row="7" Grid.Column="2" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+            <ComboBox Grid.Row="7" Grid.Column="2" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
 
             <DockPanel Grid.Row="7" Grid.Column="3">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
@@ -202,7 +202,7 @@
                 </Button>
                 <Label Content="Playlist: " Width="47" />
                 <materialDesign:PackIcon Kind="PlaylistCheck" Foreground="Gray"  ToolTip="Playlist will be set after publication." ToolTipService.ShowDuration="60000" Visibility="{Binding ShowPlaylistHint, Mode=OneWay}" Margin="0 5 0 0" />
-                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="203" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Right" Margin="0 0 7 0" />
+                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="203" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Right" Margin="0 0 7 0" VerticalAlignment="Top" Padding="6 4 6 6" />
             </DockPanel>
 
             <StackPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
@@ -213,7 +213,7 @@
             </StackPanel>
             <!-- Selected Template is clearable through burger menu. -->
             <StackPanel Grid.Row="8" Grid.Column="2" Orientation="Horizontal">
-                <ComboBox SelectedItem="{Binding SelectedVideoLanguage}" ItemsSource="{Binding Languages}" DisplayMemberPath="EnglishName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+                <ComboBox SelectedItem="{Binding SelectedVideoLanguage}" ItemsSource="{Binding Languages}" DisplayMemberPath="EnglishName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
                 <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 0" ToolTip="Language of the video's default audio track." ToolTipService.ShowDuration="60000" Background="Transparent" />
             </StackPanel>
 
@@ -222,7 +222,7 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Category: " Width="68" />
-                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="203" IsEnabled="{Binding ControlsEnabled}" />
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="203" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top" Padding="6 4 6 6" />
             </StackPanel>
 
             <StackPanel Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
@@ -234,7 +234,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="9" Grid.Column="2" Orientation="Horizontal">
-                <ComboBox SelectedItem="{Binding SelectedDescriptionLanguage}" ItemsSource="{Binding Languages}" DisplayMemberPath="EnglishName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" />
+                <ComboBox SelectedItem="{Binding SelectedDescriptionLanguage}" ItemsSource="{Binding Languages}" DisplayMemberPath="EnglishName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
                 <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 0" ToolTip="Language of the video's title and description." ToolTipService.ShowDuration="60000" Background="Transparent" />
             </StackPanel>
            

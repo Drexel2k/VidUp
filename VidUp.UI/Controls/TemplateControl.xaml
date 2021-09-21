@@ -70,7 +70,7 @@
 
                     <StackPanel  Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Template Mode: " Width="115" />
-                        <ComboBox ItemsSource="{Binding TemplateModes}" SelectedItem="{Binding SelectedTemplateMode}" Width="120" Margin="0 0 10 0">
+                        <ComboBox ItemsSource="{Binding TemplateModes}" SelectedItem="{Binding SelectedTemplateMode}" Width="120" Margin="0 0 10 0" Padding="6 4 6 6" VerticalAlignment="Top">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -208,7 +208,7 @@
                         <Label Content="Visibility: " Width="110" />
                     </StackPanel>
                     <StackPanel  Grid.Row="3" Grid.Column="2" Orientation="Horizontal">
-                        <ComboBox  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="100">
+                        <ComboBox  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="100" Padding="6 4 6 6" VerticalAlignment="Top">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -245,18 +245,18 @@
 
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Video Language: " Width="115" />
-                        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedVideoLanguage}" DisplayMemberPath="EnglishName" Width="165" />
+                        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedVideoLanguage}" DisplayMemberPath="EnglishName" Width="165" Padding="6 4 6 6" VerticalAlignment="Top" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Language of the video's default audio track." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
                         <Label Content="Category: " Width="115" />
-                        <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="180" />
+                        <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" Width="180" Padding="6 4 6 6" VerticalAlignment="Top" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                         <Label Content="Descr. Language: " Width="115" />
-                        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedDescriptionLanguage}" DisplayMemberPath="EnglishName" Width="165" />
+                        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedDescriptionLanguage}" DisplayMemberPath="EnglishName" Width="165" Padding="6 4 6 6" VerticalAlignment="Top" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Language of the video's title and description." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
 
@@ -280,11 +280,11 @@
 
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Playlist: " Width="115" />
-                        <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="180" />
+                        <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="180" Padding="6 4 6 6" VerticalAlignment="Top" />
 
                     </StackPanel>
 
-                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Grid.ColumnSpan="2">
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" >
 
                         <ToggleButton IsChecked="{Binding SetPlaylistAfterPublication}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="0 4 0 0" />
                         <Label Content="Set After Publication" Width="116" HorizontalAlignment="Left" />
