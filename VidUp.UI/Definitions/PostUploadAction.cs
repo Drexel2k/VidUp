@@ -1,8 +1,4 @@
-﻿#region
-
-using System.ComponentModel;
-
-#endregion
+﻿using System.ComponentModel;
 
 namespace Drexel.VidUp.UI.Definitions
 {
@@ -12,6 +8,8 @@ namespace Drexel.VidUp.UI.Definitions
         None,
         [Description("Taskbar Notification")]
         FlashTaskbar,
+        [Description("Close VidUp")]
+        Close,
         [Description("Sleep Mode")]
         SleepMode,
         [Description("Hibernate")]

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Shell;
+using System.Windows.Threading;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
@@ -489,7 +490,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostponePostUploadActionProcessName))
                 {
                     postponed = true;
-                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning post upload action.");
+                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing post upload action.");
                     string processName = Path.GetFileNameWithoutExtension(Settings.Instance.UserSettings.PostponePostUploadActionProcessName);
                     bool processRunning = true;
                     while (processRunning)
@@ -497,7 +498,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         Process[] processes = Process.GetProcessesByName(processName);
                         if (processes.Length > 0)
                         {
-                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning process found, delaying 5 minutes.", TraceLevel.Detailed);
+                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing process found, delaying 5 minutes.", TraceLevel.Detailed);
                             try
                             {
                                 //await Task.Delay(10000, cancellationToken).ConfigureAwait(false); //10 seconds
@@ -505,13 +506,13 @@ namespace Drexel.VidUp.UI.ViewModels
                             }
                             catch (TaskCanceledException)
                             {
-                                Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning canceled.");
+                                Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing canceled.");
                                 return;
                             }
                         }
                         else
                         {
-                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: PostPoning process '{processName}' not found.");
+                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing process '{processName}' not found.");
                             processRunning = false;
                         }
                     }
@@ -536,6 +537,10 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                     case PostUploadAction.FlashTaskbar:
                         this.notifyTaskbarItemInfo();
+                        break;
+                    case PostUploadAction.Close:
+                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: End, exit app.");
+                        System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
                         break;
                     default:
                         break;
