@@ -51,7 +51,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             }
         }
 
-        public static long CurrentPosition
+        public static long? CurrentPosition
         {
             get
             {
@@ -61,7 +61,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     return stream.Position;
                 }
 
-                return 0;
+                return null;
             }
         }
 
@@ -213,6 +213,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                             //last stats update to reach 0 bytes and time left.
                             upload.BytesSent = inputStream.Position;
+                            YoutubeVideoUploadService.stream = null;
 
                             upload.UploadStatus = UplStatus.Finished;
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with uploadByteIndex {lastUploadByteIndexBeforeError}, video id {upload.VideoId}.");
@@ -261,7 +262,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
             if (string.IsNullOrWhiteSpace(upload.ResumableSessionUri))
             {
-                Tracer.Write($"YoutubeVideoUploadService.Upload: Requesting new upload/new resumable session uri.");
+                Tracer.Write($"YoutubeVideoUploadService.initializeUploadAsync: Requesting new upload/new resumable session uri.");
                 if (!await YoutubeVideoUploadService.requestNewUploadAsync(upload).ConfigureAwait(false))
                 {
                     return false;
@@ -271,7 +272,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             }
             else
             {
-                Tracer.Write($"YoutubeVideoUploadService.Upload: Continue upload, getting range.");
+                Tracer.Write($"YoutubeVideoUploadService.initializeUploadAsync: Continue upload, getting range.");
 
                 if (!await YoutubeVideoUploadService.getUploadByteIndexAsync(upload).ConfigureAwait(false))
                 {
@@ -319,6 +320,13 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                             return true;
                         }
+                        catch (InvalidOperationException e)
+                        {
+                            errors.AppendLine($"YoutubeVideoUploadService.getUploadByteIndex: Range header not found, BytesSent set to 0: {e.Message}.");
+                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Range header not found exception: {e.ToString()}.");
+                            upload.BytesSent = 0;
+                            return true;
+                        }
                         catch (Exception e)
                         {
                             errors.AppendLine($"YoutubeVideoUploadService.getUploadByteIndex: Could not get range header: {e.Message}.");
@@ -335,7 +343,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                             requestTry++;
                         }
-
                     }
                 }
                 catch (Exception e)
@@ -387,7 +394,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
             string contentJson = JsonConvert.SerializeObject(video);
 
-            Tracer.Write($"YoutubeVideoUploadService.Upload: New upload/new resumable session uri request content: {contentJson}.");
+            Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: New upload/new resumable session uri request content: {contentJson}.");
 
             FileInfo fileInfo = new FileInfo(upload.FilePath);
             //request upload session/uri

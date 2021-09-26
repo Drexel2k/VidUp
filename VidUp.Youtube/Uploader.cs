@@ -112,7 +112,11 @@ namespace Drexel.VidUp.Youtube
         private void onUploadBytesSent(Upload upload)
         {
             UploadBytesSentHandler handler = this.UploadBytesSent;
-            upload.BytesSent = YoutubeVideoUploadService.CurrentPosition;
+
+            if (YoutubeVideoUploadService.CurrentPosition != null)
+            {
+                upload.BytesSent = YoutubeVideoUploadService.CurrentPosition.Value;
+            }
 
             if (handler != null)
             {

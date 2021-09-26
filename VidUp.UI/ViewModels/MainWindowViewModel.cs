@@ -522,7 +522,7 @@ namespace Drexel.VidUp.UI.ViewModels
             //Setting could be changed while waiting for postponing process to finish
             if (this.postUploadAction != PostUploadAction.None && e.DataSent && !e.UploadStopped && this.appStatus == AppStatus.Idle)
             {
-                Tracer.Write($"MainWindowViewModel.doPostUploadAction: Performing post uplaod action {this.postUploadAction}.");
+                Tracer.Write($"MainWindowViewModel.doPostUploadAction: Performing post upload action {this.postUploadAction}.");
 
                 switch (this.postUploadAction)
                 {
@@ -533,6 +533,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         Application.SetSuspendState(PowerState.Hibernate, false, false);
                         break;
                     case PostUploadAction.Shutdown:
+                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: End, shutdown system.");
                         ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
                         break;
                     case PostUploadAction.FlashTaskbar:
@@ -572,6 +573,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
+            //for all post upload actions which don't close VidUp the result shall stay 10 seconds.
             await Task.Delay(10000);
             this.resetTaskbarItemInfo();
             this.updateStats();
