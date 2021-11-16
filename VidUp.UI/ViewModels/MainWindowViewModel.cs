@@ -36,6 +36,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAll;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
+        private ObservableYouTubeAccountViewModels observableYouTubeAccountViewModels;
 
         private PostUploadAction postUploadAction;
         private UploadStats uploadStats;
@@ -53,6 +54,7 @@ namespace Drexel.VidUp.UI.ViewModels
         
         private object postUploadActionLock = new object();
         private CancellationTokenSource postUploadActionCancellationTokenSource;
+        private YouTubeAccountList youTubeAccountList;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -372,9 +374,8 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public MainWindowViewModel()
+        public MainWindowViewModel() : this(null, null, out _, out _, out _)
         {
-            this.initialize(null ,null, out _, out _, out _);
         }
 
         //for testing purposes
@@ -383,14 +384,23 @@ namespace Drexel.VidUp.UI.ViewModels
             this.initialize(user, subFolder, out uploadList, out templateList, out playlistList);
         }
 
-        private void initialize(string user, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        private void renameRefreshTokenFile()
         {
-            if (string.IsNullOrWhiteSpace(user))
+            string oldFile = $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken";
+            if (File.Exists(oldFile))
             {
-                user = JsonDeserializationSettings.DeserializeUser();
+                File.Move(oldFile, $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken_default");
+            }
+        }
+
+        private void initialize(string folderSuffix, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        {
+            if (string.IsNullOrWhiteSpace(folderSuffix))
+            {
+                folderSuffix = JsonDeserializationSettings.DeserializeFolderSuffix();
             }
 
-            Settings.Instance = new Settings(user, subfolder);
+            Settings.Instance = new Settings(folderSuffix, subfolder);
 
             this.checkAppDataFolder();
 
@@ -414,6 +424,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true, true);
             this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, true, false);
             this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList);
+            this.observableYouTubeAccountViewModels = new ObservableYouTubeAccountViewModels(this.youTubeAccountList);
 
             UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll, this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels);
             this.viewModels[0] = uploadListViewModel;
@@ -423,7 +434,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
-            this.viewModels[3] = new SettingsViewModel();
+            this.viewModels[3] = new SettingsViewModel(this.youTubeAccountList, this.observableYouTubeAccountViewModels);
             this.viewModels[4] = new VidUpViewModel();
         }
 
@@ -600,10 +611,27 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
 
+            this.youTubeAccountList = this.readYouTubeAccounts();
+
             DeserializationRepositoryContent.ClearRepositories();
             Tracer.Write($"MainWindowViewModel.deserializeContent: End.");
 
             return reSerialize;
+        }
+
+        private YouTubeAccountList readYouTubeAccounts()
+        {
+            //compatibility code, will be removed in future versions
+            this.renameRefreshTokenFile();
+
+            List<YouTubeAccount> youTubeAccounts = new List<YouTubeAccount>();
+            foreach (string file in Directory.GetFiles(Settings.Instance.StorageFolder, "uploadrefreshtoken*"))
+            {
+                string[] parts = file.Split('_');
+                youTubeAccounts.Add(new YouTubeAccount(file, parts[1]));
+            }
+
+            return new YouTubeAccountList(youTubeAccounts);
         }
 
         private void deserializeSettings()

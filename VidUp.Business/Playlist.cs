@@ -45,7 +45,7 @@ namespace Drexel.VidUp.Business
             {
                 this.title = value;
                 this.lastModifiedInternal = DateTime.Now;
-                this.raisePropertyChanged("Name");
+                this.raisePropertyChanged("Title");
             }
         }
 

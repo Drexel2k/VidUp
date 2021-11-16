@@ -706,7 +706,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
 
-            this.SelectedTemplate = new TemplateComboboxViewModel(template);
+            this.SelectedTemplate = this.observableTemplateViewModels.GetViewModel(template);
         }
     }
 }

@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Settings;
+using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.Utils;
+using MaterialDesignThemes.Wpf;
 
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -16,9 +19,24 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private ObservableCollection<CultureViewModel> observableCultureInfoViewModels;
         private string searchText = string.Empty;
+
+        private YouTubeAccountList youTubeAccounts;
+        private ObservableYouTubeAccountViewModels observableYouTubeAccountViewModels;
+        private YouTubeAccountComboboxViewModel selectedYouTubeAccount;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private GenericCommand newYouTubeAccountCommand;
+
         #region properties
+
+        public GenericCommand NewYouTubeAccountCommand
+        {
+            get
+            {
+                return this.newYouTubeAccountCommand;
+            }
+        }
 
         public bool Tracing
         {
@@ -64,11 +82,63 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get => this.observableCultureInfoViewModels;
         }
-        
+
+        public YouTubeAccountComboboxViewModel SelectedYouTubeAccount
+        {
+            get => this.selectedYouTubeAccount;
+            set
+            {
+                this.selectedYouTubeAccount = value;
+                this.raisePropertyChanged("SelectedYouTubeAccount");
+                this.raisePropertyChanged("SelectedYouTubeAccountName");
+                this.raisePropertyChanged("SelectedYouTubeAccountFilePath");
+            }
+        }
+
+        public ObservableYouTubeAccountViewModels ObservableYouTubeAccountViewModels
+        {
+            get
+            {
+                return this.observableYouTubeAccountViewModels;
+            }
+        }
+
+        public string SelectedYouTubeAccountName
+        {
+            get => this.selectedYouTubeAccount.YouTubeAccountName;
+            set
+            { 
+                this.selectedYouTubeAccount.YouTubeAccountName = value;
+                this.raisePropertyChanged("SelectedYouTubeAccountName");
+                this.raisePropertyChanged("SelectedYouTubeAccountFilePath");
+            }
+        }
+
+        public string SelectedYouTubeAccountFilePath
+        {
+            get => this.selectedYouTubeAccount.YouTubeAccountFilePath;
+        }
+
         #endregion properties
 
-        public SettingsViewModel()
+        public SettingsViewModel(YouTubeAccountList youTubeAccountList, ObservableYouTubeAccountViewModels observableYouTubeAccountViewModels)
         {
+            if (youTubeAccountList == null)
+            {
+                throw new ArgumentException("YouTubeAccountList must not be null.");
+            }
+
+            if (observableYouTubeAccountViewModels == null)
+            {
+                throw new ArgumentException("ObservableYouTubeAccountViewModels action must not be null.");
+            }
+
+            this.youTubeAccounts = youTubeAccountList;
+            this.observableYouTubeAccountViewModels = observableYouTubeAccountViewModels;
+            this.selectedYouTubeAccount = this.observableYouTubeAccountViewModels[0];
+
+            this.newYouTubeAccountCommand = new GenericCommand(this.openNewYouTubeAccountDialohAsync);
+
             this.observableCultureInfoViewModels = new ObservableCollection<CultureViewModel>();
 
             this.refreshObservableCultureInfoViewmodels();
@@ -195,6 +265,51 @@ namespace Drexel.VidUp.UI.ViewModels
             foreach (CultureViewModel notSelectedViewModel in notSelectedViewModels)
             {
                 this.observableCultureInfoViewModels.Add(notSelectedViewModel);
+            }
+        }
+
+        public async void openNewYouTubeAccountDialohAsync(object obj)
+        {
+            var view = new NewYouTubeAccountControl
+            {
+                DataContext = new NewYouTubeAccountViewModel()
+            };
+
+            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+            if (result)
+            {
+                string finalName;
+                NewYouTubeAccountViewModel data = (NewYouTubeAccountViewModel)view.DataContext;
+                string name = string.Concat(data.Name.Split(Path.GetInvalidFileNameChars()));
+
+                //is needed if file aready exists as the original name shall not be overwritten including the suffix
+                //as long as counting up
+                finalName = name;
+
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    
+                    name = "default";
+                    finalName = name;
+                }
+
+                string newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{name}");
+
+                int index = 1;
+                while (File.Exists(newFilePath))
+                {
+                    newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{name}{index}");
+                    finalName = $"{name}{index}";
+                    index++;
+                }
+
+                File.Create(newFilePath);
+                YouTubeAccount youTubeAccount = new YouTubeAccount(newFilePath, finalName);
+                List<YouTubeAccount> list = new List<YouTubeAccount>();
+                list.Add(youTubeAccount);
+                this.youTubeAccounts.AddYouTubeAccounts(new List<YouTubeAccount>(list));
+
+                this.SelectedYouTubeAccount = this.observableYouTubeAccountViewModels.GetViewModel(youTubeAccount);
             }
         }
 

@@ -15,22 +15,6 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 return this.playlist;
             }
-            set
-            {
-                if (this.playlist != null)
-                {
-                    this.playlist.PropertyChanged -= playlistPropertyChanged;
-                }
-
-                this.playlist = value;
-
-                if (this.playlist != null)
-                {
-                    this.playlist.PropertyChanged += playlistPropertyChanged;
-                }
-
-                this.raisePropertyChanged(string.Empty);
-            }
         }
 
         public string PlaylistId
@@ -55,9 +39,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void playlistPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if(e.PropertyName == "Name")
+            if(e.PropertyName == "Title")
             {
-                this.raisePropertyChanged("Name");
+                this.raisePropertyChanged("Title");
             }
         }
 

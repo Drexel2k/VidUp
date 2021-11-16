@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
 namespace Drexel.VidUp.Json.Content
@@ -66,32 +65,14 @@ namespace Drexel.VidUp.Json.Content
             JsonSerializer serializer = new JsonSerializer();
             serializer.MissingMemberHandling = MissingMemberHandling.Error;
 
-            bool error = false;
             using (StreamReader sr = new StreamReader(this.playlistListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                try
-                {
-                    DeserializationRepositoryContent.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
-                }
-                catch (JsonSerializationException)
-                {
-                    error = true;
-                }
-            }
-
-            if (error)
-            {
-                using (StreamReader sr = new StreamReader(this.playlistListFilePath))
-                using (JsonReader reader = new JsonTextReader(sr))
-                {
-                    serializer.ContractResolver = new PlaylistContractResolver();
-                    DeserializationRepositoryContent.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
-                }
+                DeserializationRepositoryContent.PlaylistList = serializer.Deserialize<PlaylistList>(reader);
             }
 
             Tracer.Write($"JsonDeserializationContent.deserializePlaylistList: End.");
-            return error;
+            return false;
         }
 
         private bool deserializeAllUploads()

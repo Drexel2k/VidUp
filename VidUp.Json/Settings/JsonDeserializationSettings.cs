@@ -15,11 +15,11 @@ namespace Drexel.VidUp.Json.Settings
             this.settingsFilePath = Path.Combine(serializationFolder, "settings.json");
         }
 
-        public static string DeserializeUser()
+        public static string DeserializeFolderSuffix()
         {
             string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "appsettings.json");
             JObject appSettings = JObject.Parse(File.ReadAllText(path));
-            return appSettings["User"].Value<string>();
+            return appSettings["FolderSuffix"].Value<string>();
         }
 
 

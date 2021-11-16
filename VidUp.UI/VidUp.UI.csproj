@@ -78,6 +78,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Controls\NewYouTubeAccountControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="Controls\SettingsControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>

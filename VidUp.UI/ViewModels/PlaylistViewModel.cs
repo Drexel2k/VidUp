@@ -141,13 +141,13 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.playlist != null ? this.playlist.PlaylistId : string.Empty;
         }
 
-        public string Name
+        public string Title
         {
             get => this.playlist != null ? this.playlist.Title : null;
             set
             {
                 this.playlist.Title = value;
-                this.raisePropertyChangedAndSerializePlaylistList("Name");
+                this.raisePropertyChangedAndSerializePlaylistList("Title");
             }
         }
 
