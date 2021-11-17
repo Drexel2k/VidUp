@@ -41,20 +41,20 @@ namespace Drexel.VidUp.Youtube.Authentication
                 YoutubeAuthentication.serializationFolder = value;
             }
         }
-        private static string getRefreshTokenFilePath()
+        private static string getRefreshTokenFilePath(string accountName)
         {
-            return string.Format(@"{0}\uploadrefreshtoken", YoutubeAuthentication.serializationFolder);
+            return $"{YoutubeAuthentication.serializationFolder}\\uploadrefreshtoken_{accountName}";
         }
 
         //get access token from API
-        public static async Task<AccessToken> GetNewAccessTokenAsync()
+        public static async Task<AccessToken> GetNewAccessTokenAsync(string accountName)
         {
             //check for refresh token, if not there, get it
             if (string.IsNullOrWhiteSpace(YoutubeAuthentication.refreshToken))
             {
-                if (!YoutubeAuthentication.trySetRefreshToken())
+                if (!YoutubeAuthentication.trySetRefreshToken(accountName))
                 {
-                    await YoutubeAuthentication.getRefreshTokenAsync().ConfigureAwait(false);
+                    await YoutubeAuthentication.GetRefreshTokenAsync("default").ConfigureAwait(false);
                 }
             }
 
@@ -88,10 +88,10 @@ namespace Drexel.VidUp.Youtube.Authentication
         }
 
         //get refresh token from file
-        private static bool trySetRefreshToken()
+        private static bool trySetRefreshToken(string accountName)
         {
             string refreshToken;
-            string refreshTokenFilePath = YoutubeAuthentication.getRefreshTokenFilePath();
+            string refreshTokenFilePath = YoutubeAuthentication.getRefreshTokenFilePath(accountName);
             if (File.Exists(refreshTokenFilePath))
             {
                 refreshToken = File.ReadAllText(refreshTokenFilePath);
@@ -112,7 +112,7 @@ namespace Drexel.VidUp.Youtube.Authentication
         }
 
         //initial authentication, get refresh token from API
-        private static async Task getRefreshTokenAsync()
+        public static async Task GetRefreshTokenAsync(string accountName)
         {
             // Generates state and PKCE values.
             string state = randomDataBase64url(32);
@@ -204,7 +204,7 @@ namespace Drexel.VidUp.Youtube.Authentication
 
                     Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
                     YoutubeAuthentication.refreshToken = tokenEndpointDecoded["refresh_token"];
-                    File.WriteAllText(YoutubeAuthentication.getRefreshTokenFilePath(), YoutubeAuthentication.refreshToken);
+                    File.WriteAllText(YoutubeAuthentication.getRefreshTokenFilePath(accountName), YoutubeAuthentication.refreshToken);
                 }
             }
         }

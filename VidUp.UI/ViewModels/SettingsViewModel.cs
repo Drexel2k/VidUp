@@ -9,6 +9,7 @@ using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube.Authentication;
 using MaterialDesignThemes.Wpf;
 
 
@@ -27,16 +28,12 @@ namespace Drexel.VidUp.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         private GenericCommand newYouTubeAccountCommand;
+        private GenericCommand youTubeAccountAuthenticateCommand;
+        private GenericCommand youTubeAccountDeleteCommand;
+        private object authenticateYouTubeAccountLock = new object();
+        private bool authenticatingYouTubeAccount = false;
 
         #region properties
-
-        public GenericCommand NewYouTubeAccountCommand
-        {
-            get
-            {
-                return this.newYouTubeAccountCommand;
-            }
-        }
 
         public bool Tracing
         {
@@ -119,6 +116,26 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.selectedYouTubeAccount.YouTubeAccountFilePath;
         }
 
+        public GenericCommand NewYouTubeAccountCommand
+        {
+            get => this.newYouTubeAccountCommand;
+        }
+
+        public GenericCommand YouTubeAccountAuthenticateCommand
+        {
+            get => this.youTubeAccountAuthenticateCommand;
+        }
+
+        public GenericCommand YouTubeAccountDeleteCommand
+        {
+            get => this.youTubeAccountDeleteCommand;
+        }
+
+        public bool AuthenticatingYouTubeAccount
+        {
+            get => authenticatingYouTubeAccount;
+        }
+
         #endregion properties
 
         public SettingsViewModel(YouTubeAccountList youTubeAccountList, ObservableYouTubeAccountViewModels observableYouTubeAccountViewModels)
@@ -137,7 +154,9 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableYouTubeAccountViewModels = observableYouTubeAccountViewModels;
             this.selectedYouTubeAccount = this.observableYouTubeAccountViewModels[0];
 
-            this.newYouTubeAccountCommand = new GenericCommand(this.openNewYouTubeAccountDialohAsync);
+            this.newYouTubeAccountCommand = new GenericCommand(this.openNewYouTubeAccountDialogAsync);
+            this.youTubeAccountAuthenticateCommand = new GenericCommand(this.authenticateYouTubeAccountAsync);
+            this.youTubeAccountDeleteCommand = new GenericCommand(this.deleteYouTubeAccountAsync);
 
             this.observableCultureInfoViewModels = new ObservableCollection<CultureViewModel>();
 
@@ -268,7 +287,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public async void openNewYouTubeAccountDialohAsync(object obj)
+        public async void openNewYouTubeAccountDialogAsync(object obj)
         {
             var view = new NewYouTubeAccountControl
             {
@@ -310,6 +329,51 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.youTubeAccounts.AddYouTubeAccounts(new List<YouTubeAccount>(list));
 
                 this.SelectedYouTubeAccount = this.observableYouTubeAccountViewModels.GetViewModel(youTubeAccount);
+            }
+        }
+
+        private async void authenticateYouTubeAccountAsync(object obj)
+        {
+            lock (this.authenticateYouTubeAccountLock)
+            {
+                if (this.authenticatingYouTubeAccount)
+                {
+                    return;
+                }
+
+                this.authenticatingYouTubeAccount = true;
+                this.raisePropertyChanged("AuthenticatingYouTubeAccount");
+            }
+
+            await YoutubeAuthentication.GetRefreshTokenAsync(this.SelectedYouTubeAccountName).ConfigureAwait(false);
+
+            this.authenticatingYouTubeAccount = false;
+            this.raisePropertyChanged("AuthenticatingYouTubeAccount");
+        }
+
+        private async void deleteYouTubeAccountAsync(object obj)
+        {
+            if (this.youTubeAccounts.AccountCount <= 1)
+            {
+                ConfirmControl control = new ConfirmControl(
+                    $"You cannot delete the last YouTube account, at least one account must be left. Rename or reauthenticate (relink) the account or add a new account first.",
+                    false);
+
+                await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
+            }
+            else
+            {
+                string accountName = this.selectedYouTubeAccount.YouTubeAccountName;
+                if (this.observableYouTubeAccountViewModels[0].YouTubeAccountName == this.selectedYouTubeAccount.YouTubeAccountName)
+                {
+                    this.SelectedYouTubeAccount = this.observableYouTubeAccountViewModels[1];
+                }
+                else
+                {
+                    this.SelectedYouTubeAccount = this.observableYouTubeAccountViewModels[0];
+                }
+
+                this.youTubeAccounts.Remove(accountName);
             }
         }
 

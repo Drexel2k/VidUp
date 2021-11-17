@@ -12,17 +12,17 @@ namespace Drexel.VidUp.Youtube.Playlist
     {
         private static string playlistsEndpoint = "https://www.googleapis.com/youtube/v3/playlists";
         private static int maxResults = 50;
-        public static async Task<List<Playlist>> GetPlaylistsAsync()
+        public static async Task<List<Playlist>> GetPlaylistsAsync(string accountName)
         {
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: Start.");
             List<Playlist> result = new List<Playlist>();
-            await YoutubePlaylistService.addPlaylistsToResultAsync(null, result).ConfigureAwait(false);
+            await YoutubePlaylistService.addPlaylistsToResultAsync(null, result, accountName).ConfigureAwait(false);
             
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: End.");
             return result;
         }
 
-        private static async Task<List<Playlist>> addPlaylistsToResultAsync(string pageToken, List<Playlist> result)
+        private static async Task<List<Playlist>> addPlaylistsToResultAsync(string pageToken, List<Playlist> result, string accountName)
         {
             if (result == null)
             {
@@ -30,7 +30,7 @@ namespace Drexel.VidUp.Youtube.Playlist
             }
 
             Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Start, pageToken = { pageToken }.");
-            HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
+            HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync(accountName).ConfigureAwait(false);
             HttpResponseMessage message;
 
             try
@@ -73,7 +73,7 @@ namespace Drexel.VidUp.Youtube.Playlist
 
                 if (!string.IsNullOrWhiteSpace(response.NextPageToken))
                 {
-                    await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result).ConfigureAwait(false);
+                    await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result, accountName).ConfigureAwait(false);
                 }
             }
 

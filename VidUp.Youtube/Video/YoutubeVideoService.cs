@@ -14,7 +14,7 @@ namespace Drexel.VidUp.Youtube.Video
     {
         private static string videoEndpoint = "https://www.googleapis.com/youtube/v3/videos";
 
-        public static async Task<Dictionary<string, bool>> IsPublicAsync(List<string> videoIds)
+        public static async Task<Dictionary<string, bool>> IsPublicAsync(List<string> videoIds, string accountName)
         {
             Tracer.Write($"YoutubeVideoService.IsPublic: Start.");
             Dictionary<string, bool> result = new Dictionary<string, bool>();
@@ -23,7 +23,7 @@ namespace Drexel.VidUp.Youtube.Video
             {
                 Tracer.Write($"YoutubeVideoService.IsPublic: {videoIds.Count} Videos to check available.");
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
+                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync(accountName).ConfigureAwait(false);
                 HttpResponseMessage message;
 
                 int batch = 0;

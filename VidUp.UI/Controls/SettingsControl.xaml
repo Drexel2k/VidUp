@@ -21,7 +21,7 @@
 
             <GroupBox Padding="0">
                 <GroupBox.Header>
-                    <TextBlock Text="YOUTUBE ACCOUNTS" Margin="2" />
+                    <TextBlock Text="YOUTUBE ACCOUNT" Margin="2" />
                 </GroupBox.Header>
 
                 <Grid Height="Auto" Width="620" Margin="0 0 0 3">
@@ -32,35 +32,27 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition MinHeight="30"></RowDefinition>
-                        <RowDefinition Height="50"></RowDefinition>
-                        <RowDefinition MinHeight="30"></RowDefinition>
                         <RowDefinition MinHeight="30"></RowDefinition>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="Accounts: " Width="115" />
-                        <ComboBox SelectedItem="{Binding SelectedYouTubeAccount}" ItemsSource="{Binding ObservableYouTubeAccountViewModels}" DisplayMemberPath="YouTubeAccountName" Width="190" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
-                        <Button Command="{Binding NewYouTubeAccountCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8 4 0 0 " Width="60" Height="20" Padding="0" Content="Add" VerticalContentAlignment="Top" />
-                        
-                    </StackPanel>
-
-                   <!-- <Button Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" Margin="0,5,3,5" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+                    <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,7,5" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
                             <StackPanel>
-                                <Button Content="Delete" Command="{Binding DeletePlaylistCommand}" CommandParameter="{Binding PlaylistId}"/>
+                                <Button Content="(Re-)Authenticate" Command="{Binding YouTubeAccountAuthenticateCommand}" />
+                                <Button Content="Delete" Command="{Binding YouTubeAccountDeleteCommand}" CommandParameter="{Binding YouTubeAccountName}"/>
                             </StackPanel>
                         </materialDesign:PopupBox>
-                    </Button>-->
+                    </Button>
 
-                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="Name " Width="115" />
-                        <TextBox Text="{Binding SelectedYouTubeAccountName, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="480" TextWrapping="Wrap" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="This name is only for display in VidUp, it doesn't need to the channel name or id. The name is also used as file name, on renaming invalid file name characters will be ignored." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
+                        <Label Content="Name " Width="87" />
+                        <TextBox Text="{Binding SelectedYouTubeAccountName, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="190" TextWrapping="Wrap" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 3 10 5" ToolTip="This name is only for display in VidUp, it doesn't need to the channel name or id, channel is linked on first upload or via the button to the right. The name is also used as file name, on renaming invalid file name characters will be ignored." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
-                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="File: " Width="115" />
-                        <TextBox Text="{Binding SelectedYouTubeAccountFilePath, Mode=OneWay}"  Width="480" TextWrapping="Wrap" IsEnabled="False" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="File where the authentication information is stored. Doesn't need to be the YouTube account name, the YouTube account will be linked and authenticated on first upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
+                        <Label Content="File: " Width="87" />
+                        <TextBox Text="{Binding SelectedYouTubeAccountFilePath, Mode=OneWay}"  Width="460" TextWrapping="Wrap" IsEnabled="False" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 3 10 5" ToolTip="File where the authentication information is stored." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
                 </Grid>
 
@@ -82,12 +74,12 @@
                     <StackPanel Orientation="Vertical"  Grid.Row="0" Grid.Column="1">
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Enable Tracing " Width="87" />
-                            <ToggleButton IsChecked="{Binding Tracing}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
-                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Trace information in Documents\VidUp\trace.txt, may contain useful information on problems." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <ToggleButton IsChecked="{Binding Tracing}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Trace information in Documents\VidUp\trace.txt, may contain useful information on problems." ToolTipService.ShowDuration="60000" Background="Transparent" />
                          </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Trace Level " Width="87" />
-                            <ComboBox  ItemsSource="{Binding TraceLevels}" SelectedItem="{Binding SelectedTraceLevel}" Width="80" HorizontalAlignment="Left"  Margin="4 0 5 0" Padding="6 4 6 6" VerticalAlignment="Top">
+                            <ComboBox  ItemsSource="{Binding TraceLevels}" SelectedItem="{Binding SelectedTraceLevel}" Width="80" HorizontalAlignment="Left"  Margin="4 0 0 0" Padding="6 4 6 6" VerticalAlignment="Top">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
@@ -95,7 +87,7 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
 
-                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Detailed logs also every serialization." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Detailed logs also every serialization." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>
@@ -115,12 +107,12 @@
                     </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Margin="0 0 0 3">
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Set used video languages to limit list in Video Language dropdown:" HorizontalAlignment="Left" Width="368" />
-                                <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 4 10 5" ToolTip="Nothing selected means no filter at all." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                                <Label Content="Set used video languages to limit list in Video Language dropdown:" HorizontalAlignment="Left" Width="364" />
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Nothing selected means no filter at all." ToolTipService.ShowDuration="60000" Background="Transparent" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Search: "/>
-                                <TextBox x:Name="Title" Width="150"  Text="{Binding SearchText, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
+                                <Label Content="Search: " Width="87"/>
+                                <TextBox x:Name="Title" Width="190"  Text="{Binding SearchText, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
                             </StackPanel>
 
                             <ListView MaxHeight="300" MinWidth="500" ItemsSource="{Binding ObservableCultureInfoViewModels}" HorizontalAlignment="Left" HorizontalContentAlignment="Left">

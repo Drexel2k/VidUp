@@ -196,7 +196,11 @@
                         </StackPanel>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem Header="Settings">
+                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="Settings">
+                    <Fluent:RibbonGroupBox Header="Manage YT Accounts" VerticalContentAlignment="Bottom">
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon AccountEdit}" ItemsSource="{Binding ObservableYouTubeAccountViewModels}" SelectedItem="{Binding SelectedYouTubeAccount}" DisplayMemberPath="YouTubeAccountName" IsEditable="False" />
+                        <Fluent:Button Header="New YouTube Account" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon AccountPlus}" Command="{Binding NewYouTubeAccountCommand}" />
+                    </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[4]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">

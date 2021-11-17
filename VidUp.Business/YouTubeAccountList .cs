@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 
 namespace Drexel.VidUp.Business
 {
@@ -13,7 +14,9 @@ namespace Drexel.VidUp.Business
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
-        
+
+        public int AccountCount { get => this.youTubeAccounts.Count; }
+
         public YouTubeAccountList(List<YouTubeAccount> youTubeAccounts)
         {
             this.youTubeAccounts = new List<YouTubeAccount>();
@@ -44,11 +47,19 @@ namespace Drexel.VidUp.Business
             return this.youTubeAccounts.FindIndex(predicate);
         }
 
-        public void Remove(YouTubeAccount youTubeAccount)
+        public void Remove(string name)
         {
-            this.youTubeAccounts.Remove(youTubeAccount);
+            YouTubeAccount youTubeAccount = this.youTubeAccounts.Find(acc => acc.Name == name);
+            if (youTubeAccount != null)
+            {
+                if (File.Exists(youTubeAccount.FilePath))
+                {
+                    File.Delete(youTubeAccount.FilePath);
+                }
 
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, youTubeAccount));
+                this.youTubeAccounts.Remove(youTubeAccount);
+                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, youTubeAccount));
+            }
         }
 
         public YouTubeAccount GetYouTubeAccount(int index)

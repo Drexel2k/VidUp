@@ -29,23 +29,23 @@ namespace Drexel.VidUp.Youtube
         //eg. if set to 10240 buffer will be 16384.
         private static int bufferSize = 32 * 1024;
 
-        public static async Task<HttpClient> GetAuthenticatedStandardClientAsync()
+        public static async Task<HttpClient> GetAuthenticatedStandardClientAsync(string accountName)
         {
-            await HttpHelper.checkAccesTokenAsync().ConfigureAwait(false);
+            await HttpHelper.checkAccesTokenAsync(accountName).ConfigureAwait(false);
             return HttpHelper.standardClient;
         }
 
-        public static async Task<HttpClient> GetAuthenticatedUploadClientAsync()
+        public static async Task<HttpClient> GetAuthenticatedUploadClientAsync(string accountName)
         {
-            await HttpHelper.checkAccesTokenAsync().ConfigureAwait(false);
+            await HttpHelper.checkAccesTokenAsync(accountName).ConfigureAwait(false);
             return HttpHelper.uploadClient;
         }
 
-        private static async Task checkAccesTokenAsync()
+        private static async Task checkAccesTokenAsync(string accountName)
         {
             if (HttpHelper.accessTokenExpiry - DateTime.Now < oneMinute)
             {
-                AccessToken token = await YoutubeAuthentication.GetNewAccessTokenAsync().ConfigureAwait(false);
+                AccessToken token = await YoutubeAuthentication.GetNewAccessTokenAsync(accountName).ConfigureAwait(false);
                 HttpHelper.accessTokenExpiry = token.Expiry;
                 HttpHelper.standardClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
                 HttpHelper.uploadClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);

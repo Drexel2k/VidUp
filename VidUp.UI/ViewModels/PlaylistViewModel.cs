@@ -448,7 +448,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async Task<Dictionary<string, List<string>>> getPlaylistsAndRemoveNotExistingPlaylistsAsync(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap)
         {
-            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContentAsync(playlistUploadsWithoutPlaylistMap.Keys.ToList()).ConfigureAwait(false);
+            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContentAsync(playlistUploadsWithoutPlaylistMap.Keys.ToList(), "default").ConfigureAwait(false);
             if (playlistUploadsWithoutPlaylistMap.Count != playlistVideos.Count)
             {
                 KeyValuePair<string, List<Upload>>[] missingPlaylists = playlistUploadsWithoutPlaylistMap
@@ -506,7 +506,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             List<string> noUploadsLeftPlaylists = new List<string>();
             Dictionary<string, bool> videosPublicMap = await YoutubeVideoService.IsPublicAsync(playlistUploadsWithoutPlaylistMap
-                .SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList()).ConfigureAwait(false);
+                .SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList(), "default").ConfigureAwait(false);
 
             foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
             {

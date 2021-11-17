@@ -32,7 +32,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
 
                 string contentJson = JsonConvert.SerializeObject(playlistItem);
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
+                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync("default").ConfigureAwait(false);
                 using (ByteArrayContent byteContent = HttpHelper.GetStreamContent(contentJson, "application/json"))
                 {
                     HttpResponseMessage message;
@@ -70,7 +70,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
             return true;
         }
 
-        public static async Task<Dictionary<string, List<string>>> GetPlaylistsContentAsync(IEnumerable<string> playlistIds)
+        public static async Task<Dictionary<string, List<string>>> GetPlaylistsContentAsync(IEnumerable<string> playlistIds, string accountName)
         {
             Tracer.Write($"YoutubePlaylistItemService.GetPlaylistsContent: Start.");
             Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
@@ -82,7 +82,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                 {
                     List<string> playlistResult = new List<string>();
 
-                    if (await YoutubePlaylistItemService.addPlaylistContentToResultAsync(playlistId, null, playlistResult).ConfigureAwait(false))
+                    if (await YoutubePlaylistItemService.addPlaylistContentToResultAsync(playlistId, null, playlistResult, accountName).ConfigureAwait(false))
                     {
                         result.Add(playlistId, playlistResult);
                     }
@@ -97,11 +97,11 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
             return result;
         }
 
-        private static async Task<bool> addPlaylistContentToResultAsync(string playlistId, string pageToken, List<string> result)
+        private static async Task<bool> addPlaylistContentToResultAsync(string playlistId, string pageToken, List<string> result, string accountName)
         {
             Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Start.");
 
-            HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync().ConfigureAwait(false);
+            HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync(accountName).ConfigureAwait(false);
             HttpResponseMessage message;
 
             try
@@ -151,7 +151,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
 
                 if (!string.IsNullOrWhiteSpace(response.NextPageToken))
                 {
-                    return await YoutubePlaylistItemService.addPlaylistContentToResultAsync(playlistId, response.NextPageToken, result).ConfigureAwait(false);
+                    return await YoutubePlaylistItemService.addPlaylistContentToResultAsync(playlistId, response.NextPageToken, result, accountName).ConfigureAwait(false);
                 }
             }
 
