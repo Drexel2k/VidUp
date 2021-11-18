@@ -10,11 +10,14 @@ namespace Drexel.VidUp.Json.Content
 
         public static PlaylistList PlaylistList { get; set; }
 
+        public static YoutubeAccountList YoutubeAccountList { get; set; }
+
         public static void ClearRepositories()
         {
             UploadList = null;
             TemplateList = null;
             PlaylistList = null;
+            YoutubeAccountList = null;
         }
     }
 }

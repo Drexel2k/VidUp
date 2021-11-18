@@ -84,6 +84,11 @@ namespace Drexel.VidUp.Business
             return this.playlists.Find(match);
         }
 
+        public List<Playlist> FindAll(Predicate<Playlist> match)
+        {
+            return this.playlists.FindAll(match);
+        }
+
         public IEnumerator<Playlist> GetEnumerator()
         {
             return this.playlists.GetEnumerator();

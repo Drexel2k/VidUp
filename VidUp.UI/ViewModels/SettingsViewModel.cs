@@ -5,9 +5,11 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
+using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Authentication;
 using MaterialDesignThemes.Wpf;
@@ -21,17 +23,17 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableCollection<CultureViewModel> observableCultureInfoViewModels;
         private string searchText = string.Empty;
 
-        private YouTubeAccountList youTubeAccounts;
-        private ObservableYouTubeAccountViewModels observableYouTubeAccountViewModels;
-        private YouTubeAccountComboboxViewModel selectedYouTubeAccount;
+        private YoutubeAccountList youtubeAccounts;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+        private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private GenericCommand newYouTubeAccountCommand;
-        private GenericCommand youTubeAccountAuthenticateCommand;
-        private GenericCommand youTubeAccountDeleteCommand;
-        private object authenticateYouTubeAccountLock = new object();
-        private bool authenticatingYouTubeAccount = false;
+        private GenericCommand newYoutubeAccountCommand;
+        private GenericCommand youtubeAccountAuthenticateCommand;
+        private GenericCommand youtubeAccountDeleteCommand;
+        private object authenticateYoutubeAccountLock = new object();
+        private bool authenticatingYoutubeAccount = false;
 
         #region properties
 
@@ -80,83 +82,83 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.observableCultureInfoViewModels;
         }
 
-        public YouTubeAccountComboboxViewModel SelectedYouTubeAccount
+        public YoutubeAccountComboboxViewModel SelectedYoutubeAccount
         {
-            get => this.selectedYouTubeAccount;
+            get => this.selectedYoutubeAccount;
             set
             {
-                this.selectedYouTubeAccount = value;
-                this.raisePropertyChanged("SelectedYouTubeAccount");
-                this.raisePropertyChanged("SelectedYouTubeAccountName");
-                this.raisePropertyChanged("SelectedYouTubeAccountFilePath");
+                this.selectedYoutubeAccount = value;
+                this.raisePropertyChanged("SelectedYoutubeAccount");
+                this.raisePropertyChanged("SelectedYoutubeAccountName");
+                this.raisePropertyChanged("SelectedYoutubeAccountFilePath");
             }
         }
 
-        public ObservableYouTubeAccountViewModels ObservableYouTubeAccountViewModels
+        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
         {
             get
             {
-                return this.observableYouTubeAccountViewModels;
+                return this.observableYoutubeAccountViewModels;
             }
         }
 
-        public string SelectedYouTubeAccountName
+        public string SelectedYoutubeAccountName
         {
-            get => this.selectedYouTubeAccount.YouTubeAccountName;
+            get => this.selectedYoutubeAccount.YoutubeAccount.Name;
             set
             { 
-                this.selectedYouTubeAccount.YouTubeAccountName = value;
-                this.raisePropertyChanged("SelectedYouTubeAccountName");
-                this.raisePropertyChanged("SelectedYouTubeAccountFilePath");
+                this.selectedYoutubeAccount.YoutubeAccount.Name = value;
+                this.raisePropertyChanged("SelectedYoutubeAccountName");
+                this.raisePropertyChanged("SelectedYoutubeAccountFilePath");
             }
         }
 
-        public string SelectedYouTubeAccountFilePath
+        public string SelectedYoutubeAccountFilePath
         {
-            get => this.selectedYouTubeAccount.YouTubeAccountFilePath;
+            get => this.selectedYoutubeAccount.YoutubeAccount.FilePath;
         }
 
-        public GenericCommand NewYouTubeAccountCommand
+        public GenericCommand NewYoutubeAccountCommand
         {
-            get => this.newYouTubeAccountCommand;
+            get => this.newYoutubeAccountCommand;
         }
 
-        public GenericCommand YouTubeAccountAuthenticateCommand
+        public GenericCommand YoutubeAccountAuthenticateCommand
         {
-            get => this.youTubeAccountAuthenticateCommand;
+            get => this.youtubeAccountAuthenticateCommand;
         }
 
-        public GenericCommand YouTubeAccountDeleteCommand
+        public GenericCommand YoutubeAccountDeleteCommand
         {
-            get => this.youTubeAccountDeleteCommand;
+            get => this.youtubeAccountDeleteCommand;
         }
 
-        public bool AuthenticatingYouTubeAccount
+        public bool AuthenticatingYoutubeAccount
         {
-            get => authenticatingYouTubeAccount;
+            get => authenticatingYoutubeAccount;
         }
 
         #endregion properties
 
-        public SettingsViewModel(YouTubeAccountList youTubeAccountList, ObservableYouTubeAccountViewModels observableYouTubeAccountViewModels)
+        public SettingsViewModel(YoutubeAccountList youtubeAccountList, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels)
         {
-            if (youTubeAccountList == null)
+            if (youtubeAccountList == null)
             {
-                throw new ArgumentException("YouTubeAccountList must not be null.");
+                throw new ArgumentException("YoutubeAccountList must not be null.");
             }
 
-            if (observableYouTubeAccountViewModels == null)
+            if (observableYoutubeAccountViewModels == null)
             {
-                throw new ArgumentException("ObservableYouTubeAccountViewModels action must not be null.");
+                throw new ArgumentException("ObservableYoutubeAccountViewModels action must not be null.");
             }
 
-            this.youTubeAccounts = youTubeAccountList;
-            this.observableYouTubeAccountViewModels = observableYouTubeAccountViewModels;
-            this.selectedYouTubeAccount = this.observableYouTubeAccountViewModels[0];
+            this.youtubeAccounts = youtubeAccountList;
+            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
+            this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels[0];
 
-            this.newYouTubeAccountCommand = new GenericCommand(this.openNewYouTubeAccountDialogAsync);
-            this.youTubeAccountAuthenticateCommand = new GenericCommand(this.authenticateYouTubeAccountAsync);
-            this.youTubeAccountDeleteCommand = new GenericCommand(this.deleteYouTubeAccountAsync);
+            this.newYoutubeAccountCommand = new GenericCommand(this.openNewYoutubeAccountDialogAsync);
+            this.youtubeAccountAuthenticateCommand = new GenericCommand(this.authenticateYoutubeAccountAsync);
+            this.youtubeAccountDeleteCommand = new GenericCommand(this.deleteYoutubeAccountAsync);
 
             this.observableCultureInfoViewModels = new ObservableCollection<CultureViewModel>();
 
@@ -287,18 +289,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public async void openNewYouTubeAccountDialogAsync(object obj)
+        public async void openNewYoutubeAccountDialogAsync(object obj)
         {
-            var view = new NewYouTubeAccountControl
+            var view = new NewYoutubeAccountControl
             {
-                DataContext = new NewYouTubeAccountViewModel()
+                DataContext = new NewYoutubeAccountViewModel()
             };
 
             bool result = (bool)await DialogHost.Show(view, "RootDialog");
             if (result)
             {
                 string finalName;
-                NewYouTubeAccountViewModel data = (NewYouTubeAccountViewModel)view.DataContext;
+                NewYoutubeAccountViewModel data = (NewYoutubeAccountViewModel)view.DataContext;
                 string name = string.Concat(data.Name.Split(Path.GetInvalidFileNameChars()));
 
                 //is needed if file aready exists as the original name shall not be overwritten including the suffix
@@ -323,57 +325,65 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 File.Create(newFilePath);
-                YouTubeAccount youTubeAccount = new YouTubeAccount(newFilePath, finalName);
-                List<YouTubeAccount> list = new List<YouTubeAccount>();
-                list.Add(youTubeAccount);
-                this.youTubeAccounts.AddYouTubeAccounts(new List<YouTubeAccount>(list));
+                YoutubeAccount youtubeAccount = new YoutubeAccount(newFilePath, finalName);
+                List<YoutubeAccount> list = new List<YoutubeAccount>();
+                list.Add(youtubeAccount);
+                this.youtubeAccounts.AddYoutubeAccounts(new List<YoutubeAccount>(list));
 
-                this.SelectedYouTubeAccount = this.observableYouTubeAccountViewModels.GetViewModel(youTubeAccount);
+                this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(youtubeAccount);
             }
         }
 
-        private async void authenticateYouTubeAccountAsync(object obj)
+        private async void authenticateYoutubeAccountAsync(object obj)
         {
-            lock (this.authenticateYouTubeAccountLock)
+            lock (this.authenticateYoutubeAccountLock)
             {
-                if (this.authenticatingYouTubeAccount)
+                if (this.authenticatingYoutubeAccount)
                 {
                     return;
                 }
 
-                this.authenticatingYouTubeAccount = true;
-                this.raisePropertyChanged("AuthenticatingYouTubeAccount");
+                this.authenticatingYoutubeAccount = true;
+                this.raisePropertyChanged("AuthenticatingYoutubeAccount");
             }
 
-            await YoutubeAuthentication.GetRefreshTokenAsync(this.SelectedYouTubeAccountName).ConfigureAwait(false);
+            await YoutubeAuthentication.GetRefreshTokenAsync(this.SelectedYoutubeAccountName).ConfigureAwait(false);
 
-            this.authenticatingYouTubeAccount = false;
-            this.raisePropertyChanged("AuthenticatingYouTubeAccount");
+            this.authenticatingYoutubeAccount = false;
+            this.raisePropertyChanged("AuthenticatingYoutubeAccount");
         }
 
-        private async void deleteYouTubeAccountAsync(object obj)
+        private async void deleteYoutubeAccountAsync(object obj)
         {
-            if (this.youTubeAccounts.AccountCount <= 1)
+            if (this.youtubeAccounts.AccountCount <= 1)
             {
                 ConfirmControl control = new ConfirmControl(
-                    $"You cannot delete the last YouTube account, at least one account must be left. Rename or reauthenticate (relink) the account or add a new account first.",
-                    false);
+                    $"You cannot delete the last Youtube account, at least one account must be left. Rename or reauthenticate (relink) the account or add a new account first.", false);
 
                 await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
             }
             else
             {
-                string accountName = this.selectedYouTubeAccount.YouTubeAccountName;
-                if (this.observableYouTubeAccountViewModels[0].YouTubeAccountName == this.selectedYouTubeAccount.YouTubeAccountName)
-                {
-                    this.SelectedYouTubeAccount = this.observableYouTubeAccountViewModels[1];
-                }
-                else
-                {
-                    this.SelectedYouTubeAccount = this.observableYouTubeAccountViewModels[0];
-                }
+                ConfirmControl control = new ConfirmControl(
+                    $"WARNING! If you delete an account, all content (uploads, templates, playlists) belonging to this account will be deleted!", true);
 
-                this.youTubeAccounts.Remove(accountName);
+                //a collection is change later, so we must return to the Gui thread.
+                bool result = (bool) await DialogHost.Show(control, "RootDialog").ConfigureAwait(true);
+                if (result)
+                {
+                    string accountName = this.selectedYoutubeAccount.YoutubeAccount.Name;
+                    if (this.observableYoutubeAccountViewModels[0].YoutubeAccount.Name == this.selectedYoutubeAccount.YoutubeAccount.Name)
+                    {
+                        this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels[1];
+                    }
+                    else
+                    {
+                        this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels[0];
+                    }
+
+                    EventAggregator.Instance.Publish(new BeforeYoutubeAccountDeleteMessage(this.youtubeAccounts.GetYoutubeAccount(accountName)));
+                    this.youtubeAccounts.Remove(accountName);
+                }
             }
         }
 

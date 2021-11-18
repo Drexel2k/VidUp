@@ -4,7 +4,7 @@ using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.Business
 {
-    public class YouTubeAccount : INotifyPropertyChanged
+    public class YoutubeAccount : INotifyPropertyChanged
     {
 
         private string filePath;
@@ -43,7 +43,7 @@ namespace Drexel.VidUp.Business
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public YouTubeAccount(string filePath, string name)
+        public YoutubeAccount(string filePath, string name)
         {
             this.filePath = filePath;
             this.name = name;

@@ -36,7 +36,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAll;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
-        private ObservableYouTubeAccountViewModels observableYouTubeAccountViewModels;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModelsInclAll;
 
         private PostUploadAction postUploadAction;
         private UploadStats uploadStats;
@@ -54,7 +55,9 @@ namespace Drexel.VidUp.UI.ViewModels
         
         private object postUploadActionLock = new object();
         private CancellationTokenSource postUploadActionCancellationTokenSource;
-        private YouTubeAccountList youTubeAccountList;
+        private YoutubeAccountList youtubeAccountList;
+
+        private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -374,6 +377,28 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
+        {
+            get => this.observableYoutubeAccountViewModels;
+        }
+
+        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModelsInclAll
+        {
+            get => this.observableYoutubeAccountViewModelsInclAll;
+        }
+
+        public YoutubeAccountComboboxViewModel SelectedYoutubeAccount
+        {
+            get => this.selectedYoutubeAccount;
+            set
+            {
+                YoutubeAccount oldAccount = this.selectedYoutubeAccount.YoutubeAccount;
+                this.selectedYoutubeAccount = value; 
+                EventAggregator.Instance.Publish(new SelectedYoutubeAccountChangedMessage(oldAccount, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]));
+                this.raisePropertyChanged("SelectedYoutubeAccount");
+            }
+        }
+
         public MainWindowViewModel() : this(null, null, out _, out _, out _)
         {
         }
@@ -424,7 +449,11 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true, true);
             this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, true, false);
             this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList);
-            this.observableYouTubeAccountViewModels = new ObservableYouTubeAccountViewModels(this.youTubeAccountList);
+
+            this.observableYoutubeAccountViewModels = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, false);
+            this.observableYoutubeAccountViewModelsInclAll = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, true);
+            this.selectedYoutubeAccount = this.observableYoutubeAccountViewModelsInclAll[0];
+            EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
             UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll, this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels);
             this.viewModels[0] = uploadListViewModel;
@@ -433,9 +462,17 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
-            this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, templateList);
-            this.viewModels[3] = new SettingsViewModel(this.youTubeAccountList, this.observableYouTubeAccountViewModels);
+            this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
+            this.viewModels[3] = new SettingsViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
             this.viewModels[4] = new VidUpViewModel();
+        }
+
+        private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
+        {
+            if (this.selectedYoutubeAccount.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted)
+            {
+                this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModelsInclAll[0];
+            }
         }
 
         private void uploadListViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -487,7 +524,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            doPostUploadAction(e, cancellationToken);
+            this.doPostUploadAction(e, cancellationToken);
         }
 
         private async Task doPostUploadAction(UploadFinishedEventArgs e, CancellationToken cancellationToken)
@@ -595,10 +632,12 @@ namespace Drexel.VidUp.UI.ViewModels
         private ReSerialize deserializeContent()
         {
             Tracer.Write($"MainWindowViewModel.deserializeContent: Start.");
-            JsonDeserializationContent deserializer = new JsonDeserializationContent(
-                Settings.Instance.StorageFolder, Settings.Instance.ThumbnailFallbackImageFolder);
+
+            this.youtubeAccountList = this.readYoutubeAccounts();
+
+            JsonDeserializationContent deserializer = new JsonDeserializationContent(Settings.Instance.StorageFolder, Settings.Instance.ThumbnailFallbackImageFolder);
             YoutubeAuthentication.SerializationFolder = Settings.Instance.StorageFolder;
-            ReSerialize reSerialize = deserializer.Deserialize();
+            ReSerialize reSerialize = deserializer.Deserialize(this.youtubeAccountList);
             this.templateList = DeserializationRepositoryContent.TemplateList;
             this.templateList.CollectionChanged += this.templateListCollectionChanged;
             
@@ -611,7 +650,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
 
-            this.youTubeAccountList = this.readYouTubeAccounts();
+            
 
             DeserializationRepositoryContent.ClearRepositories();
             Tracer.Write($"MainWindowViewModel.deserializeContent: End.");
@@ -619,19 +658,19 @@ namespace Drexel.VidUp.UI.ViewModels
             return reSerialize;
         }
 
-        private YouTubeAccountList readYouTubeAccounts()
+        private YoutubeAccountList readYoutubeAccounts()
         {
             //compatibility code, will be removed in future versions
             this.renameRefreshTokenFile();
 
-            List<YouTubeAccount> youTubeAccounts = new List<YouTubeAccount>();
+            List<YoutubeAccount> youtubeAccounts = new List<YoutubeAccount>();
             foreach (string file in Directory.GetFiles(Settings.Instance.StorageFolder, "uploadrefreshtoken*"))
             {
                 string[] parts = file.Split('_');
-                youTubeAccounts.Add(new YouTubeAccount(file, parts[1]));
+                youtubeAccounts.Add(new YoutubeAccount(file, parts[1]));
             }
 
-            return new YouTubeAccountList(youTubeAccounts);
+            return new YoutubeAccountList(youtubeAccounts);
         }
 
         private void deserializeSettings()

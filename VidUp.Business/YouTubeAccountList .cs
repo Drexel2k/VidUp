@@ -8,83 +8,83 @@ using System.IO;
 
 namespace Drexel.VidUp.Business
 {
-    public class YouTubeAccountList : INotifyCollectionChanged, INotifyPropertyChanged, IEnumerable<YouTubeAccount>
+    public class YoutubeAccountList : INotifyCollectionChanged, INotifyPropertyChanged, IEnumerable<YoutubeAccount>
     {
-        private List<YouTubeAccount> youTubeAccounts;
+        private List<YoutubeAccount> youtubeAccounts;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int AccountCount { get => this.youTubeAccounts.Count; }
+        public int AccountCount { get => this.youtubeAccounts.Count; }
 
-        public YouTubeAccountList(List<YouTubeAccount> youTubeAccounts)
+        public YoutubeAccountList(List<YoutubeAccount> youtubeAccounts)
         {
-            this.youTubeAccounts = new List<YouTubeAccount>();
+            this.youtubeAccounts = new List<YoutubeAccount>();
 
-            if (youTubeAccounts != null)
+            if (youtubeAccounts != null)
             {
-                this.youTubeAccounts = youTubeAccounts;
+                this.youtubeAccounts = youtubeAccounts;
             }
         }
 
-        public YouTubeAccount this[int index]
+        public YoutubeAccount this[int index]
         {
             get
             {
-                return this.youTubeAccounts[index];
+                return this.youtubeAccounts[index];
             }
         }
 
-        public void AddYouTubeAccounts(List<YouTubeAccount> youTubeAccounts)
+        public void AddYoutubeAccounts(List<YoutubeAccount> youtubeAccounts)
         {
-            this.youTubeAccounts.AddRange(youTubeAccounts);
+            this.youtubeAccounts.AddRange(youtubeAccounts);
 
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, youTubeAccounts));
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, youtubeAccounts));
         }
 
-        public int FindIndex(Predicate<YouTubeAccount> predicate)
+        public int FindIndex(Predicate<YoutubeAccount> predicate)
         {
-            return this.youTubeAccounts.FindIndex(predicate);
+            return this.youtubeAccounts.FindIndex(predicate);
         }
 
         public void Remove(string name)
         {
-            YouTubeAccount youTubeAccount = this.youTubeAccounts.Find(acc => acc.Name == name);
-            if (youTubeAccount != null)
+            YoutubeAccount youtubeAccount = this.youtubeAccounts.Find(acc => acc.Name == name);
+            if (youtubeAccount != null)
             {
-                if (File.Exists(youTubeAccount.FilePath))
+                if (File.Exists(youtubeAccount.FilePath))
                 {
-                    File.Delete(youTubeAccount.FilePath);
+                    File.Delete(youtubeAccount.FilePath);
                 }
 
-                this.youTubeAccounts.Remove(youTubeAccount);
-                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, youTubeAccount));
+                this.youtubeAccounts.Remove(youtubeAccount);
+                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, youtubeAccount));
             }
         }
 
-        public YouTubeAccount GetYouTubeAccount(int index)
+        public YoutubeAccount GetYoutubeAccount(int index)
         {
-            return this.youTubeAccounts[index];
+            return this.youtubeAccounts[index];
         }
 
-        public YouTubeAccount GetYouTubeAccount(string name)
+        public YoutubeAccount GetYoutubeAccount(string name)
         {
-            return this.youTubeAccounts.Find(youTubeAccount => youTubeAccount.Name == name);
+            return this.youtubeAccounts.Find(youtubeAccount => youtubeAccount.Name == name);
         }
 
-        public ReadOnlyCollection<YouTubeAccount> GetReadOnlyYouTubeAccountList()
+        public ReadOnlyCollection<YoutubeAccount> GetReadOnlyYoutubeAccountList()
         {
-            return this.youTubeAccounts.AsReadOnly();
+            return this.youtubeAccounts.AsReadOnly();
         }
 
-        public YouTubeAccount Find(Predicate<YouTubeAccount> match)
+        public YoutubeAccount Find(Predicate<YoutubeAccount> match)
         {
-            return this.youTubeAccounts.Find(match);
+            return this.youtubeAccounts.Find(match);
         }
 
-        public IEnumerator<YouTubeAccount> GetEnumerator()
+        public IEnumerator<YoutubeAccount> GetEnumerator()
         {
-            return this.youTubeAccounts.GetEnumerator();
+            return this.youtubeAccounts.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

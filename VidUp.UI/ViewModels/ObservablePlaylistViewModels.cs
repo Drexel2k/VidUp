@@ -79,6 +79,22 @@ namespace Drexel.VidUp.UI.ViewModels
             return null;
         }
 
+        public PlaylistComboboxViewModel GetFirstViewModel(Predicate<PlaylistComboboxViewModel> match)
+        {
+            if (match != null)
+            {
+                foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.playlistComboboxViewModels)
+                {
+                    if (match(playlistComboboxViewModel))
+                    {
+                        return playlistComboboxViewModel;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         public PlaylistComboboxViewModel this[int index]
         {
             get => this.playlistComboboxViewModels[index];

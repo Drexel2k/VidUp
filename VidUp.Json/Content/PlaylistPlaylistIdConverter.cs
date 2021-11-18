@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Drexel.VidUp.Business;
 using Newtonsoft.Json;
 
@@ -18,10 +19,10 @@ namespace Drexel.VidUp.Json.Content
             Playlist playlist = DeserializationRepositoryContent.PlaylistList.Find(playlist => playlist.PlaylistId == playlistId);
             if (playlist == null)
             {
-                throw new InvalidOperationException("Playlist not found.");
+                throw new SerializationException("Playlist not found.");
             }
 
-            return DeserializationRepositoryContent.PlaylistList.Find(playlist => playlist.PlaylistId == playlistId);
+            return playlist;
         }
 
         public override void WriteJson(JsonWriter writer, Playlist value, JsonSerializer serializer)

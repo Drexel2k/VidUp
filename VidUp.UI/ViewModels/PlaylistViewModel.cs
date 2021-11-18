@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Drexel.VidUp.Business;
@@ -14,6 +15,7 @@ using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.PlaylistItem;
 using Drexel.VidUp.Youtube.Video;
 using MaterialDesignThemes.Wpf;
+using Timer = System.Timers.Timer;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -38,6 +40,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private readonly object autoSetPlaylistsLock = new object();
         private Timer autoSetPlaylistTimer;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+        private YoutubeAccount youtubeAccountForRequestingPlaylists;
 
         #region properties
 
@@ -151,6 +155,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string YouTubeAccountName
+        {
+            get => this.playlist != null ? this.playlist.YoutubeAccount.Name : null;
+        }
+
         public DateTime Created
         { 
             get => this.playlist != null ? this.playlist.Created : DateTime.MinValue; 
@@ -174,7 +183,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public PlaylistViewModel(PlaylistList playlistList, ObservablePlaylistViewModels observablePlaylistViewModels, TemplateList templateList)
+        public PlaylistViewModel(PlaylistList playlistList, ObservablePlaylistViewModels observablePlaylistViewModels, TemplateList templateList, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForRequestingPlaylists)
         {
             if(playlistList == null)
             {
@@ -183,12 +192,22 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if(observablePlaylistViewModels == null)
             {
-                throw new ArgumentException("ObservablePlaylistViewModels action must not be null.");
+                throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
             }
 
             if (templateList == null)
             {
-                throw new ArgumentException("TemplateList action must not be null.");
+                throw new ArgumentException("TemplateList must not be null.");
+            }
+
+            if (observableYoutubeAccountViewModels == null || observableYoutubeAccountViewModels.YoutubeAccountCount <= 0)
+            {
+                throw new ArgumentException("observableYoutubeAccountViewModels action must not be null and contain at least one account.");
+            }
+
+            if (youtubeAccountForRequestingPlaylists == null)
+            {
+                throw new ArgumentException("selectedAccount must not be null.");
             }
 
             this.playlistList = playlistList;
@@ -197,10 +216,14 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.SelectedPlaylist = this.observablePlaylistViewModels.PlaylistCount > 0 ? this.observablePlaylistViewModels[0] : null;
 
+            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
+            this.youtubeAccountForRequestingPlaylists = youtubeAccountForRequestingPlaylists;
+            EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
+            EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
+
             this.newPlaylistCommand = new GenericCommand(this.OpenNewPlaylistDialogAsync);
             this.deletePlaylistCommand = new GenericCommand(this.DeletePlaylist);
             this.autoSetPlaylistsCommand = new GenericCommand(this.autoSetPlaylistsAsync);
-
 
             this.autoSetPlaylistTimer = new Timer();
             this.autoSetPlaylistTimer.AutoReset = false;
@@ -217,6 +240,57 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
+        {
+            if (selectedYoutubeAccountChangedMessage.NewAccount == null)
+            {
+                throw new ArgumentException("Changed Youtube account must not be null.");
+            }
+
+            this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.NewAccount.Name == "All" ?
+                selectedYoutubeAccountChangedMessage.FirstNotAllAccount : selectedYoutubeAccountChangedMessage.NewAccount;
+
+            foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.observablePlaylistViewModels)
+            {
+                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                {
+                    if (playlistComboboxViewModel.Visible == false)
+                    {
+                        playlistComboboxViewModel.Visible = true;
+                    }
+                }
+                else
+                {
+                    if (playlistComboboxViewModel.YoutubeAccountName == selectedYoutubeAccountChangedMessage.NewAccount.Name)
+                    {
+                        playlistComboboxViewModel.Visible = true;
+                    }
+                    else
+                    {
+                        playlistComboboxViewModel.Visible = false;
+                    }
+                }
+            }
+
+            //is null if there is no playlist in previously selected account
+            if (this.selectedPlaylist == null || this.selectedPlaylist.Visible == false)
+            {
+                PlaylistComboboxViewModel viewModel = this.observablePlaylistViewModels.GetFirstViewModel(vm => vm.Visible == true);
+                this.SelectedPlaylist = viewModel;
+                this.raisePropertyChanged("SelectedPlaylist");
+            }
+        }
+
+        private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
+        {
+            List<Playlist> playlistsToRemove = this.playlistList.FindAll(playlist => playlist.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
+            foreach (Playlist playlist in playlistsToRemove)
+            {
+                this.playlistList.Remove(playlist);
+            }
+            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+        }
+
         private void raisePropertyChanged(string propertyName)
         {
             // take a copy to prevent thread issues
@@ -231,7 +305,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             var view = new NewPlaylistControl
             {
-                DataContext = new NewPlaylistViewModel(this.playlistList.GetReadOnlyPlaylistList().Select(playlist => playlist.PlaylistId).ToList())
+                DataContext = new NewPlaylistViewModel(this.playlistList.GetReadOnlyPlaylistList().Select(playlist => playlist.PlaylistId).ToList(), this.observableYoutubeAccountViewModels, this.youtubeAccountForRequestingPlaylists)
             };
 
             bool result = (bool)await DialogHost.Show(view, "RootDialog");
@@ -242,7 +316,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     if (playlistSelectionViewModel.IsChecked)
                     {
-                        Playlist playlist = new Playlist(playlistSelectionViewModel.Id, playlistSelectionViewModel.Title);
+                        Playlist playlist = new Playlist(playlistSelectionViewModel.Id, playlistSelectionViewModel.Title, data.SelectedYoutubeAccount.YoutubeAccount);
                         this.AddPlaylist(playlist);
                     }
                 }
@@ -255,21 +329,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
             //will set the SelectedTemplate to null which causes problems if there are templates left
-            if (this.observablePlaylistViewModels.PlaylistCount > 1)
-            {
-                if (this.observablePlaylistViewModels[0].Playlist == playlist)
-                {
-                    this.SelectedPlaylist = this.observablePlaylistViewModels[1];
-                }
-                else
-                {
-                    this.SelectedPlaylist = this.observablePlaylistViewModels[0];
-                }
-            }
-            else
-            {
-                this.SelectedPlaylist = null;
-            }
+            PlaylistComboboxViewModel viewModel = this.observablePlaylistViewModels.GetFirstViewModel(vm => vm.Playlist != playlist && vm.Visible == true);
+            this.SelectedPlaylist = viewModel;
 
             this.playlistList.Remove(playlist);
 
@@ -292,7 +353,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.playlistList.AddPlaylists(list);
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
 
-            this.SelectedPlaylist = new PlaylistComboboxViewModel(playlist);
+            this.SelectedPlaylist = this.observablePlaylistViewModels.GetViewModel(playlist);
         }
 
         private void autoSetPlaylistTimerElapsed(object sender, ElapsedEventArgs e)
@@ -337,7 +398,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     {
                         success = false;
                         Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one playlist was removed on YoutTube.");
-                        message.AppendLine("At least one playlist was removed on YouTube.");
+                        message.AppendLine("At least one playlist was removed on Youtube.");
                     }
 
                     Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads are already in playlist.");
@@ -348,12 +409,12 @@ namespace Drexel.VidUp.UI.ViewModels
                         if (uploadAlreadyInPlaylist)
                         {
                             success = false;
-                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was already in playlist on YouTube.");
-                            message.AppendLine("At least one video to add to playlist was already in playlist on YouTube.");
+                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was already in playlist on Youtube.");
+                            message.AppendLine("At least one video to add to playlist was already in playlist on Youtube.");
                         }
 
                         int originalVideoCount = playlistUploadsWithoutPlaylistMap.Values.Sum(list => list.Count);
-                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on YouTube.");
+                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on Youtube.");
                         var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploadsAsync(playlistUploadsWithoutPlaylistMap).ConfigureAwait(false);
 
                         if (playlistUploadsWithoutPlaylistMap.Count > 0)
@@ -361,8 +422,8 @@ namespace Drexel.VidUp.UI.ViewModels
                             if (originalVideoCount != videosPublicMap.Count)
                             {
                                 success = false;
-                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was removed on YouTube.");
-                                message.AppendLine("At least one video to add to playlist was removed on YouTube.");
+                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was removed on Youtube.");
+                                message.AppendLine("At least one video to add to playlist was removed on Youtube.");
                             }
 
                             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads is public and add to playlist.");
@@ -371,15 +432,15 @@ namespace Drexel.VidUp.UI.ViewModels
                         else
                         {
                             success = false;
-                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No uploads left after public/exist check on YouTube.");
-                            message.AppendLine("All videos to add to playlists were removed on YouTube.");
+                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No uploads left after public/exist check on Youtube.");
+                            message.AppendLine("All videos to add to playlists were removed on Youtube.");
                         }
                     }
                     else
                     {
                         success = false;
                         message.AppendLine("All videos to add to playlists were already in playlist.");
-                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after uploads already in playlist check on YouTube.");
+                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after uploads already in playlist check on Youtube.");
                     }
 
                     JsonSerializationContent.JsonSerializer.SerializeAllUploads();
@@ -387,8 +448,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 else
                 {
                     success = false;
-                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after availability check on YouTube.");
-                    message.AppendLine("All playlists with videos to add were removed on YouTube. ");
+                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after availability check on Youtube.");
+                    message.AppendLine("All playlists with videos to add were removed on Youtube. ");
                 }
             }
             else

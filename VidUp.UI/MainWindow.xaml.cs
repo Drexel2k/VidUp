@@ -38,7 +38,7 @@ namespace Drexel.VidUp.UI
             List<Upload> uploads = new List<Upload>();
             foreach (string file in files)
             {
-                uploads.Add(new Upload(file));
+                uploads.Add(new Upload(file,new YoutubeAccount("","")));
             }
 
             uploadListViewModel.AddUploads(uploads);

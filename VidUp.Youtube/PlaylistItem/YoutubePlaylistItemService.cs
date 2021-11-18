@@ -32,7 +32,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
 
                 string contentJson = JsonConvert.SerializeObject(playlistItem);
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync("default").ConfigureAwait(false);
+                HttpClient client = HttpHelper.GetStandardClient("default");
                 using (ByteArrayContent byteContent = HttpHelper.GetStreamContent(contentJson, "application/json"))
                 {
                     HttpResponseMessage message;
@@ -101,7 +101,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
         {
             Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Start.");
 
-            HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync(accountName).ConfigureAwait(false);
+            HttpClient client = HttpHelper.GetStandardClient(accountName);
             HttpResponseMessage message;
 
             try

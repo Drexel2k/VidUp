@@ -496,7 +496,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 List<Upload> uploads = new List<Upload>();
                 foreach (string fileName in fileDialog.FileNames)
                 {
-                    uploads.Add(new Upload(fileName));
+                    uploads.Add(new Upload(fileName, new YoutubeAccount("","")));
                 }
 
                 Tracer.Write($"UploadListViewModel.openUploadDialog: Selected {uploads.Count} files.");

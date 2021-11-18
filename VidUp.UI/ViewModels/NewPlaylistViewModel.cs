@@ -4,7 +4,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Drexel.VidUp.Business;
 using Drexel.VidUp.Youtube.Playlist;
+using Playlist = Drexel.VidUp.Youtube.Playlist.Playlist;
 
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -12,10 +14,12 @@ namespace Drexel.VidUp.UI.ViewModels
     class NewPlaylistViewModel : INotifyPropertyChanged
     {
         private ObservableCollection<PlaylistSelectionViewModel> observablePlaylistSelectionViewModels;
-        private List<PlaylistSelectionViewModel> allPayPlaylistSelectionViewModels;
+        private List<PlaylistSelectionViewModel> allPlaylistSelectionViewModels;
         private bool showPlaylistReceiveError = false;
         private List<string> selectedPlaylists;
         private string searchText = string.Empty;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+        private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
 
         public bool ShowPlaylistReceiveError
         {
@@ -37,21 +41,50 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
+        {
+            get => this.observableYoutubeAccountViewModels;
+        }
+
+        public YoutubeAccountComboboxViewModel SelectedYoutubeAccount
+        {
+            get => this.selectedYoutubeAccount;
+            set
+            {
+                this.selectedYoutubeAccount = value;
+                this.initializePlaylistsAsync();
+                this.raisePropertyChanged("ObservablePlaylistSelectionViewModels");
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public NewPlaylistViewModel(List<string> selectedPlaylists)
+        public NewPlaylistViewModel(List<string> selectedPlaylists, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount)
         {
+            if (observableYoutubeAccountViewModels == null || observableYoutubeAccountViewModels.YoutubeAccountCount <= 0)
+            {
+                throw new ArgumentException("observableYoutubeAccountViewModels must not be null and must contain accounts.");
+            }
+
+            if (selectedYoutubeAccount == null)
+            {
+                throw new ArgumentException("selectedYoutubeAccount must not be null.");
+            }
+
             this.selectedPlaylists = selectedPlaylists == null ? new List<string>() : selectedPlaylists;
             this.observablePlaylistSelectionViewModels = new ObservableCollection<PlaylistSelectionViewModel>();
-            this.allPayPlaylistSelectionViewModels = new List<PlaylistSelectionViewModel>();
+            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
+            this.selectedYoutubeAccount = observableYoutubeAccountViewModels.GetViewModel(selectedYoutubeAccount);
+            this.allPlaylistSelectionViewModels = new List<PlaylistSelectionViewModel>();
             this.initializePlaylistsAsync();
         }
 
         private async Task initializePlaylistsAsync()
         {
+            this.allPlaylistSelectionViewModels.Clear();
             try
             {
-                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylistsAsync("default");
+                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylistsAsync(this.selectedYoutubeAccount.YoutubeAccount.Name);
 
                 foreach (Playlist playlist in playlists)
                 {
@@ -59,7 +92,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     {
                         PlaylistSelectionViewModel playlistSelectionViewModel = new PlaylistSelectionViewModel(playlist.Id, playlist.Title, false);
                         playlistSelectionViewModel.PropertyChanged += playlistViewModelPropertyChanged;
-                        this.allPayPlaylistSelectionViewModels.Add(playlistSelectionViewModel); }
+                        this.allPlaylistSelectionViewModels.Add(playlistSelectionViewModel); }
                 }
 
                 this.filterObservablePlaylistSelectionViewmodels();
@@ -78,7 +111,7 @@ namespace Drexel.VidUp.UI.ViewModels
             string searchText = this.searchText.ToLower();
             List<PlaylistSelectionViewModel> selectedViewModels = new List<PlaylistSelectionViewModel>();
             List<PlaylistSelectionViewModel> notSelectedViewModels = new List<PlaylistSelectionViewModel>();
-            foreach (PlaylistSelectionViewModel playlistSelectionViewModel in this.allPayPlaylistSelectionViewModels)
+            foreach (PlaylistSelectionViewModel playlistSelectionViewModel in this.allPlaylistSelectionViewModels)
             {
                 if (playlistSelectionViewModel.IsChecked)
                 {
@@ -90,7 +123,6 @@ namespace Drexel.VidUp.UI.ViewModels
                     {
                         notSelectedViewModels.Add(playlistSelectionViewModel);
                     }
-                    
                 }
             }
 

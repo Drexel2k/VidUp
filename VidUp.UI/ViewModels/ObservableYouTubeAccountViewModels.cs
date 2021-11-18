@@ -3,43 +3,52 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.UI.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    public class ObservableYouTubeAccountViewModels : INotifyCollectionChanged, IEnumerable<YouTubeAccountComboboxViewModel>
+    public class ObservableYoutubeAccountViewModels : INotifyCollectionChanged, IEnumerable<YoutubeAccountComboboxViewModel>
     {
-        private YouTubeAccountList youTubeAccountList;
-        private List<YouTubeAccountComboboxViewModel> youTubeAccountComboboxViewModels;
+        private YoutubeAccountList youtubeAccountList;
+        private List<YoutubeAccountComboboxViewModel> youtubeAccountComboboxViewModels;
 
-        public int YouTubeAccountCount { get => this.youTubeAccountComboboxViewModels.Count;  }
+        public int YoutubeAccountCount { get => this.youtubeAccountComboboxViewModels.Count;  }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public ObservableYouTubeAccountViewModels(YouTubeAccountList youTubeAccountList)
+        public ObservableYoutubeAccountViewModels(YoutubeAccountList youtubeAccountList, bool addAll)
         {
-            this.youTubeAccountList = youTubeAccountList;
+            this.youtubeAccountList = youtubeAccountList;
 
-            this.youTubeAccountComboboxViewModels = new List<YouTubeAccountComboboxViewModel>();
-            foreach (YouTubeAccount youTubeAccount in youTubeAccountList)
+            this.youtubeAccountComboboxViewModels = new List<YoutubeAccountComboboxViewModel>();
+
+            if (addAll)
             {
-                YouTubeAccountComboboxViewModel youTubeAccountComboboxViewModel = new YouTubeAccountComboboxViewModel(youTubeAccount);
-                this.youTubeAccountComboboxViewModels.Add(youTubeAccountComboboxViewModel);
+                YoutubeAccount allAccount = new YoutubeAccount(null, "All");
+                YoutubeAccountComboboxViewModel allViewModel = new YoutubeAccountComboboxViewModel(allAccount);
+                this.youtubeAccountComboboxViewModels.Add(allViewModel);
             }
 
-            this.youTubeAccountList.CollectionChanged += youTubeAccountListCollectionChanged;
+            foreach (YoutubeAccount youtubeAccount in youtubeAccountList)
+            {
+                YoutubeAccountComboboxViewModel youtubeAccountComboboxViewModel = new YoutubeAccountComboboxViewModel(youtubeAccount);
+                this.youtubeAccountComboboxViewModels.Add(youtubeAccountComboboxViewModel);
+            }
+
+            this.youtubeAccountList.CollectionChanged += youtubeAccountListCollectionChanged;
         }
 
-        private void youTubeAccountListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void youtubeAccountListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if(e.Action == NotifyCollectionChangedAction.Add)
             {
-                List<YouTubeAccountComboboxViewModel> newViewModels = new List<YouTubeAccountComboboxViewModel>();
-                foreach (YouTubeAccount youTubeAccount in e.NewItems)
+                List<YoutubeAccountComboboxViewModel> newViewModels = new List<YoutubeAccountComboboxViewModel>();
+                foreach (YoutubeAccount youtubeAccount in e.NewItems)
                 {
-                    newViewModels.Add(new YouTubeAccountComboboxViewModel(youTubeAccount));
+                    newViewModels.Add(new YoutubeAccountComboboxViewModel(youtubeAccount));
                 }
 
-                this.youTubeAccountComboboxViewModels.AddRange(newViewModels);
+                this.youtubeAccountComboboxViewModels.AddRange(newViewModels);
 
                 this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newViewModels));
                 return;
@@ -49,29 +58,29 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 //if multiple view models removed, remove every view model with a single call, as WPF/MVVM only supports
                 //multiple deletes in one call when they are all in direct sequence in the collection
-                foreach (YouTubeAccount youTubeAccount in e.OldItems)
+                foreach (YoutubeAccount youtubeAccount in e.OldItems)
                 {
-                    YouTubeAccountComboboxViewModel oldViewModel = this.youTubeAccountComboboxViewModels.Find(viewModel => viewModel.YouTubeAccountName == youTubeAccount.Name);
-                    int index = this.youTubeAccountComboboxViewModels.IndexOf(oldViewModel);
-                    this.youTubeAccountComboboxViewModels.Remove(oldViewModel);
+                    YoutubeAccountComboboxViewModel oldViewModel = this.youtubeAccountComboboxViewModels.Find(viewModel => viewModel.YoutubeAccount.Name == youtubeAccount.Name);
+                    int index = this.youtubeAccountComboboxViewModels.IndexOf(oldViewModel);
+                    this.youtubeAccountComboboxViewModels.Remove(oldViewModel);
                     this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldViewModel, index));
                 }
 
                 return;
             }
 
-            throw new InvalidOperationException("ObservableYouTubeAccountViewModels supports only adding and removing.");
+            throw new InvalidOperationException("ObservableYoutubeAccountViewModels supports only adding and removing.");
         }
 
-        public YouTubeAccountComboboxViewModel GetViewModel(YouTubeAccount youTubeAccount)
+        public YoutubeAccountComboboxViewModel GetViewModel(YoutubeAccount youtubeAccount)
         {
-            if (youTubeAccount != null)
+            if (youtubeAccount != null)
             {
-                foreach (YouTubeAccountComboboxViewModel youTubeAccountComboboxViewModel in this.youTubeAccountComboboxViewModels)
+                foreach (YoutubeAccountComboboxViewModel youtubeAccountComboboxViewModel in this.youtubeAccountComboboxViewModels)
                 {
-                    if (youTubeAccountComboboxViewModel.YouTubeAccountName == youTubeAccount.Name)
+                    if (youtubeAccountComboboxViewModel.YoutubeAccount.Name == youtubeAccount.Name)
                     {
-                        return youTubeAccountComboboxViewModel;
+                        return youtubeAccountComboboxViewModel;
                     }
                 }
             }
@@ -79,9 +88,9 @@ namespace Drexel.VidUp.UI.ViewModels
             return null;
         }
 
-        public YouTubeAccountComboboxViewModel this[int index]
+        public YoutubeAccountComboboxViewModel this[int index]
         {
-            get => this.youTubeAccountComboboxViewModels[index];
+            get => this.youtubeAccountComboboxViewModels[index];
         }
 
 
@@ -94,9 +103,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public IEnumerator<YouTubeAccountComboboxViewModel> GetEnumerator()
+        public IEnumerator<YoutubeAccountComboboxViewModel> GetEnumerator()
         {
-            return this.youTubeAccountComboboxViewModels.GetEnumerator();
+            return this.youtubeAccountComboboxViewModels.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

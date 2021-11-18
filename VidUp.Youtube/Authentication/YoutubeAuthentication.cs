@@ -17,7 +17,7 @@ namespace Drexel.VidUp.Youtube.Authentication
     //based on: https://github.com/googlesamples/oauth-apps-for-windows/blob/master/OAuthDesktopApp/OAuthDesktopApp/MainWindow.xaml.cs
     public static class YoutubeAuthentication
     {
-        private static string refreshToken;
+        private static Dictionary<string, string> youtubeAccountRefreshToken = new Dictionary<string, string>();
         private static string authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
         private static string tokenEndpoint = "https://www.googleapis.com/oauth2/v4/token";
 
@@ -50,11 +50,11 @@ namespace Drexel.VidUp.Youtube.Authentication
         public static async Task<AccessToken> GetNewAccessTokenAsync(string accountName)
         {
             //check for refresh token, if not there, get it
-            if (string.IsNullOrWhiteSpace(YoutubeAuthentication.refreshToken))
+            if (! YoutubeAuthentication.youtubeAccountRefreshToken.ContainsKey(accountName))
             {
                 if (!YoutubeAuthentication.trySetRefreshToken(accountName))
                 {
-                    await YoutubeAuthentication.GetRefreshTokenAsync("default").ConfigureAwait(false);
+                    await YoutubeAuthentication.GetRefreshTokenAsync(accountName).ConfigureAwait(false);
                 }
             }
 
@@ -62,7 +62,7 @@ namespace Drexel.VidUp.Youtube.Authentication
             // builds the  request
             string tokenRequestBody = string.Format(
                 "refresh_token={0}&client_id={1}&client_secret={2}&grant_type=refresh_token",
-                YoutubeAuthentication.refreshToken,
+                YoutubeAuthentication.youtubeAccountRefreshToken[accountName],
                 Credentials.ClientId,
                 Credentials.ClientSecret
             );
@@ -101,7 +101,7 @@ namespace Drexel.VidUp.Youtube.Authentication
                 }
                 else
                 {
-                    YoutubeAuthentication.refreshToken = refreshToken;
+                    YoutubeAuthentication.youtubeAccountRefreshToken[accountName] = refreshToken;
                     return true;
                 }
             }
@@ -203,8 +203,8 @@ namespace Drexel.VidUp.Youtube.Authentication
                     message.EnsureSuccessStatusCode();
 
                     Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
-                    YoutubeAuthentication.refreshToken = tokenEndpointDecoded["refresh_token"];
-                    File.WriteAllText(YoutubeAuthentication.getRefreshTokenFilePath(accountName), YoutubeAuthentication.refreshToken);
+                    YoutubeAuthentication.youtubeAccountRefreshToken[accountName] = tokenEndpointDecoded["refresh_token"];
+                    File.WriteAllText(YoutubeAuthentication.getRefreshTokenFilePath(accountName), YoutubeAuthentication.youtubeAccountRefreshToken[accountName]);
                 }
             }
         }

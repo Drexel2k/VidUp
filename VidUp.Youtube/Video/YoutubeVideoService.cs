@@ -23,7 +23,7 @@ namespace Drexel.VidUp.Youtube.Video
             {
                 Tracer.Write($"YoutubeVideoService.IsPublic: {videoIds.Count} Videos to check available.");
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync(accountName).ConfigureAwait(false);
+                HttpClient client = HttpHelper.GetStandardClient(accountName);
                 HttpResponseMessage message;
 
                 int batch = 0;

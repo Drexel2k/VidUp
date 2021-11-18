@@ -33,11 +33,12 @@ namespace Drexel.VidUp.Json.Content
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        public ReSerialize Deserialize()
+        public ReSerialize Deserialize(YoutubeAccountList youtubeAccountList)
         {
-            ReSerialize reSerialize = new ReSerialize();
-            
             Tracer.Write($"JsonDeserializationContent.Deserialize: Start.");
+            DeserializationRepositoryContent.YoutubeAccountList = youtubeAccountList;
+            ReSerialize reSerialize = new ReSerialize();
+
             reSerialize.PlaylistList = this.deserializePlaylistList();
             reSerialize.AllUploads = this.deserializeAllUploads();
             reSerialize.TemplateList = this.deserializeTemplateList();
@@ -46,6 +47,7 @@ namespace Drexel.VidUp.Json.Content
             this.createTemplateListToRepository();
             this.createUploadListToRepository();
             this.checkConsistency();
+
             Tracer.Write($"JsonDeserializationContent.Deserialize: End.");
 
             return reSerialize;
@@ -63,7 +65,7 @@ namespace Drexel.VidUp.Json.Content
 
             //todo: remove compatibility ode
             JsonSerializer serializer = new JsonSerializer();
-            serializer.MissingMemberHandling = MissingMemberHandling.Error;
+            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
 
             using (StreamReader sr = new StreamReader(this.playlistListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))

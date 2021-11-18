@@ -62,6 +62,8 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
+            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+
             serializer.Formatting = Formatting.Indented;
 
             lock(this.allUploadsLock)
@@ -105,6 +107,7 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
+            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
 
             serializer.Formatting = Formatting.Indented;
 
@@ -121,6 +124,8 @@ namespace Drexel.VidUp.Json.Content
         {
             Tracer.Write($"JsonSerializationContent.SerializePlaylistList: Start.", TraceLevel.Detailed);
             JsonSerializer serializer = new JsonSerializer();
+            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+
             serializer.Formatting = Formatting.Indented;
 
             using (StreamWriter sw = new StreamWriter(this.playlistListFilePath))

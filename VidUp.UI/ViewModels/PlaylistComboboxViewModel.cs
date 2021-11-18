@@ -7,6 +7,7 @@ namespace Drexel.VidUp.UI.ViewModels
     public class PlaylistComboboxViewModel : INotifyPropertyChanged
     {
         private Playlist playlist;
+        private bool visible = true;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Playlist Playlist
@@ -22,9 +23,29 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.playlist != null ? this.playlist.PlaylistId : string.Empty;
         }
 
-        public string Name
+        public string Title
         {
             get => this.playlist != null ? this.playlist.Title : string.Empty;
+        }
+
+        public string TitleWithYoutubeAccountInfo
+        {
+            get => this.playlist != null ? $"{this.playlist.Title} [{this.playlist.YoutubeAccount.Name}]" : string.Empty;
+        }
+
+        public string YoutubeAccountName
+        {
+            get => this.playlist != null ? this.playlist.YoutubeAccount.Name : string.Empty;
+        }
+
+        public bool Visible
+        {
+            get => this.visible;
+            set
+            {
+                this.visible = value;
+                this.raisePropertyChanged("Visible");
+            }
         }
 
         public PlaylistComboboxViewModel(Playlist playlist)

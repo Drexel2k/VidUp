@@ -17,6 +17,8 @@ namespace Drexel.VidUp.Business
         private DateTime lastModified;
         [JsonProperty]
         private bool notExistsOnYoutube;
+        [JsonProperty]
+        private YoutubeAccount youtubeAccount;
 
         private DateTime lastModifiedInternal
         {
@@ -32,6 +34,10 @@ namespace Drexel.VidUp.Business
             get => this.playlistId;
             set
             {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentException("playlistId must not be null or white space.");
+                }
                 this.playlistId = value;
                 this.lastModifiedInternal = DateTime.Now;
                 this.raisePropertyChanged("PlaylistId");
@@ -61,6 +67,19 @@ namespace Drexel.VidUp.Business
                 this.lastModifiedInternal = DateTime.Now;
             }
         }
+        public YoutubeAccount YoutubeAccount
+        {
+            get => this.youtubeAccount;
+            set
+            {
+                if (youtubeAccount == null)
+                {
+                    throw new ArgumentException("youtubeAccount must not be null.");
+                }
+                this.youtubeAccount = value;
+                this.lastModified = DateTime.Now;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -70,10 +89,16 @@ namespace Drexel.VidUp.Business
 
         }
 
-        public Playlist(string playlistId, string title)
+        public Playlist(string playlistId, string title, YoutubeAccount youtubeAccount)
         {
+            if (string.IsNullOrWhiteSpace(playlistId) || youtubeAccount == null)
+            {
+                throw new ArgumentException("playlistId or youtubeAccount must not be null or white space.");
+            }
+
             this.playlistId = playlistId;
             this.title = title;
+            this.youtubeAccount = youtubeAccount;
             this.created = DateTime.Now;
             this.lastModified = this.created;
         }

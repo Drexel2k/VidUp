@@ -61,6 +61,8 @@ namespace Drexel.VidUp.Business
         private CultureInfo descriptionLanguage;
         [JsonProperty]
         private Category category;
+        [JsonProperty]
+        private YoutubeAccount youtubeAccount;
 
         //public event PropertyChangedEventHandler PropertyChanged;
         public event OldValueHandler ThumbnailFallbackFilePathChanged;
@@ -320,6 +322,15 @@ namespace Drexel.VidUp.Business
                 this.LastModified = DateTime.Now;
             }
         }
+        public YoutubeAccount YoutubeAccount
+        {
+            get => this.youtubeAccount;
+            set
+            {
+                this.youtubeAccount = value;
+                this.LastModified = DateTime.Now;
+            }
+        }
 
         #endregion properties
 
@@ -333,11 +344,16 @@ namespace Drexel.VidUp.Business
             this.name = name;
         }
 
-        public Template(string name, string imagefilePath, TemplateMode templateMode, string rootFolderPath, string partOfFileName, TemplateList templateList)
+        public Template(string name, string imagefilePath, TemplateMode templateMode, string rootFolderPath, string partOfFileName, TemplateList templateList, YoutubeAccount youtubeAccount)
         {
             if (templateList == null)
             {
                 throw new ArgumentException("templateList must not be null.");
+            }
+
+            if (youtubeAccount == null)
+            {
+                throw new ArgumentException("youtubeAccount must not be null.");
             }
 
             this.guid = Guid.NewGuid();

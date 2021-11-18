@@ -1,47 +1,47 @@
 ﻿using System;
 using System.ComponentModel;
+using System.DirectoryServices.ActiveDirectory;
 using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
 
-    public class YouTubeAccountComboboxViewModel : INotifyPropertyChanged
+    public class YoutubeAccountComboboxViewModel : INotifyPropertyChanged
     {
-        private YouTubeAccount youTubeAccount;
+        private YoutubeAccount youtubeAccount;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string YouTubeAccountFilePath
+        public YoutubeAccount YoutubeAccount
         {
-            get => this.youTubeAccount.FilePath;
+            get => this.youtubeAccount;
         }
 
-        public string YouTubeAccountName
+        public string YoutubeAccountName
         {
-            get => this.youTubeAccount.Name;
-            set => this.youTubeAccount.Name = value;
+            get => this.youtubeAccount.Name;
         }
 
-        public YouTubeAccountComboboxViewModel(YouTubeAccount youTubeAccount)
+        public YoutubeAccountComboboxViewModel(YoutubeAccount youtubeAccount)
         {
-            if (youTubeAccount == null)
+            if (youtubeAccount == null)
             {
                 throw new ArgumentException("YouToubeAccount must not be null");
             }
 
-            this.youTubeAccount = youTubeAccount;
-            this.youTubeAccount.PropertyChanged += youTubeAccountPropertyChanged;
+            this.youtubeAccount = youtubeAccount;
+            this.youtubeAccount.PropertyChanged += youtubeAccountPropertyChanged;
         }
 
-        private void youTubeAccountPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void youtubeAccountPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if(e.PropertyName == "Name")
             {
-                this.raisePropertyChanged("YouTubeAccountName");
+                this.raisePropertyChanged("YoutubeAccountName");
             }
 
             if(e.PropertyName == "FilePath")
             {
-                this.raisePropertyChanged("YouTubeAccountFilePath");
+                this.raisePropertyChanged("YoutubeAccountFilePath");
             }
         }
 

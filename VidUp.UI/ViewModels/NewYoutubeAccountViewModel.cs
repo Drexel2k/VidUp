@@ -2,7 +2,7 @@
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    class NewYouTubeAccountViewModel : INotifyPropertyChanged
+    class NewYoutubeAccountViewModel : INotifyPropertyChanged
     {
         private string name;
         private bool formVaild = false;
@@ -44,7 +44,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public NewYouTubeAccountViewModel()
+        public NewYoutubeAccountViewModel()
         {
 
         }

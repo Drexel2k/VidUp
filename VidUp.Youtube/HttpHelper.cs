@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Drexel.VidUp.Youtube.Authentication;
@@ -14,7 +16,8 @@ namespace Drexel.VidUp.Youtube
         private static HttpClient standardClient;
         private static HttpClient uploadClient;
 
-        private static DateTime accessTokenExpiry = DateTime.MinValue;
+        private static Dictionary<string, DateTime> youtubeAccountAccessTokenExpiry = new Dictionary<string, DateTime>();
+        public static Dictionary<string, string> YouTubeAccountTokens = new Dictionary<string, string>();
         private static TimeSpan oneMinute = new TimeSpan(0, 1, 0);
         static HttpHelper()
         {
@@ -29,26 +32,31 @@ namespace Drexel.VidUp.Youtube
         //eg. if set to 10240 buffer will be 16384.
         private static int bufferSize = 32 * 1024;
 
-        public static async Task<HttpClient> GetAuthenticatedStandardClientAsync(string accountName)
+        public static HttpClient GetStandardClient(string accountName)
         {
-            await HttpHelper.checkAccesTokenAsync(accountName).ConfigureAwait(false);
             return HttpHelper.standardClient;
         }
 
-        public static async Task<HttpClient> GetAuthenticatedUploadClientAsync(string accountName)
+        public static HttpClient GetUploadClient(string accountName)
+        {
+            return HttpHelper.uploadClient;
+        }
+
+        public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(string accountName)
         {
             await HttpHelper.checkAccesTokenAsync(accountName).ConfigureAwait(false);
-            return HttpHelper.uploadClient;
+            HttpRequestMessage message = new HttpRequestMessage();
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", HttpHelper.YouTubeAccountTokens[accountName]);
+            return message;
         }
 
         private static async Task checkAccesTokenAsync(string accountName)
         {
-            if (HttpHelper.accessTokenExpiry - DateTime.Now < oneMinute)
+            if (!HttpHelper.youtubeAccountAccessTokenExpiry.ContainsKey(accountName) || HttpHelper.youtubeAccountAccessTokenExpiry[accountName] - DateTime.Now < oneMinute)
             {
                 AccessToken token = await YoutubeAuthentication.GetNewAccessTokenAsync(accountName).ConfigureAwait(false);
-                HttpHelper.accessTokenExpiry = token.Expiry;
-                HttpHelper.standardClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
-                HttpHelper.uploadClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+                HttpHelper.youtubeAccountAccessTokenExpiry[accountName] = token.Expiry;
+                HttpHelper.YouTubeAccountTokens[accountName] = token.Token;
             }
         }
 

@@ -21,7 +21,7 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                 Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Video with thumbnail to add available.");
 
 
-                HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync("default").ConfigureAwait(false);
+                HttpClient client = HttpHelper.GetStandardClient("default");
                 using (FileStream fs = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
                 using (StreamContent streamcontent = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
                 {

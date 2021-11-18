@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security;
 using System.Text.RegularExpressions;
 using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
@@ -62,6 +63,8 @@ namespace Drexel.VidUp.Business
         private CultureInfo descriptionLanguage;
         [JsonProperty]
         private Category category;
+        [JsonProperty]
+        private YoutubeAccount youtubeAccount;
 
         private long fileLength;
 
@@ -405,14 +408,39 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public YoutubeAccount YoutubeAccount
+        {
+            get => this.youtubeAccount;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentException("youtubeAccount must not be null.");
+                }
+
+                this.youtubeAccount = value;
+                this.LastModified = DateTime.Now;
+            }
+        }
+
         [JsonConstructor]
         private Upload()
         {
             
         }
 
-        public Upload(string filePath)
+        public Upload(string filePath, YoutubeAccount youtubeAccount)
         {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("filePath must not be null or white space.");
+            }
+
+            if (youtubeAccount == null)
+            {
+                throw new ArgumentException("youtubeAccount must not be null.");
+            }
+
             this.guid = Guid.NewGuid();
             this.filePath = filePath;
             this.created = DateTime.Now;

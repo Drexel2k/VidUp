@@ -532,7 +532,7 @@ namespace Drexel.VidUp.UI.ViewModels
             if (result)
             {
                 NewTemplateViewModel data = (NewTemplateViewModel) view.DataContext;
-                Template template = new Template(data.Name, data.ImageFilePath, data.TemplateMode, data.RootFolderPath, data.PartOfFileName, this.templateList);
+                Template template = new Template(data.Name, data.ImageFilePath, data.TemplateMode, data.RootFolderPath, data.PartOfFileName, this.templateList, new YoutubeAccount("",""));
                 this.AddTemplate(template);
 
             }

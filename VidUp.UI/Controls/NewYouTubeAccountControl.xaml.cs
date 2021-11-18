@@ -3,9 +3,9 @@
     /// <summary>
     /// Interaktionslogik für NewTemplateControl.xaml
     /// </summary>
-    public partial class NewYouTubeAccountControl : System.Windows.Controls.UserControl
+    public partial class NewYoutubeAccountControl : System.Windows.Controls.UserControl
     {
-        public NewYouTubeAccountControl()
+        public NewYoutubeAccountControl()
         {
             InitializeComponent();
         }

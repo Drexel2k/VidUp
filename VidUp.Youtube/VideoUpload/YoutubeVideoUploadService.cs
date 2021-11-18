@@ -102,7 +102,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     YoutubeVideoUploadService.stream = inputStream;
 
                     long fileLength = upload.FileLength;
-                    HttpClient client = await HttpHelper.GetAuthenticatedUploadClientAsync("default").ConfigureAwait(false);
+                    HttpClient client = HttpHelper.GetUploadClient("default");
                     
                     //on IOExceptions try 2 times more to upload the chunk.
                     //no response from the server shall be requested on IOException.
@@ -294,7 +294,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync("default").ConfigureAwait(false);
+                    HttpClient client = HttpHelper.GetStandardClient("default");
 
                     Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Requesting upload byte index.");
                     using (StreamContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length))
@@ -417,7 +417,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    HttpClient client = await HttpHelper.GetAuthenticatedStandardClientAsync("default").ConfigureAwait(false);
+                    HttpClient client = HttpHelper.GetStandardClient("default");
                     using (ByteArrayContent content = HttpHelper.GetStreamContent(contentJson, "application/json"))
                     {
                         content.Headers.Add("Slug", httpHeaderCompatibleString);

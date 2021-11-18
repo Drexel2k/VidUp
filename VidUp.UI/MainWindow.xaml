@@ -180,7 +180,22 @@
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[2]}" Header="Playlists" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
-                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon playlistedit}" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" IsEditable="False" />
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon playlistedit}" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" IsEditable="False">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TitleWithYoutubeAccountInfo}"></TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Visible}" Value="false">
+                                            <Setter Property="Visibility" Value="Collapsed"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </Fluent:ComboBox>
                         <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon playlistplus}" Command="{Binding NewPlaylistCommand}" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Update" VerticalContentAlignment="Bottom">
@@ -198,8 +213,8 @@
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="Settings">
                     <Fluent:RibbonGroupBox Header="Manage YT Accounts" VerticalContentAlignment="Bottom">
-                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon AccountEdit}" ItemsSource="{Binding ObservableYouTubeAccountViewModels}" SelectedItem="{Binding SelectedYouTubeAccount}" DisplayMemberPath="YouTubeAccountName" IsEditable="False" />
-                        <Fluent:Button Header="New YouTube Account" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon AccountPlus}" Command="{Binding NewYouTubeAccountCommand}" />
+                        <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon AccountEdit}" ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" IsEditable="False" />
+                        <Fluent:Button Header="New Youtube Account" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon AccountPlus}" Command="{Binding NewYoutubeAccountCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[4]}" Header="VidUp" >
@@ -228,6 +243,10 @@
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
                         <Label Content="App Status: " />
                         <Label Content="{Binding AppStatus, Mode=OneWay}" />
+                        <Label Content="  |  " />
+                        <Label Content="YT Account: " />
+                        <ComboBox ItemsSource="{Binding ObservableYoutubeAccountViewModelsInclAll}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="125"  Padding="0" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Filters view to selected account and is default account for operation whithout account context, e.g. creatin new templates or getting playlists." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         <Label Content="  |  " />
                         <Label Content="Post Upload Action: " />
                         <ComboBox  ItemsSource="{Binding PostUploadActions}" SelectedItem="{Binding PostUploadAction}" Width="125"  Padding="0">
