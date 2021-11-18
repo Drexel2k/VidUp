@@ -254,6 +254,11 @@ namespace Drexel.VidUp.Business
             return this.templates.FindIndex(predicate);
         }
 
+        public List<Template> FindAll(Predicate<Template> match)
+        {
+            return this.templates.FindAll(match);
+        }
+
         public void Remove(Template template)
         {
             this.templates.Remove(template);
@@ -262,6 +267,8 @@ namespace Drexel.VidUp.Business
             this.deleteImageIfPossible(template.ImageFilePathForEditing);
 
             this.raiseNotifyPropertyChanged("TemplateCount");
+            //template is removed from uploads in event listener in MainWindowViewModel.templateListCollectionChanged
+            //todo: Move to event aggregator
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, template));
         }
 

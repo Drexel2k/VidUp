@@ -28,7 +28,7 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.playlist != null ? this.playlist.Title : string.Empty;
         }
 
-        public string TitleWithYoutubeAccountInfo
+        public string TitleWithYoutubeAccountName
         {
             get => this.playlist != null ? $"{this.playlist.Title} [{this.playlist.YoutubeAccount.Name}]" : string.Empty;
         }

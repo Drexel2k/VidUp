@@ -15,6 +15,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private string partOfFileName;
         private bool formVaild = false;
 
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+        private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
+
         public string Name
         {
             get
@@ -111,6 +114,17 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
+        {
+            get => this.observableYoutubeAccountViewModels;
+        }
+
+        public YoutubeAccountComboboxViewModel SelectedYouTubeAccount
+        {
+            get => this.selectedYoutubeAccount;
+            set => this.selectedYoutubeAccount = value;
+        }
+
         public GenericCommand OpenFileDialogCommand
         {
             get
@@ -131,8 +145,21 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public NewTemplateViewModel(string templateImageFolder)
+        public NewTemplateViewModel(string templateImageFolder, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount)
         {
+            if (observableYoutubeAccountViewModels == null || observableYoutubeAccountViewModels.YoutubeAccountCount <= 0)
+            {
+                throw new ArgumentException("observableYoutubeAccountViewModels must not be null and must contain accounts.");
+            }
+
+            if (selectedYoutubeAccount == null)
+            {
+                throw new ArgumentException("selectedYoutubeAccount must not be null.");
+            }
+
+            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
+            this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(selectedYoutubeAccount);
+
             this.openFileDialogCommand = new GenericCommand(openFileDialog);
         }
 

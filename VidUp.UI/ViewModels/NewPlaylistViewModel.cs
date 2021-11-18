@@ -74,7 +74,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.selectedPlaylists = selectedPlaylists == null ? new List<string>() : selectedPlaylists;
             this.observablePlaylistSelectionViewModels = new ObservableCollection<PlaylistSelectionViewModel>();
             this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
-            this.selectedYoutubeAccount = observableYoutubeAccountViewModels.GetViewModel(selectedYoutubeAccount);
+            this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(selectedYoutubeAccount);
             this.allPlaylistSelectionViewModels = new List<PlaylistSelectionViewModel>();
             this.initializePlaylistsAsync();
         }

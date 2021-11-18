@@ -120,6 +120,7 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
+            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
 
             using (StreamReader sr = new StreamReader(this.templateListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))

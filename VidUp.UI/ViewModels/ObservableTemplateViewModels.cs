@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.UI.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -43,7 +44,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.templateComboboxViewModels.Add(templateViewModel);
             }
 
-            this.templateList.CollectionChanged += templateListCollectionChanged;
+            this.templateList.CollectionChanged += this.templateListCollectionChanged;
         }
 
         private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -88,6 +89,22 @@ namespace Drexel.VidUp.UI.ViewModels
                 foreach (TemplateComboboxViewModel templateComboboxViewModel in this.templateComboboxViewModels)
                 {
                     if (templateComboboxViewModel.Template == template)
+                    {
+                        return templateComboboxViewModel;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public TemplateComboboxViewModel GetFirstViewModel(Predicate<TemplateComboboxViewModel> match)
+        {
+            if (match != null)
+            {
+                foreach (TemplateComboboxViewModel templateComboboxViewModel in this.templateComboboxViewModels)
+                {
+                    if (match(templateComboboxViewModel))
                     {
                         return templateComboboxViewModel;
                     }

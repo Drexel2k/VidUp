@@ -461,7 +461,7 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
             uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
 
-            this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels);
+            this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels, this.youtubeAccountList[0]);
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
             this.viewModels[3] = new SettingsViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
             this.viewModels[4] = new VidUpViewModel();

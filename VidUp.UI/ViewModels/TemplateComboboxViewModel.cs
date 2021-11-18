@@ -10,6 +10,8 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private Template template;
         private Subscription templateDisplayPropertyChangedSubscription;
+        private bool visible = true;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Template Template
@@ -31,7 +33,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.template != null)
                 {
-                    return this.template.IsDefault ? string.Format("{0} *", this.template.Name) : this.template.Name;
+                    return this.template.IsDefault ? $"{this.template.Name} *" : this.template.Name;
                 }
 
                 return null;
@@ -51,6 +53,35 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string NameWithYoutubeAccountName
+        {
+            get => this.template != null ? $"{this.template.Name} [{this.template.YoutubeAccount.Name}]" : string.Empty;
+        }
+
+        public string NameWithDefaultIndicatorAndYoutubeAccountName
+        {
+            get
+            {
+                string defaultSign = this.template.IsDefault ? "* " : string.Empty;
+                return this.template != null ? $"{this.template.Name} {defaultSign}[{this.template.YoutubeAccount.Name}]" : string.Empty;
+            }
+        }
+
+        public string YoutubeAccountName
+        {
+            get => this.template != null ? this.template.YoutubeAccount.Name : string.Empty;
+        }
+
+        public bool Visible
+        {
+            get => this.visible;
+            set
+            {
+                this.visible = value;
+                this.raisePropertyChanged("Visible");
+            }
+        }
+
         public TemplateComboboxViewModel(Template template)
         {
             this.template = template;
@@ -62,6 +93,8 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.raisePropertyChanged("Name");
             this.raisePropertyChanged("NameWithDefaultIndicator");
+            this.raisePropertyChanged("NameWithYoutubeAccountName");
+            this.raisePropertyChanged("NameWithDefaultIndicatorAndYoutubeAccountName");
         }
 
         private void raisePropertyChanged(string propertyName)

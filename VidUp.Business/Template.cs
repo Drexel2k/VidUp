@@ -367,6 +367,7 @@ namespace Drexel.VidUp.Business
             this.created = DateTime.Now;
             this.lastModified = this.created;
             this.visibility = Visibility.Private;
+            this.youtubeAccount = youtubeAccount;
         }
 
         private void setName(string name)

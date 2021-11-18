@@ -12,7 +12,6 @@
         <Grid Height="Auto" Width="Auto">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
-
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
@@ -78,6 +77,11 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                         <materialDesign:PackIcon Kind="HelpCircleOutline" ToolTip="Sets how the template is set automatically to a new upload, by folder path or by part of the file name." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
+                    </StackPanel>
+                    <StackPanel  Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Grid.ColumnSpan="2">
+                        <Label Content="Default Template: " Width="115" />
+                        <ToggleButton IsChecked="{Binding IsDefault}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline"  ToolTip="When a new video is added which doesn't belong to any project's root folder, this template is set automatically." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFolderBasedVisibleConverter}}">
@@ -157,11 +161,9 @@
                     </StackPanel>
 
                     <StackPanel  Grid.Row="9" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="Default Template: " Width="115" />
-                        <ToggleButton IsChecked="{Binding IsDefault}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 5 0" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline"  ToolTip="When a new video is added which doesn't belong to any project's root folder, this template is set automatically." ToolTipService.ShowDuration="60000" Background="Transparent" VerticalAlignment="Top" Margin="0 4 10 5" />
+                        <Label Content="YT Account: " Width="115" />
+                        <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="125"  Padding="0" />
                     </StackPanel>
-
                 </Grid>
 
             </GroupBox>

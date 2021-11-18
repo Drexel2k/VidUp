@@ -21,11 +21,14 @@ namespace Drexel.VidUp.UI.ViewModels
         private Template template;
 
         private ObservableTemplateViewModels observableTemplateViewModels;
-        private ObservablePlaylistViewModels observablePlaylistViewModels;
+
 
         private TemplateComboboxViewModel selectedTemplate;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+
+        private YoutubeAccount youtubeAccountForCreatingTemplates;
 
         private GenericCommand newTemplateCommand;
         private GenericCommand deleteCommand;
@@ -37,8 +40,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private string lastThumbnailFallbackFilePathAdded = null;
         private string lastImageFilePathAdded;
 
+        public event PropertyChangedEventHandler PropertyChanged;
         #region properties
-
         public Template Template
         {
             get
@@ -74,6 +77,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.observablePlaylistViewModels;
+            }
+        }
+
+        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
+        {
+            get
+            {
+                return this.observableYoutubeAccountViewModels;
             }
         }
 
@@ -121,6 +132,29 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("SelectedPlaylist");
+            }
+        }
+
+        public YoutubeAccountComboboxViewModel SelectedYoutubeAccount
+        {
+            get
+            {
+                return this.template != null ? this.observableYoutubeAccountViewModels.GetViewModel(this.template.YoutubeAccount) : null;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new InvalidOperationException("A template must have a Youtube account.");
+                }
+                else
+                {
+                    this.template.YoutubeAccount = value.YoutubeAccount;
+                }
+
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("YoutubeAccount"));
+                this.raisePropertyChanged("SelectedYoutubeAccount");
             }
         }
 
@@ -480,7 +514,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels)
+        public TemplateViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels,
+            ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForCreatingTemplates)
         {
             if(templateList == null)
             {
@@ -497,11 +532,25 @@ namespace Drexel.VidUp.UI.ViewModels
                 throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
             }
 
+            if (observableYoutubeAccountViewModels == null)
+            {
+                throw new ArgumentException("ObservableYoutubeAccountViewModels must not be null.");
+            }
+
+            if (youtubeAccountForCreatingTemplates == null)
+            {
+                throw new ArgumentException("selectedYoutubeAccount must not be null.");
+            }
+
             this.templateList = templateList;
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
 
             this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
+            this.youtubeAccountForCreatingTemplates = youtubeAccountForCreatingTemplates;
+            EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
+            EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialogAsync);
             this.deleteCommand = new GenericCommand(this.DeleteTemplate);
@@ -509,6 +558,58 @@ namespace Drexel.VidUp.UI.ViewModels
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
             this.openPublishAtCommand = new GenericCommand(this.openPublishAtAsync);
+        }
+
+        private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
+        {
+            List<Template> templatesToRemove = this.templateList.FindAll(template => template.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
+            foreach (Template template in templatesToRemove)
+            {
+                this.templateList.Remove(template);
+            }
+
+            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+        }
+
+        private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
+        {
+            if (selectedYoutubeAccountChangedMessage.NewAccount == null)
+            {
+                throw new ArgumentException("Changed Youtube account must not be null.");
+            }
+
+            this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.NewAccount.Name == "All" ?
+                selectedYoutubeAccountChangedMessage.FirstNotAllAccount : selectedYoutubeAccountChangedMessage.NewAccount;
+
+            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModels)
+            {
+                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                {
+                    if (templateComboboxViewModel.Visible == false)
+                    {
+                        templateComboboxViewModel.Visible = true;
+                    }
+                }
+                else
+                {
+                    if (templateComboboxViewModel.YoutubeAccountName == selectedYoutubeAccountChangedMessage.NewAccount.Name)
+                    {
+                        templateComboboxViewModel.Visible = true;
+                    }
+                    else
+                    {
+                        templateComboboxViewModel.Visible = false;
+                    }
+                }
+            }
+
+            //is null if there is no playlist in previously selected account
+            if (this.selectedTemplate == null || this.selectedTemplate.Visible == false)
+            {
+                TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Visible == true);
+                this.SelectedTemplate = viewModel;
+                this.raisePropertyChanged("SelectedTemplate");
+            }
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -525,14 +626,14 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             var view = new NewTemplateControl
             {
-                DataContext = new NewTemplateViewModel(Settings.Instance.TemplateImageFolder)
+                DataContext = new NewTemplateViewModel(Settings.Instance.TemplateImageFolder, this.observableYoutubeAccountViewModels, this.youtubeAccountForCreatingTemplates)
             };
 
             bool result = (bool)await DialogHost.Show(view, "RootDialog");
             if (result)
             {
                 NewTemplateViewModel data = (NewTemplateViewModel) view.DataContext;
-                Template template = new Template(data.Name, data.ImageFilePath, data.TemplateMode, data.RootFolderPath, data.PartOfFileName, this.templateList, new YoutubeAccount("",""));
+                Template template = new Template(data.Name, data.ImageFilePath, data.TemplateMode, data.RootFolderPath, data.PartOfFileName, this.templateList, data.SelectedYouTubeAccount.YoutubeAccount);
                 this.AddTemplate(template);
 
             }
@@ -544,21 +645,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
             //will set the SelectedTemplate to null which causes problems if there are templates left
-            if (this.observableTemplateViewModels.TemplateCount > 1)
-            {
-                if (this.observableTemplateViewModels[0].Template == template)
-                {
-                    this.SelectedTemplate = this.observableTemplateViewModels[1];
-                }
-                else
-                {
-                    this.SelectedTemplate = this.observableTemplateViewModels[0];
-                }
-            }
-            else
-            {
-                this.SelectedTemplate = null;
-            }
+            TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template != template && vm.Visible == true);
+            this.SelectedTemplate = viewModel;
 
             this.templateList.Remove(template);
 

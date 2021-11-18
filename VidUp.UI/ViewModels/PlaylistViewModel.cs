@@ -183,7 +183,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public PlaylistViewModel(PlaylistList playlistList, ObservablePlaylistViewModels observablePlaylistViewModels, TemplateList templateList, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForRequestingPlaylists)
+        public PlaylistViewModel(PlaylistList playlistList, ObservablePlaylistViewModels observablePlaylistViewModels, TemplateList templateList,
+            ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForRequestingPlaylists)
         {
             if(playlistList == null)
             {
