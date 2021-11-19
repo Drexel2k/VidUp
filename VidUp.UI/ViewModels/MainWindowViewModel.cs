@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -395,6 +396,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 YoutubeAccount oldAccount = this.selectedYoutubeAccount.YoutubeAccount;
                 this.selectedYoutubeAccount = value; 
                 EventAggregator.Instance.Publish(new SelectedYoutubeAccountChangedMessage(oldAccount, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]));
+                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
+                this.selectedYoutubeAccountChanged();
                 this.raisePropertyChanged("SelectedYoutubeAccount");
             }
         }
@@ -445,6 +448,7 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<UploadStatsChangedMessage>(this.uploadStatsChanged);
             EventAggregator.Instance.Subscribe<AutoSettingPlaylistsStateChangedMessage>(this.autoSettingPlaylistsStateChanged);
 
+            Template.DummyAccount = new YoutubeAccount("Dummy", this.getYoutubeAccountName);
             this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, false, false);
             this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true, true);
             this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, true, false);
@@ -453,9 +457,11 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableYoutubeAccountViewModels = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, false);
             this.observableYoutubeAccountViewModelsInclAll = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, true);
             this.selectedYoutubeAccount = this.observableYoutubeAccountViewModelsInclAll[0];
+
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
-            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll, this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels);
+            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll,
+                this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels, this.youtubeAccountList[0]);
             this.viewModels[0] = uploadListViewModel;
             uploadListViewModel.PropertyChanged += this.uploadListViewModelOnPropertyChanged;
             uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
@@ -465,6 +471,114 @@ namespace Drexel.VidUp.UI.ViewModels
             this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
             this.viewModels[3] = new SettingsViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
             this.viewModels[4] = new VidUpViewModel();
+        }
+
+        private string getYoutubeAccountName()
+        {
+            return this.selectedYoutubeAccount.YoutubeAccountName;
+        }
+
+        private void selectedYoutubeAccountChanged()
+        {
+            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModels)
+            {
+                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy && this.selectedYoutubeAccount.YoutubeAccountName == "All")
+                {
+                    if (templateComboboxViewModel.Visible == false)
+                    {
+                        templateComboboxViewModel.Visible = true;
+                    }
+                }
+                else
+                {
+                    if (!templateComboboxViewModel.Template.IsDummy)
+                    {
+                        if (templateComboboxViewModel.YoutubeAccountName == this.selectedYoutubeAccount.YoutubeAccountName)
+                        {
+                            templateComboboxViewModel.Visible = true;
+                        }
+                        else
+                        {
+                            templateComboboxViewModel.Visible = false;
+                        }
+                    }
+                }
+            }
+
+            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModelsInclAll)
+            {
+                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy && this.selectedYoutubeAccount.YoutubeAccountName == "All")
+                {
+                    if (templateComboboxViewModel.Visible == false)
+                    {
+                        templateComboboxViewModel.Visible = true;
+                    }
+                }
+                else
+                {
+                    if (!templateComboboxViewModel.Template.IsDummy)
+                    {
+                        if (templateComboboxViewModel.YoutubeAccountName == this.selectedYoutubeAccount.YoutubeAccountName)
+                        {
+                            templateComboboxViewModel.Visible = true;
+                        }
+                        else
+                        {
+                            templateComboboxViewModel.Visible = false;
+                        }
+                    }
+                }
+            }
+
+            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModelsInclAllNone)
+            {
+                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy && this.selectedYoutubeAccount.YoutubeAccountName == "All")
+                {
+                    if (templateComboboxViewModel.Visible == false)
+                    {
+                        templateComboboxViewModel.Visible = true;
+                    }
+                }
+                else
+                {
+                    if (!templateComboboxViewModel.Template.IsDummy)
+                    {
+                        if (templateComboboxViewModel.YoutubeAccountName == this.selectedYoutubeAccount.YoutubeAccountName)
+                        {
+                            templateComboboxViewModel.Visible = true;
+                        }
+                        else
+                        {
+                            templateComboboxViewModel.Visible = false;
+                        }
+                    }
+                }
+            }
+
+            foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.observablePlaylistViewModels)
+            {
+                if (selectedYoutubeAccount.YoutubeAccount.IsDummy && selectedYoutubeAccount.YoutubeAccount.Name == "All")
+                {
+                    if (playlistComboboxViewModel.Visible == false)
+                    {
+                        playlistComboboxViewModel.Visible = true;
+                    }
+                }
+                else
+                {
+                    if (!selectedYoutubeAccount.YoutubeAccount.IsDummy)
+                    {
+                        if (playlistComboboxViewModel.YoutubeAccountName == selectedYoutubeAccount.YoutubeAccount.Name)
+                        {
+                            playlistComboboxViewModel.Visible = true;
+                        }
+                        else
+                        {
+                            playlistComboboxViewModel.Visible = false;
+                        }
+                    }
+                }
+            }
         }
 
         private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)

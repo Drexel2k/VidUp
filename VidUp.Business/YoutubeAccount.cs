@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using Drexel.VidUp.Utils;
 
@@ -9,6 +10,8 @@ namespace Drexel.VidUp.Business
 
         private string filePath;
         private string name;
+        private bool isDummy = false;
+        private Func<string> getAccountName;
 
 
 
@@ -41,12 +44,36 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public string DummyNameFlex
+        {
+            get => this.getAccountName();
+        }
+
+        public bool IsDummy
+        {
+            get => this.isDummy;
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public YoutubeAccount(string name, bool isDummy)
+        {
+            this.name = name;
+            this.isDummy = isDummy;
+        }
 
         public YoutubeAccount(string filePath, string name)
         {
             this.filePath = filePath;
             this.name = name;
+        }
+
+        //for dummy templates with changing account info
+        public YoutubeAccount(string name, Func<string> getaccountName)
+        {
+            this.filePath = null;
+            this.name = name;
+            this.getAccountName = getaccountName;
         }
 
         private void raisePropertyChanged(string propertyName)

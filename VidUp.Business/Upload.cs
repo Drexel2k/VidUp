@@ -443,6 +443,7 @@ namespace Drexel.VidUp.Business
 
             this.guid = Guid.NewGuid();
             this.filePath = filePath;
+            this.youtubeAccount = youtubeAccount;
             this.created = DateTime.Now;
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
@@ -487,6 +488,7 @@ namespace Drexel.VidUp.Business
             this.copyVideoLanguageFromTemplateInternal();
             this.copyDescriptionLanguageFromTemplateInternal();
             this.copyCategoryFromTemplateInternal();
+            this.copyYoutubeAccountFromTemplateInternal();
             this.autoSetPublishAtDateTimeInternal();
         }
 
@@ -644,11 +646,26 @@ namespace Drexel.VidUp.Business
             this.copyCategoryFromTemplateInternal();
         }
 
+        public void CopyYoutubeAccountFromTemplate()
+        {
+            this.copyYoutubeAccountFromTemplateInternal();
+        }
+
         private void copyCategoryFromTemplateInternal()
         {
             if (this.template != null )
             {
                 this.category = this.template.Category;
+
+                this.LastModified = DateTime.Now;
+            }
+        }
+
+        private void copyYoutubeAccountFromTemplateInternal()
+        {
+            if (this.template != null)
+            {
+                this.youtubeAccount = this.template.YoutubeAccount;
 
                 this.LastModified = DateTime.Now;
             }

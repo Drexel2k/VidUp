@@ -10,7 +10,9 @@
              xmlns:validators="clr-namespace:Drexel.VidUp.UI.Validators"
              xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing.Common"
              x:Name="UCUpload"
-             AllowDrop="True">
+             AllowDrop="True"
+             Visibility="{Binding Visible, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}"
+             >
     <GroupBox Padding="0" x:Name="GroupBox" Margin="4" VerticalAlignment="Top" >
         <GroupBox.Header >
             <StackPanel Orientation="Horizontal" Margin="0">
@@ -152,21 +154,25 @@
                     </TextBox.Text>
                 </TextBox>
             </StackPanel>
-            <StackPanel Grid.Row="6" Grid.Column="1"  Orientation="Horizontal">
-                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset visibility to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="visibility" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+
+            <StackPanel Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset all values to template values." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="all" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
-                <Label Content="Visibility: " Width="110" />
+                <Label Content="Template: " Width="66" />
             </StackPanel>
-            <ComboBox Grid.Row="6" Grid.Column="2"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <!-- Selected Template is clearable through burger menu. -->
+            <ComboBox Grid.Row="6" Grid.Column="2" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
 
-            <StackPanel  Grid.Row="6" Grid.Column="3" Orientation="Horizontal">
+            <StackPanel Grid.Row="6" Grid.Column="3"  Orientation="Horizontal">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset category to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="account" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+                    <materialDesign:PackIcon Kind="Refresh" />
+                </Button>
+                <Label Content="YT Acc.: " Width="68" />
+                <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="201"  Padding="6 4 6 6" />
+            </StackPanel>
+
+            <StackPanel  Grid.Row="7" Grid.Column="3" Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset publish at template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="publishat" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
@@ -186,16 +192,21 @@
                 <ComboBox SelectedItem="{Binding PublishAtTime}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="58" Margin="8 0 0 0" IsEnabled="{Binding PublishAtDateTimeControlsEnabled}" VerticalAlignment="Top" Padding="6 4 6 6" />
             </StackPanel>
 
-            <StackPanel Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset all values to template values." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="all" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
+            <StackPanel Grid.Row="7" Grid.Column="1"  Orientation="Horizontal">
+                <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset visibility to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="visibility" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
-                <Label Content="Template: " Width="66" />
+                <Label Content="Visibility: " Width="110" />
             </StackPanel>
-            <!-- Selected Template is clearable through burger menu. -->
-            <ComboBox Grid.Row="7" Grid.Column="2" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
+            <ComboBox Grid.Row="7" Grid.Column="2"  ItemsSource="{Binding Visibilities}" SelectedItem="{Binding SelectedVisibility}" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={converters:EnumConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
 
-            <DockPanel Grid.Row="7" Grid.Column="3">
+            <DockPanel Grid.Row="8" Grid.Column="3">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset playlist to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
@@ -216,7 +227,7 @@
                 <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 0" ToolTip="Language of the video's default audio track." ToolTipService.ShowDuration="60000" Background="Transparent" />
             </StackPanel>
 
-            <StackPanel Grid.Row="8" Grid.Column="3"  Orientation="Horizontal">
+            <StackPanel Grid.Row="9" Grid.Column="3"  Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset category to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="category" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>

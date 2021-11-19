@@ -35,13 +35,7 @@ namespace Drexel.VidUp.UI
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 
             Tracer.Write($"MainWindow.fileDrop: Dropped {files.Length} files.");
-            List<Upload> uploads = new List<Upload>();
-            foreach (string file in files)
-            {
-                uploads.Add(new Upload(file,new YoutubeAccount("","")));
-            }
-
-            uploadListViewModel.AddUploads(uploads);
+            uploadListViewModel.AddFiles(files);
             Tracer.Write($"MainWindow.fileDrop: End.");
         }
 

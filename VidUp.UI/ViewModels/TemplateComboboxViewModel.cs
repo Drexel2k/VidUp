@@ -55,15 +55,42 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string NameWithYoutubeAccountName
         {
-            get => this.template != null ? $"{this.template.Name} [{this.template.YoutubeAccount.Name}]" : string.Empty;
+            get
+            {
+                if (this.template != null)
+                {
+                    if (this.template.IsDummy)
+                    {
+                        return $"{this.template.Name} [{this.template.YoutubeAccount.DummyNameFlex}]";
+                    }
+                    else
+                    {
+                        return $"{this.template.Name} [{this.template.YoutubeAccount.Name}]";
+                    }
+                }
+
+                return string.Empty;
+            }
         }
 
         public string NameWithDefaultIndicatorAndYoutubeAccountName
         {
             get
             {
-                string defaultSign = this.template.IsDefault ? "* " : string.Empty;
-                return this.template != null ? $"{this.template.Name} {defaultSign}[{this.template.YoutubeAccount.Name}]" : string.Empty;
+                if (this.template != null)
+                {
+                    if (this.template.IsDummy)
+                    {
+                        return $"{this.template.Name} [{this.template.YoutubeAccount.DummyNameFlex}]";
+                    }
+                    else
+                    {
+                        string defaultSign = this.template.IsDefault ? "* " : string.Empty;
+                        return this.template != null ? $"{this.template.Name} {defaultSign}[{this.template.YoutubeAccount.Name}]" : string.Empty;
+                    }
+                }
+
+                return string.Empty;
             }
         }
 
@@ -82,11 +109,23 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool IsDummy
+        {
+            get
+            {
+                if (this.template != null)
+                {
+                    return this.template.IsDummy;
+                }
+
+                return false;
+            }
+        }
+
         public TemplateComboboxViewModel(Template template)
         {
             this.template = template;
-            this.templateDisplayPropertyChangedSubscription =
-                EventAggregator.Instance.Subscribe<TemplateDisplayPropertyChangedMessage>(this.onTemplateDisplayPropertyChanged);
+            this.templateDisplayPropertyChangedSubscription = EventAggregator.Instance.Subscribe<TemplateDisplayPropertyChangedMessage>(this.onTemplateDisplayPropertyChanged);
         }
 
         private void onTemplateDisplayPropertyChanged(TemplateDisplayPropertyChangedMessage templateDisplayPropertyChangedMessage)

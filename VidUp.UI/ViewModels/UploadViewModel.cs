@@ -18,6 +18,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private Upload upload;
         private QuarterHourViewModels quarterHourViewModels;
 
+        private bool visible = true;
+
         private GenericCommand pauseCommand;
         private GenericCommand resetStateCommand;
         private GenericCommand removeComboBoxValueCommand;
@@ -27,6 +29,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private ObservableTemplateViewModels observableTemplateViewModels;
         private ObservablePlaylistViewModels observablePlaylistViewModels;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
 
         //need for determination of upload status color
         private bool resumeUploads;
@@ -36,6 +39,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private Subscription uploadStatusChangedSubscription;
         private Subscription resumableSessionUriChangedSubscription;
         private Subscription publishAtChangedSubscription;
+        
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -52,6 +56,14 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.observablePlaylistViewModels;
+            }
+        }
+
+        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
+        {
+            get
+            {
+                return this.observableYoutubeAccountViewModels;
             }
         }
 
@@ -107,6 +119,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 return this.resetToTemplateValueCommand;
             }
         }
+
 
         public UplStatus UploadStatus
         {
@@ -317,8 +330,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 return new SolidColorBrush(color);
             }
         }
-
-
         public string Description
         {
             get => this.upload.Description;
@@ -437,6 +448,25 @@ namespace Drexel.VidUp.UI.ViewModels
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 this.raisePropertyChanged("ShowPlaylistHint");
                 this.raisePropertyChanged("SelectedPlaylist");
+            }
+        }
+
+        public YoutubeAccountComboboxViewModel SelectedYoutubeAccount
+        {
+            get => this.observableYoutubeAccountViewModels.GetViewModel(this.upload.YoutubeAccount);
+            set
+            {
+                if (value == null)
+                {
+                    this.upload.YoutubeAccount = null;
+                }
+                else
+                {
+                    this.upload.YoutubeAccount = value.YoutubeAccount;
+                }
+
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("SelectedYoutubeAccount");
             }
         }
 
@@ -666,7 +696,17 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads)
+        public bool Visible
+        {
+            get => this.visible;
+            set
+            {
+                this.visible = value;
+                this.raisePropertyChanged("Visible");
+            }
+        }
+
+        public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels)
         {
             if (observableTemplateViewModels == null)
             {
@@ -678,11 +718,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
             }
 
+            if (observableYoutubeAccountViewModels == null)
+            {
+                throw new ArgumentException("ObservableYoutubeAccountViewModels must not be null.");
+            }
+
             this.upload = upload;
             //this.upload.PropertyChanged += this.uploadPropertyChanged;
 
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
             this.resumeUploads = resumeUploads;
 
             this.quarterHourViewModels = new QuarterHourViewModels(false);
@@ -976,6 +1022,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     case "title":
                         this.upload.CopyTitleFromTemplate();
                         this.raisePropertyChanged("YtTitle");
+                        this.raisePropertyChanged("Title");
                         break;
                     case "description":
                         this.upload.CopyDescriptionFromTemplate();
@@ -987,19 +1034,19 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                     case "visibility":
                         this.upload.CopyVisibilityFromTemplate();
-                        this.raisePropertyChanged("Visibility");
+                        this.raisePropertyChanged("SelectedVisibility");
                         break;
                     case "playlist":
                         this.upload.CopyPlaylistFromTemplate();
-                        this.raisePropertyChanged("PlaylistId");
+                        this.raisePropertyChanged("SelectedPlaylist");
                         break;
                     case "videolanguage":
                         this.upload.CopyVideoLanguageFromTemplate();
-                        this.raisePropertyChanged("VideoLanguage");
+                        this.raisePropertyChanged("SelectedVideoLanguage");
                         break;
                     case "descriptionlanguage":
                         this.upload.CopyDescriptionLanguageFromTemplate();
-                        this.raisePropertyChanged("DescriptionLanguage");
+                        this.raisePropertyChanged("SelectedDescriptionLanguage");
                         break;
                     case "publishat":
                         this.upload.AutoSetPublishAtDateTime();
@@ -1007,7 +1054,11 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                     case "category":
                         this.upload.CopyCategoryFromTemplate();
-                        this.raisePropertyChanged("Category");
+                        this.raisePropertyChanged("SelectedCategory");
+                        break;
+                    case "account":
+                        this.upload.CopyYoutubeAccountFromTemplate();
+                        this.raisePropertyChanged("SelectedYoutubeAccount");
                         break;
                     case "all":
                         this.upload.CopyTemplateValues();

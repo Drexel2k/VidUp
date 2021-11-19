@@ -64,6 +64,11 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private YoutubeAccount youtubeAccount;
 
+        private bool isDummy = false;
+
+        //for dummy templates "All", "None"...
+        public static YoutubeAccount DummyAccount;
+
         //public event PropertyChangedEventHandler PropertyChanged;
         public event OldValueHandler ThumbnailFallbackFilePathChanged;
         public event OldValueHandler ImageFilePathForEditingChanged;
@@ -342,6 +347,13 @@ namespace Drexel.VidUp.Business
         public Template(string name)
         {
             this.name = name;
+            this.isDummy = true;
+            this.youtubeAccount = Template.DummyAccount;
+        }
+
+        public bool IsDummy
+        {
+            get => this.isDummy;
         }
 
         public Template(string name, string imagefilePath, TemplateMode templateMode, string rootFolderPath, string partOfFileName, TemplateList templateList, YoutubeAccount youtubeAccount)

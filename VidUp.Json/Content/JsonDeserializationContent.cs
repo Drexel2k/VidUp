@@ -94,6 +94,7 @@ namespace Drexel.VidUp.Json.Content
             //templates are set to null, because template objects do not yet exist.
             //templates are set on setTemplateOnUploads by reading json again.
             serializer.Converters.Add(new TemplateNullConverter());
+            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
 
             using (StreamReader sr = new StreamReader(this.allUploadsFilePath))
             using (JsonReader reader = new JsonTextReader(sr))

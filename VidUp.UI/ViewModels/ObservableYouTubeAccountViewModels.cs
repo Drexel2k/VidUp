@@ -24,7 +24,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (addAll)
             {
-                YoutubeAccount allAccount = new YoutubeAccount(null, "All");
+                YoutubeAccount allAccount = new YoutubeAccount("All", true);
                 YoutubeAccountComboboxViewModel allViewModel = new YoutubeAccountComboboxViewModel(allAccount);
                 this.youtubeAccountComboboxViewModels.Add(allViewModel);
             }

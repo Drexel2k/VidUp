@@ -1011,7 +1011,7 @@ namespace Drexel.VidUp.Test
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[0];
             uploadListViewModel.DeleteSelectedTemplate =
-                uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "All");
+                uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.IsDummy && vm.Template.Name == "All");
             uploadListViewModel.DeleteUploadsCommand.Execute(true);
             uploadListViewModel = null;
             mainWindowViewModel.Close();

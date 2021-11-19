@@ -153,7 +153,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("YoutubeAccount"));
+                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
                 this.raisePropertyChanged("SelectedYoutubeAccount");
             }
         }
@@ -578,29 +578,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 throw new ArgumentException("Changed Youtube account must not be null.");
             }
 
-            this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.NewAccount.Name == "All" ?
-                selectedYoutubeAccountChangedMessage.FirstNotAllAccount : selectedYoutubeAccountChangedMessage.NewAccount;
-
-            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModels)
+            this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.NewAccount;
+            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy && selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
             {
-                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
-                {
-                    if (templateComboboxViewModel.Visible == false)
-                    {
-                        templateComboboxViewModel.Visible = true;
-                    }
-                }
-                else
-                {
-                    if (templateComboboxViewModel.YoutubeAccountName == selectedYoutubeAccountChangedMessage.NewAccount.Name)
-                    {
-                        templateComboboxViewModel.Visible = true;
-                    }
-                    else
-                    {
-                        templateComboboxViewModel.Visible = false;
-                    }
-                }
+                this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
             }
 
             //is null if there is no playlist in previously selected account

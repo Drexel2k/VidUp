@@ -17,6 +17,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservablePlaylistViewModels observablePlaylistViewModels;
 
         private bool resumeUploads;
+        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
 
         public bool ResumeUploads
         {
@@ -30,10 +31,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public ObservableUploadViewModels(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads)
+        public ObservableUploadViewModels(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels)
         {
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
             this.resumeUploads = resumeUploads;
 
             this.uploadViewModels = new List<UploadViewModel>();
@@ -42,7 +44,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 foreach (Upload upload in uploadList)
                 {
-                    this.uploadViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads));
+                    this.uploadViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads, this.observableYoutubeAccountViewModels));
                 }
 
                 uploadList.CollectionChanged += uploadListCollectionChanged;
@@ -56,7 +58,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 List<UploadViewModel> newViewModels = new List<UploadViewModel>();
                 foreach (Upload upload in e.NewItems)
                 {
-                    newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads));
+                    newViewModels.Add(new UploadViewModel(upload, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads, this.observableYoutubeAccountViewModels));
                 }
 
                 this.uploadViewModels.AddRange(newViewModels);

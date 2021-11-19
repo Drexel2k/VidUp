@@ -248,29 +248,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 throw new ArgumentException("Changed Youtube account must not be null.");
             }
 
-            this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.NewAccount.Name == "All" ?
-                selectedYoutubeAccountChangedMessage.FirstNotAllAccount : selectedYoutubeAccountChangedMessage.NewAccount;
-
-            foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.observablePlaylistViewModels)
+            this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.NewAccount;
+            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy && selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
             {
-                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
-                {
-                    if (playlistComboboxViewModel.Visible == false)
-                    {
-                        playlistComboboxViewModel.Visible = true;
-                    }
-                }
-                else
-                {
-                    if (playlistComboboxViewModel.YoutubeAccountName == selectedYoutubeAccountChangedMessage.NewAccount.Name)
-                    {
-                        playlistComboboxViewModel.Visible = true;
-                    }
-                    else
-                    {
-                        playlistComboboxViewModel.Visible = false;
-                    }
-                }
+                this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
             }
 
             //is null if there is no playlist in previously selected account
