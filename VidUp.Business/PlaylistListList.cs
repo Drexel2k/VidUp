@@ -56,7 +56,7 @@ namespace Drexel.VidUp.Business
             this.playlists.Add(playlist);
 
             this.raiseNotifyPropertyChanged("PlaylistCount");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, playlists));
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, playlist));
         }
 
         public int FindIndex(Predicate<Playlist> predicate)

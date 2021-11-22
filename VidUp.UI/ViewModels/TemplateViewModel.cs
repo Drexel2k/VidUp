@@ -92,7 +92,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.observablePlaylistViewModels[template.YoutubeAccount];
+                if (this.template != null)
+                {
+                    return this.observablePlaylistViewModels[this.template.YoutubeAccount];
+                }
+
+                return null;
             }
         }
 
@@ -634,12 +639,25 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            //is null if there is no playlist in previously selected account
-            if (this.selectedTemplate == null || this.selectedTemplate.Visible == false)
+            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
             {
-                TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Visible == true);
+                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                {
+                    if (this.observableTemplateViewModels.TemplateCount >= 1)
+                    {
+                        TemplateComboboxViewModel viewModel = this.observableTemplateViewModels[0];
+                        this.SelectedTemplate = viewModel;
+                    }
+                    else
+                    {
+                        this.SelectedTemplate = null;
+                    }
+                }
+            }
+            else
+            {
+                TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template.YoutubeAccount == selectedYoutubeAccountChangedMessage.NewAccount);
                 this.SelectedTemplate = viewModel;
-                this.raisePropertyChanged("SelectedTemplate");
             }
         }
 
@@ -819,9 +837,7 @@ namespace Drexel.VidUp.UI.ViewModels
         //exposed for testing
         public void AddTemplate(Template template)
         {
-            List<Template> list = new List<Template>();
-            list.Add(template);
-            this.templateList.AddTemplates(list);
+            this.templateList.AddTemplate(template);
 
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
 

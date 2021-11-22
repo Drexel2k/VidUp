@@ -9,17 +9,17 @@ namespace Drexel.VidUp.UI.ViewModels
 {
     public class ObservableTemplateViewModels : INotifyCollectionChanged, IEnumerable<TemplateComboboxViewModel>
     {
-        private TemplateList templateList;
+        private TemplateListBase templateList;
         private List<TemplateComboboxViewModel> templateComboboxViewModels;
 
-        private Dictionary<YoutubeAccount, TemplateList> templateListsByAccount;
+        private Dictionary<YoutubeAccount, TemplateListBase> templateListsByAccount;
         private Dictionary<YoutubeAccount, ObservableTemplateViewModels> observableTemplateViewModelsByAccount;
 
         public int TemplateCount { get => this.templateComboboxViewModels.Count;  }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public ObservableTemplateViewModels(TemplateList templateList, bool createByAccount, bool addAll, bool addNone)
+        public ObservableTemplateViewModels(TemplateListBase templateList, bool createByAccount, bool addAll, bool addNone)
         {
             this.templateList = templateList;
 
@@ -49,7 +49,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (createByAccount)
             {
-                this.templateListsByAccount = new Dictionary<YoutubeAccount, TemplateList>();
+                this.templateListsByAccount = new Dictionary<YoutubeAccount, TemplateListBase>();
                 this.observableTemplateViewModelsByAccount = new Dictionary<YoutubeAccount, ObservableTemplateViewModels>();
 
                 Dictionary<YoutubeAccount, List<Template>> templatesByAccount = new Dictionary<YoutubeAccount, List<Template>>();
@@ -67,36 +67,24 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 foreach (KeyValuePair<YoutubeAccount, List<Template>> accountTemplates in templatesByAccount)
                 {
-                    TemplateList accountTemplateList = new TemplateList(accountTemplates.Value);
+                    TemplateListSimple accountTemplateList = new TemplateListSimple(accountTemplates.Value);
                     this.templateListsByAccount.Add(accountTemplates.Key, accountTemplateList);
                     this.observableTemplateViewModelsByAccount.Add(accountTemplates.Key, new ObservableTemplateViewModels(accountTemplateList, false, false, false));
                 }
             }
 
             this.templateList.CollectionChanged += this.templateListCollectionChanged;
-            EventAggregator.Instance.Subscribe<TemplateYoutubeAccountChangedMessage>(this.templateYoutubeAccountChanged);
+
+            if (createByAccount)
+            {
+                EventAggregator.Instance.Subscribe<TemplateYoutubeAccountChangedMessage>(this.templateYoutubeAccountChanged);
+            }
         }
 
         private void templateYoutubeAccountChanged(TemplateYoutubeAccountChangedMessage templateYoutubeAccountChangedMessage)
         {
-            if (this.templateListsByAccount != null)
-            {
-                this.templateListsByAccount[templateYoutubeAccountChangedMessage.OldAccount].Remove(templateYoutubeAccountChangedMessage.Template);
-
-                TemplateList accountTemplateList;
-                if (!this.templateListsByAccount.TryGetValue(templateYoutubeAccountChangedMessage.NewAccount, out accountTemplateList))
-                {
-                    List<Template> templates = new List<Template>();
-                    templates.Add(templateYoutubeAccountChangedMessage.Template);
-                    accountTemplateList = new TemplateList(templates);
-                    this.templateListsByAccount.Add(templateYoutubeAccountChangedMessage.NewAccount, accountTemplateList);
-                    this.observableTemplateViewModelsByAccount.Add(templateYoutubeAccountChangedMessage.NewAccount, new ObservableTemplateViewModels(accountTemplateList, false, false, false));
-                }
-                else
-                {
-                    accountTemplateList.AddTemplate(templateYoutubeAccountChangedMessage.Template);
-                }
-            }
+            this.templateListsByAccount[templateYoutubeAccountChangedMessage.OldAccount].Remove(templateYoutubeAccountChangedMessage.Template);
+            this.addToAccountTemplates(templateYoutubeAccountChangedMessage.Template);
         }
 
         public ObservableTemplateViewModels(TemplateList templateList, YoutubeAccount youtubeAccount)
@@ -124,7 +112,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     if (this.templateListsByAccount != null)
                     {
-                        this.templateListsByAccount[template.YoutubeAccount].AddTemplate(template);
+                        this.addToAccountTemplates(template);
                     }
                 }
 
@@ -157,6 +145,23 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             throw new InvalidOperationException("ObservableTemplateViewModels supports only adding and removing.");
+        }
+
+        private void addToAccountTemplates(Template template)
+        {
+            TemplateListBase accountTemplateList;
+            if (!this.templateListsByAccount.TryGetValue(template.YoutubeAccount, out accountTemplateList))
+            {
+                List<Template> templates = new List<Template>();
+                templates.Add(template);
+                accountTemplateList = new TemplateListSimple(templates);
+                this.templateListsByAccount.Add(template.YoutubeAccount, accountTemplateList);
+                this.observableTemplateViewModelsByAccount.Add(template.YoutubeAccount, new ObservableTemplateViewModels(accountTemplateList, false, false, false));
+            }
+            else
+            {
+                this.templateListsByAccount[template.YoutubeAccount].AddTemplate(template);
+            }
         }
 
         internal TemplateComboboxViewModel GetViewModel(Template template)

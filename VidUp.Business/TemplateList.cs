@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
@@ -11,16 +10,9 @@ using Newtonsoft.Json;
 namespace Drexel.VidUp.Business
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class TemplateList : INotifyCollectionChanged, INotifyPropertyChanged, IEnumerable<Template>
+    public class TemplateList : TemplateListBase
     {
-        [JsonProperty]
-        private List<Template> templates;
         private CheckFileUsage checkFileUsage;
-
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public int TemplateCount { get => this.templates.Count; }
 
         public CheckFileUsage CheckFileUsage
         {
@@ -138,17 +130,16 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void AddTemplate(Template template)
+        public override void AddTemplate(Template template)
         {
             this.setupTemplate(template);
-
             this.templates.Add(template);
 
             this.raiseNotifyPropertyChanged("TemplateCount");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, template));
         }
 
-        public void AddTemplates(List<Template> templates)
+        public override void AddTemplates(List<Template> templates)
         {
             foreach (Template template in templates)
             {
@@ -264,17 +255,7 @@ namespace Drexel.VidUp.Business
             return targetFilePath;
         }
 
-        public int FindIndex(Predicate<Template> predicate)
-        {
-            return this.templates.FindIndex(predicate);
-        }
-
-        public List<Template> FindAll(Predicate<Template> match)
-        {
-            return this.templates.FindAll(match);
-        }
-
-        public void Remove(Template template)
+        public override void Remove(Template template)
         {
             this.templates.Remove(template);
 
@@ -335,44 +316,6 @@ namespace Drexel.VidUp.Business
                         File.Delete(imageFilePath);
                     }
                 }
-            }
-        }
-
-        public Template GetTemplate(int index)
-        {
-            return this.templates[index];
-        }
-
-        public Template GetTemplate(Guid guid)
-        {
-            return this.templates.Find(template => template.Guid == guid);
-        }
-
-        public IEnumerator<Template> GetEnumerator()
-        {
-            return this.templates.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
-        private void raiseNotifyCollectionChanged(NotifyCollectionChangedEventArgs args)
-        {
-            NotifyCollectionChangedEventHandler handler = this.CollectionChanged;
-            if (handler != null)
-            {
-                handler(this, args);
-            }
-        }
-
-        private void raiseNotifyPropertyChanged(string propertyName)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

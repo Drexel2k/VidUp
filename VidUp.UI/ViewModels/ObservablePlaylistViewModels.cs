@@ -70,7 +70,19 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     if (this.playlistListsByAccount != null)
                     {
-                        this.playlistListsByAccount[playlist.YoutubeAccount].AddPlaylist(playlist);
+                        PlaylistList accountPlaylistList;
+                        if (!this.playlistListsByAccount.TryGetValue(playlist.YoutubeAccount, out accountPlaylistList))
+                        {
+                            List<Playlist> playlists = new List<Playlist>();
+                            playlists.Add(playlist);
+                            accountPlaylistList = new PlaylistList(playlists);
+                            this.playlistListsByAccount.Add(playlist.YoutubeAccount, accountPlaylistList);
+                            this.observablePlaylistViewModelsByAccount.Add(playlist.YoutubeAccount, new ObservablePlaylistViewModels(accountPlaylistList, false));
+                        }
+                        else
+                        {
+                            this.playlistListsByAccount[playlist.YoutubeAccount].AddPlaylist(playlist);
+                        }
                     }
                 }
 
