@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -11,11 +12,14 @@ namespace Drexel.VidUp.UI.ViewModels
         private PlaylistList playlistList;
         private List<PlaylistComboboxViewModel> playlistComboboxViewModels;
 
+        private Dictionary<YoutubeAccount, PlaylistList> playlistListsByAccount;
+        private Dictionary<YoutubeAccount, ObservablePlaylistViewModels> observablePlaylistViewModelsByAccount;
+
         public int PlaylistCount { get => this.playlistComboboxViewModels.Count;  }
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public ObservablePlaylistViewModels(PlaylistList playlistList)
+        public ObservablePlaylistViewModels(PlaylistList playlistList, bool createByAccount)
         {
             this.playlistList = playlistList;
 
@@ -26,7 +30,33 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.playlistComboboxViewModels.Add(playlistComboboxViewModel);
             }
 
-            this.playlistList.CollectionChanged += playlistListCollectionChanged;
+            if(createByAccount)
+            {
+                this.playlistListsByAccount = new Dictionary<YoutubeAccount, PlaylistList>();
+                this.observablePlaylistViewModelsByAccount = new Dictionary<YoutubeAccount, ObservablePlaylistViewModels>();
+
+                Dictionary<YoutubeAccount, List<Playlist>> playlistsByAccount = new Dictionary<YoutubeAccount, List<Playlist>>();
+                foreach (Playlist playlist in this.playlistList)
+                {
+                    List<Playlist> playlists;
+                    if (!playlistsByAccount.TryGetValue(playlist.YoutubeAccount, out playlists))
+                    {
+                        playlists = new List<Playlist>();
+                        playlistsByAccount.Add(playlist.YoutubeAccount, playlists);
+                    }
+
+                    playlists.Add(playlist);
+                }
+
+                foreach (KeyValuePair<YoutubeAccount, List<Playlist>> accountPlaylists in playlistsByAccount)
+                {
+                    PlaylistList accountPlaylistList = new PlaylistList(accountPlaylists.Value);
+                    this.playlistListsByAccount.Add(accountPlaylists.Key, accountPlaylistList);
+                    this.observablePlaylistViewModelsByAccount.Add(accountPlaylists.Key, new ObservablePlaylistViewModels(accountPlaylistList, false));
+                }
+            }
+
+            this.playlistList.CollectionChanged += this.playlistListCollectionChanged;
         }
 
         private void playlistListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -37,6 +67,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 foreach (Playlist playlist in e.NewItems)
                 {
                     newViewModels.Add(new PlaylistComboboxViewModel(playlist));
+
+                    if (this.playlistListsByAccount != null)
+                    {
+                        this.playlistListsByAccount[playlist.YoutubeAccount].AddPlaylist(playlist);
+                    }
                 }
 
                 this.playlistComboboxViewModels.AddRange(newViewModels);
@@ -54,6 +89,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     PlaylistComboboxViewModel oldViewModel = this.playlistComboboxViewModels.Find(viewModel => viewModel.Playlist == playlist);
                     int index = this.playlistComboboxViewModels.IndexOf(oldViewModel);
                     this.playlistComboboxViewModels.Remove(oldViewModel);
+
+                    if (this.playlistListsByAccount != null)
+                    {
+                        this.playlistListsByAccount[playlist.YoutubeAccount].Remove(playlist);
+                    }
+
                     this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldViewModel, index));
                 }
 
@@ -100,6 +141,18 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.playlistComboboxViewModels[index];
         }
 
+        public ObservablePlaylistViewModels this[YoutubeAccount youtubeAccount]
+        {
+            get
+            {
+                if (!this.observablePlaylistViewModelsByAccount.ContainsKey(youtubeAccount))
+                {
+                    return null;
+                }
+
+                return this.observablePlaylistViewModelsByAccount[youtubeAccount];
+            }
+        }
 
         private void raiseNotifyCollectionChanged(NotifyCollectionChangedEventArgs args)
         {

@@ -249,9 +249,12 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.NewAccount;
-            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy && selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
             {
-                this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                {
+                    this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                }
             }
 
             //is null if there is no playlist in previously selected account
@@ -330,9 +333,7 @@ namespace Drexel.VidUp.UI.ViewModels
         //exposed for testing
         public void AddPlaylist(Playlist playlist)
         {
-            List<Playlist> list = new List<Playlist>();
-            list.Add(playlist);
-            this.playlistList.AddPlaylists(list);
+            this.playlistList.AddPlaylist(playlist);
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
 
             this.SelectedPlaylist = this.observablePlaylistViewModels.GetViewModel(playlist);

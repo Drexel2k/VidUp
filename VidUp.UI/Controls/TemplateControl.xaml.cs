@@ -19,5 +19,11 @@ namespace Drexel.VidUp.UI.Controls
         {
             InitializeComponent();
         }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox comboBox = sender as ComboBox;
+            comboBox.GetBindingExpression(ComboBox.SelectedItemProperty).UpdateSource();
+        }
     }
 }

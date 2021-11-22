@@ -39,7 +39,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private Subscription uploadStatusChangedSubscription;
         private Subscription resumableSessionUriChangedSubscription;
         private Subscription publishAtChangedSubscription;
-        
+
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -47,7 +48,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.observableTemplateViewModels;
+                return this.observableTemplateViewModels[this.SelectedYoutubeAccount.YoutubeAccount];
             }
         }
 
@@ -55,7 +56,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.observablePlaylistViewModels;
+                return this.observablePlaylistViewModels[this.SelectedYoutubeAccount.YoutubeAccount];
             }
         }
 
@@ -204,7 +205,16 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public TemplateComboboxViewModel SelectedTemplate
         {
-            get => this.observableTemplateViewModels.GetViewModel(this.upload.Template);
+            get
+            {
+                if (this.upload.Template != null)
+                {
+                    this.observableTemplateViewModels[this.SelectedYoutubeAccount.YoutubeAccount].GetViewModel(this.upload.Template);
+                }
+
+                return null;
+            }
+            
             set
             {
                 if (value == null)
@@ -220,6 +230,34 @@ namespace Drexel.VidUp.UI.ViewModels
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 //if template changes all values are set to template values
                 this.raisePropertyChanged(null);
+            }
+        }
+
+        public PlaylistComboboxViewModel SelectedPlaylist
+        {
+            get
+            {
+                if (this.upload.Playlist != null)
+                {
+                    return this.observablePlaylistViewModels[this.SelectedYoutubeAccount.YoutubeAccount].GetViewModel(this.upload.Playlist);
+                }
+
+                return null;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    this.upload.Playlist = null;
+                }
+                else
+                {
+                    this.upload.Playlist = value.Playlist;
+                }
+
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                this.raisePropertyChanged("ShowPlaylistHint");
+                this.raisePropertyChanged("SelectedPlaylist");
             }
         }
 
@@ -431,26 +469,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public PlaylistComboboxViewModel SelectedPlaylist
-        {
-            get => this.observablePlaylistViewModels.GetViewModel(this.upload.Playlist);
-            set
-            {
-                if (value == null)
-                {
-                    this.upload.Playlist = null;
-                }
-                else
-                {
-                    this.upload.Playlist = value.Playlist;
-                }
-
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                this.raisePropertyChanged("ShowPlaylistHint");
-                this.raisePropertyChanged("SelectedPlaylist");
-            }
-        }
-
         public YoutubeAccountComboboxViewModel SelectedYoutubeAccount
         {
             get => this.observableYoutubeAccountViewModels.GetViewModel(this.upload.YoutubeAccount);
@@ -458,7 +476,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (value == null)
                 {
-                    this.upload.YoutubeAccount = null;
+                    throw new ArgumentException("SelectedYoutubeAccount must not be null.");
                 }
                 else
                 {
@@ -466,7 +484,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+
+                this.raisePropertyChanged("ObservableTemplateViewModels");
+                this.raisePropertyChanged("ObservablePlaylistViewModels");
                 this.raisePropertyChanged("SelectedYoutubeAccount");
+                this.raisePropertyChanged("SelectedPlaylist");
+                this.raisePropertyChanged("SelectedTemplate");
             }
         }
 
@@ -706,6 +730,8 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        //get the template list and playlist list to create own filtered ObservableViewModels of that list
+        //dependant on account selection
         public UploadViewModel (Upload upload, ObservableTemplateViewModels observableTemplateViewModels, ObservablePlaylistViewModels observablePlaylistViewModels, bool resumeUploads, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels)
         {
             if (observableTemplateViewModels == null)
@@ -715,7 +741,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (observablePlaylistViewModels == null)
             {
-                throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
+                throw new ArgumentException("ObservablePlaylistViewModelsByAccount must not be null.");
             }
 
             if (observableYoutubeAccountViewModels == null)
@@ -724,10 +750,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.upload = upload;
-            //this.upload.PropertyChanged += this.uploadPropertyChanged;
+
 
             this.observableTemplateViewModels = observableTemplateViewModels;
             this.observablePlaylistViewModels = observablePlaylistViewModels;
+
             this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
             this.resumeUploads = resumeUploads;
 

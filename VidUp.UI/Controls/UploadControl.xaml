@@ -162,9 +162,9 @@
                 <Label Content="Template: " Width="66" />
             </StackPanel>
             <!-- Selected Template is clearable through burger menu. -->
-            <ComboBox Grid.Row="6" Grid.Column="2" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="Name" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
+            <ComboBox Grid.Row="6" Grid.Column="2" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="NameWithYoutubeAccountName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
 
-            <StackPanel Grid.Row="6" Grid.Column="3"  Orientation="Horizontal">
+                <StackPanel Grid.Row="6" Grid.Column="3"  Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset category to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="account" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
@@ -212,7 +212,7 @@
                 </Button>
                 <Label Content="Playlist: " Width="47" />
                 <materialDesign:PackIcon Kind="PlaylistCheck" Foreground="Gray"  ToolTip="Playlist will be set after publication." ToolTipService.ShowDuration="60000" Visibility="{Binding ShowPlaylistHint, Mode=OneWay}" Margin="0 5 0 0" />
-                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="203" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Right" Margin="0 0 7 0" VerticalAlignment="Top" Padding="6 4 6 6" />
+                <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="TitleWithYoutubeAccountName" Width="203" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Right" Margin="0 0 7 0" VerticalAlignment="Top" Padding="6 4 6 6" />
             </DockPanel>
 
             <StackPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">

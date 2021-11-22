@@ -162,7 +162,7 @@
 
                     <StackPanel  Grid.Row="9" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="YT Account: " Width="115" />
-                        <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="125"  Padding="0" />
+                        <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount, UpdateSourceTrigger=Explicit}" DisplayMemberPath="YoutubeAccountName" Width="125"  Padding="0" SelectionChanged="ComboBox_SelectionChanged" />
                     </StackPanel>
                 </Grid>
 
@@ -282,8 +282,7 @@
 
                     <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Playlist: " Width="115" />
-                        <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="Name" Width="180" Padding="6 4 6 6" VerticalAlignment="Top" />
-
+                        <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="TitleWithYoutubeAccountName" Width="180" Padding="6 4 6 6" VerticalAlignment="Top" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" >

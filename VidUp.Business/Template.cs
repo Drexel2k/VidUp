@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
@@ -332,6 +333,20 @@ namespace Drexel.VidUp.Business
             get => this.youtubeAccount;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentException("Template's YouTube account must not be null.");
+                }
+
+                if (value != this.youtubeAccount)
+                {
+                    //otherwise collection was modified exception as upload is removed...
+                    foreach (Upload upload in this.uploads.ToList())
+                    {
+                        upload.Template = null;
+                    }
+                }
+
                 this.youtubeAccount = value;
                 this.LastModified = DateTime.Now;
             }

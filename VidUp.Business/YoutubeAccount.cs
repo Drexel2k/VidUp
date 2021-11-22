@@ -74,6 +74,7 @@ namespace Drexel.VidUp.Business
             this.filePath = null;
             this.name = name;
             this.getAccountName = getaccountName;
+            this.isDummy = true;
         }
 
         private void raisePropertyChanged(string propertyName)

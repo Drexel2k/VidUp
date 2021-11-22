@@ -95,6 +95,11 @@ namespace Drexel.VidUp.Business
             {
                 if (value != null)
                 {
+                    if (value.YoutubeAccount != this.youtubeAccount)
+                    {
+                        throw new ArgumentException("Template's YouTube account must be the same thant the upload's account.");
+                    }
+
                     if (this.template != null)
                     {
                         this.template.RemoveUpload(this);
@@ -111,7 +116,11 @@ namespace Drexel.VidUp.Business
                 }
                 else
                 {
-                    this.template.RemoveUpload(this);
+                    if (this.template != null)
+                    {
+                        this.template.RemoveUpload(this);
+                    }
+
                     this.template = value;
                 }
 
@@ -239,6 +248,14 @@ namespace Drexel.VidUp.Business
             get { return this.playlist; }
             set
             {
+                if (value != null)
+                {
+                    if (value.YoutubeAccount != this.youtubeAccount)
+                    {
+                        throw new ArgumentException("Playlist's YouTube account must be the same thant the upload's account.");
+                    }
+                }
+
                 this.playlist = value;
                 this.LastModified = DateTime.Now;
             }
@@ -415,7 +432,13 @@ namespace Drexel.VidUp.Business
             {
                 if (value == null)
                 {
-                    throw new ArgumentException("youtubeAccount must not be null.");
+                    throw new ArgumentException("Upload's YoutubeAccount must not be null.");
+                }
+
+                if (this.youtubeAccount != value)
+                {
+                    this.Playlist = null;
+                    this.Template = null;
                 }
 
                 this.youtubeAccount = value;

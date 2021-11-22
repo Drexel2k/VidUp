@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
@@ -76,7 +77,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.observablePlaylistViewModels;
+                return this.observablePlaylistViewModels[template.YoutubeAccount];
             }
         }
 
@@ -117,7 +118,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.template != null ? this.observablePlaylistViewModels.GetViewModel(this.template.Playlist) : null;
+                if (this.template != null && this.template.Playlist != null)
+                {
+                    return this.observablePlaylistViewModels[template.YoutubeAccount].GetViewModel(this.template.Playlist);
+                }
+
+                return null;
             }
             set
             {
@@ -149,13 +155,32 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    this.template.YoutubeAccount = value.YoutubeAccount;
+                    this.confirmAccountChange(value.YoutubeAccount);
                 }
-
-                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
-                this.raisePropertyChanged("SelectedYoutubeAccount");
             }
+        }
+
+        private async Task confirmAccountChange(YoutubeAccount youtubeAccount)
+        {
+            ConfirmControl control = new ConfirmControl(
+                $"WARNING! If you change the account, template will be removed from all uploads belonging to this template until now!",
+                true);
+
+            //a collection is change later, so we must return to the Gui thread.
+            bool result = (bool) await DialogHost.Show(control, "RootDialog").ConfigureAwait(true);
+            if (result)
+            {
+                YoutubeAccount oldAccount = this.template.YoutubeAccount;
+                this.template.YoutubeAccount = youtubeAccount;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
+                EventAggregator.Instance.Publish(new TemplateYoutubeAccountChangedMessage(this.template, oldAccount, youtubeAccount));
+            }
+
+            this.raisePropertyChanged("ObservablePlaylistViewModels");
+            this.raisePropertyChanged("SelectedPlaylist");
+            this.raisePropertyChanged("SelectedYoutubeAccount");
         }
 
         public GenericCommand NewTemplateCommand
@@ -579,9 +604,12 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.NewAccount;
-            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy && selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
             {
-                this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                {
+                    this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                }
             }
 
             //is null if there is no playlist in previously selected account

@@ -449,10 +449,10 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<AutoSettingPlaylistsStateChangedMessage>(this.autoSettingPlaylistsStateChanged);
 
             Template.DummyAccount = new YoutubeAccount("Dummy", this.getYoutubeAccountName);
-            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, false, false);
-            this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, true, true);
-            this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, true, false);
-            this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList);
+            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, true, false, false);
+            this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, false, true, true);
+            this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, false, true, false);
+            this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList, true);
 
             this.observableYoutubeAccountViewModels = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, false);
             this.observableYoutubeAccountViewModelsInclAll = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, true);
@@ -482,11 +482,14 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModels)
             {
-                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy && this.selectedYoutubeAccount.YoutubeAccountName == "All")
+                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy)
                 {
-                    if (templateComboboxViewModel.Visible == false)
+                    if(this.selectedYoutubeAccount.YoutubeAccountName == "All")
                     {
-                        templateComboboxViewModel.Visible = true;
+                        if (templateComboboxViewModel.Visible == false)
+                        {
+                            templateComboboxViewModel.Visible = true;
+                        }
                     }
                 }
                 else
@@ -507,11 +510,14 @@ namespace Drexel.VidUp.UI.ViewModels
 
             foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModelsInclAll)
             {
-                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy && this.selectedYoutubeAccount.YoutubeAccountName == "All")
+                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy)
                 {
-                    if (templateComboboxViewModel.Visible == false)
+                    if (this.selectedYoutubeAccount.YoutubeAccountName == "All")
                     {
-                        templateComboboxViewModel.Visible = true;
+                        if (templateComboboxViewModel.Visible == false)
+                        {
+                            templateComboboxViewModel.Visible = true;
+                        }
                     }
                 }
                 else
@@ -532,11 +538,14 @@ namespace Drexel.VidUp.UI.ViewModels
 
             foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModelsInclAllNone)
             {
-                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy && this.selectedYoutubeAccount.YoutubeAccountName == "All")
+                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy)
                 {
-                    if (templateComboboxViewModel.Visible == false)
+                    if (this.selectedYoutubeAccount.YoutubeAccountName == "All")
                     {
-                        templateComboboxViewModel.Visible = true;
+                        if (templateComboboxViewModel.Visible == false)
+                        {
+                            templateComboboxViewModel.Visible = true;
+                        }
                     }
                 }
                 else
@@ -557,11 +566,14 @@ namespace Drexel.VidUp.UI.ViewModels
 
             foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.observablePlaylistViewModels)
             {
-                if (selectedYoutubeAccount.YoutubeAccount.IsDummy && selectedYoutubeAccount.YoutubeAccount.Name == "All")
+                if (selectedYoutubeAccount.YoutubeAccount.IsDummy)
                 {
-                    if (playlistComboboxViewModel.Visible == false)
+                    if (selectedYoutubeAccount.YoutubeAccount.Name == "All")
                     {
-                        playlistComboboxViewModel.Visible = true;
+                        if (playlistComboboxViewModel.Visible == false)
+                        {
+                            playlistComboboxViewModel.Visible = true;
+                        }
                     }
                 }
                 else

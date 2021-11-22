@@ -138,21 +138,36 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public void AddTemplate(Template template)
+        {
+            this.setupTemplate(template);
+
+            this.templates.Add(template);
+
+            this.raiseNotifyPropertyChanged("TemplateCount");
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
+        }
+
         public void AddTemplates(List<Template> templates)
         {
             foreach (Template template in templates)
             {
-                string newFilePath = TemplateList.CopyTemplateImageToStorageFolder(template.ImageFilePathForEditing);
-                template.ImageFilePathForEditing = newFilePath;
-                template.ThumbnailFallbackFilePathChanged += (sender, args) => this.thumbnailFallbackFilePathChanged(args);
-                template.ImageFilePathForEditingChanged += (sender, args) => this.imageFilePathForEditingChanged(args);
-                template.IsDefaultChanged += (sender, args) => this.isDefaultChanged(sender);
+                this.setupTemplate(template);
             }
 
             this.templates.AddRange(templates);
 
             this.raiseNotifyPropertyChanged("TemplateCount");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
+        }
+
+        private void setupTemplate(Template template)
+        {
+            string newFilePath = TemplateList.CopyTemplateImageToStorageFolder(template.ImageFilePathForEditing);
+            template.ImageFilePathForEditing = newFilePath;
+            template.ThumbnailFallbackFilePathChanged += (sender, args) => this.thumbnailFallbackFilePathChanged(args);
+            template.ImageFilePathForEditingChanged += (sender, args) => this.imageFilePathForEditingChanged(args);
+            template.IsDefaultChanged += (sender, args) => this.isDefaultChanged(sender);
         }
 
         private void isDefaultChanged(object sender)

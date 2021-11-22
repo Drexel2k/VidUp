@@ -70,15 +70,6 @@ namespace Drexel.VidUp.Business
         public YoutubeAccount YoutubeAccount
         {
             get => this.youtubeAccount;
-            set
-            {
-                if (youtubeAccount == null)
-                {
-                    throw new ArgumentException("youtubeAccount must not be null.");
-                }
-                this.youtubeAccount = value;
-                this.lastModified = DateTime.Now;
-            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

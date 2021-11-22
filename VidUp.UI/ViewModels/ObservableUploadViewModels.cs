@@ -14,10 +14,10 @@ namespace Drexel.VidUp.UI.ViewModels
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         private ObservableTemplateViewModels observableTemplateViewModels;
-        private ObservablePlaylistViewModels observablePlaylistViewModels;
 
         private bool resumeUploads;
         private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+        private ObservablePlaylistViewModels observablePlaylistViewModels;
 
         public bool ResumeUploads
         {

@@ -25,11 +25,6 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private UploadList uploadList;
 
-        //needed for template and playlist combobox in upload control
-        private ObservableTemplateViewModels observableTemplateViewModels;
-        private ObservablePlaylistViewModels observablePlaylistViewModels;
-        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
-
         private ObservableTemplateViewModels observableTemplateViewModelsInclAll;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
 
@@ -386,9 +381,6 @@ namespace Drexel.VidUp.UI.ViewModels
             ObservablePlaylistViewModels observablePlaylistViewModels, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForCreatingUploads)
         {
             this.uploadList = uploadList;
-            this.observableTemplateViewModels = observableTemplateViewModels;
-            this.observablePlaylistViewModels = observablePlaylistViewModels;
-            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
 
             this.observableTemplateViewModelsInclAllNone = observableTemplateViewModelsInclAllNone;
             this.observableTemplateViewModelsInclAll = observableTemplateViewModelsInclAll;
@@ -399,7 +391,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.resetWithSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
             this.resetAttributeSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
 
-            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.resumeUploads, this.observableYoutubeAccountViewModels);
+            this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, observableTemplateViewModels, observablePlaylistViewModels, this.resumeUploads, observableYoutubeAccountViewModels);
 
             this.youtubeAccountForCreatingUploads = youtubeAccountForCreatingUploads;
             EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
@@ -423,18 +415,24 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.NewAccount;
-            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy && selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
             {
-                this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                {
+                    this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                }
             }
 
             foreach (UploadViewModel observableUploadViewModel in this.observableUploadViewModels)
             {
-                if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy && selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
                 {
-                    if (observableUploadViewModel.Visible == false)
+                    if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
                     {
-                        observableUploadViewModel.Visible = true;
+                        if (observableUploadViewModel.Visible == false)
+                        {
+                            observableUploadViewModel.Visible = true;
+                        }
                     }
                 }
                 else
@@ -701,13 +699,16 @@ namespace Drexel.VidUp.UI.ViewModels
 
 
             predicates[0] = upload => string.IsNullOrWhiteSpace(upload.ResumableSessionUri);
-            if (this.resetAttributeSelectedTemplate.Template.IsDummy && this.resetAttributeSelectedTemplate.Template.Name == "All")
+            if (this.resetAttributeSelectedTemplate.Template.IsDummy)
             {
-                predicates[1] = upload => true;
-            }
-            else if (this.resetAttributeSelectedTemplate.Template.IsDummy && this.resetAttributeSelectedTemplate.Template.Name == "None")
-            {
-                predicates[1] = upload => upload.Template == null;
+                if (this.resetAttributeSelectedTemplate.Template.Name == "All")
+                {
+                    predicates[1] = upload => true;
+                }
+                else if (this.resetAttributeSelectedTemplate.Template.Name == "None")
+                {
+                    predicates[1] = upload => upload.Template == null;
+                }
             }
             else
             {
@@ -781,27 +782,30 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void recalculatePublishAt(object obj)
         {
-            if (this.recalculatePublishAtSelectedTemplate.IsDummy && this.recalculatePublishAtSelectedTemplate.Name == "All")
+            if (this.recalculatePublishAtSelectedTemplate.IsDummy)
             {
-                if (this.recalculatePublishAtStartDate != null)
+                if(this.recalculatePublishAtSelectedTemplate.Name == "All")
                 {
-                    this.uploadList.SetStartDateOnAllTemplateSchedules(this.recalculatePublishAtStartDate.Value);
-                }
-
-                foreach (Upload upload in this.uploadList)
-                {
-                    if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
+                    if (this.recalculatePublishAtStartDate != null)
                     {
-                        upload.PublishAt = null;
+                        this.uploadList.SetStartDateOnAllTemplateSchedules(this.recalculatePublishAtStartDate.Value);
                     }
-                }
 
-                foreach (Upload upload in this.uploadList)
-                {
-                    if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
+                    foreach (Upload upload in this.uploadList)
                     {
-                        upload.AutoSetPublishAtDateTime();
-                        EventAggregator.Instance.Publish(new PublishAtChangedMessage(upload));
+                        if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            upload.PublishAt = null;
+                        }
+                    }
+
+                    foreach (Upload upload in this.uploadList)
+                    {
+                        if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
+                        {
+                            upload.AutoSetPublishAtDateTime();
+                            EventAggregator.Instance.Publish(new PublishAtChangedMessage(upload));
+                        }
                     }
                 }
             }
@@ -867,15 +871,17 @@ namespace Drexel.VidUp.UI.ViewModels
                 predicates[0] = upload => upload.UploadStatus == status;
             }
 
-            if (this.deleteSelectedTemplate.Template.IsDummy && this.deleteSelectedTemplate.Template.Name == "All")
+            if (this.deleteSelectedTemplate.Template.IsDummy)
             {
-                Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All.");
-                predicates[1] = upload => true;
-            }
-            else if (this.deleteSelectedTemplate.Template.IsDummy && this.deleteSelectedTemplate.Template.Name == "None")
-            {
-                Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None.");
-                predicates[1] = upload => upload.Template == null;
+                if (this.deleteSelectedTemplate.Template.Name == "All")
+                {
+                    Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All.");
+                    predicates[1] = upload => true;
+                } else if (this.deleteSelectedTemplate.Template.Name == "None")
+                {
+                    Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None.");
+                    predicates[1] = upload => upload.Template == null;
+                }
             }
             else
             {
@@ -925,13 +931,16 @@ namespace Drexel.VidUp.UI.ViewModels
                 predicates[0] = upload => upload.UploadStatus == status;
             }
 
-            if (this.resetWithSelectedTemplate.Template.IsDummy && this.resetWithSelectedTemplate.Template.Name == "All")
+            if (this.resetWithSelectedTemplate.Template.IsDummy)
             {
-                predicates[1] = upload => true;
-            }
-            else if (this.resetWithSelectedTemplate.Template.IsDummy && this.resetWithSelectedTemplate.Template.Name == "None")
-            {
-                predicates[1] = upload => upload.Template == null;
+                if (this.resetWithSelectedTemplate.Template.Name == "All")
+                {
+                    predicates[1] = upload => true;
+                }
+                else if (this.resetWithSelectedTemplate.Template.Name == "None")
+                {
+                    predicates[1] = upload => upload.Template == null;
+                }
             }
             else
             {
