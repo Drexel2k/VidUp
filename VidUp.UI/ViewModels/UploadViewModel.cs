@@ -209,7 +209,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.upload.Template != null)
                 {
-                    this.observableTemplateViewModels[this.SelectedYoutubeAccount.YoutubeAccount].GetViewModel(this.upload.Template);
+                    return this.observableTemplateViewModels[this.SelectedYoutubeAccount.YoutubeAccount].GetViewModel(this.upload.Template);
                 }
 
                 return null;

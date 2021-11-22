@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.IO;
 using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
@@ -13,6 +11,7 @@ namespace Drexel.VidUp.Business
     public class TemplateList : TemplateListBase
     {
         private CheckFileUsage checkFileUsage;
+        private PlaylistList playlistList;
 
         public CheckFileUsage CheckFileUsage
         {
@@ -22,9 +21,11 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public TemplateList(List<Template> templates)
+        public TemplateList(List<Template> templates, PlaylistList playlistList)
         {
             this.templates = new List<Template>();
+            this.playlistList = playlistList;
+            this.playlistList.CollectionChanged += this.playlistListCollectionChanged;
 
             if (templates != null)
             {
@@ -35,6 +36,17 @@ namespace Drexel.VidUp.Business
                     template.ThumbnailFallbackFilePathChanged += (sender, args) => this.thumbnailFallbackFilePathChanged(args);
                     template.ImageFilePathForEditingChanged += (sender, args) => this.imageFilePathForEditingChanged(args);
                     template.IsDefaultChanged += (sender, args) => this.isDefaultChanged(sender);
+                }
+            }
+        }
+
+        private void playlistListCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (object playlist in e.OldItems)
+                {
+                    this.removePlaylist((Playlist)playlist);
                 }
             }
         }
@@ -120,14 +132,6 @@ namespace Drexel.VidUp.Business
         public Template GetDefaultTemplate()
         {
             return this.templates.Find(template => template.IsDefault);
-        }
-
-        public Template this[int index]
-        {
-            get
-            {
-                return this.templates[index];
-            }
         }
 
         public override void AddTemplate(Template template)
@@ -255,7 +259,7 @@ namespace Drexel.VidUp.Business
             return targetFilePath;
         }
 
-        public override void Remove(Template template)
+        public override void Delete(Template template)
         {
             this.templates.Remove(template);
 
@@ -263,12 +267,12 @@ namespace Drexel.VidUp.Business
             this.deleteImageIfPossible(template.ImageFilePathForEditing);
 
             this.raiseNotifyPropertyChanged("TemplateCount");
+
             //template is removed from uploads in event listener in MainWindowViewModel.templateListCollectionChanged
-            //todo: Move to event aggregator
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, template));
         }
 
-        public void RemovePlaylist(Playlist playlist)
+        private void removePlaylist(Playlist playlist)
         {
             foreach (Template template in this.templates)
             {

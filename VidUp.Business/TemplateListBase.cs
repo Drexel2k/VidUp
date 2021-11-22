@@ -40,7 +40,7 @@ namespace Drexel.VidUp.Business
             return this.templates.FindAll(match);
         }
 
-        public abstract void Remove(Template template);
+        public abstract void Delete(Template template);
 
         public Template GetTemplate(int index)
         {

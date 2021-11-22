@@ -31,7 +31,7 @@ namespace Drexel.VidUp.UI
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
         }
 
-        public override void Remove(Template template)
+        public override void Delete(Template template)
         {
             this.templates.Remove(template);
             this.raiseNotifyPropertyChanged("TemplateCount");

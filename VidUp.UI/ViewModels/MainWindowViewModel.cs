@@ -765,13 +765,11 @@ namespace Drexel.VidUp.UI.ViewModels
             YoutubeAuthentication.SerializationFolder = Settings.Instance.StorageFolder;
             ReSerialize reSerialize = deserializer.Deserialize(this.youtubeAccountList);
             this.templateList = DeserializationRepositoryContent.TemplateList;
-            this.templateList.CollectionChanged += this.templateListCollectionChanged;
-            
+
             this.uploadList = DeserializationRepositoryContent.UploadList;
             this.uploadList.PropertyChanged += this.uploadListPropertyChanged;
 
             this.playlistList = DeserializationRepositoryContent.PlaylistList;
-            this.playlistList.CollectionChanged += this.playlistListCollectionChanged;
 
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
@@ -828,23 +826,6 @@ namespace Drexel.VidUp.UI.ViewModels
             if (reSerialize.PlaylistList)
             {
                 JsonSerializationContent.JsonSerializer.SerializePlaylistList();
-            }
-        }
-
-        private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if(e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                this.uploadList.RemoveTemplate((Template)e.OldItems[0]);
-            }
-        }
-
-        private void playlistListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                this.uploadList.RemovePlaylist((Playlist)e.OldItems[0]);
-                this.templateList.RemovePlaylist((Playlist)e.OldItems[0]);
             }
         }
 

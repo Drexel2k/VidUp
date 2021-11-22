@@ -163,8 +163,7 @@
             </StackPanel>
             <!-- Selected Template is clearable through burger menu. -->
             <ComboBox Grid.Row="6" Grid.Column="2" SelectedItem="{Binding SelectedTemplate}" ItemsSource="{Binding ObservableTemplateViewModels}" DisplayMemberPath="NameWithYoutubeAccountName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
-
-                <StackPanel Grid.Row="6" Grid.Column="3"  Orientation="Horizontal">
+            <StackPanel Grid.Row="6" Grid.Column="3"  Orientation="Horizontal">
                 <Button Padding="0" Width="17" Height="21" Style="{StaticResource MaterialDesignFlatButton}" Margin="0 2 0 5" ToolTip="Reset category to template value." ToolTipService.ShowDuration="60000" Command="{Binding ResetToTemplateValueCommand}" CommandParameter="account" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top">
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>

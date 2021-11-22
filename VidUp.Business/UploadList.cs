@@ -24,6 +24,7 @@ namespace Drexel.VidUp.Business
         private CheckFileUsage checkFileUsage;
         private string thumbnailFallbackImageFolder;
         private TemplateList templateList;
+        private PlaylistList playlistList;
 
         public int UploadCount { get => this.uploads.Count; }
 
@@ -115,9 +116,13 @@ namespace Drexel.VidUp.Business
 
         public ReadOnlyCollection<Upload> Uploads { get => this.uploads.AsReadOnly(); }
 
-        public UploadList(List<Upload> uploads, TemplateList templateList, string thumbnailFallbackImageFolder)
+        public UploadList(List<Upload> uploads, TemplateList templateList, PlaylistList playlistList, string thumbnailFallbackImageFolder)
         {
             this.templateList = templateList;
+            this.templateList.CollectionChanged += this.templateListCollectionChanged;
+
+            this.playlistList = playlistList;
+            this.playlistList.CollectionChanged += this.playlistListCollectionChanged;
 
             this.uploads = new List<Upload>();
             if (uploads != null)
@@ -131,6 +136,28 @@ namespace Drexel.VidUp.Business
             }
 
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
+        }
+
+        private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (object template in e.OldItems)
+                {
+                    this.removeTemplate((Template)template);
+                }
+            }
+        }
+
+        private void playlistListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (object playlist in e.OldItems)
+                {
+                    this.removePlaylist((Playlist)playlist);
+                }
+            }
         }
 
         private void onThumbnailChanged(object sender, OldValueArgs args)
@@ -272,7 +299,7 @@ namespace Drexel.VidUp.Business
             return false;
         }
 
-        public void RemoveTemplate(Template template)
+        private void removeTemplate(Template template)
         {
             foreach (Upload upload in this.uploads)
             {
@@ -283,7 +310,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void RemovePlaylist(Playlist playlist)
+        private void removePlaylist(Playlist playlist)
         {
             foreach (Upload upload in this.uploads)
             {

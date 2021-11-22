@@ -218,7 +218,7 @@ namespace Drexel.VidUp.Json.Content
                 }
             }
 
-            DeserializationRepositoryContent.UploadList = new UploadList(uploads, DeserializationRepositoryContent.TemplateList, this.thumbnailFallbackImageFolder);
+            DeserializationRepositoryContent.UploadList = new UploadList(uploads, DeserializationRepositoryContent.TemplateList, DeserializationRepositoryContent.PlaylistList, this.thumbnailFallbackImageFolder);
 
             Tracer.Write($"JsonDeserializationContent.createUploadListToRepository: End.");
         }
@@ -226,7 +226,7 @@ namespace Drexel.VidUp.Json.Content
         private void createTemplateListToRepository()
         {
             Tracer.Write($"JsonDeserializationContent.createTemplateListToRepository: Start.");
-            DeserializationRepositoryContent.TemplateList = new TemplateList(this.templates);
+            DeserializationRepositoryContent.TemplateList = new TemplateList(this.templates, DeserializationRepositoryContent.PlaylistList);
             Tracer.Write($"JsonDeserializationContent.createTemplateListToRepository: End.");
         }
 

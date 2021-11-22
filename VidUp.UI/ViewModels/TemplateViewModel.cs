@@ -617,7 +617,7 @@ namespace Drexel.VidUp.UI.ViewModels
             List<Template> templatesToRemove = this.templateList.FindAll(template => template.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
             foreach (Template template in templatesToRemove)
             {
-                this.templateList.Remove(template);
+                this.templateList.Delete(template);
             }
 
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
@@ -697,7 +697,7 @@ namespace Drexel.VidUp.UI.ViewModels
             TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template != template && vm.Visible == true);
             this.SelectedTemplate = viewModel;
 
-            this.templateList.Remove(template);
+            this.templateList.Delete(template);
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();

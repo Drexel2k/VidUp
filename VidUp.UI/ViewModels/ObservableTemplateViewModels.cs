@@ -83,7 +83,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void templateYoutubeAccountChanged(TemplateYoutubeAccountChangedMessage templateYoutubeAccountChangedMessage)
         {
-            this.templateListsByAccount[templateYoutubeAccountChangedMessage.OldAccount].Remove(templateYoutubeAccountChangedMessage.Template);
+            this.templateListsByAccount[templateYoutubeAccountChangedMessage.OldAccount].Delete(templateYoutubeAccountChangedMessage.Template);
             this.addToAccountTemplates(templateYoutubeAccountChangedMessage.Template);
         }
 
@@ -135,7 +135,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     if (this.templateListsByAccount != null)
                     {
-                        this.templateListsByAccount[template.YoutubeAccount].Remove(template);
+                        this.templateListsByAccount[template.YoutubeAccount].Delete(template);
                     }
 
                     this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldViewModel, index));
