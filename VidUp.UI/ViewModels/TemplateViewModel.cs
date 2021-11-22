@@ -615,12 +615,16 @@ namespace Drexel.VidUp.UI.ViewModels
         private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
         {
             List<Template> templatesToRemove = this.templateList.FindAll(template => template.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
+
+            //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
+            //will set the SelectedTemplate to null which causes problems if there are templates left
+            TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => !templatesToRemove.Contains(vm.Template) && vm.Visible == true);
+            this.SelectedTemplate = viewModel;
+
             foreach (Template template in templatesToRemove)
             {
                 this.templateList.Delete(template);
             }
-
-            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
         }
 
         private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
@@ -702,7 +706,6 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
-
 
         private void removeComboBoxValue(object parameter)
         {

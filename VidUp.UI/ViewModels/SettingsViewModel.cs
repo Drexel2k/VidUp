@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.EventAggregation;
@@ -383,6 +384,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     EventAggregator.Instance.Publish(new BeforeYoutubeAccountDeleteMessage(this.youtubeAccounts.GetYoutubeAccount(accountName)));
                     this.youtubeAccounts.Remove(accountName);
+                    JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+                    JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                    JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                    JsonSerializationContent.JsonSerializer.SerializeUploadList();
                 }
             }
         }

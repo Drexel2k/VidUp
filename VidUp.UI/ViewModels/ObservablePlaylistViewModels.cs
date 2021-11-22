@@ -104,7 +104,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     if (this.playlistListsByAccount != null)
                     {
-                        this.playlistListsByAccount[playlist.YoutubeAccount].Remove(playlist);
+                        this.playlistListsByAccount[playlist.YoutubeAccount].DeletePlaylists(pl => pl == playlist);
                     }
 
                     this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldViewModel, index));

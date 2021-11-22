@@ -406,5 +406,10 @@ namespace Drexel.VidUp.Business
                 template.SetStartDateOnTemplateSchedule(startDate);
             }
         }
+
+        public List<Upload> FindAll(Predicate<Upload> match)
+        {
+            return this.uploads.FindAll(match);
+        }
     }
 }

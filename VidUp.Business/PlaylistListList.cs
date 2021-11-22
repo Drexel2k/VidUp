@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
@@ -64,12 +65,18 @@ namespace Drexel.VidUp.Business
             return this.playlists.FindIndex(predicate);
         }
 
-        public void Remove(Playlist playlist)
+        public void DeletePlaylists(Predicate<Playlist> predicate)
         {
-            this.playlists.Remove(playlist);
+            Tracer.Write($"PlaylistList.DeletePlaylists: Start.");
+            List<Playlist> oldPlaylists = this.playlists.FindAll(predicate);
+
+            Tracer.Write($"PlaylistList.DeletePlaylists: Delete {oldPlaylists.Count} playlists from playlist list.");
+            this.playlists.RemoveAll(predicate);
 
             this.raiseNotifyPropertyChanged("PlaylistCount");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, playlist));
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldPlaylists));
+
+            Tracer.Write($"PlaylistList.DeletePlaylists: Ende.");
         }
 
         public Playlist GetPlaylist(int index)

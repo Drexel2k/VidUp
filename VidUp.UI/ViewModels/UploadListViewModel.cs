@@ -394,6 +394,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, observableTemplateViewModels, observablePlaylistViewModels, this.resumeUploads, observableYoutubeAccountViewModels);
 
             this.youtubeAccountForCreatingUploads = youtubeAccountForCreatingUploads;
+            EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
             EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
 
             this.deleteCommand = new GenericCommand(this.DeleteUpload);
@@ -405,6 +406,11 @@ namespace Drexel.VidUp.UI.ViewModels
             this.deleteUploadsCommand = new GenericCommand(this.deleteUploadsAsync);
             this.resetUploadsCommand = new GenericCommand(this.resetUploadsAsync);
             this.resetAttributeCommand = new GenericCommand(this.resetAttributeAsync);
+        }
+
+        private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
+        {
+            this.uploadList.DeleteUploads(upload => upload.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
         }
 
         private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)

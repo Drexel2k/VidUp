@@ -269,11 +269,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
         {
             List<Playlist> playlistsToRemove = this.playlistList.FindAll(playlist => playlist.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
-            foreach (Playlist playlist in playlistsToRemove)
-            {
-                this.playlistList.Remove(playlist);
-            }
-            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+            this.playlistList.DeletePlaylists(pl => playlistsToRemove.Contains(pl));
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -317,7 +313,7 @@ namespace Drexel.VidUp.UI.ViewModels
             PlaylistComboboxViewModel viewModel = this.observablePlaylistViewModels.GetFirstViewModel(vm => vm.Playlist != playlist && vm.Visible == true);
             this.SelectedPlaylist = viewModel;
 
-            this.playlistList.Remove(playlist);
+            this.playlistList.DeletePlaylists(pl => pl == playlist);
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
