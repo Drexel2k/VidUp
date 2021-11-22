@@ -162,7 +162,7 @@
 
                     <StackPanel  Grid.Row="9" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="YT Account: " Width="115" />
-                        <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount, UpdateSourceTrigger=Explicit}" DisplayMemberPath="YoutubeAccountName" Width="125"  Padding="0" SelectionChanged="ComboBox_SelectionChanged" />
+                        <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="125"  Padding="0" />
                     </StackPanel>
                 </Grid>
 

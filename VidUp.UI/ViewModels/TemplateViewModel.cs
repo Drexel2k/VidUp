@@ -41,8 +41,14 @@ namespace Drexel.VidUp.UI.ViewModels
         private string lastThumbnailFallbackFilePathAdded = null;
         private string lastImageFilePathAdded;
 
+        //needs to be a separate field if the user cancels the account change it needs to 
+        //be set once to the new selected value and then reverted back to reflect
+        //the change in the GUI.
+        private YoutubeAccountComboboxViewModel selectedYoutubeAccountComboboxViewModel;
+
         public event PropertyChangedEventHandler PropertyChanged;
         #region properties
+
         public Template Template
         {
             get
@@ -53,6 +59,15 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.template != value)
                 {
+                    if (value != null)
+                    {
+                        this.selectedYoutubeAccountComboboxViewModel = this.observableYoutubeAccountViewModels.GetViewModel(value.YoutubeAccount);
+                    }
+                    else
+                    {
+                        this.selectedYoutubeAccountComboboxViewModel = null;
+                    }
+
                     this.template = value;
                     //all properties changed
                     this.raisePropertyChanged(null);
@@ -145,10 +160,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.template != null ? this.observableYoutubeAccountViewModels.GetViewModel(this.template.YoutubeAccount) : null;
+                return this.selectedYoutubeAccountComboboxViewModel;
             }
             set
             {
+                this.selectedYoutubeAccountComboboxViewModel = value;
+
                 if (value == null)
                 {
                     throw new InvalidOperationException("A template must have a Youtube account.");
@@ -160,7 +177,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private async Task confirmAccountChange(YoutubeAccount youtubeAccount)
+        private async void confirmAccountChange(YoutubeAccount youtubeAccount)
         {
             ConfirmControl control = new ConfirmControl(
                 $"WARNING! If you change the account, template will be removed from all uploads belonging to this template until now!",
@@ -168,6 +185,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             //a collection is change later, so we must return to the Gui thread.
             bool result = (bool) await DialogHost.Show(control, "RootDialog").ConfigureAwait(true);
+
             if (result)
             {
                 YoutubeAccount oldAccount = this.template.YoutubeAccount;
@@ -177,10 +195,14 @@ namespace Drexel.VidUp.UI.ViewModels
                 EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
                 EventAggregator.Instance.Publish(new TemplateYoutubeAccountChangedMessage(this.template, oldAccount, youtubeAccount));
             }
+            else
+            {
+                this.selectedYoutubeAccountComboboxViewModel = this.observableYoutubeAccountViewModels.GetViewModel(this.template.YoutubeAccount);
+            }
 
+            this.raisePropertyChanged("SelectedYoutubeAccount");
             this.raisePropertyChanged("ObservablePlaylistViewModels");
             this.raisePropertyChanged("SelectedPlaylist");
-            this.raisePropertyChanged("SelectedYoutubeAccount");
         }
 
         public GenericCommand NewTemplateCommand
