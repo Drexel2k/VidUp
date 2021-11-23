@@ -102,7 +102,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     YoutubeVideoUploadService.stream = inputStream;
 
                     long fileLength = upload.FileLength;
-                    HttpClient client = HttpHelper.GetUploadClient("default");
                     
                     //on IOExceptions try 2 times more to upload the chunk.
                     //no response from the server shall be requested on IOException.
@@ -110,7 +109,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     bool error = false;
 
                     Tracer.Write($"YoutubeVideoUploadService.Upload: fileLength: {fileLength}.");
-                    HttpResponseMessage message;
+                    HttpResponseMessage responseMessage;
                     StreamContent streamContent;
 
                     do
@@ -154,12 +153,16 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: uploadByteIndex {upload.BytesSent} Try {uploadTry}.");
 
                         Tracer.Write($"YoutubeVideoUploadService.Upload: Creating content.");
+
+                        HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                            upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false);
                         using (streamContent = HttpHelper.GetStreamContentResumableUpload(inputStream, inputStream.Length, upload.BytesSent, MimeTypesMap.GetMimeType(upload.FilePath)))
                         {
                             try
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: Start uploading.");
-                                message = await client.PutAsync(upload.ResumableSessionUri, streamContent, cancellationToken).ConfigureAwait(false);
+                                requestMessage.Content = streamContent;
+                                responseMessage = await HttpHelper.UploadClient.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
                                 Tracer.Write("YoutubeVideoUploadService.Upload: Uploading finished.");
                             }
                             catch (TaskCanceledException e)
@@ -192,17 +195,17 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             }
                         }
 
-                        using (message)
-                        using (message.Content)
+                        using (responseMessage)
+                        using (responseMessage.Content)
                         {
                             Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer.");
-                            string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                             Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer finished.");
 
-                            if (!message.IsSuccessStatusCode)
+                            if (!responseMessage.IsSuccessStatusCode)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
-                                errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
+                                errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
                                 error = true;
                                 uploadTry++;
                                 continue;
@@ -294,24 +297,26 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    HttpClient client = HttpHelper.GetStandardClient("default");
-
                     Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Requesting upload byte index.");
-                    using (StreamContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length))
-                    using (HttpResponseMessage message = await client.PutAsync(upload.ResumableSessionUri, content).ConfigureAwait(false))
+                    StreamContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length);
+                    HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                        upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false);
+                    requestMessage.Content = content;
+
+                    using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
                     {
-                        if (message.StatusCode != HttpStatusCode.PermanentRedirect)
+                        if (responseMessage.StatusCode != HttpStatusCode.PermanentRedirect)
                         {
-                            string httpContent = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {httpContent}.");
-                            throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {httpContent}.");
+                            string httpContent = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {httpContent}.");
+                            throw new HttpRequestException($"Http error status code: {responseMessage.StatusCode}, reason {responseMessage.ReasonPhrase}, content {httpContent}.");
                         }
 
                         Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Read header.");
 
                         try
                         {
-                            string range = message.Headers.GetValues("Range").First();
+                            string range = responseMessage.Headers.GetValues("Range").First();
                             if (!string.IsNullOrWhiteSpace(range))
                             {
                                 string[] parts = range.Split('-');
@@ -417,7 +422,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    HttpClient client = HttpHelper.GetStandardClient("default");
                     using (ByteArrayContent content = HttpHelper.GetStreamContent(contentJson, "application/json"))
                     {
                         content.Headers.Add("Slug", httpHeaderCompatibleString);
@@ -425,7 +429,11 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         content.Headers.Add("X-Upload-Content-Type", MimeTypesMap.GetMimeType(upload.FilePath));
 
                         Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload.");
-                        using (HttpResponseMessage message = await client.PostAsync($"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable", content).ConfigureAwait(false))
+                        HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                            upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable").ConfigureAwait(false);
+                        requestMessage.Content = content;
+
+                        using (HttpResponseMessage message = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
                         {
                             string httpContent = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (!message.IsSuccessStatusCode)

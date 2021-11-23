@@ -310,7 +310,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (string.IsNullOrWhiteSpace(name))
                 {
-                    
                     name = "default";
                     finalName = name;
                 }

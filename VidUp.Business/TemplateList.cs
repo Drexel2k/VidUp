@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
@@ -93,8 +94,13 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public Template GetTemplateForUpload(Upload upload)
+        public Template GetTemplateForFilePath(string fullFilePath)
         {
+            if (string.IsNullOrWhiteSpace(fullFilePath))
+            {
+                throw new ArgumentException("FullFilePath must not be null or empty.");
+            }
+
             foreach (Template template in this.templates)
             {
                 if (template.TemplateMode == TemplateMode.FolderBased)
@@ -102,7 +108,7 @@ namespace Drexel.VidUp.Business
                     if (!string.IsNullOrWhiteSpace(template.RootFolderPath))
                     {
                         DirectoryInfo templateRootDirectory = new DirectoryInfo(template.RootFolderPath);
-                        DirectoryInfo uploadDirectory = new DirectoryInfo(upload.FilePath);
+                        DirectoryInfo uploadDirectory = new DirectoryInfo(fullFilePath);
 
                         while (uploadDirectory.Parent != null)
                         {
@@ -118,7 +124,7 @@ namespace Drexel.VidUp.Business
                 {
                     if (!string.IsNullOrWhiteSpace(template.PartOfFileName))
                     {
-                        if (Path.GetFileName(upload.FilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
+                        if (Path.GetFileName(fullFilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
                         {
                             return template;
                         }

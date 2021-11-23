@@ -165,44 +165,56 @@ namespace Drexel.VidUp.Business
             this.DeleteThumbnailFallbackIfPossible(args.OldValue);
         }
 
-        public void AddUploads(List<Upload> uploads)
+        public bool AddFiles(string[] files, YoutubeAccount fallbackYoutubeAccount)
         {
-            Tracer.Write($"UploadList.AddUploads: Start, add {uploads.Count} uploads.");
-            foreach (Upload upload in uploads)
+            Tracer.Write($"UploadList.AddFiles: Start, add {files.Length} files to uploads.");
+            bool templateAutoAdded = false;
+
+            List<Upload> newUploads = new List<Upload>();
+            foreach (string file in files)
             {
-                Tracer.Write($"UploadList.AddUploads: Add '{upload.FilePath}'.");
-                Template template = this.templateList.GetTemplateForUpload(upload);
+                Tracer.Write($"UploadList.AddFiles: Add '{file}'.");
+                Template template = this.templateList.GetTemplateForFilePath(file);
+                Upload upload = null;
                 if (template != null)
                 {
-                    Tracer.Write($"UploadList.AddUploads: Template '{template.Name}' found for upload.");
-                    upload.Template = template;
+                    Tracer.Write($"UploadList.AddFiles: Template '{template.Name}' found for file.");
+                    upload = new Upload(file, template);
+                    newUploads.Add(upload);
+                    templateAutoAdded = true;
                 }
                 else
                 {
-                    Tracer.Write($"UploadList.AddUploads: No template found for upload, try to get default template.");
+                    Tracer.Write($"UploadList.AddFiles: No template found for upload, try to get default template.");
                     template = this.templateList.GetDefaultTemplate();
                     if (template != null)
                     {
-                        Tracer.Write($"UploadList.AddUploads: Default template '{template.Name}' found.");
-                        upload.Template = template;
+                        Tracer.Write($"UploadList.AddFiles: Default template '{template.Name}' found.");
+                        upload = new Upload(file, template);
+                        newUploads.Add(upload);
+                        templateAutoAdded = true;
                     }
                     else
                     {
-                        Tracer.Write($"UploadList.AddUploads: No default template found.");
+                        Tracer.Write($"UploadList.AddAddFilesUploads: No default template found.");
+                        upload = new Upload(file, fallbackYoutubeAccount);
+                        newUploads.Add(upload);
                     }
                 }
 
-                upload.ThumbnailChanged += (sender, args) => this.onThumbnailChanged(sender, args);
+                upload.ThumbnailChanged += this.onThumbnailChanged;
             }
 
-            this.uploads.AddRange(uploads);
+            this.uploads.AddRange(newUploads);
 
             this.raiseNotifyPropertyChanged("TotalBytesToUpload");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadRemaining");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, uploads));
-            Tracer.Write($"UploadList.AddUploads: End.");
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newUploads));
+            Tracer.Write($"UploadList.AddFiles: End.");
+
+            return templateAutoAdded;
         }
 
         public void DeleteUploads(Predicate<Upload> predicate)
@@ -399,11 +411,25 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void SetStartDateOnAllTemplateSchedules(DateTime startDate)
+        public void SetStartDateOnAllTemplateSchedules(DateTime startDate, YoutubeAccount youtubeAccount)
         {
             foreach (Template template in this.templateList)
             {
-                template.SetStartDateOnTemplateSchedule(startDate);
+                if (youtubeAccount.IsDummy)
+                {
+                    if (youtubeAccount.Name == "All")
+                    {
+                        template.SetStartDateOnTemplateSchedule(startDate);
+                    }
+                }
+                else
+                {
+                    if (template.YoutubeAccount == youtubeAccount)
+                    {
+                        template.SetStartDateOnTemplateSchedule(startDate);
+                    }
+                }
+                
             }
         }
 

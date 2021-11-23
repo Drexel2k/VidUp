@@ -394,10 +394,13 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 YoutubeAccount oldAccount = this.selectedYoutubeAccount.YoutubeAccount;
-                this.selectedYoutubeAccount = value; 
+                this.selectedYoutubeAccount = value;
+
+                this.selectedYoutubeAccountChanged();
+
                 EventAggregator.Instance.Publish(new SelectedYoutubeAccountChangedMessage(oldAccount, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]));
                 EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
-                this.selectedYoutubeAccountChanged();
+
                 this.raisePropertyChanged("SelectedYoutubeAccount");
             }
         }
@@ -461,7 +464,7 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
             UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll,
-                this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels, this.youtubeAccountList[0]);
+                this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels, this.youtubeAccountList[0], this.selectedYoutubeAccount.YoutubeAccount);
             this.viewModels[0] = uploadListViewModel;
             uploadListViewModel.PropertyChanged += this.uploadListViewModelOnPropertyChanged;
             uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
@@ -480,34 +483,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void selectedYoutubeAccountChanged()
         {
-            foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModels)
-            {
-                if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy)
-                {
-                    if(this.selectedYoutubeAccount.YoutubeAccountName == "All")
-                    {
-                        if (templateComboboxViewModel.Visible == false)
-                        {
-                            templateComboboxViewModel.Visible = true;
-                        }
-                    }
-                }
-                else
-                {
-                    if (!templateComboboxViewModel.Template.IsDummy)
-                    {
-                        if (templateComboboxViewModel.YoutubeAccountName == this.selectedYoutubeAccount.YoutubeAccountName)
-                        {
-                            templateComboboxViewModel.Visible = true;
-                        }
-                        else
-                        {
-                            templateComboboxViewModel.Visible = false;
-                        }
-                    }
-                }
-            }
-
             foreach (TemplateComboboxViewModel templateComboboxViewModel in this.observableTemplateViewModelsInclAll)
             {
                 if (this.selectedYoutubeAccount.YoutubeAccount.IsDummy)

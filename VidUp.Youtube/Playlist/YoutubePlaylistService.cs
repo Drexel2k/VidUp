@@ -30,23 +30,21 @@ namespace Drexel.VidUp.Youtube.Playlist
             }
 
             Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Start, pageToken = { pageToken }.");
-            HttpClient client = HttpHelper.GetStandardClient(accountName);
             HttpResponseMessage responseMessage;
-            HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(accountName).ConfigureAwait(false);
-            requestMessage.Method = HttpMethod.Get;
-
+            
             try
             {
+                HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(accountName, HttpMethod.Get).ConfigureAwait(false);
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Get Playlists.");
                 if (string.IsNullOrWhiteSpace(pageToken))
                 {
                     requestMessage.RequestUri = new Uri($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={YoutubePlaylistService.maxResults}");
-                    responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
+                    responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
                 }
                 else
                 {
                     requestMessage.RequestUri = new Uri($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={ YoutubePlaylistService.maxResults }&pageToken={pageToken}");
-                    responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
+                    responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
                 }
             }
             catch (Exception e)

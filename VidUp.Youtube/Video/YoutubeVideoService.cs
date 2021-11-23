@@ -23,9 +23,7 @@ namespace Drexel.VidUp.Youtube.Video
             {
                 Tracer.Write($"YoutubeVideoService.IsPublic: {videoIds.Count} Videos to check available.");
 
-                HttpClient client = HttpHelper.GetStandardClient(accountName);
-                HttpResponseMessage message;
-
+                HttpResponseMessage responseMessage;
                 int batch = 0;
 
                 Tracer.Write($"YoutubeVideoService.IsPublic: Get video batch {batch}.");
@@ -34,8 +32,10 @@ namespace Drexel.VidUp.Youtube.Video
                 {
                     try
                     {
+                        HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                            accountName, HttpMethod.Get, $"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}").ConfigureAwait(false);
                         Tracer.Write($"YoutubeVideoService.IsPublic: Get video information.");
-                        message = await client.GetAsync($"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}").ConfigureAwait(false);
+                        responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -43,14 +43,14 @@ namespace Drexel.VidUp.Youtube.Video
                         throw;
                     }
 
-                    using (message)
-                    using (message.Content)
+                    using (responseMessage)
+                    using (responseMessage.Content)
                     {
-                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        if (!message.IsSuccessStatusCode)
+                        string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        if (!responseMessage.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
-                            throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {content}.");
+                            Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
+                            throw new HttpRequestException($"Http error status code: {responseMessage.StatusCode}, reason {responseMessage.ReasonPhrase}, content {content}.");
                         }
 
                         YoutubeVideosGetResponse response = JsonConvert.DeserializeObject<YoutubeVideosGetResponse>(content);

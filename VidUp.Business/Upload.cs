@@ -282,7 +282,7 @@ namespace Drexel.VidUp.Business
             }
             set
             {
-                string title = Path.GetFileNameWithoutExtension(this.filePath);
+                string title = this.getDefaultTitle();
                 if (!string.IsNullOrWhiteSpace(value))
                 {
                     title = value;
@@ -452,6 +452,24 @@ namespace Drexel.VidUp.Business
             
         }
 
+        public Upload(string filePath, Template template)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("FilePath must not be null or white space.");
+            }
+
+            if (template == null)
+            {
+                throw new ArgumentException("Template must not be null.");
+            }
+
+            this.initialize(filePath);
+
+            this.youtubeAccount = template.YoutubeAccount;
+            this.Template = template;
+        }
+
         public Upload(string filePath, YoutubeAccount youtubeAccount)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -464,9 +482,16 @@ namespace Drexel.VidUp.Business
                 throw new ArgumentException("youtubeAccount must not be null.");
             }
 
+            this.initialize(filePath);
+
+            this.youtubeAccount = youtubeAccount;
+        }
+
+        private void initialize(string filePath)
+        {
             this.guid = Guid.NewGuid();
             this.filePath = filePath;
-            this.youtubeAccount = youtubeAccount;
+
             this.created = DateTime.Now;
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
@@ -474,9 +499,14 @@ namespace Drexel.VidUp.Business
             this.visibility = Visibility.Private;
 
             //to ensure at least file name is set as title.
-            this.title = title = Path.GetFileNameWithoutExtension(this.filePath);
+            this.title = this.getDefaultTitle();
             this.autoSetThumbnail();
             this.verifyAndSetUploadStatus();
+        }
+
+        private string getDefaultTitle()
+        {
+            return Path.GetFileNameWithoutExtension(this.filePath);
         }
 
         [OnDeserialized()]
@@ -606,6 +636,10 @@ namespace Drexel.VidUp.Business
 
                         matchIndex++;
                     }
+                }
+                else
+                {
+                    this.title = this.getDefaultTitle();
                 }
 
                 this.LastModified = DateTime.Now;

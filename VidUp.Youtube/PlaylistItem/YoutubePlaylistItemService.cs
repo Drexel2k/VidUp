@@ -32,15 +32,17 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
 
                 string contentJson = JsonConvert.SerializeObject(playlistItem);
 
-                HttpClient client = HttpHelper.GetStandardClient("default");
                 using (ByteArrayContent byteContent = HttpHelper.GetStreamContent(contentJson, "application/json"))
                 {
-                    HttpResponseMessage message;
+                    HttpResponseMessage responseMessage;
 
                     try
                     {
+                        HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                            upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet").ConfigureAwait(false);
+                        requestMessage.Content = byteContent;
                         Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: Add to Playlist.");
-                        message = await client.PostAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet", byteContent).ConfigureAwait(false);
+                        responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -49,14 +51,14 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                         return false;
                     }
 
-                    using (message)
-                    using (message.Content)
+                    using (responseMessage)
+                    using (responseMessage.Content)
                     {
-                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        if (!message.IsSuccessStatusCode)
+                        string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        if (!responseMessage.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
-                            upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.\n";
+                            Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
+                            upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.\n";
                             return false;
                         }
                     }
@@ -101,19 +103,21 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
         {
             Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Start.");
 
-            HttpClient client = HttpHelper.GetStandardClient(accountName);
-            HttpResponseMessage message;
+            HttpResponseMessage responseMessage;
 
             try
             {
+                HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(accountName, HttpMethod.Get).ConfigureAwait(false);
                 Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: Get Playlist info.");
                 if (string.IsNullOrWhiteSpace(pageToken))
                 {
-                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}").ConfigureAwait(false);
+                    requestMessage.RequestUri = new Uri($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}");
+                    responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
                 }
                 else
                 {
-                    message = await client.GetAsync($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}&pageToken={pageToken}").ConfigureAwait(false);
+                    requestMessage.RequestUri = new Uri($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlistId}&maxResults={YoutubePlaylistItemService.maxResults}&pageToken={pageToken}");
+                    responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
                 }
             }
             catch (Exception e)
@@ -122,16 +126,16 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                 throw;
             }
 
-            using (message)
-            using (message.Content)
+            using (responseMessage)
+            using (responseMessage.Content)
             {
-                string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!message.IsSuccessStatusCode)
+                string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (!responseMessage.IsSuccessStatusCode)
                 {
-                    if (message.StatusCode != HttpStatusCode.NotFound)
+                    if (responseMessage.StatusCode != HttpStatusCode.NotFound)
                     {
-                        Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
-                        throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {content}.");
+                        Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
+                        throw new HttpRequestException($"Http error status code: {responseMessage.StatusCode}, reason {responseMessage.ReasonPhrase}, content {content}.");
                     }
                     else
                     {

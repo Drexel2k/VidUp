@@ -20,16 +20,17 @@ namespace Drexel.VidUp.Youtube.Thumbnail
             {
                 Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Video with thumbnail to add available.");
 
-
-                HttpClient client = HttpHelper.GetStandardClient("default");
                 using (FileStream fs = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
-                using (StreamContent streamcontent = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
+                using (StreamContent streamContent = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
                 {
-                    HttpResponseMessage message;
+                    HttpResponseMessage responseMessage;
+                    HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                        upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}").ConfigureAwait(false);
                     try
                     {
+                        requestMessage.Content = streamContent;
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Add thumbnail.");
-                        message = await client.PostAsync($"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}", streamcontent).ConfigureAwait(false);
+                        responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -38,14 +39,14 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                         return false;
                     }
 
-                    using (message)
-                    using (message.Content)
+                    using (responseMessage)
+                    using (responseMessage.Content)
                     {
-                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        if (!message.IsSuccessStatusCode)
+                        string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        if (!responseMessage.IsSuccessStatusCode)
                         {
-                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.");
-                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {content}.\n";
+                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
+                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.\n";
                             return false;
                         }
                     }

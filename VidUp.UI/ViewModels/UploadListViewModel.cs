@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
@@ -60,6 +61,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private DateTime? recalculatePublishAtStartDate;
 
         private YoutubeAccount youtubeAccountForCreatingUploads;
+        private YoutubeAccount youtubeAccountForFiltering;
 
         //todo: add to event aggregator maybe
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
@@ -378,7 +380,7 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         public UploadListViewModel(UploadList uploadList, ObservableTemplateViewModels observableTemplateViewModels, ObservableTemplateViewModels observableTemplateViewModelsInclAll, ObservableTemplateViewModels observableTemplateViewModelsInclAllNone,
-            ObservablePlaylistViewModels observablePlaylistViewModels, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForCreatingUploads)
+            ObservablePlaylistViewModels observablePlaylistViewModels, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForCreatingUploads, YoutubeAccount youtubeAccountForFiltering)
         {
             this.uploadList = uploadList;
 
@@ -394,6 +396,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableUploadViewModels = new ObservableUploadViewModels(this.uploadList, observableTemplateViewModels, observablePlaylistViewModels, this.resumeUploads, observableYoutubeAccountViewModels);
 
             this.youtubeAccountForCreatingUploads = youtubeAccountForCreatingUploads;
+            this.youtubeAccountForFiltering = youtubeAccountForFiltering;
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
             EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
 
@@ -425,9 +428,25 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
                 {
+                    if (selectedYoutubeAccountChangedMessage.FirstNotAllAccount == null)
+                    {
+                        throw new ArgumentException("FirstNotAllAccount Youtube account must not be null.");
+                    }
+
                     this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
                 }
             }
+
+            this.youtubeAccountForFiltering = selectedYoutubeAccountChangedMessage.NewAccount;
+            this.DeleteSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
+            this.DeleteSelectedUploadStatus = "Finished";
+            this.RecalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAll[0];
+            this.RecalculatePublishAtStartDate = null;
+            this.ResetToSelectedUploadStatus = "ReadyForUpload";
+            this.ResetWithSelectedUploadStatus = "Paused";
+            this.ResetWithSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
+            this.ResetAttributeSelectedAttribute = UploadTemplateAttribute.All;
+            this.ResetAttributeSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
 
             foreach (UploadViewModel observableUploadViewModel in this.observableUploadViewModels)
             {
@@ -558,25 +577,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public void AddFiles(string[] files)
         {
-            List<Upload> uploads = new List<Upload>();
-            foreach (string file in files)
-            {
-                uploads.Add(new Upload(file, this.youtubeAccountForCreatingUploads));
-            }
-
-            this.AddUploads(uploads);
-        }
-
-        //exposed for testing
-        public void AddUploads(List<Upload> uploads)
-        {
-            Tracer.Write($"UploadListViewModel.AddUploads: Start, add {uploads.Count} uploads.");
-
-            uploads.Sort((u1, u2) => String.Compare(u1.FilePath, u2.FilePath, StringComparison.OrdinalIgnoreCase));
-
-            this.uploadList.AddUploads(uploads);
-
-            if (uploads.Any(upl => upl.Template != null))
+            Tracer.Write($"UploadListViewModel.AddFiles: Start, add {files.Length} uploads.");
+            Array.Sort(files, StringComparer.InvariantCulture);
+            
+            bool templateAutoAdded = this.uploadList.AddFiles(files, this.youtubeAccountForCreatingUploads);
+            if (templateAutoAdded)
             {
                 Tracer.Write($"UploadListViewModel.AddUploads: At least one template was auto added.");
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
@@ -709,11 +714,31 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.resetAttributeSelectedTemplate.Template.Name == "All")
                 {
-                    predicates[1] = upload => true;
+                    if (this.youtubeAccountForFiltering.IsDummy)
+                    {
+                        if (this.youtubeAccountForFiltering.Name == "All")
+                        {
+                            predicates[1] = upload => true;
+                        }
+                    }
+                    else
+                    {
+                        predicates[1] = upload => upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                    }
                 }
                 else if (this.resetAttributeSelectedTemplate.Template.Name == "None")
                 {
-                    predicates[1] = upload => upload.Template == null;
+                    if (this.youtubeAccountForFiltering.IsDummy)
+                    {
+                        if (this.youtubeAccountForFiltering.Name == "All")
+                        {
+                            predicates[1] = upload => upload.Template == null;
+                        }
+                    }
+                    else
+                    {
+                        predicates[1] = upload => upload.Template == null && upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                    }
                 }
             }
             else
@@ -794,14 +819,27 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     if (this.recalculatePublishAtStartDate != null)
                     {
-                        this.uploadList.SetStartDateOnAllTemplateSchedules(this.recalculatePublishAtStartDate.Value);
+                        this.uploadList.SetStartDateOnAllTemplateSchedules(this.recalculatePublishAtStartDate.Value, this.youtubeAccountForFiltering);
                     }
 
                     foreach (Upload upload in this.uploadList)
                     {
-                        if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
+                        if (upload.Template != null  && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                         {
-                            upload.PublishAt = null;
+                            if (this.youtubeAccountForFiltering.IsDummy)
+                            {
+                                if (this.youtubeAccountForFiltering.Name == "All")
+                                {
+                                    upload.PublishAt = null;
+                                }
+                            }
+                            else
+                            {
+                                if (upload.Template.YoutubeAccount == this.youtubeAccountForFiltering)
+                                {
+                                    upload.PublishAt = null;
+                                }
+                            }
                         }
                     }
 
@@ -809,8 +847,22 @@ namespace Drexel.VidUp.UI.ViewModels
                     {
                         if (upload.Template != null && upload.Template.UsePublishAtSchedule && upload.UploadStatus == UplStatus.ReadyForUpload)
                         {
-                            upload.AutoSetPublishAtDateTime();
-                            EventAggregator.Instance.Publish(new PublishAtChangedMessage(upload));
+                            if (this.youtubeAccountForFiltering.IsDummy)
+                            {
+                                if (this.youtubeAccountForFiltering.Name == "All")
+                                {
+                                    upload.AutoSetPublishAtDateTime();
+                                    EventAggregator.Instance.Publish(new PublishAtChangedMessage(upload));
+                                }
+                            }
+                            else
+                            {
+                                if (upload.Template.YoutubeAccount == this.youtubeAccountForFiltering)
+                                {
+                                    upload.AutoSetPublishAtDateTime();
+                                    EventAggregator.Instance.Publish(new PublishAtChangedMessage(upload));
+                                }
+                            }
                         }
                     }
                 }
@@ -881,12 +933,35 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.deleteSelectedTemplate.Template.Name == "All")
                 {
-                    Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All.");
-                    predicates[1] = upload => true;
-                } else if (this.deleteSelectedTemplate.Template.Name == "None")
+                    if (this.youtubeAccountForFiltering.IsDummy == true)
+                    {
+                        if (youtubeAccountForFiltering.Name == "All")
+                        {
+                            Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All and dummy account all.");
+                            predicates[1] = upload => true;
+                        }
+                    }
+                    else
+                    {
+                        Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All and filtered account.");
+                        predicates[1] = upload => upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                    }
+                }
+                else if (this.deleteSelectedTemplate.Template.Name == "None")
                 {
-                    Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None.");
-                    predicates[1] = upload => upload.Template == null;
+                    if (this.youtubeAccountForFiltering.IsDummy == true)
+                    {
+                        if (youtubeAccountForFiltering.Name == "All")
+                        {
+                            Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None and dummy account all.");
+                            predicates[1] = upload => upload.Template == null;
+                        }
+                    }
+                    else
+                    {
+                        Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None and filtered.");
+                        predicates[1] = upload => upload.Template == null && upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                    }
                 }
             }
             else
@@ -941,11 +1016,31 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.resetWithSelectedTemplate.Template.Name == "All")
                 {
-                    predicates[1] = upload => true;
+                    if (this.youtubeAccountForFiltering.IsDummy)
+                    {
+                        if (this.youtubeAccountForFiltering.Name == "All")
+                        {
+                            predicates[1] = upload => true;
+                        }
+                    }
+                    else
+                    {
+                        predicates[1] = upload => upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                    }
                 }
                 else if (this.resetWithSelectedTemplate.Template.Name == "None")
                 {
-                    predicates[1] = upload => upload.Template == null;
+                    if (this.youtubeAccountForFiltering.IsDummy)
+                    {
+                        if (this.youtubeAccountForFiltering.Name == "All")
+                        {
+                            predicates[1] = upload => upload.Template == null; ;
+                        }
+                    }
+                    else
+                    {
+                        predicates[1] = upload => upload.Template == null && upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                    }
                 }
             }
             else
