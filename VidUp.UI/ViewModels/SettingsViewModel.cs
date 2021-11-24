@@ -109,6 +109,11 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             { 
                 this.selectedYoutubeAccount.YoutubeAccount.Name = value;
+
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+
                 this.raisePropertyChanged("SelectedYoutubeAccountName");
                 this.raisePropertyChanged("SelectedYoutubeAccountFilePath");
             }
