@@ -22,6 +22,8 @@ namespace Drexel.VidUp.Youtube
 
     public delegate void UploadStatusChangedHandler(object sender, Upload upload);
 
+    public delegate void ErrorMessageChangedHandler(object sender, Upload upload);
+
     public delegate void UploadBytesSentHandler(object sender, Upload upload);
     public class Uploader
     {
@@ -46,6 +48,7 @@ namespace Drexel.VidUp.Youtube
         public event UploadChangedHandler UploadChanged;
         public event ResumableSessionUriSetHandler ResumableSessionUriSet;
         public event UploadBytesSentHandler UploadBytesSent;
+        public event ErrorMessageChangedHandler ErrorMessageChanged;
 
         public long MaxUploadInBytesPerSecond
         {
@@ -124,6 +127,16 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
+        private void onErrorMessageChanged(Upload upload)
+        {
+            ErrorMessageChangedHandler handler = this.ErrorMessageChanged;
+
+            if (handler != null)
+            {
+                handler(this, upload);
+            }
+        }
+
         public async Task<UploaderResult> UploadAsync(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond)
         {
             Tracer.Write($"Uploader.Upload: Start with resumeUploads: {resumeUploads}, maxUploadInBytesPerSecond: {maxUploadInBytesPerSecond}.");
@@ -179,6 +192,8 @@ namespace Drexel.VidUp.Youtube
                         await YoutubeThumbnailService.AddThumbnailAsync(upload).ConfigureAwait(false);
                         await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
                     }
+
+                    this.onErrorMessageChanged(upload);
 
                     if (videoResult == UploadResult.FailedWithDataSent || videoResult == UploadResult.StoppedWithDataSent)
                     {

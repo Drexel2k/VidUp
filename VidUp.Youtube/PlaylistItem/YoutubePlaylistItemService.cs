@@ -47,8 +47,8 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                                 string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                                 if (!responseMessage.IsSuccessStatusCode)
                                 {
-                                    Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                                    upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: Could not add upload to playlist: {responseMessage.StatusCode} {responseMessage.ReasonPhrase}.\n";
+                                    Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                    upload.UploadErrorMessage += $"YoutubePlaylistItemService.AddToPlaylist: Could not add upload to playlist: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.\n";
                                     return false;
                                 }
 
@@ -118,7 +118,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItem
                         {
                             if (responseMessage.StatusCode != HttpStatusCode.NotFound)
                             {
-                                Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                 responseMessage.EnsureSuccessStatusCode();
                             }
                             else

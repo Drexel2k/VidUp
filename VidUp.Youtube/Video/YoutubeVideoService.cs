@@ -42,7 +42,7 @@ namespace Drexel.VidUp.Youtube.Video
                                 string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                                 if (!responseMessage.IsSuccessStatusCode)
                                 {
-                                    Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                    Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                     responseMessage.EnsureSuccessStatusCode();
                                 }
 

@@ -19,11 +19,13 @@ namespace Drexel.VidUp.UI.Controls
             base.OnDrop(e);
 
             UploadControl uploadControlToMove = (UploadControl)e.Data.GetData("UploadControl");
-            UploadControl uploadControlAtTargetPosition = (UploadControl)sender;
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)this.DataContext;
-            uploadListViewModel.ReOrder(((UploadViewModel)uploadControlToMove.DataContext).Upload, ((UploadViewModel)uploadControlAtTargetPosition.DataContext).Upload);
-
-            e.Handled = true;
+            if (uploadControlToMove != null)
+            {
+                UploadControl uploadControlAtTargetPosition = (UploadControl) sender;
+                UploadListViewModel uploadListViewModel = (UploadListViewModel) this.DataContext;
+                uploadListViewModel.ReOrder(((UploadViewModel) uploadControlToMove.DataContext).Upload, ((UploadViewModel) uploadControlAtTargetPosition.DataContext).Upload);
+                e.Handled = true;
+            }
         }
     }
 }

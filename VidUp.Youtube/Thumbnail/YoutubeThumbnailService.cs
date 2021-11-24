@@ -37,8 +37,8 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                                 string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                                 if (!responseMessage.IsSuccessStatusCode)
                                 {
-                                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                                    upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: Could not add thumbnail: {responseMessage.StatusCode} {responseMessage.ReasonPhrase}.\n";
+                                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                    upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: Could not add thumbnail: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.\n";
                                     return false;
                                 }
                             }

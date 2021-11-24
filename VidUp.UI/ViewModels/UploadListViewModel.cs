@@ -533,6 +533,11 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Publish(new UploadStatusChangedMessage(upload));
         }
 
+        private void onErrorMessageChanged(Upload upload)
+        {
+            EventAggregator.Instance.Publish(new ErrorMessageChangedMessage(upload));
+        }
+
         private void onResumableSessionUriSet(Upload upload)
         {
             EventAggregator.Instance.Publish(new ResumableSessionUriChangedMessage(upload));
@@ -608,6 +613,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.uploader.UploadStatusChanged += (sender, upload) => this.onUploadStatusChanged(upload);
                 this.uploader.ResumableSessionUriSet += (sender, upload) => this.onResumableSessionUriSet(upload);
                 this.uploader.UploadStatsUpdated += (sender) => this.onUploadStatsUpdated();
+                this.uploader.ErrorMessageChanged += (sender, upload) => this.onErrorMessageChanged(upload);
                 UploaderResult uploadResult = await uploader.UploadAsync(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond).ConfigureAwait(false);
                 bool uploadStopped = uploader.UploadStopped;
                 this.uploader = null;

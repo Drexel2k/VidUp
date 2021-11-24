@@ -39,7 +39,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private Subscription uploadStatusChangedSubscription;
         private Subscription resumableSessionUriChangedSubscription;
         private Subscription publishAtChangedSubscription;
-
+        private Subscription errorMessageChangedSubscription;
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -524,7 +524,7 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 //add more helpful information if upload index couldn't be received.
-                if (this.upload.UploadErrorMessage != null && this.upload.UploadErrorMessage.Contains("Getting upload byte index failed 3 times") && this.upload.UploadErrorMessage.Contains("Could not get range header"))
+                if (this.upload.UploadErrorMessage != null && this.upload.UploadErrorMessage.Contains("Getting resume position failed 3 times") && this.upload.UploadErrorMessage.Contains("Could not get range header"))
                 {
                     string message = "If range header couldn't get 3 times in a row, the upload can't be continued, because the Youtube server doesn't deliver information where to continue the upload. Please restart the upload from beginning by resetting the upload until it is in state \"Ready for Upload\"\n\n";
                     message += this.upload.UploadErrorMessage;
@@ -771,7 +771,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.bytesSentSubscription = EventAggregator.Instance.Subscribe<BytesSentMessage>(this.bytesSent);
             this.uploadStatusChangedSubscription = EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
             this.resumableSessionUriChangedSubscription = EventAggregator.Instance.Subscribe<ResumableSessionUriChangedMessage>(this.resumableSessionUriChanged);
-            this.publishAtChangedSubscription = EventAggregator.Instance.Subscribe<PublishAtChangedMessage>(this.publishAtChanged);
+            this.errorMessageChangedSubscription = EventAggregator.Instance.Subscribe<ErrorMessageChangedMessage>(this.errorMessageChanged);
         }
 
         private void attributeReset(AttributeResetMessage attributeResetMessage)
@@ -872,6 +872,14 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadErrorMessage");
                 this.raisePropertyChanged("ControlsEnabled");
                 this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+            }
+        }
+
+        private void errorMessageChanged(ErrorMessageChangedMessage errorMessageChangedMessage)
+        {
+            if (errorMessageChangedMessage.Upload == this.upload)
+            {
+                this.raisePropertyChanged("UploadErrorMessage");
             }
         }
 
@@ -1125,6 +1133,11 @@ namespace Drexel.VidUp.UI.ViewModels
             if (this.publishAtChangedSubscription != null)
             {
                 this.publishAtChangedSubscription.Dispose();
+            }
+
+            if (this.errorMessageChangedSubscription != null)
+            {
+                this.errorMessageChangedSubscription.Dispose();
             }
         }
     }

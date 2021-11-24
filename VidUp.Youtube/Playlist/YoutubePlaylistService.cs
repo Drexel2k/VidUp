@@ -50,7 +50,7 @@ namespace Drexel.VidUp.Youtube.Playlist
                             string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (!responseMessage.IsSuccessStatusCode)
                             {
-                                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                 responseMessage.EnsureSuccessStatusCode();
                             }
 

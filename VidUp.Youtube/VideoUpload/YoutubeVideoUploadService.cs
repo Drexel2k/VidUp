@@ -173,8 +173,8 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                                         if (!responseMessage.IsSuccessStatusCode)
                                         {
-                                            Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code resume position {lastResumePositionBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
-                                            errors.AppendLine($"YoutubeVideoUploadService.Upload: Upload failed with resume position {lastResumePositionBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase}.");
+                                            Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code resume position {lastResumePositionBeforeError} try {uploadTry}: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
+                                            errors.AppendLine($"YoutubeVideoUploadService.Upload: Upload failed with resume position {lastResumePositionBeforeError} try {uploadTry}: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                             error = true;
                                             uploadTry++;
                                             continue;
@@ -298,7 +298,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Requesting upload byte index.");
+                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Requesting resume position.");
                     StreamContent streamContent = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length);
                     using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
                         upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
@@ -309,8 +309,8 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (responseMessage.StatusCode != HttpStatusCode.PermanentRedirect)
                             {
-                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not resume position: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase}.");
+                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not resume position: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                 responseMessage.EnsureSuccessStatusCode();
                             }
 
@@ -342,7 +342,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                                 if (requestTry >= 3)
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End header, failed 3 times.");
-                                    upload.UploadErrorMessage += $"YoutubeVideoUploadService.getResumePositionAsync: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
+                                    upload.UploadErrorMessage += $"YoutubeVideoUploadService.getResumePositionAsync: Getting resume position failed 3 times. Errors: {errors.ToString()}";
                                     upload.UploadStatus = UplStatus.Failed;
                                     return false;
                                 }
@@ -364,7 +364,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     if (requestTry >= 3)
                     {
                         Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End all, failed 3 times.");
-                        upload.UploadErrorMessage += $"YoutubeVideoUploadService.getResumePositionAsync: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
+                        upload.UploadErrorMessage += $"YoutubeVideoUploadService.getResumePositionAsync: Getting resume position failed 3 times. Errors: {errors.ToString()}";
                         upload.UploadStatus = UplStatus.Failed;
                         return false;
                     }
@@ -444,8 +444,8 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (!message.IsSuccessStatusCode)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
-                                errors.AppendLine($"YoutubeVideoUploadService.requestNewUpload: Could not request new upload: {message.StatusCode} {message.ReasonPhrase}.");
+                                Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                                errors.AppendLine($"YoutubeVideoUploadService.requestNewUpload: Could not request new upload: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
                                 message.EnsureSuccessStatusCode();
                             }
 
