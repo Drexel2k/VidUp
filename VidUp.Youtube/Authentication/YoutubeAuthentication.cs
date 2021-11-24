@@ -10,6 +10,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Youtube.Authentication
@@ -58,13 +59,15 @@ namespace Drexel.VidUp.Youtube.Authentication
                 }
             }
 
+            string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
+            string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
             //here we should have the refresh token
             // builds the  request
             string tokenRequestBody = string.Format(
                 "refresh_token={0}&client_id={1}&client_secret={2}&grant_type=refresh_token",
                 YoutubeAuthentication.youtubeAccountRefreshToken[accountName],
-                Credentials.ClientId,
-                Credentials.ClientSecret
+                clientId,
+                clientSecret
             );
 
             // sends the request
@@ -128,11 +131,14 @@ namespace Drexel.VidUp.Youtube.Authentication
             http.Prefixes.Add(redirectURI);
             http.Start();
 
+            string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
+            string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
+
             // Creates the OAuth 2.0 authorization request.
             string authorizationRequest = string.Format("{0}?response_type=code&scope={6}&redirect_uri={1}&client_id={2}&state={3}&code_challenge={4}&code_challenge_method={5}",
                 YoutubeAuthentication.authorizationEndpoint,
                 Uri.EscapeDataString(redirectURI),
-                Credentials.ClientId,
+                clientId,
                 state,
                 code_challenge,
                 code_challenge_method,
@@ -188,7 +194,7 @@ namespace Drexel.VidUp.Youtube.Authentication
                 System.Uri.EscapeDataString(redirectURI),
                 Credentials.ClientId,
                 code_verifier,
-                Credentials.ClientSecret
+                clientSecret
                 );
 
             // sends the request

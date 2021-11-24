@@ -38,6 +38,23 @@ namespace Drexel.VidUp.Utils
         [JsonProperty]
         private string postponePostUploadActionProcessName;
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        private string clientId;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        private string clientSecret;
+
+
+        public string ClientId
+        {
+            get => this.clientId;
+        }
+
+        public string ClientSecret
+        {
+            get => this.clientSecret;
+        }
+
         public bool Trace
         {
             get => this.trace;
