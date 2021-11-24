@@ -91,10 +91,10 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 }
 
                 long initialUploadBytesSent = upload.BytesSent;
-                long lastUploadByteIndexBeforeError = upload.BytesSent;
+                long lastResumePositionBeforeError = upload.BytesSent;
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                Tracer.Write($"YoutubeVideoUploadService.Upload: Initial uploadByteIndex: {upload.BytesSent}.");
+                Tracer.Write($"YoutubeVideoUploadService.Upload: Initial resume position: {upload.BytesSent}.");
                 ThrottledBufferedStream inputStream;
 
                 using (inputStream = new ThrottledBufferedStream(upload.FilePath, upload.BytesSent, YoutubeVideoUploadService.maxUploadInBytesPerSecond))
@@ -109,8 +109,6 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     bool error = false;
 
                     Tracer.Write($"YoutubeVideoUploadService.Upload: fileLength: {fileLength}.");
-                    HttpResponseMessage responseMessage;
-                    StreamContent streamContent;
 
                     do
                     {
@@ -118,9 +116,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         {
                             if (uploadTry > 3)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload not successful after 3 tries for uploadByteIndex {lastUploadByteIndexBeforeError}.");
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload not successful after 3 tries for resume position {lastResumePositionBeforeError}.");
 
-                                upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Upload not successful after 3 tries for uploadByteIndex {lastUploadByteIndexBeforeError}. Errors: {errors.ToString()}.";
+                                upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Upload not successful after 3 tries for resume position {lastResumePositionBeforeError}. Errors: {errors.ToString()}.";
                                 upload.UploadStatus = UplStatus.Failed;
 
                                 return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, false);
@@ -132,7 +130,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Getting range due to upload retry.");
-                            if(!await YoutubeVideoUploadService.getUploadByteIndexAsync(upload).ConfigureAwait(false))
+                            if(!await YoutubeVideoUploadService.getResumePositionAsync(upload).ConfigureAwait(false))
                             {
                                 return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, false);
                             }
@@ -141,36 +139,66 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             inputStream = new ThrottledBufferedStream(upload.FilePath, upload.BytesSent, YoutubeVideoUploadService.maxUploadInBytesPerSecond);
                             YoutubeVideoUploadService.stream = inputStream;
 
-                            Tracer.Write($"YoutubeVideoUploadService.Upload: Upload retry uploadByteIndex: {upload.BytesSent}.");
+                            Tracer.Write($"YoutubeVideoUploadService.Upload: Upload retry resume postion: {upload.BytesSent}.");
 
-                            if (upload.BytesSent != lastUploadByteIndexBeforeError)
+                            if (upload.BytesSent != lastResumePositionBeforeError)
                             {
                                 uploadTry = 1;
-                                lastUploadByteIndexBeforeError = upload.BytesSent;
+                                lastResumePositionBeforeError = upload.BytesSent;
                             }
                         }
 
-                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: uploadByteIndex {upload.BytesSent} Try {uploadTry}.");
+                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: resume position {upload.BytesSent} Try {uploadTry}.");
 
                         Tracer.Write($"YoutubeVideoUploadService.Upload: Creating content.");
 
-                        HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                            upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false);
-                        using (streamContent = HttpHelper.GetStreamContentResumableUpload(inputStream, inputStream.Length, upload.BytesSent, MimeTypesMap.GetMimeType(upload.FilePath)))
+
+                        using (StreamContent streamContent = HttpHelper.GetStreamContentResumableUpload(inputStream, inputStream.Length, upload.BytesSent, MimeTypesMap.GetMimeType(upload.FilePath)))
                         {
                             try
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: Start uploading.");
-                                requestMessage.Content = streamContent;
-                                responseMessage = await HttpHelper.UploadClient.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-                                Tracer.Write("YoutubeVideoUploadService.Upload: Uploading finished.");
+                                using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                                        upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
+                                {
+                                    
+                                    requestMessage.Content = streamContent;
+                                    Tracer.Write($"YoutubeVideoUploadService.Upload: Start uploading.");
+                                    using (HttpResponseMessage responseMessage = await HttpHelper.UploadClient.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
+                                    using (responseMessage.Content)
+                                    {
+                                        Tracer.Write("YoutubeVideoUploadService.Upload: Uploading finished.");
+                                        Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer.");
+                                        string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                                        Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer finished.");
+
+                                        if (!responseMessage.IsSuccessStatusCode)
+                                        {
+                                            Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code resume position {lastResumePositionBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
+                                            errors.AppendLine($"YoutubeVideoUploadService.Upload: Upload failed with resume position {lastResumePositionBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase}.");
+                                            error = true;
+                                            uploadTry++;
+                                            continue;
+                                        }
+
+                                        YoutubeVideoPostResponse response = JsonConvert.DeserializeObject<YoutubeVideoPostResponse>(content);
+                                        upload.VideoId = response.Id;
+
+                                        //last stats update to reach 0 bytes and time left.
+                                        upload.BytesSent = inputStream.Position;
+                                        YoutubeVideoUploadService.stream = null;
+
+                                        upload.UploadStatus = UplStatus.Finished;
+                                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with resume position {lastResumePositionBeforeError}, video id {upload.VideoId}.");
+                                    }
+
+                                }
                             }
                             catch (TaskCanceledException e)
                             {
                                 if (e.InnerException is TimeoutException)
                                 {
-                                    Tracer.Write($"YoutubeVideoUploadService.Upload: uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry} upload timeout.");
-                                    errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry} upload timeout.");
+                                    Tracer.Write($"YoutubeVideoUploadService.Upload: resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout.");
+                                    errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout.");
                                     error = true;
                                     uploadTry++;
                                     continue;
@@ -186,40 +214,13 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             }
                             catch (Exception e)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync Exception uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {e.ToString()}.");
-                                errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync Exception uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {e.GetType().ToString()}: {e.Message}.");
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
+                                errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.GetType().ToString()}: {e.Message}.");
 
                                 error = true;
                                 uploadTry++;
                                 continue;
                             }
-                        }
-
-                        using (responseMessage)
-                        using (responseMessage.Content)
-                        {
-                            Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer.");
-                            string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            Tracer.Write("YoutubeVideoUploadService.Upload: Reading answer finished.");
-
-                            if (!responseMessage.IsSuccessStatusCode)
-                            {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
-                                errors.AppendLine($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code uploadByteIndex {lastUploadByteIndexBeforeError} try {uploadTry}: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
-                                error = true;
-                                uploadTry++;
-                                continue;
-                            }
-
-                            YoutubeVideoPostResponse response = JsonConvert.DeserializeObject<YoutubeVideoPostResponse>(content);
-                            upload.VideoId = response.Id;
-
-                            //last stats update to reach 0 bytes and time left.
-                            upload.BytesSent = inputStream.Position;
-                            YoutubeVideoUploadService.stream = null;
-
-                            upload.UploadStatus = UplStatus.Finished;
-                            Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with uploadByteIndex {lastUploadByteIndexBeforeError}, video id {upload.VideoId}.");
                         }
                     }
                     while(error);
@@ -277,7 +278,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 Tracer.Write($"YoutubeVideoUploadService.initializeUploadAsync: Continue upload, getting range.");
 
-                if (!await YoutubeVideoUploadService.getUploadByteIndexAsync(upload).ConfigureAwait(false))
+                if (!await YoutubeVideoUploadService.getResumePositionAsync(upload).ConfigureAwait(false))
                 {
                     return false;
                 }
@@ -287,9 +288,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             return true;
         }
 
-        private static async Task<bool> getUploadByteIndexAsync(Upload upload)
+        private static async Task<bool> getResumePositionAsync(Upload upload)
         {
-            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Start");
+            Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Start");
             short requestTry = 1;
 
             StringBuilder errors = new StringBuilder();
@@ -297,68 +298,73 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Requesting upload byte index.");
-                    StreamContent content = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length);
-                    HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                        upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false);
-                    requestMessage.Content = content;
-
-                    using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
+                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Requesting upload byte index.");
+                    StreamContent streamContent = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length);
+                    using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                        upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
                     {
-                        if (responseMessage.StatusCode != HttpStatusCode.PermanentRedirect)
+                        requestMessage.Content = streamContent;
+                        using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
                         {
-                            string httpContent = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {httpContent}.");
-                            throw new HttpRequestException($"Http error status code: {responseMessage.StatusCode}, reason {responseMessage.ReasonPhrase}, content {httpContent}.");
-                        }
-
-                        Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Read header.");
-
-                        try
-                        {
-                            string range = responseMessage.Headers.GetValues("Range").First();
-                            if (!string.IsNullOrWhiteSpace(range))
+                            string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            if (responseMessage.StatusCode != HttpStatusCode.PermanentRedirect)
                             {
-                                string[] parts = range.Split('-');
-                                upload.BytesSent = Convert.ToInt64(parts[1]) + 1;
+                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not resume position: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase}.");
+                                responseMessage.EnsureSuccessStatusCode();
                             }
 
-                            return true;
-                        }
-                        catch (InvalidOperationException e)
-                        {
-                            errors.AppendLine($"YoutubeVideoUploadService.getUploadByteIndex: Range header not found, BytesSent set to 0: {e.Message}.");
-                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Range header not found exception: {e.ToString()}.");
-                            upload.BytesSent = 0;
-                            return true;
-                        }
-                        catch (Exception e)
-                        {
-                            errors.AppendLine($"YoutubeVideoUploadService.getUploadByteIndex: Could not get range header: {e.Message}.");
-                            Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Range header exception: {e.ToString()}.");
+                            Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Read header.");
 
-                            if (requestTry >= 3)
+                            try
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: End header, failed 3 times.");
-                                upload.UploadErrorMessage += $"YoutubeVideoUploadService.getUploadByteIndex: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
-                                upload.UploadStatus = UplStatus.Failed;
-                                return false;
-                            }
+                                string range = responseMessage.Headers.GetValues("Range").First();
+                                if (!string.IsNullOrWhiteSpace(range))
+                                {
+                                    string[] parts = range.Split('-');
+                                    upload.BytesSent = Convert.ToInt64(parts[1]) + 1;
+                                }
 
-                            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
-                            requestTry++;
+                                return true;
+                            }
+                            catch (InvalidOperationException e)
+                            {
+                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found, BytesSent set to 0: {e.Message}.");
+                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found exception: {e.ToString()}.");
+                                upload.BytesSent = 0;
+                                return true;
+                            }
+                            catch (Exception e)
+                            {
+                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not get range header: {e.Message}.");
+                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header exception: {e.ToString()}.");
+
+                                if (requestTry >= 3)
+                                {
+                                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End header, failed 3 times.");
+                                    upload.UploadErrorMessage += $"YoutubeVideoUploadService.getResumePositionAsync: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
+                                    upload.UploadStatus = UplStatus.Failed;
+                                    return false;
+                                }
+
+                                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                                requestTry++;
+                            }
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    errors.AppendLine($"YoutubeVideoUploadService.getUploadByteIndex: Getting upload index failed: {e.Message}.");
-                    Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: Exception: {e.ToString()}.");
+                    if (!(e is HttpRequestException))
+                    {
+                        errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Getting upload index failed: {e.Message}.");
+                        Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Exception: {e.ToString()}.");
+                    }
 
                     if (requestTry >= 3)
                     {
-                        Tracer.Write($"YoutubeVideoUploadService.getUploadByteIndex: End all, failed 3 times.");
-                        upload.UploadErrorMessage += $"YoutubeVideoUploadService.getUploadByteIndex: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
+                        Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End all, failed 3 times.");
+                        upload.UploadErrorMessage += $"YoutubeVideoUploadService.getResumePositionAsync: Getting upload byte index failed 3 times. Errors: {errors.ToString()}";
                         upload.UploadStatus = UplStatus.Failed;
                         return false;
                     }
@@ -422,24 +428,25 @@ namespace Drexel.VidUp.Youtube.VideoUpload
             {
                 try
                 {
-                    using (ByteArrayContent content = HttpHelper.GetStreamContent(contentJson, "application/json"))
-                    {
-                        content.Headers.Add("Slug", httpHeaderCompatibleString);
-                        content.Headers.Add("X-Upload-Content-Length", fileInfo.Length.ToString());
-                        content.Headers.Add("X-Upload-Content-Type", MimeTypesMap.GetMimeType(upload.FilePath));
+                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload.");
+                    using (ByteArrayContent byteArrayContent = HttpHelper.GetStreamContent(contentJson, "application/json"))
+                    using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                        upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable").ConfigureAwait(false))
 
-                        Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload.");
-                        HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                            upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable").ConfigureAwait(false);
-                        requestMessage.Content = content;
+                    {
+                        byteArrayContent.Headers.Add("Slug", httpHeaderCompatibleString);
+                        byteArrayContent.Headers.Add("X-Upload-Content-Length", fileInfo.Length.ToString());
+                        byteArrayContent.Headers.Add("X-Upload-Content-Type", MimeTypesMap.GetMimeType(upload.FilePath));
+                        requestMessage.Content = byteArrayContent;
 
                         using (HttpResponseMessage message = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
                         {
-                            string httpContent = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (!message.IsSuccessStatusCode)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content {httpContent}.");
-                                throw new HttpRequestException($"Http error status code: {message.StatusCode}, reason {message.ReasonPhrase}, content {httpContent}.");
+                                Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                                errors.AppendLine($"YoutubeVideoUploadService.requestNewUpload: Could not request new upload: {message.StatusCode} {message.ReasonPhrase}.");
+                                message.EnsureSuccessStatusCode();
                             }
 
                             Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Read header.");
@@ -447,14 +454,15 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End.");
                             return true;
                         }
-
                     }
-
                 }
                 catch (Exception e)
                 {
-                    errors.AppendLine($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed: {e.Message}.");
-                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Exception: {e.ToString()}.");
+                    if (!(e is HttpRequestException))
+                    {
+                        errors.AppendLine($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed: {e.Message}.");
+                        Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Exception: {e.ToString()}.");
+                    }
 
                     if (requestTry >= 3)
                     {

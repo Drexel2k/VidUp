@@ -23,7 +23,6 @@ namespace Drexel.VidUp.Youtube.Video
             {
                 Tracer.Write($"YoutubeVideoService.IsPublic: {videoIds.Count} Videos to check available.");
 
-                HttpResponseMessage responseMessage;
                 int batch = 0;
 
                 Tracer.Write($"YoutubeVideoService.IsPublic: Get video batch {batch}.");
@@ -32,10 +31,36 @@ namespace Drexel.VidUp.Youtube.Video
                 {
                     try
                     {
-                        HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                            accountName, HttpMethod.Get, $"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}").ConfigureAwait(false);
-                        Tracer.Write($"YoutubeVideoService.IsPublic: Get video information.");
-                        responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
+                        using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                            accountName, HttpMethod.Get, $"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}").ConfigureAwait(false))
+                        {
+                            Tracer.Write($"YoutubeVideoService.IsPublic: Get video information.");
+
+                            using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
+                            using (responseMessage.Content)
+                            {
+                                string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                                if (!responseMessage.IsSuccessStatusCode)
+                                {
+                                    Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                    responseMessage.EnsureSuccessStatusCode();
+                                }
+
+                                YoutubeVideosGetResponse response = JsonConvert.DeserializeObject<YoutubeVideosGetResponse>(content);
+
+                                foreach (YoutubeVideosGetResponseVideo item in response.Items)
+                                {
+                                    result.Add(item.Id, item.Status.PrivacyStatus == "public");
+                                }
+                            }
+
+                            batch++;
+                            videoIdsBatch = YoutubeVideoService.getBatch(videoIds, batch, 50);
+                        }
+                    }
+                    catch (HttpRequestException)
+                    {
+                        throw;
                     }
                     catch (Exception e)
                     {
@@ -43,26 +68,6 @@ namespace Drexel.VidUp.Youtube.Video
                         throw;
                     }
 
-                    using (responseMessage)
-                    using (responseMessage.Content)
-                    {
-                        string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        if (!responseMessage.IsSuccessStatusCode)
-                        {
-                            Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
-                            throw new HttpRequestException($"Http error status code: {responseMessage.StatusCode}, reason {responseMessage.ReasonPhrase}, content {content}.");
-                        }
-
-                        YoutubeVideosGetResponse response = JsonConvert.DeserializeObject<YoutubeVideosGetResponse>(content);
-
-                        foreach (YoutubeVideosGetResponseVideo item in response.Items)
-                        {
-                            result.Add(item.Id, item.Status.PrivacyStatus == "public");
-                        }
-                    }
-
-                    batch++;
-                    videoIdsBatch = YoutubeVideoService.getBatch(videoIds, batch, 50);
                 }
 
                 Tracer.Write($"YoutubeVideoService.IsPublic: End.");

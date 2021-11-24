@@ -23,30 +23,30 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                 using (FileStream fs = new FileStream(upload.ThumbnailFilePath, FileMode.Open))
                 using (StreamContent streamContent = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
                 {
-                    HttpResponseMessage responseMessage;
-                    HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                        upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}").ConfigureAwait(false);
-                    try
+                    using(HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
+                        upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}").ConfigureAwait(false))
                     {
-                        requestMessage.Content = streamContent;
-                        Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Add thumbnail.");
-                        responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.PostAsync Exception: {e.ToString()}.");
-                        upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpClient.PutAsync Exception: {e.GetType().ToString()}: {e.Message}.\n";
-                        return false;
-                    }
-
-                    using (responseMessage)
-                    using (responseMessage.Content)
-                    {
-                        string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        if (!responseMessage.IsSuccessStatusCode)
+                        try
                         {
-                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.");
-                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content {content}.\n";
+                            requestMessage.Content = streamContent;
+                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Add thumbnail.");
+
+                            using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
+                            using (responseMessage.Content)
+                            {
+                                string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                                if (!responseMessage.IsSuccessStatusCode)
+                                {
+                                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                    upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: Could not add thumbnail: {responseMessage.StatusCode} {responseMessage.ReasonPhrase}.\n";
+                                    return false;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.PostAsync Exception: {e.ToString()}.");
+                            upload.UploadErrorMessage += $"YoutubeThumbnailService.AddThumbnail: HttpClient.PutAsync Exception: {e.GetType().ToString()}: {e.Message}.\n";
                             return false;
                         }
                     }
