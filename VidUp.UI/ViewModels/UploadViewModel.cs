@@ -1073,6 +1073,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         break;
                     case "playlist":
                         this.upload.CopyPlaylistFromTemplate();
+                        this.raisePropertyChanged("ShowPlaylistHint");
                         this.raisePropertyChanged("SelectedPlaylist");
                         break;
                     case "videolanguage":

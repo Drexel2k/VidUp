@@ -415,12 +415,57 @@ namespace Drexel.VidUp.UI.ViewModels
             this.initialize(user, subFolder, out uploadList, out templateList, out playlistList);
         }
 
-        private void renameRefreshTokenFile()
+        private bool renameRefreshTokenFile()
         {
+            bool renamed = false;
             string oldFile = $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken";
             if (File.Exists(oldFile))
             {
-                File.Move(oldFile, $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken_default");
+                File.Move(oldFile, $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken_Default");
+                renamed = true;
+            }
+
+            return renamed;
+        }
+
+        private void setDefaultAccountOnContent()
+        {
+            foreach (Template template in this.templateList)
+            {
+                Type uploadType = typeof(Template);
+                FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
+                youtubeAccountFieldInfo.SetValue(template, this.youtubeAccountList[0]);
+            }
+
+            foreach (Playlist playlist in this.playlistList)
+            {
+                Type uploadType = typeof(Playlist);
+                FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
+                youtubeAccountFieldInfo.SetValue(playlist, this.youtubeAccountList[0]);
+            }
+
+            List<Upload> allUploads = new List<Upload>();
+            foreach (Upload upload in this.uploadList)
+            {
+                allUploads.Add(upload);
+            }
+
+            foreach (Template template in this.templateList)
+            {
+                foreach (Upload upload in template.Uploads)
+                {
+                    if (!allUploads.Contains(upload))
+                    {
+                        allUploads.Add(upload);
+                    }
+                }
+            }
+
+            foreach (Upload upload in allUploads)
+            {
+                Type uploadType = typeof(Upload);
+                FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
+                youtubeAccountFieldInfo.SetValue(upload, this.youtubeAccountList[0]);
             }
         }
 
@@ -734,6 +779,9 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             Tracer.Write($"MainWindowViewModel.deserializeContent: Start.");
 
+            //compatibility code, will be removed in future versions
+            bool renamed = this.renameRefreshTokenFile();
+
             this.youtubeAccountList = this.readYoutubeAccounts();
 
             JsonDeserializationContent deserializer = new JsonDeserializationContent(Settings.Instance.StorageFolder, Settings.Instance.ThumbnailFallbackImageFolder);
@@ -745,6 +793,15 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.PropertyChanged += this.uploadListPropertyChanged;
 
             this.playlistList = DeserializationRepositoryContent.PlaylistList;
+
+            //compatibility code, will be removed in future versions
+            if (renamed)
+            {
+                this.setDefaultAccountOnContent();
+                reSerialize.AllUploads = true;
+                reSerialize.PlaylistList = true;
+                reSerialize.TemplateList = true;
+            }
 
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
@@ -759,8 +816,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private YoutubeAccountList readYoutubeAccounts()
         {
-            //compatibility code, will be removed in future versions
-            this.renameRefreshTokenFile();
+            string[] files = Directory.GetFiles(Settings.Instance.StorageFolder, "uploadrefreshtoken*");
+            if (files.Length <= 0)
+            {
+                File.Create(Path.Combine(Settings.Instance.StorageFolder, "uploadrefreshtoken_Default"));
+            }
 
             List<YoutubeAccount> youtubeAccounts = new List<YoutubeAccount>();
             foreach (string file in Directory.GetFiles(Settings.Instance.StorageFolder, "uploadrefreshtoken*"))

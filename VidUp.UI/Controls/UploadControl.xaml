@@ -168,7 +168,7 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="YT Acc.: " Width="68" />
-                <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="201"  Padding="6 4 6 6" />
+                <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" IsEnabled="{Binding ControlsEnabled}" Width="201" VerticalAlignment="Top"  Padding="6 4 6 6" />
             </StackPanel>
 
             <StackPanel  Grid.Row="7" Grid.Column="3" Orientation="Horizontal">
