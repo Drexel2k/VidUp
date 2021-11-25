@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -62,6 +62,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private YoutubeAccount youtubeAccountForCreatingUploads;
         private YoutubeAccount youtubeAccountForFiltering;
+        private object uploadingLock = new object();
 
         //todo: add to event aggregator maybe
         public event EventHandler<UploadStartedEventArgs> UploadStarted;
@@ -599,32 +600,42 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async void startUploadingAsync(object obj)
         {
-            if (this.uploadStatus == UploadStatus.NotUploading)
+            lock (this.uploadingLock)
             {
-                //prevent sleep mode
-                PowerSavingHelper.DisablePowerSaving();
+                if (this.uploadStatus == UploadStatus.Uploading)
+                {
+                    return;
+                }
 
                 this.uploadStatus = UploadStatus.Uploading;
-                UploadStats uploadStats = new UploadStats();
-                this.onUploadStarted(new UploadStartedEventArgs(uploadStats));
-
-                this.uploader = new Uploader(this.uploadList);
-                this.uploader.UploadBytesSent += (sender, upload) => this.onUploadBytesSent(upload);
-                this.uploader.UploadStatusChanged += (sender, upload) => this.onUploadStatusChanged(upload);
-                this.uploader.ResumableSessionUriSet += (sender, upload) => this.onResumableSessionUriSet(upload);
-                this.uploader.UploadStatsUpdated += (sender) => this.onUploadStatsUpdated();
-                this.uploader.ErrorMessageChanged += (sender, upload) => this.onErrorMessageChanged(upload);
-                UploaderResult uploadResult = await uploader.UploadAsync(uploadStats, this.resumeUploads, this.maxUploadInBytesPerSecond).ConfigureAwait(false);
-                bool uploadStopped = uploader.UploadStopped;
-                this.uploader = null;
-
-                this.uploadStatus = UploadStatus.NotUploading;
-
-                PowerSavingHelper.EnablePowerSaving();
-
-                //needs to be after PowerSavingHelper.EnablePowerSaving(); so that StandBy is not prevented.
-                this.onUploadFinished(new UploadFinishedEventArgs(uploadResult == UploaderResult.DataSent, uploadStopped));
             }
+
+            //prevent sleep mode
+            PowerSavingHelper.DisablePowerSaving();
+
+            this.uploadStatus = UploadStatus.Uploading;
+            bool resume = this.resumeUploads;
+            AutoResetEvent resetEvent = new AutoResetEvent(true);
+            UploadStats uploadStats = new UploadStats(resetEvent);
+            this.onUploadStarted(new UploadStartedEventArgs(uploadStats));
+
+            this.uploader = new Uploader(this.uploadList);
+            this.uploader.UploadBytesSent += (sender, upload) => this.onUploadBytesSent(upload);
+            this.uploader.UploadStatusChanged += (sender, upload) => this.onUploadStatusChanged(upload);
+            this.uploader.ResumableSessionUriSet += (sender, upload) => this.onResumableSessionUriSet(upload);
+            this.uploader.UploadStatsUpdated += (sender) => this.onUploadStatsUpdated();
+            this.uploader.ErrorMessageChanged += (sender, upload) => this.onErrorMessageChanged(upload);
+            UploaderResult uploadResult = await uploader.UploadAsync(uploadStats, resume, this.maxUploadInBytesPerSecond, resetEvent).ConfigureAwait(false);
+            bool uploadStopped = uploader.UploadStopped;
+            this.uploader = null;
+
+            this.uploadStatus = UploadStatus.NotUploading;
+
+            PowerSavingHelper.EnablePowerSaving();
+
+            //needs to be after PowerSavingHelper.EnablePowerSaving(); so that StandBy is not prevented.
+            this.onUploadFinished(new UploadFinishedEventArgs(uploadResult == UploaderResult.DataSent, uploadStopped));
+            this.uploadStatus = UploadStatus.NotUploading;
         }
 
         private void stopUploading(object obj)
