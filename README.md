@@ -12,6 +12,8 @@ all uploads finished e.g.
 You can find more information here (German language sorry!):
 https://letsplayforum.de/thread/178125-drexel-s-vidup-ein-templatebasierter-youtube-uploader/
 
+Twitter: https://twitter.com/DrexelsVidUp
+
 Binaries of releases:
 https://1drv.ms/u/s!AlNGd4g1Vh9rmHAvaCyZ5nvtOkDF?e=5vhucP
 
