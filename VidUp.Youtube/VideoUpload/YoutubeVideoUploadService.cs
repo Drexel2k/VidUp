@@ -96,12 +96,9 @@ namespace Drexel.VidUp.Youtube.VideoUpload
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                 Tracer.Write($"YoutubeVideoUploadService.Upload: Initial resume position: {upload.BytesSent}.");
-                ThrottledBufferedStream inputStream;
 
-                using (inputStream = new ThrottledBufferedStream(upload.FilePath, upload.BytesSent, YoutubeVideoUploadService.maxUploadInBytesPerSecond))
+                using (YoutubeVideoUploadService.stream = new ThrottledBufferedStream(upload.FilePath, upload.BytesSent, YoutubeVideoUploadService.maxUploadInBytesPerSecond))
                 {
-                    YoutubeVideoUploadService.stream = inputStream;
-
                     long fileLength = upload.FileLength;
                     
                     //on IOExceptions try 2 times more to upload the chunk.
@@ -123,6 +120,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                                 resetEvent.WaitOne();
                                 upload.UploadStatus = UplStatus.Failed;
 
+                                YoutubeVideoUploadService.stream = null;
                                 return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, false);
                             }
 
@@ -134,12 +132,12 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Getting range due to upload retry.");
                             if(!await YoutubeVideoUploadService.getResumePositionAsync(upload, resetEvent).ConfigureAwait(false))
                             {
+                                YoutubeVideoUploadService.stream = null;
                                 return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, false);
                             }
 
                             //HttpClient disposed inputStream...
-                            inputStream = new ThrottledBufferedStream(upload.FilePath, upload.BytesSent, YoutubeVideoUploadService.maxUploadInBytesPerSecond);
-                            YoutubeVideoUploadService.stream = inputStream;
+                            YoutubeVideoUploadService.stream = new ThrottledBufferedStream(upload.FilePath, upload.BytesSent, YoutubeVideoUploadService.maxUploadInBytesPerSecond); ;
 
                             Tracer.Write($"YoutubeVideoUploadService.Upload: Upload retry resume postion: {upload.BytesSent}.");
 
@@ -155,7 +153,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                         Tracer.Write($"YoutubeVideoUploadService.Upload: Creating content.");
 
 
-                        using (StreamContent streamContent = HttpHelper.GetStreamContentResumableUpload(inputStream, inputStream.Length, upload.BytesSent, MimeTypesMap.GetMimeType(upload.FilePath)))
+                        using (StreamContent streamContent = HttpHelper.GetStreamContentResumableUpload(YoutubeVideoUploadService.stream, YoutubeVideoUploadService.stream.Length, upload.BytesSent, MimeTypesMap.GetMimeType(upload.FilePath)))
                         {
                             try
                             {
@@ -186,9 +184,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                                         upload.VideoId = response.Id;
 
                                         //last stats update to reach 0 bytes and time left.
-                                        upload.BytesSent = inputStream.Position;
-                                        YoutubeVideoUploadService.stream = null;
-
+                                        upload.BytesSent = YoutubeVideoUploadService.stream.Position;
                                         resetEvent.WaitOne();
                                         upload.UploadStatus = UplStatus.Finished;
                                         Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with resume position {lastResumePositionBeforeError}, video id {upload.VideoId}.");
@@ -210,9 +206,11 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload stopped by user.");
 
-                                    upload.BytesSent = inputStream.Position;
+                                    upload.BytesSent = YoutubeVideoUploadService.stream.Position;
                                     resetEvent.WaitOne();
                                     upload.UploadStatus = UplStatus.Stopped;
+
+                                    YoutubeVideoUploadService.stream = null;
                                     return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, true);
                                 }
                             }
@@ -235,12 +233,15 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                 Tracer.Write($"YoutubeVideoUploadService.Upload: End, Unexpected Exception: {e.ToString()}.");
 
                 upload.UploadErrorMessage += $"YoutubeVideoUploadService.Upload: Unexpected Exception: : {e.GetType().ToString()}: {e.Message}.\n";
+                
                 resetEvent.WaitOne();
                 upload.UploadStatus = UplStatus.Failed;
 
+                YoutubeVideoUploadService.stream = null;
                 return UploadResult.FailedWithoutDataSent;
             }
 
+            YoutubeVideoUploadService.stream = null;
             Tracer.Write($"YoutubeVideoUploadService.Upload: End.");
             return UploadResult.Finished;
         }

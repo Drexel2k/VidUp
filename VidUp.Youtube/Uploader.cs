@@ -28,11 +28,6 @@ namespace Drexel.VidUp.Youtube
     public class Uploader
     {
         private UploadList uploadList;
-        //will be updated during upload when files are added or removed
-        //todo: change to file count
-        private long sessionTotalBytesOfFilesToUpload = 0;
-        private long uploadedLengthTotalFileSize = 0;
-
         private UploadStats uploadStats;
 
         private bool resumeUploads;
@@ -159,9 +154,6 @@ namespace Drexel.VidUp.Youtube
 
             bool dataSent = false;
 
-            this.sessionTotalBytesOfFilesToUpload = this.resumeUploads ? this.uploadList.TotalBytesOfFilesToUploadIncludingResumable : this.uploadList.TotalBytesOfFilesToUpload;
-            this.uploadedLengthTotalFileSize = 0;
-
             List<Upload> uploadsOfSession = new List<Upload>();
 
             using (System.Timers.Timer timer = new System.Timers.Timer(2000))
@@ -200,8 +192,6 @@ namespace Drexel.VidUp.Youtube
                     {
                         dataSent = true;
                     }
-
-                    this.uploadedLengthTotalFileSize += upload.FileLength;
 
                     JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 

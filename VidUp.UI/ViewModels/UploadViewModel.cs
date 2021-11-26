@@ -872,6 +872,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadErrorMessage");
                 this.raisePropertyChanged("ControlsEnabled");
                 this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
+                this.raisePropertyChanged("UploadedInMegaByte");
             }
         }
 

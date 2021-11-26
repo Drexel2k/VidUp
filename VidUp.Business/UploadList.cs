@@ -28,84 +28,6 @@ namespace Drexel.VidUp.Business
 
         public int UploadCount { get => this.uploads.Count; }
 
-        public long TotalBytesOfFilesToUpload
-        {
-            get
-            {
-                long length = 0;
-                foreach (Upload upload in this.uploads.FindAll(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
-                {
-                    length += upload.FileLength;
-                }
-
-                return length;
-            }
-        }
-
-        public long RemainingBytesOfFilesToUpload
-        {
-            get
-            {
-                long length = 0;
-                foreach (Upload upload in this.uploads.FindAll(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
-                {
-                    if (upload.UploadStatus == UplStatus.ReadyForUpload)
-                    {
-                        length += upload.FileLength;
-                    }
-                    else
-                    {
-                        length += upload.FileLength - upload.BytesSent;
-                    }
-
-                }
-
-                return length;
-            }
-        }
-
-        public long TotalBytesOfFilesToUploadIncludingResumable
-        {
-            get
-            {
-                long length = 0;
-                foreach (Upload upload in this.uploads.FindAll(
-                    upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
-                              upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed))
-                {
-                    length += upload.FileLength;
-                }
-
-                return length;
-            }
-        }
-
-        public long RemainingBytesOfFilesToUploadIncludingResumable
-        {
-            get
-            {
-                long length = 0;
-                foreach (Upload upload in this.uploads.FindAll(
-                    upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
-                    upload.UploadStatus == UplStatus.Stopped ||upload.UploadStatus== UplStatus.Failed))
-                {
-                    if (File.Exists(upload.FilePath))
-                    {
-                        if (upload.UploadStatus == UplStatus.ReadyForUpload)
-                        {
-                            length += upload.FileLength;
-                        }
-                        else
-                        {
-                            length += upload.FileLength - upload.BytesSent;
-                        }
-                    }
-                }
-
-                return length;
-            }
-        }
-
         public CheckFileUsage CheckFileUsage
         {
             set
@@ -136,6 +58,95 @@ namespace Drexel.VidUp.Business
             }
 
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
+        }
+
+        public long GetRemainingBytesOfFilesToUpload(List<Upload> uploadsToIgnore)
+        {
+            long length = 0;
+            List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
+
+            foreach (Upload upload in uploadsInternal.FindAll(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
+            {
+                if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                {
+                    length += upload.FileLength;
+                }
+                else
+                {
+                    length += upload.FileLength - upload.BytesSent;
+                }
+
+            }
+
+            return length;
+        }
+
+        public long GetRemainingBytesOfFilesToUploadIncludingResumable(List<Upload> uploadsToIgnore)
+        {
+            long length = 0;
+            List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
+
+            foreach (Upload upload in uploadsInternal.FindAll(
+                upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
+                          upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed))
+            {
+                if (File.Exists(upload.FilePath))
+                {
+                    if (upload.UploadStatus == UplStatus.ReadyForUpload)
+                    {
+                        length += upload.FileLength;
+                    }
+                    else
+                    {
+                        length += upload.FileLength - upload.BytesSent;
+                    }
+                }
+            }
+
+            return length;
+        }
+
+        public long GetTotalBytesOfFilesToUpload(List<Upload> uploadsToIgnore)
+        {
+            long length = 0;
+            List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
+
+            foreach (Upload upload in uploadsInternal.FindAll(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
+            {
+                length += upload.FileLength;
+            }
+
+            return length;
+        }
+
+        public long GetTotalBytesOfFilesToUploadIncludingResumable(List<Upload> uploadsToIgnore)
+        {
+            long length = 0;
+            List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
+
+            foreach (Upload upload in uploadsInternal.FindAll(
+                upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
+                          upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed))
+            {
+                length += upload.FileLength;
+            }
+
+            return length;
+        }
+
+        private List<Upload> getUploadsInternal(List<Upload> uploadsToIgnore)
+        {
+            List<Upload> uploadsInternal;
+            if (uploadsToIgnore != null && uploadsToIgnore.Count > 0)
+            {
+                uploadsInternal = this.uploads.FindAll(upload => !uploadsToIgnore.Contains(upload)).ToList();
+            }
+            else
+            {
+                uploadsInternal = new List<Upload>(this.uploads);
+            }
+
+            return uploadsInternal;
         }
 
         private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

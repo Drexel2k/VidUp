@@ -245,12 +245,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (((UploadListViewModel)this.viewModels[0]).ResumeUploads)
                 {
-                    return ((int)((float)this.uploadList.RemainingBytesOfFilesToUploadIncludingResumable /
+                    return ((int)((float)this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(null) /
                                    Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
                 }
                 else
                 {
-                    return ((int)((float)this.uploadList.RemainingBytesOfFilesToUpload /
+                    return ((int)((float)this.uploadList.GetRemainingBytesOfFilesToUpload(null) /
                                   Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
                 }
             }

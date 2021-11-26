@@ -144,8 +144,8 @@ namespace Drexel.VidUp.Business
                 this.uploadStatus = value;
                 if (value == UplStatus.ReadyForUpload)
                 {
-                    this.ResumableSessionUri = null;
-                    this.BytesSent = 0;
+                    this.resumableSessionUri = null;
+                    this.bytesSent = 0;
                     this.uploadStart = null;
                     this.uploadEnd = null;
                     this.uploadErrorMessage = null;
