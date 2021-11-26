@@ -35,11 +35,11 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void AddYoutubeAccounts(List<YoutubeAccount> youtubeAccounts)
+        public void AddYoutubeAccount(YoutubeAccount youtubeAccount)
         {
-            this.youtubeAccounts.AddRange(youtubeAccounts);
+            this.youtubeAccounts.Add(youtubeAccount);
 
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, youtubeAccounts));
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, youtubeAccount));
         }
 
         public int FindIndex(Predicate<YoutubeAccount> predicate)

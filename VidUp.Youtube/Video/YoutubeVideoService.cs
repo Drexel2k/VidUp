@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Video.Data;
 using Newtonsoft.Json;
@@ -14,7 +15,7 @@ namespace Drexel.VidUp.Youtube.Video
     {
         private static string videoEndpoint = "https://www.googleapis.com/youtube/v3/videos";
 
-        public static async Task<Dictionary<string, bool>> IsPublicAsync(List<string> videoIds, string accountName)
+        public static async Task<Dictionary<string, bool>> IsPublicAsync(List<string> videoIds, YoutubeAccount youtubeAccount)
         {
             Tracer.Write($"YoutubeVideoService.IsPublic: Start.");
             Dictionary<string, bool> result = new Dictionary<string, bool>();
@@ -32,7 +33,7 @@ namespace Drexel.VidUp.Youtube.Video
                     try
                     {
                         using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                            accountName, HttpMethod.Get, $"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}").ConfigureAwait(false))
+                            youtubeAccount, HttpMethod.Get, $"{YoutubeVideoService.videoEndpoint}?part=status&id={string.Join(",", videoIdsBatch)}").ConfigureAwait(false))
                         {
                             Tracer.Write($"YoutubeVideoService.IsPublic: Get video information.");
 

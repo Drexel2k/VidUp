@@ -62,7 +62,7 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
-            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+            serializer.Converters.Add(new YoutubeAccountGuidStringConverter());
 
             serializer.Formatting = Formatting.Indented;
 
@@ -107,7 +107,7 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
-            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+            serializer.Converters.Add(new YoutubeAccountGuidStringConverter());
 
             serializer.Formatting = Formatting.Indented;
 
@@ -124,7 +124,7 @@ namespace Drexel.VidUp.Json.Content
         {
             Tracer.Write($"JsonSerializationContent.SerializePlaylistList: Start.", TraceLevel.Detailed);
             JsonSerializer serializer = new JsonSerializer();
-            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+            serializer.Converters.Add(new YoutubeAccountGuidStringConverter());
 
             serializer.Formatting = Formatting.Indented;
 
@@ -135,6 +135,22 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializePlaylistList: End.", TraceLevel.Detailed);
+        }
+
+        public void SerializeYoutubeAccount(YoutubeAccount youtubeAccount)
+        {
+            Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccount: Start.", TraceLevel.Detailed);
+            JsonSerializer serializer = new JsonSerializer();
+
+            serializer.Formatting = Formatting.Indented;
+
+            using (StreamWriter sw = new StreamWriter(youtubeAccount.FilePath))
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(writer, youtubeAccount);
+            }
+
+            Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccount: End.", TraceLevel.Detailed);
         }
     }
 }

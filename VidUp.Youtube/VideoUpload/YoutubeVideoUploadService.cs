@@ -160,7 +160,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                             try
                             {
                                 using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                                        upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
+                                        upload.YoutubeAccount, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
                                 {
                                     
                                     requestMessage.Content = streamContent;
@@ -306,7 +306,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Requesting resume position.");
                     StreamContent streamContent = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length);
                     using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                        upload.YoutubeAccount.Name, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
+                        upload.YoutubeAccount, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
                     {
                         requestMessage.Content = streamContent;
                         using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
@@ -438,7 +438,7 @@ namespace Drexel.VidUp.Youtube.VideoUpload
                     Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload.");
                     using (ByteArrayContent byteArrayContent = HttpHelper.GetStreamContent(contentJson, "application/json"))
                     using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                        upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable").ConfigureAwait(false))
+                        upload.YoutubeAccount, HttpMethod.Post, $"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable").ConfigureAwait(false))
 
                     {
                         byteArrayContent.Headers.Add("Slug", httpHeaderCompatibleString);

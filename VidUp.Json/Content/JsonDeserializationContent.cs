@@ -16,6 +16,7 @@ namespace Drexel.VidUp.Json.Content
         private string uploadListFilePath;
         private string templateListFilePath;
         private string allUploadsFilePath;
+        private string serializationFolder;
 
         private string thumbnailFallbackImageFolder;
 
@@ -25,19 +26,26 @@ namespace Drexel.VidUp.Json.Content
 
         public JsonDeserializationContent(string serializationFolder, string thumbnailFallbackImageFolder)
         {
-            this.playlistListFilePath = Path.Combine(serializationFolder, "playlistlist.json");
-            this.uploadListFilePath = Path.Combine(serializationFolder, "uploadlist.json");
-            this.templateListFilePath = Path.Combine(serializationFolder, "templatelist.json");
-            this.allUploadsFilePath = Path.Combine(serializationFolder, "uploads.json");
+            this.serializationFolder = serializationFolder;
+            this.playlistListFilePath = Path.Combine(this.serializationFolder, "playlistlist.json");
+            this.uploadListFilePath = Path.Combine(this.serializationFolder, "uploadlist.json");
+            this.templateListFilePath = Path.Combine(this.serializationFolder, "templatelist.json");
+            this.allUploadsFilePath = Path.Combine(this.serializationFolder, "uploads.json");
 
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        public ReSerialize Deserialize(YoutubeAccountList youtubeAccountList)
+        public void Deserialize(ReSerialize reSerialize, YoutubeAccountList list)
         {
             Tracer.Write($"JsonDeserializationContent.Deserialize: Start.");
-            DeserializationRepositoryContent.YoutubeAccountList = youtubeAccountList;
-            ReSerialize reSerialize = new ReSerialize();
+            if (list == null)
+            {
+                reSerialize.YoutubeAccountList = this.deserializeYoutubeAccountList();
+            }
+            else
+            {
+                DeserializationRepositoryContent.YoutubeAccountList = list;
+            }
 
             reSerialize.PlaylistList = this.deserializePlaylistList();
             reSerialize.AllUploads = this.deserializeAllUploads();
@@ -49,7 +57,35 @@ namespace Drexel.VidUp.Json.Content
             this.checkConsistency();
 
             Tracer.Write($"JsonDeserializationContent.Deserialize: End.");
+        }
 
+        private bool deserializeYoutubeAccountList()
+        {
+            bool reSerialize = false;
+            List<YoutubeAccount> youtubeAccounts = new List<YoutubeAccount>();
+            string[] files = Directory.GetFiles(this.serializationFolder, "uploadrefreshtoken*");
+            if (files.Length <= 0)
+            {
+                youtubeAccounts.Add(new YoutubeAccount(Path.Combine(this.serializationFolder, "uploadrefreshtoken_Default"), "Default"));
+                reSerialize = true;
+            }
+            else
+            {
+                foreach (string file in Directory.GetFiles(this.serializationFolder, "uploadrefreshtoken*"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+
+                    using (StreamReader sr = new StreamReader(file))
+                    using (JsonReader reader = new JsonTextReader(sr))
+                    {
+                        YoutubeAccount youtubeAccount = serializer.Deserialize<YoutubeAccount>(reader);
+                        youtubeAccount.FilePath = file;
+                        youtubeAccounts.Add(youtubeAccount);
+                    }
+                }
+            }
+
+            DeserializationRepositoryContent.YoutubeAccountList = new YoutubeAccountList(youtubeAccounts);
             return reSerialize;
         }
 
@@ -65,7 +101,7 @@ namespace Drexel.VidUp.Json.Content
 
             //todo: remove compatibility ode
             JsonSerializer serializer = new JsonSerializer();
-            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+            serializer.Converters.Add(new YoutubeAccountGuidStringConverter());
 
             using (StreamReader sr = new StreamReader(this.playlistListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
@@ -94,7 +130,7 @@ namespace Drexel.VidUp.Json.Content
             //templates are set to null, because template objects do not yet exist.
             //templates are set on setTemplateOnUploads by reading json again.
             serializer.Converters.Add(new TemplateNullConverter());
-            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+            serializer.Converters.Add(new YoutubeAccountGuidStringConverter());
 
             using (StreamReader sr = new StreamReader(this.allUploadsFilePath))
             using (JsonReader reader = new JsonTextReader(sr))
@@ -121,7 +157,7 @@ namespace Drexel.VidUp.Json.Content
             serializer.Converters.Add(new PlaylistPlaylistIdConverter());
             serializer.Converters.Add(new CategoryIdConverter());
             serializer.Converters.Add(new CultureInfoCultureStringConverter());
-            serializer.Converters.Add(new YoutubeAccountNameStringConverter());
+            serializer.Converters.Add(new YoutubeAccountGuidStringConverter());
 
             using (StreamReader sr = new StreamReader(this.templateListFilePath))
             using (JsonReader reader = new JsonTextReader(sr))

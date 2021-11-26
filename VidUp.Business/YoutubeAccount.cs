@@ -2,18 +2,34 @@
 using System.ComponentModel;
 using System.IO;
 using Drexel.VidUp.Utils;
+using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
 {
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class YoutubeAccount : INotifyPropertyChanged
     {
+        [JsonProperty]
+        private Guid guid;
+        [JsonProperty]
+        private string name;
+        [JsonProperty]
+        private string refreshToken;
 
         private string filePath;
-        private string name;
         private bool isDummy = false;
         private Func<string> getAccountName;
+        
+        public Guid Guid
+        {
+            get => this.guid;
+        }
 
-
+        public string RefreshToken
+        {
+            get => this.refreshToken;
+            set => this.refreshToken = value;
+        }
 
         public string FilePath
         {
@@ -30,17 +46,8 @@ namespace Drexel.VidUp.Business
             get => this.name;
             set
             {
-                value = string.Concat(value.Split(Path.GetInvalidFileNameChars()));
-                string newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{value}");
-
-                if (!string.IsNullOrWhiteSpace(value) && !File.Exists(newFilePath))
-                {
-                    File.Move(this.filePath, newFilePath);
-                    this.name = value;
-                    this.filePath = newFilePath;
-                    this.raisePropertyChanged("Name");
-                    this.raisePropertyChanged("FilePath");
-                }
+                this.name = value;
+                this.raisePropertyChanged("Name");
             }
         }
 
@@ -56,6 +63,11 @@ namespace Drexel.VidUp.Business
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        [JsonConstructor]
+        public YoutubeAccount()
+        {
+        }
+
         public YoutubeAccount(string name, bool isDummy)
         {
             this.name = name;
@@ -64,6 +76,7 @@ namespace Drexel.VidUp.Business
 
         public YoutubeAccount(string filePath, string name)
         {
+            this.guid = Guid.NewGuid();
             this.filePath = filePath;
             this.name = name;
         }

@@ -361,18 +361,18 @@ namespace Drexel.VidUp.UI.ViewModels
             bool success = true;
             StringBuilder message = new StringBuilder();
             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Get uploads without playlists but with autoset templates.");
-            Dictionary<string, Dictionary<string, List<Upload>>> uploadsByPlaylistByAccount = this.getPlaylistUploadsWithoutPlaylistMap();
+            Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> uploadsByPlaylistByAccount = this.getPlaylistUploadsWithoutPlaylistMap();
 
-            foreach (KeyValuePair<string, Dictionary<string, List<Upload>>> accountPlaylists in uploadsByPlaylistByAccount)
+            foreach (KeyValuePair<YoutubeAccount, Dictionary<Playlist, List<Upload>>> accountPlaylists in uploadsByPlaylistByAccount)
             {
-                Dictionary<string, List<Upload>> uploadsWithoutPlaylistByPlaylist = accountPlaylists.Value;
+                Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist = accountPlaylists.Value;
                 if (uploadsWithoutPlaylistByPlaylist.Count > 0)
                 {
                     message.AppendLine($"{DateTime.Now} adding videos to playlists.");
                     int originalPlaylistCount = uploadsWithoutPlaylistByPlaylist.Count;
                     Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
                     //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
-                    Dictionary<string, List<string>> playlistVideos = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(accountPlaylists.Key, uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
+                    Dictionary<Playlist, List<string>> playlistVideos = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
 
                     if (uploadsWithoutPlaylistByPlaylist.Count > 0)
                     {
@@ -397,7 +397,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                             int originalVideoCount = uploadsWithoutPlaylistByPlaylist.Values.Sum(list => list.Count);
                             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on Youtube.");
-                            var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploadsAsync(accountPlaylists.Key, uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
+                            var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploadsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
 
                             if (uploadsWithoutPlaylistByPlaylist.Count > 0)
                             {
@@ -462,9 +462,9 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: End.");
         }
 
-        private Dictionary<string, Dictionary<string, List<Upload>>> getPlaylistUploadsWithoutPlaylistMap()
+        private Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> getPlaylistUploadsWithoutPlaylistMap()
         {
-            Dictionary<string, Dictionary<string, List<Upload>>> uploadsByPlaylistByAccount = new Dictionary<string, Dictionary<string, List<Upload>>>();
+            Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> uploadsByPlaylistByAccount = new Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>>();
             foreach (Template template in this.templateList)
             {
                 if (template.SetPlaylistAfterPublication && template.Playlist != null && !template.Playlist.NotExistsOnYoutube)
@@ -475,18 +475,18 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     if (uploads.Length >= 1)
                     {
-                        Dictionary<string, List<Upload>> uploadsByPlaylist;
-                        if (!uploadsByPlaylistByAccount.TryGetValue(template.YoutubeAccount.Name, out uploadsByPlaylist))
+                        Dictionary<Playlist, List<Upload>> uploadsByPlaylist;
+                        if (!uploadsByPlaylistByAccount.TryGetValue(template.YoutubeAccount, out uploadsByPlaylist))
                         {
-                            uploadsByPlaylist = new Dictionary<string, List<Upload>>();
-                            uploadsByPlaylistByAccount.Add(template.YoutubeAccount.Name, uploadsByPlaylist);
+                            uploadsByPlaylist = new Dictionary<Playlist, List<Upload>>();
+                            uploadsByPlaylistByAccount.Add(template.YoutubeAccount, uploadsByPlaylist);
                         }
 
                         List<Upload> playlistUploads;
-                        if (!uploadsByPlaylist.TryGetValue(template.Playlist.PlaylistId, out playlistUploads))
+                        if (!uploadsByPlaylist.TryGetValue(template.Playlist, out playlistUploads))
                         {
                             playlistUploads = new List<Upload>();
-                            uploadsByPlaylist.Add(template.Playlist.PlaylistId, playlistUploads);
+                            uploadsByPlaylist.Add(template.Playlist, playlistUploads);
                         }
 
                         playlistUploads.AddRange(uploads);
@@ -497,16 +497,16 @@ namespace Drexel.VidUp.UI.ViewModels
             return uploadsByPlaylistByAccount;
         }
 
-        private async Task<Dictionary<string, List<string>>> getPlaylistsAndRemoveNotExistingPlaylistsAsync(string accountName, Dictionary<string, List<Upload>> uploadsWithoutPlaylistByPlaylist)
+        private async Task<Dictionary<Business.Playlist, List<string>>> getPlaylistsAndRemoveNotExistingPlaylistsAsync(Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist)
         {
-            Dictionary<string, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContentAsync(uploadsWithoutPlaylistByPlaylist.Keys.ToList(), accountName).ConfigureAwait(false);
+            Dictionary<Playlist, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContentAsync(uploadsWithoutPlaylistByPlaylist.Keys.ToList()).ConfigureAwait(false);
             if (uploadsWithoutPlaylistByPlaylist.Count != playlistVideos.Count)
             {
-                KeyValuePair<string, List<Upload>>[] missingPlaylists = uploadsWithoutPlaylistByPlaylist
+                KeyValuePair<Business.Playlist, List<Upload>>[] missingPlaylists = uploadsWithoutPlaylistByPlaylist
                     .Where(kvp => !playlistVideos.ContainsKey(kvp.Key)).ToArray();
-                foreach (KeyValuePair<string, List<Upload>> playlistUploadsMap in missingPlaylists)
+                foreach (KeyValuePair<Business.Playlist, List<Upload>> playlistUploadsMap in missingPlaylists)
                 {
-                    this.playlistList.GetPlaylist(playlistUploadsMap.Key).NotExistsOnYoutube = true;
+                    playlistUploadsMap.Key.NotExistsOnYoutube = true;
                     uploadsWithoutPlaylistByPlaylist.Remove(playlistUploadsMap.Key);
                 }
 
@@ -516,19 +516,19 @@ namespace Drexel.VidUp.UI.ViewModels
             return playlistVideos;
         }
 
-        private bool removeUploadsAlreadyInPlaylist(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, List<string>> playlistVideos)
+        private bool removeUploadsAlreadyInPlaylist(Dictionary<Playlist, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<Playlist, List<string>> playlistVideos)
         {
             bool allVideosNotInPlaylist = true;
             //check if videos are already in playlist on YT.
-            List<string> noUploadsLeftPlaylists = new List<string>();
-            foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
+            List<Playlist> noUploadsLeftPlaylists = new List<Playlist>();
+            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
             {
                 List<Upload> uploadsToRemove = new List<Upload>();
                 foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
                 {
                     if (playlistVideos[playlistVideosWithoutPlaylist.Key].Contains(upload.VideoId))
                     {
-                        upload.Playlist = this.playlistList.GetPlaylist(playlistVideosWithoutPlaylist.Key);
+                        upload.Playlist = playlistVideosWithoutPlaylist.Key;
                         uploadsToRemove.Add(upload);
                     }
                 }
@@ -545,21 +545,21 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            foreach (string playlistId in noUploadsLeftPlaylists)
+            foreach (Playlist playlist in noUploadsLeftPlaylists)
             {
-                playlistUploadsWithoutPlaylistMap.Remove(playlistId);
+                playlistUploadsWithoutPlaylistMap.Remove(playlist);
             }
 
             return allVideosNotInPlaylist;
         }
 
-        private async Task<Dictionary<string, bool>> getPublicVideosAndRemoveNotExisingUploadsAsync(string accountName, Dictionary<string, List<Upload>> uploadsWithoutPlaylistByPlaylist)
+        private async Task<Dictionary<string, bool>> getPublicVideosAndRemoveNotExisingUploadsAsync(Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist)
         {
-            List<string> noUploadsLeftPlaylists = new List<string>();
+            List<Playlist> noUploadsLeftPlaylists = new List<Playlist>();
             Dictionary<string, bool> videosPublicMap = await YoutubeVideoService.IsPublicAsync(uploadsWithoutPlaylistByPlaylist
-                .SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList(), accountName).ConfigureAwait(false);
+                .SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList(), playlist.YoutubeAccount).ConfigureAwait(false);
 
-            foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in uploadsWithoutPlaylistByPlaylist)
+            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in uploadsWithoutPlaylistByPlaylist)
             {
                 List<Upload> notExistingUploadsOnYoutube = new List<Upload>();
                 foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
@@ -579,24 +579,24 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            foreach (string playlistId in noUploadsLeftPlaylists)
+            foreach (Playlist playlist in noUploadsLeftPlaylists)
             {
-                uploadsWithoutPlaylistByPlaylist.Remove(playlistId);
+                uploadsWithoutPlaylistByPlaylist.Remove(playlist);
             }
 
             return videosPublicMap;
         }
 
-        private async Task addUploadsToPlaylistIfPublicAsync(Dictionary<string, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, bool> videosPublicMap)
+        private async Task addUploadsToPlaylistIfPublicAsync(Dictionary<Playlist, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, bool> videosPublicMap)
         {
 
-            foreach (KeyValuePair<string, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
+            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
             {
                 foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
                 {
                     if (videosPublicMap[upload.VideoId])
                     {
-                        upload.Playlist = this.playlistList.GetPlaylist(playlistVideosWithoutPlaylist.Key);
+                        upload.Playlist = playlistVideosWithoutPlaylist.Key;
                         if (!await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false))
                         {
                             upload.Playlist = null;

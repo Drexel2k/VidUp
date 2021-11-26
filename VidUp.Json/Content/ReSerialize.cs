@@ -12,5 +12,6 @@ namespace Drexel.VidUp.Business
         public bool UploadList { get; set; }
         public bool TemplateList { get; set; }
         public bool PlaylistList { get; set; }
+        public bool YoutubeAccountList { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.Playlist.Data;
 using Newtonsoft.Json;
@@ -13,17 +14,17 @@ namespace Drexel.VidUp.Youtube.Playlist
     {
         private static string playlistsEndpoint = "https://www.googleapis.com/youtube/v3/playlists";
         private static int maxResults = 50;
-        public static async Task<List<Playlist>> GetPlaylistsAsync(string accountName)
+        public static async Task<List<PlaylistApi>> GetPlaylistsAsync(YoutubeAccount youtubeAccount)
         {
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: Start.");
-            List<Playlist> result = new List<Playlist>();
-            await YoutubePlaylistService.addPlaylistsToResultAsync(null, result, accountName).ConfigureAwait(false);
+            List<PlaylistApi> result = new List<PlaylistApi>();
+            await YoutubePlaylistService.addPlaylistsToResultAsync(null, result, youtubeAccount).ConfigureAwait(false);
             
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: End.");
             return result;
         }
 
-        private static async Task<List<Playlist>> addPlaylistsToResultAsync(string pageToken, List<Playlist> result, string accountName)
+        private static async Task<List<PlaylistApi>> addPlaylistsToResultAsync(string pageToken, List<PlaylistApi> result, YoutubeAccount youtubeAccount)
         {
             if (result == null)
             {
@@ -34,7 +35,7 @@ namespace Drexel.VidUp.Youtube.Playlist
 
             try
             {
-                using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(accountName, HttpMethod.Get).ConfigureAwait(false))
+                using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(youtubeAccount, HttpMethod.Get).ConfigureAwait(false))
                 {
                     Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Get Playlists.");
                     requestMessage.RequestUri = string.IsNullOrWhiteSpace(pageToken)
@@ -60,13 +61,13 @@ namespace Drexel.VidUp.Youtube.Playlist
                             {
                                 foreach (YoutubePlaylistsGetResponsePlaylist item in response.Items)
                                 {
-                                    result.Add(new Playlist(item.Id, item.Snippet.Title));
+                                    result.Add(new PlaylistApi(item.Id, item.Snippet.Title));
                                 }
                             }
 
                             if (!string.IsNullOrWhiteSpace(response.NextPageToken))
                             {
-                                await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result, accountName).ConfigureAwait(false);
+                                await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result, youtubeAccount).ConfigureAwait(false);
                             }
                         }
                     }

@@ -2,7 +2,7 @@
 
 namespace Drexel.VidUp.Youtube.Playlist
 {
-    public class Playlist
+    public class PlaylistApi
     {
         private string id;
         private string title;
@@ -10,7 +10,7 @@ namespace Drexel.VidUp.Youtube.Playlist
 
         public string Title { get => this.title; }
 
-        public Playlist(string id, string title)
+        public PlaylistApi(string id, string title)
         {
             if (string.IsNullOrWhiteSpace(id))
             {

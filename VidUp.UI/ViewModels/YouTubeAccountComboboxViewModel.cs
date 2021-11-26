@@ -29,7 +29,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.youtubeAccount = youtubeAccount;
-            this.youtubeAccount.PropertyChanged += youtubeAccountPropertyChanged;
+            this.youtubeAccount.PropertyChanged += this.youtubeAccountPropertyChanged;
         }
 
         private void youtubeAccountPropertyChanged(object sender, PropertyChangedEventArgs e)

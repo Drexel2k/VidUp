@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Youtube.Playlist;
-using Playlist = Drexel.VidUp.Youtube.Playlist.Playlist;
 
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -84,9 +83,9 @@ namespace Drexel.VidUp.UI.ViewModels
             this.allPlaylistSelectionViewModels.Clear();
             try
             {
-                List<Playlist> playlists = await YoutubePlaylistService.GetPlaylistsAsync(this.selectedYoutubeAccount.YoutubeAccount.Name);
+                List<PlaylistApi> playlists = await YoutubePlaylistService.GetPlaylistsAsync(this.selectedYoutubeAccount.YoutubeAccount);
 
-                foreach (Playlist playlist in playlists)
+                foreach (PlaylistApi playlist in playlists)
                 {
                     if (!this.selectedPlaylists.Contains(playlist.Id))
                     {

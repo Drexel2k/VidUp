@@ -22,7 +22,7 @@
         <TextBlock FontSize="9" Margin="0, 24, 0, 0" Grid.Row="1">VidUp Display Information:</TextBlock>
         <StackPanel Orientation="Horizontal" Grid.Row="2">
             <TextBox wpf:HintAssist.Hint="Account Name" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Style="{DynamicResource MaterialDesignFloatingHintTextBox}" Margin="0 8 0 0" Width="280" />
-            <materialDesign:PackIcon Kind="HelpCircleOutline" Grid.Column="1" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="This name is only for display in VidUp, it doesn't need to the channel name or id, channel is linked on first upload or via the button on YT account edit form. The name is also used as file name, invalid file name characters will be ignored." ToolTipService.ShowDuration="60000" Background="Transparent" />
+            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 0 0 5" ToolTip="This name is only for display in VidUp, it doesn't need to the channel name or id, channel is linked on first upload or via the button on YT account edit form." ToolTipService.ShowDuration="60000" Background="Transparent" />
         </StackPanel>
         
         <StackPanel Orientation="Horizontal" Grid.Row="3"

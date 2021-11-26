@@ -24,7 +24,7 @@ namespace Drexel.VidUp.Youtube.Thumbnail
                 using (StreamContent streamContent = HttpHelper.GetStreamContentUpload(fs, MimeTypesMap.GetMimeType(upload.ThumbnailFilePath)))
                 {
                     using(HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                        upload.YoutubeAccount.Name, HttpMethod.Post, $"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}").ConfigureAwait(false))
+                        upload.YoutubeAccount, HttpMethod.Post, $"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}").ConfigureAwait(false))
                     {
                         try
                         {

@@ -5,17 +5,17 @@ using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Json.Content
 {
-    public class YoutubeAccountNameStringConverter : JsonConverter<YoutubeAccount>
+    public class YoutubeAccountGuidStringConverter : JsonConverter<YoutubeAccount>
     {
         public override YoutubeAccount ReadJson(JsonReader reader, Type objectType, YoutubeAccount existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            string accountName = (string)reader.Value;
-            if (string.IsNullOrWhiteSpace(accountName))
+            string guid = (string)reader.Value;
+            if (string.IsNullOrWhiteSpace(guid))
             {
                 throw new SerializationException("Youtube Account not found.");
             }
 
-            YoutubeAccount account = DeserializationRepositoryContent.YoutubeAccountList.Find(acc => acc.Name == accountName);
+            YoutubeAccount account = DeserializationRepositoryContent.YoutubeAccountList.Find(acc => acc.Guid == Guid.Parse(guid));
             if (account == null)
             {
                 throw new SerializationException("Youtube Account not found.");
@@ -26,7 +26,7 @@ namespace Drexel.VidUp.Json.Content
 
         public override void WriteJson(JsonWriter writer, YoutubeAccount value, JsonSerializer serializer)
         {
-            writer.WriteValue(value.Name);
+            writer.WriteValue(value.Guid);
         }
     }
 }

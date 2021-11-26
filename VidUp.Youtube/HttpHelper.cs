@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using Drexel.VidUp.Business;
 using Drexel.VidUp.Youtube.Authentication;
 
 namespace Drexel.VidUp.Youtube
@@ -16,7 +17,7 @@ namespace Drexel.VidUp.Youtube
         private static HttpClient standardClient;
         private static HttpClient uploadClient;
 
-        private static Dictionary<string, AccessToken> youtubeAccessTokenExpiryByAccount = new Dictionary<string, AccessToken>();
+        private static Dictionary<YoutubeAccount, AccessToken> youtubeAccessTokenExpiryByAccount = new Dictionary<YoutubeAccount, AccessToken>();
         private static TimeSpan oneMinute = new TimeSpan(0, 1, 0);
         static HttpHelper()
         {
@@ -41,29 +42,29 @@ namespace Drexel.VidUp.Youtube
             get => HttpHelper.uploadClient;
         }
 
-        public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(string accountName, HttpMethod method, string uri)
+        public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(YoutubeAccount youtubeAccount, HttpMethod method, string uri)
         {
-            await HttpHelper.ensureAccessTokenAsync(accountName).ConfigureAwait(false);
+            await HttpHelper.ensureAccessTokenAsync(youtubeAccount).ConfigureAwait(false);
             HttpRequestMessage message = new HttpRequestMessage(method, uri);
-            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", HttpHelper.youtubeAccessTokenExpiryByAccount[accountName].Token);
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount].Token);
             return message;
         }
 
-        public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(string accountName, HttpMethod method)
+        public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(YoutubeAccount youtubeAccount, HttpMethod method)
         {
-            await HttpHelper.ensureAccessTokenAsync(accountName).ConfigureAwait(false);
+            await HttpHelper.ensureAccessTokenAsync(youtubeAccount).ConfigureAwait(false);
             HttpRequestMessage message = new HttpRequestMessage();
             message.Method = method;
-            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", HttpHelper.youtubeAccessTokenExpiryByAccount[accountName].Token);
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount].Token);
             return message;
         }
 
-        private static async Task ensureAccessTokenAsync(string accountName)
+        private static async Task ensureAccessTokenAsync(YoutubeAccount youtubeAccount)
         {
-            if (!HttpHelper.youtubeAccessTokenExpiryByAccount.ContainsKey(accountName) || HttpHelper.youtubeAccessTokenExpiryByAccount[accountName].Expiry - DateTime.Now < oneMinute)
+            if (!HttpHelper.youtubeAccessTokenExpiryByAccount.ContainsKey(youtubeAccount) || HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount].Expiry - DateTime.Now < oneMinute)
             {
-                AccessToken token = await YoutubeAuthentication.GetNewAccessTokenAsync(accountName).ConfigureAwait(false);
-                HttpHelper.youtubeAccessTokenExpiryByAccount[accountName] = token;
+                AccessToken token = await YoutubeAuthentication.GetNewAccessTokenAsync(youtubeAccount).ConfigureAwait(false);
+                HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount] = token;
             }
         }
 

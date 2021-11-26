@@ -415,17 +415,24 @@ namespace Drexel.VidUp.UI.ViewModels
             this.initialize(user, subFolder, out uploadList, out templateList, out playlistList);
         }
 
-        private bool renameRefreshTokenFile()
+        private YoutubeAccountList checkLegacyRefreshtokenFile(ReSerialize reSerialize)
         {
-            bool renamed = false;
             string oldFile = $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken";
             if (File.Exists(oldFile))
             {
-                File.Move(oldFile, $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken_Default");
-                renamed = true;
+                string newFile = $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken_Default";
+                File.Move(oldFile, newFile);
+                string refreshtoken = File.ReadAllText(newFile);
+                YoutubeAccount youtubeAccount = new YoutubeAccount(newFile, "Default");
+                youtubeAccount.RefreshToken = string.IsNullOrWhiteSpace(refreshtoken) ? null : refreshtoken;
+                List<YoutubeAccount> list = new List<YoutubeAccount>();
+                list.Add(youtubeAccount);
+                YoutubeAccountList youtubeAccountList = new YoutubeAccountList(list);
+                reSerialize.YoutubeAccountList = true;
+                return youtubeAccountList;
             }
 
-            return renamed;
+            return null;
         }
 
         private void setDefaultAccountOnContent()
@@ -780,13 +787,13 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"MainWindowViewModel.deserializeContent: Start.");
 
             //compatibility code, will be removed in future versions
-            bool renamed = this.renameRefreshTokenFile();
-
-            this.youtubeAccountList = this.readYoutubeAccounts();
+            ReSerialize reSerialize = new ReSerialize();
+            YoutubeAccountList list = this.checkLegacyRefreshtokenFile(reSerialize);
 
             JsonDeserializationContent deserializer = new JsonDeserializationContent(Settings.Instance.StorageFolder, Settings.Instance.ThumbnailFallbackImageFolder);
-            YoutubeAuthentication.SerializationFolder = Settings.Instance.StorageFolder;
-            ReSerialize reSerialize = deserializer.Deserialize(this.youtubeAccountList);
+            deserializer.Deserialize(reSerialize, list);
+
+            this.youtubeAccountList = DeserializationRepositoryContent.YoutubeAccountList;
             this.templateList = DeserializationRepositoryContent.TemplateList;
 
             this.uploadList = DeserializationRepositoryContent.UploadList;
@@ -795,7 +802,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.playlistList = DeserializationRepositoryContent.PlaylistList;
 
             //compatibility code, will be removed in future versions
-            if (renamed)
+            if (reSerialize.YoutubeAccountList)
             {
                 this.setDefaultAccountOnContent();
                 reSerialize.AllUploads = true;
@@ -812,24 +819,6 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"MainWindowViewModel.deserializeContent: End.");
 
             return reSerialize;
-        }
-
-        private YoutubeAccountList readYoutubeAccounts()
-        {
-            string[] files = Directory.GetFiles(Settings.Instance.StorageFolder, "uploadrefreshtoken*");
-            if (files.Length <= 0)
-            {
-                File.Create(Path.Combine(Settings.Instance.StorageFolder, "uploadrefreshtoken_Default"));
-            }
-
-            List<YoutubeAccount> youtubeAccounts = new List<YoutubeAccount>();
-            foreach (string file in Directory.GetFiles(Settings.Instance.StorageFolder, "uploadrefreshtoken*"))
-            {
-                string[] parts = file.Split('_');
-                youtubeAccounts.Add(new YoutubeAccount(file, parts[1]));
-            }
-
-            return new YoutubeAccountList(youtubeAccounts);
         }
 
         private void deserializeSettings()
@@ -861,6 +850,14 @@ namespace Drexel.VidUp.UI.ViewModels
             if (reSerialize.PlaylistList)
             {
                 JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+            }
+
+            if (reSerialize.YoutubeAccountList)
+            {
+                foreach (YoutubeAccount youtubeAccount in this.youtubeAccountList)
+                {
+                    JsonSerializationContent.JsonSerializer.SerializeYoutubeAccount(youtubeAccount);
+                }
             }
         }
 

@@ -110,9 +110,7 @@ namespace Drexel.VidUp.UI.ViewModels
             { 
                 this.selectedYoutubeAccount.YoutubeAccount.Name = value;
 
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccount(this.selectedYoutubeAccount.YoutubeAccount);
 
                 this.raisePropertyChanged("SelectedYoutubeAccountName");
                 this.raisePropertyChanged("SelectedYoutubeAccountFilePath");
@@ -307,33 +305,29 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 string finalName;
                 NewYoutubeAccountViewModel data = (NewYoutubeAccountViewModel)view.DataContext;
-                string name = string.Concat(data.Name.Split(Path.GetInvalidFileNameChars()));
+                string fileName = string.Concat(data.Name.Split(Path.GetInvalidFileNameChars()));
 
                 //is needed if file aready exists as the original name shall not be overwritten including the suffix
                 //as long as counting up
-                finalName = name;
 
-                if (string.IsNullOrWhiteSpace(name))
+                if (string.IsNullOrWhiteSpace(fileName))
                 {
-                    name = "default";
-                    finalName = name;
+                    fileName = "default";
                 }
 
-                string newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{name}");
+                string newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{fileName}");
 
                 int index = 1;
                 while (File.Exists(newFilePath))
                 {
-                    newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{name}{index}");
-                    finalName = $"{name}{index}";
+                    newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{fileName}{index}");
                     index++;
                 }
 
-                File.Create(newFilePath);
-                YoutubeAccount youtubeAccount = new YoutubeAccount(newFilePath, finalName);
-                List<YoutubeAccount> list = new List<YoutubeAccount>();
-                list.Add(youtubeAccount);
-                this.youtubeAccounts.AddYoutubeAccounts(new List<YoutubeAccount>(list));
+                File.Create(newFilePath).Dispose();
+                YoutubeAccount youtubeAccount = new YoutubeAccount(newFilePath, data.Name);
+                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccount(youtubeAccount);
+                this.youtubeAccounts.AddYoutubeAccount(youtubeAccount);
 
                 this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(youtubeAccount);
             }
@@ -352,7 +346,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("AuthenticatingYoutubeAccount");
             }
 
-            await YoutubeAuthentication.GetRefreshTokenAsync(this.SelectedYoutubeAccountName).ConfigureAwait(false);
+            await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(this.selectedYoutubeAccount.YoutubeAccount).ConfigureAwait(false);
 
             this.authenticatingYoutubeAccount = false;
             this.raisePropertyChanged("AuthenticatingYoutubeAccount");
