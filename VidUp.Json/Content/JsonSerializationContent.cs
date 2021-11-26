@@ -13,25 +13,29 @@ namespace Drexel.VidUp.Json.Content
         private string uploadListFilePath;
         private string templateListFilePath;
         private string allUploadsFilePath;
+        private string youtubeAccountListFilePath;
 
         private UploadList uploadList;
         private TemplateList templateList;
         private PlaylistList playlistList;
+        private YoutubeAccountList youtubeAccountList;
 
         private object allUploadsLock = new object();
 
         public static JsonSerializationContent JsonSerializer;
 
-        public JsonSerializationContent(string serializationFolder, UploadList uploadList, TemplateList templateList, PlaylistList playlistList)
+        public JsonSerializationContent(string serializationFolder, UploadList uploadList, TemplateList templateList, PlaylistList playlistList, YoutubeAccountList youtubeAccountList)
         {
             this.playlistListFilePath = Path.Combine(serializationFolder, "playlistlist.json");
             this.uploadListFilePath = Path.Combine(serializationFolder, "uploadlist.json");
             this.templateListFilePath = Path.Combine(serializationFolder, "templatelist.json");
             this.allUploadsFilePath = Path.Combine(serializationFolder, "uploads.json");
+            this.youtubeAccountListFilePath = Path.Combine(serializationFolder, "accountlist.json");
 
             this.uploadList = uploadList;
             this.templateList = templateList;
             this.playlistList = playlistList;
+            this.youtubeAccountList = youtubeAccountList;
         }
 
         //on Upload [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -137,20 +141,20 @@ namespace Drexel.VidUp.Json.Content
             Tracer.Write($"JsonSerializationContent.SerializePlaylistList: End.", TraceLevel.Detailed);
         }
 
-        public void SerializeYoutubeAccount(YoutubeAccount youtubeAccount)
+        public void SerializeYoutubeAccountList()
         {
-            Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccount: Start.", TraceLevel.Detailed);
+            Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccountList: Start.", TraceLevel.Detailed);
             JsonSerializer serializer = new JsonSerializer();
 
             serializer.Formatting = Formatting.Indented;
 
-            using (StreamWriter sw = new StreamWriter(youtubeAccount.FilePath))
+            using (StreamWriter sw = new StreamWriter(this.youtubeAccountListFilePath))
             using (JsonWriter writer = new JsonTextWriter(sw))
             {
-                serializer.Serialize(writer, youtubeAccount);
+                serializer.Serialize(writer, this.youtubeAccountList);
             }
 
-            Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccount: End.", TraceLevel.Detailed);
+            Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccountList: End.", TraceLevel.Detailed);
         }
     }
 }

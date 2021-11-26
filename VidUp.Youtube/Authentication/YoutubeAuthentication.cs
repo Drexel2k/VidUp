@@ -172,7 +172,7 @@ namespace Drexel.VidUp.Youtube.Authentication
 
                     Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
                     youtubeAccount.RefreshToken = tokenEndpointDecoded["refresh_token"];
-                    JsonSerializationContent.JsonSerializer.SerializeYoutubeAccount(youtubeAccount);
+                    JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
                 }
             }
         }

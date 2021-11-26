@@ -16,7 +16,6 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string refreshToken;
 
-        private string filePath;
         private bool isDummy = false;
         private Func<string> getAccountName;
         
@@ -29,16 +28,6 @@ namespace Drexel.VidUp.Business
         {
             get => this.refreshToken;
             set => this.refreshToken = value;
-        }
-
-        public string FilePath
-        {
-            get => this.filePath;
-            set
-            {
-                this.filePath = value;
-                this.raisePropertyChanged("FilePath");
-            }
         }
 
         public string Name
@@ -74,17 +63,15 @@ namespace Drexel.VidUp.Business
             this.isDummy = isDummy;
         }
 
-        public YoutubeAccount(string filePath, string name)
+        public YoutubeAccount(string name)
         {
             this.guid = Guid.NewGuid();
-            this.filePath = filePath;
             this.name = name;
         }
 
         //for dummy templates with changing account info
         public YoutubeAccount(string name, Func<string> getaccountName)
         {
-            this.filePath = null;
             this.name = name;
             this.getAccountName = getaccountName;
             this.isDummy = true;

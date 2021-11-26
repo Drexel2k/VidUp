@@ -420,14 +420,13 @@ namespace Drexel.VidUp.UI.ViewModels
             string oldFile = $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken";
             if (File.Exists(oldFile))
             {
-                string newFile = $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken_Default";
-                File.Move(oldFile, newFile);
-                string refreshtoken = File.ReadAllText(newFile);
-                YoutubeAccount youtubeAccount = new YoutubeAccount(newFile, "Default");
+                string refreshtoken = File.ReadAllText(oldFile);
+                YoutubeAccount youtubeAccount = new YoutubeAccount("Default");
                 youtubeAccount.RefreshToken = string.IsNullOrWhiteSpace(refreshtoken) ? null : refreshtoken;
                 List<YoutubeAccount> list = new List<YoutubeAccount>();
                 list.Add(youtubeAccount);
                 YoutubeAccountList youtubeAccountList = new YoutubeAccountList(list);
+                File.Delete(oldFile);
                 reSerialize.YoutubeAccountList = true;
                 return youtubeAccountList;
             }
@@ -490,7 +489,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.deserializeSettings();
             ReSerialize reSerialize = this.deserializeContent();
 
-            JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.Instance.StorageFolder, this.uploadList, this.templateList, this.playlistList);
+            JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.Instance.StorageFolder, this.uploadList, this.templateList, this.playlistList, this.youtubeAccountList);
             JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.Instance.StorageFolder, Settings.Instance.UserSettings);
 
             this.reSerialize(reSerialize);
@@ -813,8 +812,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;
 
-            
-
             DeserializationRepositoryContent.ClearRepositories();
             Tracer.Write($"MainWindowViewModel.deserializeContent: End.");
 
@@ -854,10 +851,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (reSerialize.YoutubeAccountList)
             {
-                foreach (YoutubeAccount youtubeAccount in this.youtubeAccountList)
-                {
-                    JsonSerializationContent.JsonSerializer.SerializeYoutubeAccount(youtubeAccount);
-                }
+                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
             }
         }
 

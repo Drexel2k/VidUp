@@ -49,11 +49,7 @@
                         <TextBox Text="{Binding SelectedYoutubeAccountName, UpdateSourceTrigger=PropertyChanged, Delay=500}"  Width="190" TextWrapping="Wrap" />
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 3 10 5" ToolTip="This name is only for display in VidUp, it doesn't need to the channel name or id, channel is linked on first upload or via the button to the right." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
-                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
-                        <Label Content="File: " Width="87" />
-                        <TextBox Text="{Binding SelectedYoutubeAccountFilePath, Mode=OneWay}"  Width="460" TextWrapping="Wrap" IsEnabled="False" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 3 10 5" ToolTip="File where the authentication information is stored." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                    </StackPanel>
+
                 </Grid>
 
             </GroupBox>

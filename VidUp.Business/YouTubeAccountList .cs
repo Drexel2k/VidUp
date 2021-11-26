@@ -5,11 +5,14 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
 {
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class YoutubeAccountList : INotifyCollectionChanged, INotifyPropertyChanged, IEnumerable<YoutubeAccount>
     {
+        [JsonProperty]
         private List<YoutubeAccount> youtubeAccounts;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -52,11 +55,6 @@ namespace Drexel.VidUp.Business
             YoutubeAccount youtubeAccount = this.youtubeAccounts.Find(acc => acc.Name == name);
             if (youtubeAccount != null)
             {
-                if (File.Exists(youtubeAccount.FilePath))
-                {
-                    File.Delete(youtubeAccount.FilePath);
-                }
-
                 this.youtubeAccounts.Remove(youtubeAccount);
                 this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, youtubeAccount));
             }

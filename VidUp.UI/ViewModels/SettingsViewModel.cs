@@ -110,16 +110,11 @@ namespace Drexel.VidUp.UI.ViewModels
             { 
                 this.selectedYoutubeAccount.YoutubeAccount.Name = value;
 
-                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccount(this.selectedYoutubeAccount.YoutubeAccount);
+                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
 
                 this.raisePropertyChanged("SelectedYoutubeAccountName");
                 this.raisePropertyChanged("SelectedYoutubeAccountFilePath");
             }
-        }
-
-        public string SelectedYoutubeAccountFilePath
-        {
-            get => this.selectedYoutubeAccount.YoutubeAccount.FilePath;
         }
 
         public GenericCommand NewYoutubeAccountCommand
@@ -325,8 +320,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 File.Create(newFilePath).Dispose();
-                YoutubeAccount youtubeAccount = new YoutubeAccount(newFilePath, data.Name);
-                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccount(youtubeAccount);
+                YoutubeAccount youtubeAccount = new YoutubeAccount(data.Name);
+                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
                 this.youtubeAccounts.AddYoutubeAccount(youtubeAccount);
 
                 this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(youtubeAccount);
