@@ -55,6 +55,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                                         result.StatusInformation = statusInformation;
                                         result.Success = false;
                                         upload.AddUploadError(statusInformation);
+                                        Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, quota exceeded.");
                                         return result;
                                     }
 

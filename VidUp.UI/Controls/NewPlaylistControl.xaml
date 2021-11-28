@@ -31,8 +31,7 @@
                 <TextBox x:Name="Title" Width="150"  Text="{Binding SearchText, Delay=500, UpdateSourceTrigger=PropertyChanged}"  />
             </StackPanel>
 
-
-            <Label Visibility="{Binding ShowPlaylistReceiveError, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" Content="Playlists could not be received." />
+            <TextBlock Visibility="{Binding ShowPlaylistReceiveError, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" Text="{Binding PlaylistReceiveErrorMessage}" TextWrapping="Wrap" Margin="0 10 0 0" />
 
             <ListView MaxHeight="300" MinWidth="500" ItemsSource="{Binding ObservablePlaylistSelectionViewModels}" HorizontalAlignment="Left" HorizontalContentAlignment="Left">
                 <ListView.ItemTemplate>

@@ -286,7 +286,8 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             var view = new NewPlaylistControl
             {
-                DataContext = new NewPlaylistViewModel(this.playlistList.GetReadOnlyPlaylistList().Select(playlist => playlist.PlaylistId).ToList(), this.observableYoutubeAccountViewModels, this.youtubeAccountForRequestingPlaylists)
+                DataContext = await NewPlaylistViewModel.Create(
+                    this.playlistList.GetReadOnlyPlaylistList().Select(playlist => playlist.PlaylistId).ToList(), this.observableYoutubeAccountViewModels, this.youtubeAccountForRequestingPlaylists)
             };
 
             bool result = (bool)await DialogHost.Show(view, "RootDialog");
@@ -383,11 +384,12 @@ namespace Drexel.VidUp.UI.ViewModels
                         Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
 
                         //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
+                        messages.Add(new StatusInformation($"{DateTime.Now} Receiving current playlist content."));
                         GetPlaylistsAndRemoveNotExistingPlaylistsResult getPlaylistsAndRemoveNotExistingPlaylistsResult = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
                         if (getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation != null)
                         {
                             success = false;
-                            messages.Add(new StatusInformation($"{DateTime.Now}  {getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation.Message}"));
+                            messages.Add(new StatusInformation($"{DateTime.Now} Could not receive playlist content:\n{getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation.Message}"));
                         }
                         else
                         {
@@ -413,6 +415,7 @@ namespace Drexel.VidUp.UI.ViewModels
                                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads are already in playlist.");
 
                                 //clear uploadsWithoutPlaylistByPlaylist from uploads already and playlists on youtube and remove playlists where nothing is left to do.
+                                messages.Add(new StatusInformation($"{DateTime.Now} Checking if videos are already in playlists."));
                                 Dictionary<Playlist, List<Upload>> uploadsAlreadyInPlaylistByPlaylist = this.removeUploadsAlreadyInPlaylist(uploadsWithoutPlaylistByPlaylist, getPlaylistsAndRemoveNotExistingPlaylistsResult.PlaylistItemsByPlaylist);
 
                                 if (uploadsAlreadyInPlaylistByPlaylist.Count > 0)
@@ -441,11 +444,12 @@ namespace Drexel.VidUp.UI.ViewModels
                                     Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on Youtube.");
 
                                     //clear uploadsWithoutPlaylistByPlaylist also from uploads not on youtube anymore and remove playlists where nothing is left to do.
+                                    messages.Add(new StatusInformation($"{DateTime.Now} Checking if videos are public."));
                                     GetPublicVideosAndRemoveNotExistingUploadsResult getPublicVideosAndRemoveNotExisingUploadsResult = await this.getPublicVideosAndRemoveNotExistingUploadsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
                                     if (getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation != null)
                                     {
                                         success = false;
-                                        messages.Add(new StatusInformation($"{DateTime.Now}  {getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation.Message}"));
+                                        messages.Add(new StatusInformation($"{DateTime.Now} Could not check if videos are public:\n{getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation.Message}"));
                                     }
                                     else
                                     {
@@ -478,11 +482,12 @@ namespace Drexel.VidUp.UI.ViewModels
                                             else
                                             {
                                                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Add public videos to playlist.");
+                                                messages.Add(new StatusInformation($"{DateTime.Now} Adding videos to playlists."));
                                                 AddUploadsToPlaylistIfPublicResult addUploadsToPlaylistIfPublicResult = await this.addUploadsToPlaylistIfPublicAsync(uploadsWithoutPlaylistByPlaylist, getPublicVideosAndRemoveNotExisingUploadsResult.PublicByVideo).ConfigureAwait(false);
                                                 if (addUploadsToPlaylistIfPublicResult.StatusInformation != null)
                                                 {
                                                     success = false;
-                                                    messages.Add(new StatusInformation($"{DateTime.Now}  {getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation.Message}"));
+                                                    messages.Add(new StatusInformation($"{DateTime.Now}  {addUploadsToPlaylistIfPublicResult.StatusInformation.Message}"));
                                                 }
 
                                                 if (addUploadsToPlaylistIfPublicResult.UploadsNotAddedByPlaylist.Count > 0)
@@ -589,7 +594,7 @@ namespace Drexel.VidUp.UI.ViewModels
             StringBuilder message = new StringBuilder();
             if (messages.Any(messageInternal => messageInternal.IsQuotaError))
             {
-                message.AppendLine($"{TinyHelpers.QuotaExceededString}");
+                message.AppendLine(TinyHelpers.QuotaExceededString);
             }
 
             foreach (StatusInformation statusInformation in messages)

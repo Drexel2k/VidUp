@@ -22,7 +22,7 @@ namespace Drexel.VidUp.Business
         }
 
         [JsonConstructor]
-        public StatusInformation()
+        private StatusInformation()
         {
 
         }

@@ -45,6 +45,7 @@ namespace Drexel.VidUp.Youtube.VideoService
                                     if (statusInformation.IsQuotaError)
                                     {
                                         result.StatusInformation = statusInformation;
+                                        Tracer.Write($"YoutubeVideoService.IsPublic: End, quota exceeded.");
                                         return result;
                                     }
 

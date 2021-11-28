@@ -325,9 +325,9 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                 upload.AddUploadError(statusInformation);
                                 if (statusInformation.IsQuotaError)
                                 {
-                                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End, quota exceeded.");
                                     resetEvent.WaitOne();
                                     upload.UploadStatus = UplStatus.Failed;
+                                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End, quota exceeded.");
                                     return false;
                                 }
 
@@ -469,9 +469,9 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                 upload.AddUploadError(statusInformation);
                                 if (statusInformation.IsQuotaError)
                                 {
-                                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End, quota exceeded.");
                                     resetEvent.WaitOne();
                                     upload.UploadStatus = UplStatus.Failed;
+                                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End, quota exceeded.");
                                     return false;
                                 }
 

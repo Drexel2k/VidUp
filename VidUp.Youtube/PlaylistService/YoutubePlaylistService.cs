@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.PlaylistService.Data;
+using Drexel.VidUp.Youtube.VideoService.Data;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Youtube.PlaylistService
@@ -13,21 +14,28 @@ namespace Drexel.VidUp.Youtube.PlaylistService
     {
         private static string playlistsEndpoint = "https://www.googleapis.com/youtube/v3/playlists";
         private static int maxResults = 50;
-        public static async Task<List<PlaylistApi>> GetPlaylistsAsync(YoutubeAccount youtubeAccount)
+        public static async Task<GetPlaylistsResult> GetPlaylistsAsync(YoutubeAccount youtubeAccount)
         {
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: Start.");
-            List<PlaylistApi> result = new List<PlaylistApi>();
-            await YoutubePlaylistService.addPlaylistsToResultAsync(null, result, youtubeAccount).ConfigureAwait(false);
+            GetPlaylistsResult result = new GetPlaylistsResult();
+
+            StatusInformation statusInformation = await YoutubePlaylistService.addPlaylistsToResultAsync(null, result.Playlists, youtubeAccount).ConfigureAwait(false);
+            if (statusInformation != null)
+            {
+                result.StatusInformation = statusInformation;
+                Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, quota exceeded.");
+                return result;
+            }
             
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: End.");
             return result;
         }
 
-        private static async Task<List<PlaylistApi>> addPlaylistsToResultAsync(string pageToken, List<PlaylistApi> result, YoutubeAccount youtubeAccount)
+        private static async Task<StatusInformation> addPlaylistsToResultAsync(string pageToken, List<PlaylistApi> result, YoutubeAccount youtubeAccount)
         {
             if (result == null)
             {
-                throw new ArgumentException("result must not be null.");
+                throw new ArgumentException("Result must not be null.");
             }
 
             Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: Start, pageToken = { pageToken }.");
@@ -50,6 +58,13 @@ namespace Drexel.VidUp.Youtube.PlaylistService
                             string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (!responseMessage.IsSuccessStatusCode)
                             {
+                                StatusInformation statusInformation = new StatusInformation(content);
+                                if (statusInformation.IsQuotaError)
+                                {
+                                    Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, quota exceeded.");
+                                    return statusInformation;
+                                }
+
                                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                 responseMessage.EnsureSuccessStatusCode();
                             }
@@ -66,7 +81,12 @@ namespace Drexel.VidUp.Youtube.PlaylistService
 
                             if (!string.IsNullOrWhiteSpace(response.NextPageToken))
                             {
-                                await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result, youtubeAccount).ConfigureAwait(false);
+                                StatusInformation statusInformation = await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result, youtubeAccount).ConfigureAwait(false);
+                                if (statusInformation != null)
+                                {
+                                    Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, quota exceeded.");
+                                    return statusInformation;
+                                }
                             }
                         }
                     }
@@ -83,7 +103,7 @@ namespace Drexel.VidUp.Youtube.PlaylistService
             }
 
             Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, pageToken = { pageToken }.");
-            return result;
+            return null;
         }
     }
 }

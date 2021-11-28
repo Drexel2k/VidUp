@@ -267,7 +267,7 @@ namespace Drexel.VidUp.Business
                 StringBuilder stringBuilder = new StringBuilder();
                 if (this.ErrorsContainQuotaError)
                 {
-                    stringBuilder.AppendLine($"{TinyHelpers.QuotaExceededString}");
+                    stringBuilder.AppendLine(TinyHelpers.QuotaExceededString);
                 }
 
                 foreach (StatusInformation uploadError in this.uploadErrors)

@@ -4,7 +4,7 @@ namespace Drexel.VidUp.Utils
 {
     public class TinyHelpers
     {
-        public static string QuotaExceededString = "VidUp's YouTube access is closed for today (API quota exceeded). Try again after midnight PT (UTC-8).";
+        public static string QuotaExceededString = "VidUp's YouTube access is closed for today (API quota exceeded). Try again after midnight pacific time (UTC-8).";
 
         public static string TrimLineBreakAtEnd(string text)
         {

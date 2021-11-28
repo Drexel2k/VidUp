@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.PlaylistService;
 
 
@@ -19,6 +20,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private string searchText = string.Empty;
         private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
         private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
+        private string playlistReceiveErrorMessage;
 
         public bool ShowPlaylistReceiveError
         {
@@ -56,9 +58,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string PlaylistReceiveErrorMessage
+        {
+            get => this.playlistReceiveErrorMessage;
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public NewPlaylistViewModel(List<string> selectedPlaylists, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount)
+        private NewPlaylistViewModel(List<string> selectedPlaylists, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount)
         {
             if (observableYoutubeAccountViewModels == null || observableYoutubeAccountViewModels.YoutubeAccountCount <= 0)
             {
@@ -75,7 +82,18 @@ namespace Drexel.VidUp.UI.ViewModels
             this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
             this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(selectedYoutubeAccount);
             this.allPlaylistSelectionViewModels = new List<PlaylistSelectionViewModel>();
-            this.initializePlaylistsAsync();
+        }
+
+        public static async Task<NewPlaylistViewModel> Create(List<string> selectedPlaylists, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount)
+        {
+            NewPlaylistViewModel newPlaylistViewModel = new NewPlaylistViewModel(selectedPlaylists, observableYoutubeAccountViewModels, selectedYoutubeAccount);
+            await newPlaylistViewModel.initialize();
+            return newPlaylistViewModel;
+        }
+
+        private async Task initialize()
+        {
+            await this.initializePlaylistsAsync();
         }
 
         private async Task initializePlaylistsAsync()
@@ -83,23 +101,34 @@ namespace Drexel.VidUp.UI.ViewModels
             this.allPlaylistSelectionViewModels.Clear();
             try
             {
-                List<PlaylistApi> playlists = await YoutubePlaylistService.GetPlaylistsAsync(this.selectedYoutubeAccount.YoutubeAccount);
+                GetPlaylistsResult getPlaylistsResult = await YoutubePlaylistService.GetPlaylistsAsync(this.selectedYoutubeAccount.YoutubeAccount);
 
-                foreach (PlaylistApi playlist in playlists)
+                if (getPlaylistsResult.StatusInformation != null)
+                {
+                    this.showPlaylistReceiveError = true;
+                    this.playlistReceiveErrorMessage = TinyHelpers.QuotaExceededString;
+                    this.raisePropertyChanged("ShowPlaylistReceiveError");
+                    this.raisePropertyChanged("PlaylistReceiveErrorMessage");
+                }
+
+                foreach (PlaylistApi playlist in getPlaylistsResult.Playlists)
                 {
                     if (!this.selectedPlaylists.Contains(playlist.Id))
                     {
                         PlaylistSelectionViewModel playlistSelectionViewModel = new PlaylistSelectionViewModel(playlist.Id, playlist.Title, false);
                         playlistSelectionViewModel.PropertyChanged += playlistViewModelPropertyChanged;
-                        this.allPlaylistSelectionViewModels.Add(playlistSelectionViewModel); }
+                        this.allPlaylistSelectionViewModels.Add(playlistSelectionViewModel);
+                    }
                 }
 
                 this.filterObservablePlaylistSelectionViewmodels();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 this.showPlaylistReceiveError = true;
+                this.playlistReceiveErrorMessage = $"Playlists could not be received, exception: {e.ToString()}.";
                 this.raisePropertyChanged("ShowPlaylistReceiveError");
+                this.raisePropertyChanged("PlaylistReceiveErrorMessage");
             }
         }
 
