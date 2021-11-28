@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Shell;
-using System.Windows.Threading;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
@@ -22,7 +19,6 @@ using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
-using Drexel.VidUp.Youtube.Authentication;
 using TraceLevel = Drexel.VidUp.Utils.TraceLevel;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -434,13 +430,14 @@ namespace Drexel.VidUp.UI.ViewModels
             return null;
         }
 
-        private void setDefaultAccountOnContent()
+        private void setDefaultAccountOnContent(ReSerialize reSerialize)
         {
             foreach (Template template in this.templateList)
             {
                 Type uploadType = typeof(Template);
                 FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
                 youtubeAccountFieldInfo.SetValue(template, this.youtubeAccountList[0]);
+                reSerialize.TemplateList = true;
             }
 
             foreach (Playlist playlist in this.playlistList)
@@ -448,6 +445,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 Type uploadType = typeof(Playlist);
                 FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
                 youtubeAccountFieldInfo.SetValue(playlist, this.youtubeAccountList[0]);
+                reSerialize.PlaylistList = true;
             }
 
             List<Upload> allUploads = new List<Upload>();
@@ -472,6 +470,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 Type uploadType = typeof(Upload);
                 FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
                 youtubeAccountFieldInfo.SetValue(upload, this.youtubeAccountList[0]);
+                reSerialize.AllUploads = true;
             }
         }
 
@@ -803,10 +802,7 @@ namespace Drexel.VidUp.UI.ViewModels
             //compatibility code, will be removed in future versions
             if (reSerialize.YoutubeAccountList)
             {
-                this.setDefaultAccountOnContent();
-                reSerialize.AllUploads = true;
-                reSerialize.PlaylistList = true;
-                reSerialize.TemplateList = true;
+                this.setDefaultAccountOnContent(reSerialize);
             }
 
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;

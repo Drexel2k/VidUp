@@ -523,13 +523,14 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
+                //shouldn't happen any more as upload is restarted automatically.
                 //add more helpful information if upload index couldn't be received.
-                if (this.upload.UploadErrorMessage != null && this.upload.UploadErrorMessage.Contains("Getting resume position failed 3 times") && this.upload.UploadErrorMessage.Contains("Could not get range header"))
-                {
-                    string message = "If range header couldn't get 3 times in a row, the upload can't be continued, because the Youtube server doesn't deliver information where to continue the upload. Please restart the upload from beginning by resetting the upload until it is in state \"Ready for Upload\"\n\n";
-                    message += this.upload.UploadErrorMessage;
-                    return message;
-                }
+                //if (this.upload.UploadErrorMessage != null && this.upload.UploadErrorMessage.Contains("Getting resume position failed 3 times") && this.upload.UploadErrorMessage.Contains("Could not get range header"))
+                //{
+                //    string message = "If range header couldn't get 3 times in a row, the upload can't be continued, because the Youtube server doesn't deliver information where to continue the upload. Please restart the upload from beginning by resetting the upload until it is in state \"Ready for Upload\"\n\n";
+                //    message += this.upload.UploadErrorMessage;
+                //    return message;
+                //}
 
                 return this.upload.UploadErrorMessage;
             }

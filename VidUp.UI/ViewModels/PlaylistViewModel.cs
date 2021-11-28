@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Drexel.VidUp.Business;
@@ -12,8 +11,9 @@ using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.PlaylistItem;
-using Drexel.VidUp.Youtube.Video;
+using Drexel.VidUp.Youtube.PlaylistItemService;
+using Drexel.VidUp.Youtube.PlaylistService;
+using Drexel.VidUp.Youtube.VideoService;
 using MaterialDesignThemes.Wpf;
 using Timer = System.Timers.Timer;
 
@@ -342,6 +342,7 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: End autosetting playlists.");
         }
 
+        //todo: rework...
         private async void autoSetPlaylistsAsync(object obj)
         {
             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Start.");
@@ -359,86 +360,208 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             bool success = true;
-            StringBuilder message = new StringBuilder();
-            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Get uploads without playlists but with autoset templates.");
-            Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> uploadsByPlaylistByAccount = this.getPlaylistUploadsWithoutPlaylistMap();
-
-            foreach (KeyValuePair<YoutubeAccount, Dictionary<Playlist, List<Upload>>> accountPlaylists in uploadsByPlaylistByAccount)
+            List<StatusInformation> messages = new List<StatusInformation>();
+            messages.Add(new StatusInformation($"{DateTime.Now} Starting autosetting playlists."));
+            try
             {
-                Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist = accountPlaylists.Value;
-                if (uploadsWithoutPlaylistByPlaylist.Count > 0)
-                {
-                    message.AppendLine($"{DateTime.Now} adding videos to playlists.");
-                    int originalPlaylistCount = uploadsWithoutPlaylistByPlaylist.Count;
-                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
-                    //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
-                    Dictionary<Playlist, List<string>> playlistVideos = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
+                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Get uploads without playlists but with autoset templates.");
 
-                    if (uploadsWithoutPlaylistByPlaylist.Count > 0)
+                //get potential uploads to add to playlists
+                Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> uploadsByPlaylistByAccount = this.getUploadsByPlaylistByAccount();
+
+                if (uploadsByPlaylistByAccount.Count > 0)
+                {
+                    messages.Add(new StatusInformation($"{DateTime.Now} Try adding videos to playlists, potential uploads without playlist found."));
+
+                    foreach (KeyValuePair<YoutubeAccount, Dictionary<Playlist, List<Upload>>> accountPlaylists in uploadsByPlaylistByAccount)
                     {
-                        if (originalPlaylistCount != uploadsWithoutPlaylistByPlaylist.Count)
+                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Get uploads without playlists but with autoset templates.");
+                        messages.Add(new StatusInformation($"{DateTime.Now} Processing account {accountPlaylists.Key.Name}."));
+                        Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist = accountPlaylists.Value;
+
+                        int originalPlaylistCount = uploadsWithoutPlaylistByPlaylist.Count;
+                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if playlists exist on Youtube.");
+
+                        //check if all needed playlists exist on youtube and if not mark them as not existing and remove from playlistUploadsWithoutPlaylistMap
+                        GetPlaylistsAndRemoveNotExistingPlaylistsResult getPlaylistsAndRemoveNotExistingPlaylistsResult = await this.getPlaylistsAndRemoveNotExistingPlaylistsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
+                        if (getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation != null)
                         {
                             success = false;
-                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one playlist was removed on YoutTube.");
-                            message.AppendLine("At least one playlist was removed on Youtube.");
+                            messages.Add(new StatusInformation($"{DateTime.Now}  {getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation.Message}"));
                         }
-
-                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads are already in playlist.");
-                        bool uploadAlreadyInPlaylist = !this.removeUploadsAlreadyInPlaylist(uploadsWithoutPlaylistByPlaylist, playlistVideos);
-
-                        if (uploadsWithoutPlaylistByPlaylist.Count > 0)
+                        else
                         {
-                            if (uploadAlreadyInPlaylist)
+                            StringBuilder tempStringBuilderForChangeLists = new StringBuilder();
+
+                            if (originalPlaylistCount != uploadsWithoutPlaylistByPlaylist.Count)
                             {
                                 success = false;
-                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was already in playlist on Youtube.");
-                                message.AppendLine("At least one video to add to playlist was already in playlist on Youtube.");
-                            }
 
-                            int originalVideoCount = uploadsWithoutPlaylistByPlaylist.Values.Sum(list => list.Count);
-                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on Youtube.");
-                            var videosPublicMap = await this.getPublicVideosAndRemoveNotExisingUploadsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
+                                foreach (Playlist removedPlaylist in getPlaylistsAndRemoveNotExistingPlaylistsResult.RemovedPlaylists)
+                                {
+                                    tempStringBuilderForChangeLists.AppendLine($"{removedPlaylist.Title} ({removedPlaylist.PlaylistId})");
+                                }
+
+                                string removedPlaylistsString = tempStringBuilderForChangeLists.ToString();
+
+                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one playlist was removed on YoutTube:\n{removedPlaylistsString}");
+                                messages.Add(new StatusInformation($"{DateTime.Now} These playlists were removed on Youtube:\n{removedPlaylistsString}"));
+                            }
 
                             if (uploadsWithoutPlaylistByPlaylist.Count > 0)
                             {
-                                if (originalVideoCount != videosPublicMap.Count)
+                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads are already in playlist.");
+
+                                //clear uploadsWithoutPlaylistByPlaylist from uploads already and playlists on youtube and remove playlists where nothing is left to do.
+                                Dictionary<Playlist, List<Upload>> uploadsAlreadyInPlaylistByPlaylist = this.removeUploadsAlreadyInPlaylist(uploadsWithoutPlaylistByPlaylist, getPlaylistsAndRemoveNotExistingPlaylistsResult.PlaylistItemsByPlaylist);
+
+                                if (uploadsAlreadyInPlaylistByPlaylist.Count > 0)
                                 {
                                     success = false;
-                                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was removed on Youtube.");
-                                    message.AppendLine("At least one video to add to playlist was removed on Youtube.");
+
+                                    tempStringBuilderForChangeLists.Clear();
+                                    foreach (KeyValuePair<Playlist, List<Upload>> removedUploads in uploadsAlreadyInPlaylistByPlaylist)
+                                    {
+                                        tempStringBuilderForChangeLists.AppendLine($"{removedUploads.Key.Title} ({removedUploads.Key.PlaylistId})");
+                                        foreach (Upload upload in removedUploads.Value)
+                                        {
+                                            tempStringBuilderForChangeLists.AppendLine($"   {upload.Title} ({upload.VideoId})");
+                                        }
+                                    }
+
+                                    string removedUploadsAlreadyInPlaylistString = tempStringBuilderForChangeLists.ToString();
+
+                                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was already in playlist on Youtube:\n{removedUploadsAlreadyInPlaylistString}");
+                                    messages.Add(new StatusInformation($"{DateTime.Now} These videos were already in playlist on Youtube:\n{removedUploadsAlreadyInPlaylistString}"));
                                 }
 
-                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads is public and add to playlist.");
-                                await this.addUploadsToPlaylistIfPublicAsync(uploadsWithoutPlaylistByPlaylist, videosPublicMap).ConfigureAwait(false);
+                                if (uploadsWithoutPlaylistByPlaylist.Count > 0)
+                                {
+                                    int originalVideoCount = uploadsWithoutPlaylistByPlaylist.Values.Sum(list => list.Count);
+                                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Check if uploads exist on Youtube.");
+
+                                    //clear uploadsWithoutPlaylistByPlaylist also from uploads not on youtube anymore and remove playlists where nothing is left to do.
+                                    GetPublicVideosAndRemoveNotExistingUploadsResult getPublicVideosAndRemoveNotExisingUploadsResult = await this.getPublicVideosAndRemoveNotExistingUploadsAsync(uploadsWithoutPlaylistByPlaylist).ConfigureAwait(false);
+                                    if (getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation != null)
+                                    {
+                                        success = false;
+                                        messages.Add(new StatusInformation($"{DateTime.Now}  {getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation.Message}"));
+                                    }
+                                    else
+                                    {
+                                        if (originalVideoCount != getPublicVideosAndRemoveNotExisingUploadsResult.PublicByVideo.Count)
+                                        {
+                                            success = false;
+
+                                            tempStringBuilderForChangeLists.Clear();
+                                            foreach (KeyValuePair<Playlist, List<Upload>> removedUploads in getPublicVideosAndRemoveNotExisingUploadsResult.UploadsNotExistOnYouTubeByPlaylist)
+                                            {
+                                                tempStringBuilderForChangeLists.AppendLine($"{removedUploads.Key.Title} ({removedUploads.Key.PlaylistId})");
+                                                foreach (Upload upload in removedUploads.Value)
+                                                {
+                                                    tempStringBuilderForChangeLists.AppendLine($"   {upload.Title} ({upload.VideoId})");
+                                                }
+                                            }
+
+                                            string removedUploadsDeletedOnYoutubeString = tempStringBuilderForChangeLists.ToString();
+
+                                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was removed on Youtube:\n{removedUploadsDeletedOnYoutubeString}");
+                                            messages.Add(new StatusInformation($"{DateTime.Now} These videos were removed on Youtube.\n{removedUploadsDeletedOnYoutubeString}"));
+                                        }
+
+                                        if (uploadsWithoutPlaylistByPlaylist.Count > 0)
+                                        {
+                                            if (getPublicVideosAndRemoveNotExisingUploadsResult.PublicByVideo.All(upl => upl.Value == false))
+                                            {
+                                                messages.Add(new StatusInformation($"{DateTime.Now} All videos without playlist are still private."));
+                                            }
+                                            else
+                                            {
+                                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Add public videos to playlist.");
+                                                AddUploadsToPlaylistIfPublicResult addUploadsToPlaylistIfPublicResult = await this.addUploadsToPlaylistIfPublicAsync(uploadsWithoutPlaylistByPlaylist, getPublicVideosAndRemoveNotExisingUploadsResult.PublicByVideo).ConfigureAwait(false);
+                                                if (addUploadsToPlaylistIfPublicResult.StatusInformation != null)
+                                                {
+                                                    success = false;
+                                                    messages.Add(new StatusInformation($"{DateTime.Now}  {getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation.Message}"));
+                                                }
+
+                                                if (addUploadsToPlaylistIfPublicResult.UploadsNotAddedByPlaylist.Count > 0)
+                                                {
+                                                    success = false;
+
+                                                    tempStringBuilderForChangeLists.Clear();
+                                                    foreach (KeyValuePair<Playlist, List<Upload>> notAddedUploads in addUploadsToPlaylistIfPublicResult.UploadsNotAddedByPlaylist)
+                                                    {
+                                                        tempStringBuilderForChangeLists.AppendLine($"{notAddedUploads.Key.Title} ({notAddedUploads.Key.PlaylistId})");
+                                                        foreach (Upload upload in notAddedUploads.Value)
+                                                        {
+                                                            tempStringBuilderForChangeLists.AppendLine($"   {upload.Title} ({upload.VideoId})");
+                                                        }
+                                                    }
+
+                                                    string notAddedUploadsToPlaylistsString = tempStringBuilderForChangeLists.ToString();
+
+                                                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload could not be added to playlist:\n{notAddedUploadsToPlaylistsString}");
+                                                    messages.Add(new StatusInformation($"{DateTime.Now} These videos could not be added to playlist:\n{notAddedUploadsToPlaylistsString}"));
+                                                }
+
+                                                if (addUploadsToPlaylistIfPublicResult.UploadsAddedByPlaylist.Count > 0)
+                                                {
+                                                    tempStringBuilderForChangeLists.Clear();
+                                                    foreach (KeyValuePair<Playlist, List<Upload>> addedUploads in addUploadsToPlaylistIfPublicResult.UploadsAddedByPlaylist)
+                                                    {
+                                                        tempStringBuilderForChangeLists.AppendLine($"{addedUploads.Key.Title} ({addedUploads.Key.PlaylistId})");
+                                                        foreach (Upload upload in addedUploads.Value)
+                                                        {
+                                                            tempStringBuilderForChangeLists.AppendLine($"   {upload.Title} ({upload.VideoId})");
+                                                        }
+                                                    }
+
+                                                    string addedUploadsToPlaylistsString = tempStringBuilderForChangeLists.ToString();
+
+                                                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Added these videos to playlists:\n{addedUploadsToPlaylistsString}");
+                                                    messages.Add(new StatusInformation($"{DateTime.Now} Added these videos to playlists:\n{addedUploadsToPlaylistsString}"));
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            success = false;
+                                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No uploads left after public/exist check on Youtube.");
+                                            messages.Add(new StatusInformation($"{DateTime.Now} All videos to add to playlists were removed on Youtube."));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    success = false;
+                                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: All videos to add to playlists were already in playlist.");
+                                    messages.Add(new StatusInformation($"{DateTime.Now} All videos to add to playlists were already in playlist."));
+                                }
+
+                                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
                             }
                             else
                             {
                                 success = false;
-                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No uploads left after public/exist check on Youtube.");
-                                message.AppendLine("All videos to add to playlists were removed on Youtube.");
+                                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after availability check on Youtube.");
+                                messages.Add(new StatusInformation($"{DateTime.Now} All playlists with videos to add were removed on Youtube."));
                             }
                         }
-                        else
-                        {
-                            success = false;
-                            message.AppendLine("All videos to add to playlists were already in playlist.");
-                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after uploads already in playlist check on Youtube.");
-                        }
-
-                        JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                    }
-                    else
-                    {
-                        success = false;
-                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No playlists left after availability check on Youtube.");
-                        message.AppendLine("All playlists with videos to add were removed on Youtube. ");
                     }
                 }
                 else
                 {
-                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Nothing to do.");
-                    message.AppendLine($"{DateTime.Now} no videos to add to playlists.");
+                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: No videos for autosetting playlists without playlist found.");
+                    messages.Add(new StatusInformation($"{DateTime.Now} No videos to add to playlists."));
                 }
+
+            }
+            catch (Exception e)
+            {
+                success = false;
+                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Unexpected Exception: {e.ToString()}.");
+                messages.Add(new StatusInformation($"{DateTime.Now} Something went wrong on autosetting playlists: {e.ToString()}."));
             }
 
             Settings.Instance.UserSettings.LastAutoAddToPlaylist = DateTime.Now;
@@ -451,18 +574,37 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.autoSetPlaylistTimer.Stop();
                 //first call after constructor the timer can be less than interval.
                 this.autoSetPlaylistTimer.Interval = this.intervalInSeconds * 1000;
-                message.AppendLine($"Next auto set playlists: {DateTime.Now.AddMilliseconds(this.autoSetPlaylistTimer.Interval)}."); 
+                messages.Add(new StatusInformation($"{DateTime.Now} Next auto set playlists: {DateTime.Now.AddMilliseconds(this.autoSetPlaylistTimer.Interval)}.")); 
                 this.autoSetPlaylistTimer.Start();
+            }
+            else
+            {
+                Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Autosetting playlists is disabled.");
+                messages.Add(new StatusInformation($"{DateTime.Now} Autosetting playlists is disabled."));
             }
 
             this.autoSettingPlaylists = false;
             this.raisePropertyChanged("AutoSettingPlaylists");
-            EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(success, message.ToString().TrimEnd('\r', '\n')));
+
+            StringBuilder message = new StringBuilder();
+            if (messages.Any(messageInternal => messageInternal.IsQuotaError))
+            {
+                message.AppendLine($"{TinyHelpers.QuotaExceededString}");
+            }
+
+            foreach (StatusInformation statusInformation in messages)
+            {
+                message.AppendLine(statusInformation.Message);
+            }
+
+            EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(success, TinyHelpers.TrimLineBreakAtEnd(message.ToString())));
 
             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: End.");
         }
 
-        private Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> getPlaylistUploadsWithoutPlaylistMap()
+
+        //get uploads without playlists and where template has SetPlaylistAfterPublication active
+        private Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> getUploadsByPlaylistByAccount()
         {
             Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>> uploadsByPlaylistByAccount = new Dictionary<YoutubeAccount, Dictionary<Playlist, List<Upload>>>();
             foreach (Template template in this.templateList)
@@ -497,31 +639,49 @@ namespace Drexel.VidUp.UI.ViewModels
             return uploadsByPlaylistByAccount;
         }
 
-        private async Task<Dictionary<Business.Playlist, List<string>>> getPlaylistsAndRemoveNotExistingPlaylistsAsync(Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist)
+        //gets all item/video ids of the playlists and checks if playlists exists on youtube
+        //and removes playlists which don't exist on youtube
+        private async Task<GetPlaylistsAndRemoveNotExistingPlaylistsResult> getPlaylistsAndRemoveNotExistingPlaylistsAsync(Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist)
         {
-            Dictionary<Playlist, List<string>> playlistVideos = await YoutubePlaylistItemService.GetPlaylistsContentAsync(uploadsWithoutPlaylistByPlaylist.Keys.ToList()).ConfigureAwait(false);
-            if (uploadsWithoutPlaylistByPlaylist.Count != playlistVideos.Count)
+            GetPlaylistsAndRemoveNotExistingPlaylistsResult result = new GetPlaylistsAndRemoveNotExistingPlaylistsResult();
+
+            GetPlaylistsPlaylistItemsResult getPlaylistsPlaylistItemsResult = await YoutubePlaylistItemService.GetPlaylistsPlaylistItemsAsync(uploadsWithoutPlaylistByPlaylist.Keys.ToList()).ConfigureAwait(false);
+            if (getPlaylistsPlaylistItemsResult.StatusInformation != null)
             {
-                KeyValuePair<Business.Playlist, List<Upload>>[] missingPlaylists = uploadsWithoutPlaylistByPlaylist
-                    .Where(kvp => !playlistVideos.ContainsKey(kvp.Key)).ToArray();
-                foreach (KeyValuePair<Business.Playlist, List<Upload>> playlistUploadsMap in missingPlaylists)
+                result.StatusInformation = getPlaylistsPlaylistItemsResult.StatusInformation;
+                return result;
+            }
+
+            //key are distinct, so no distinct is need here like in GetPlaylistsPlaylistItemsAsync
+            if (uploadsWithoutPlaylistByPlaylist.Keys.Count != getPlaylistsPlaylistItemsResult.PlaylistItemsByPlaylist.Count)
+            {
+                KeyValuePair<Playlist, List<Upload>>[] missingPlaylists = uploadsWithoutPlaylistByPlaylist
+                    .Where(kvp => !getPlaylistsPlaylistItemsResult.PlaylistItemsByPlaylist.ContainsKey(kvp.Key)).ToArray();
+
+                List<Playlist> removedPlaylists = new List<Playlist>();
+                foreach (KeyValuePair<Playlist, List<Upload>> playlistUploadsMap in missingPlaylists)
                 {
                     playlistUploadsMap.Key.NotExistsOnYoutube = true;
                     uploadsWithoutPlaylistByPlaylist.Remove(playlistUploadsMap.Key);
+                    removedPlaylists.Add(playlistUploadsMap.Key);
                 }
 
+                result.RemovedPlaylists = removedPlaylists;
                 JsonSerializationContent.JsonSerializer.SerializePlaylistList();
             }
 
-            return playlistVideos;
+            result.PlaylistItemsByPlaylist = getPlaylistsPlaylistItemsResult.PlaylistItemsByPlaylist;
+            return result;
         }
 
-        private bool removeUploadsAlreadyInPlaylist(Dictionary<Playlist, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<Playlist, List<string>> playlistVideos)
+
+        //removes uploads without playlist already in playlists and removes playlists where are no uploads without playlist left
+        private Dictionary<Playlist, List<Upload>> removeUploadsAlreadyInPlaylist(Dictionary<Playlist, List<Upload>> uploadsByPlaylist, Dictionary<Playlist, List<string>> playlistVideos)
         {
-            bool allVideosNotInPlaylist = true;
+            Dictionary<Playlist, List<Upload>> uploadsAlreadyInPlaylistByPlaylist = new Dictionary<Playlist, List<Upload>>();
             //check if videos are already in playlist on YT.
             List<Playlist> noUploadsLeftPlaylists = new List<Playlist>();
-            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
+            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in uploadsByPlaylist)
             {
                 List<Upload> uploadsToRemove = new List<Upload>();
                 foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
@@ -530,12 +690,16 @@ namespace Drexel.VidUp.UI.ViewModels
                     {
                         upload.Playlist = playlistVideosWithoutPlaylist.Key;
                         uploadsToRemove.Add(upload);
-                    }
-                }
 
-                if (uploadsToRemove.Count > 0)
-                {
-                    allVideosNotInPlaylist = false;
+                        List<Upload> uploads;
+                        if (!uploadsAlreadyInPlaylistByPlaylist.TryGetValue(playlistVideosWithoutPlaylist.Key, out uploads))
+                        {
+                            uploads = new List<Upload>();
+                            uploadsAlreadyInPlaylistByPlaylist.Add(playlistVideosWithoutPlaylist.Key, uploads);
+                        }
+
+                        uploads.Add(upload);
+                    }
                 }
 
                 playlistVideosWithoutPlaylist.Value.RemoveAll(upload => uploadsToRemove.Contains(upload));
@@ -547,63 +711,128 @@ namespace Drexel.VidUp.UI.ViewModels
 
             foreach (Playlist playlist in noUploadsLeftPlaylists)
             {
-                playlistUploadsWithoutPlaylistMap.Remove(playlist);
+                uploadsByPlaylist.Remove(playlist);
             }
 
-            return allVideosNotInPlaylist;
+            return uploadsAlreadyInPlaylistByPlaylist;
         }
 
-        private async Task<Dictionary<string, bool>> getPublicVideosAndRemoveNotExisingUploadsAsync(Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist)
+        private async Task<GetPublicVideosAndRemoveNotExistingUploadsResult> getPublicVideosAndRemoveNotExistingUploadsAsync(Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist)
         {
-            List<Playlist> noUploadsLeftPlaylists = new List<Playlist>();
-            Dictionary<string, bool> videosPublicMap = await YoutubeVideoService.IsPublicAsync(uploadsWithoutPlaylistByPlaylist
-                .SelectMany(kvp => kvp.Value).Select(upload => upload.VideoId).ToList(), playlist.YoutubeAccount).ConfigureAwait(false);
+            GetPublicVideosAndRemoveNotExistingUploadsResult result = new GetPublicVideosAndRemoveNotExistingUploadsResult();
 
-            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in uploadsWithoutPlaylistByPlaylist)
+            List<Playlist> noUploadsLeftPlaylists = new List<Playlist>();
+
+            //transform into videos by account
+            Dictionary<YoutubeAccount, List<string>> videoIdsByAccount = new Dictionary<YoutubeAccount, List<string>>();
+            foreach (KeyValuePair<Playlist, List<Upload>> uploadsByPlaylist in uploadsWithoutPlaylistByPlaylist)
             {
-                List<Upload> notExistingUploadsOnYoutube = new List<Upload>();
-                foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
+                List<string> videoIds;
+                if (!videoIdsByAccount.TryGetValue(uploadsByPlaylist.Key.YoutubeAccount, out videoIds))
                 {
-                    //if video id is not included in response it was deleted on YT.
-                    if (!videosPublicMap.ContainsKey(upload.VideoId))
+                    videoIds = new List<string>();
+                    videoIdsByAccount.Add(uploadsByPlaylist.Key.YoutubeAccount, videoIds);
+                }
+
+                videoIds.AddRange(uploadsByPlaylist.Value.Select(upload => upload.VideoId));
+            }
+
+            foreach (KeyValuePair<YoutubeAccount, List<string>> accountVideoIds in videoIdsByAccount)
+            {
+                IsPublicResult isPublicResult = await YoutubeVideoService.IsPublicAsync(accountVideoIds.Key, accountVideoIds.Value).ConfigureAwait(false);
+                if (isPublicResult.StatusInformation != null)
+                {
+                    result.StatusInformation = isPublicResult.StatusInformation;
+                    return result;
+                }
+
+                foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in uploadsWithoutPlaylistByPlaylist)
+                {
+
+                    foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
                     {
-                        upload.NotExistsOnYoutube = true;
-                        notExistingUploadsOnYoutube.Add(upload);
+                        //if video id is not included in response it was deleted on YT.
+                        if (!isPublicResult.IsPublicByVideoId.ContainsKey(upload.VideoId))
+                        {
+                            upload.NotExistsOnYoutube = true;
+
+                            List<Upload> playlistUploads;
+                            if (!result.UploadsNotExistOnYouTubeByPlaylist.TryGetValue(playlistVideosWithoutPlaylist.Key, out playlistUploads))
+                            {
+                                playlistUploads = new List<Upload>();
+                                result.UploadsNotExistOnYouTubeByPlaylist.Add(playlistVideosWithoutPlaylist.Key, playlistUploads);
+                            }
+
+                            playlistUploads.Add(upload);
+                        }
+                        else
+                        {
+                            result.PublicByVideo.Add(upload.VideoId, isPublicResult.IsPublicByVideoId[upload.VideoId]);
+                        }
+                    }
+
+                    playlistVideosWithoutPlaylist.Value.RemoveAll(upload => upload.NotExistsOnYoutube);
+                    if (playlistVideosWithoutPlaylist.Value.Count <= 0)
+                    {
+                        noUploadsLeftPlaylists.Add(playlistVideosWithoutPlaylist.Key);
                     }
                 }
 
-                playlistVideosWithoutPlaylist.Value.RemoveAll(upload => upload.NotExistsOnYoutube);
-                if (playlistVideosWithoutPlaylist.Value.Count <= 0)
+                foreach (Playlist playlist in noUploadsLeftPlaylists)
                 {
-                    noUploadsLeftPlaylists.Add(playlistVideosWithoutPlaylist.Key);
+                    uploadsWithoutPlaylistByPlaylist.Remove(playlist);
                 }
             }
 
-            foreach (Playlist playlist in noUploadsLeftPlaylists)
-            {
-                uploadsWithoutPlaylistByPlaylist.Remove(playlist);
-            }
-
-            return videosPublicMap;
+            return result;
         }
 
-        private async Task addUploadsToPlaylistIfPublicAsync(Dictionary<Playlist, List<Upload>> playlistUploadsWithoutPlaylistMap, Dictionary<string, bool> videosPublicMap)
+        private async Task<AddUploadsToPlaylistIfPublicResult> addUploadsToPlaylistIfPublicAsync(Dictionary<Playlist, List<Upload>> uploadsWithoutPlaylistByPlaylist, Dictionary<string, bool> videosPublicMap)
         {
+            AddUploadsToPlaylistIfPublicResult result = new AddUploadsToPlaylistIfPublicResult();
 
-            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in playlistUploadsWithoutPlaylistMap)
+            foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in uploadsWithoutPlaylistByPlaylist)
             {
                 foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
                 {
                     if (videosPublicMap[upload.VideoId])
                     {
                         upload.Playlist = playlistVideosWithoutPlaylist.Key;
-                        if (!await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false))
+                        AddToPlaylistResult addToPlaylistResult = await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
+                        if (addToPlaylistResult.StatusInformation != null)
+                        {
+                            result.StatusInformation = addToPlaylistResult.StatusInformation;
+                            return result;
+                        }
+
+                        if (!addToPlaylistResult.Success)
                         {
                             upload.Playlist = null;
+                            List<Upload> notAddedUploads;
+                            if (!result.UploadsNotAddedByPlaylist.TryGetValue(playlistVideosWithoutPlaylist.Key, out notAddedUploads))
+                            {
+                                notAddedUploads = new List<Upload>();
+                                result.UploadsNotAddedByPlaylist.Add(playlistVideosWithoutPlaylist.Key, notAddedUploads);
+                            }
+
+                            notAddedUploads.Add(upload);
+                        }
+                        else
+                        {
+                            List<Upload> addedUploads;
+                            if (!result.UploadsAddedByPlaylist.TryGetValue(playlistVideosWithoutPlaylist.Key, out addedUploads))
+                            {
+                                addedUploads = new List<Upload>();
+                                result.UploadsAddedByPlaylist.Add(playlistVideosWithoutPlaylist.Key, addedUploads);
+                            }
+
+                            addedUploads.Add(upload);
                         }
                     }
                 }
             }
+
+            return result;
         }
 
         private void setAutoSetPlaylistsTimer()

@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Youtube.Authentication;
+using Drexel.VidUp.Youtube.AuthenticationService;
 
 namespace Drexel.VidUp.Youtube
 {

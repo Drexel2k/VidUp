@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.Authentication;
+using Drexel.VidUp.Youtube.AuthenticationService;
 using MaterialDesignThemes.Wpf;
 
 
@@ -113,7 +111,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
 
                 this.raisePropertyChanged("SelectedYoutubeAccountName");
-                this.raisePropertyChanged("SelectedYoutubeAccountFilePath");
+
             }
         }
 
@@ -298,31 +296,11 @@ namespace Drexel.VidUp.UI.ViewModels
             bool result = (bool)await DialogHost.Show(view, "RootDialog");
             if (result)
             {
-                string finalName;
                 NewYoutubeAccountViewModel data = (NewYoutubeAccountViewModel)view.DataContext;
-                string fileName = string.Concat(data.Name.Split(Path.GetInvalidFileNameChars()));
-
-                //is needed if file aready exists as the original name shall not be overwritten including the suffix
-                //as long as counting up
-
-                if (string.IsNullOrWhiteSpace(fileName))
-                {
-                    fileName = "default";
-                }
-
-                string newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{fileName}");
-
-                int index = 1;
-                while (File.Exists(newFilePath))
-                {
-                    newFilePath = Path.Combine(Settings.Instance.StorageFolder, $"uploadrefreshtoken_{fileName}{index}");
-                    index++;
-                }
-
-                File.Create(newFilePath).Dispose();
+                
                 YoutubeAccount youtubeAccount = new YoutubeAccount(data.Name);
-                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
                 this.youtubeAccounts.AddYoutubeAccount(youtubeAccount);
+                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
 
                 this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(youtubeAccount);
             }

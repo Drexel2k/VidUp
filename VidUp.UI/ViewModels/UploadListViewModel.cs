@@ -615,6 +615,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.uploadStatus = UploadStatus.Uploading;
             bool resume = this.resumeUploads;
+
+            //AutoResetEvent is used to prevent the UploadStats
+            //from updating in the time between one upload
+            //finished and the next upload has not yet started
+            //as this can lead to unwanted behaviour in the UploadStats...
             AutoResetEvent resetEvent = new AutoResetEvent(true);
             UploadStats uploadStats = new UploadStats(resetEvent);
             this.onUploadStarted(new UploadStartedEventArgs(uploadStats));
@@ -763,7 +768,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 predicates[1] = upload => upload.Template == this.resetAttributeSelectedTemplate.Template;
             }
 
-            List<Upload> uploads = this.uploadList.Uploads.Where(upload => PredicateCombiner.And(predicates)(upload)).ToList();
+            List<Upload> uploads = this.uploadList.Uploads.Where(upload => TinyHelpers.PredicateAnd(predicates)(upload)).ToList();
 
             //set all puplish at dates to null so that existing values don't block potential dates
             if (this.resetAttributeSelectedAttribute == UploadTemplateAttribute.All ||
@@ -987,7 +992,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 predicates[1] = upload => upload.Template == this.deleteSelectedTemplate.Template;
             }
 
-            Predicate<Upload> combinedPredicate = PredicateCombiner.And(predicates);
+            Predicate<Upload> combinedPredicate = TinyHelpers.PredicateAnd(predicates);
             this.deleteUploads(combinedPredicate);
             Tracer.Write($"UploadListViewModel.deleteUploads: End.");
         }
@@ -1065,7 +1070,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 predicates[1] = upload => upload.Template == this.resetWithSelectedTemplate.Template;
             }
 
-            List<Upload> uploads = this.uploadList.Uploads.Where(upload => PredicateCombiner.And(predicates)(upload)).ToList();
+            List<Upload> uploads = this.uploadList.Uploads.Where(upload => TinyHelpers.PredicateAnd(predicates)(upload)).ToList();
 
             UplStatus resetToStatus = (UplStatus) Enum.Parse(typeof(UplStatus), this.resetToSelectedUploadStatus);
             foreach (Upload upload in uploads)

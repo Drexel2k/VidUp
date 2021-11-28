@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Youtube.Playlist;
+using Drexel.VidUp.Youtube.PlaylistService;
 
 
 namespace Drexel.VidUp.UI.ViewModels

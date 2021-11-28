@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Utils;
-using Drexel.VidUp.Youtube.PlaylistItem;
-using Drexel.VidUp.Youtube.Thumbnail;
-using Drexel.VidUp.Youtube.VideoUpload;
+using Drexel.VidUp.Youtube.PlaylistItemService;
+using Drexel.VidUp.Youtube.ThumbnailService;
+using Drexel.VidUp.Youtube.VideoUploadService;
 
 
 namespace Drexel.VidUp.Youtube
@@ -146,7 +146,7 @@ namespace Drexel.VidUp.Youtube
             }
 
             this.uploadStats.Initialize(this.uploadList, resumeUploads);
-            Upload upload = this.uploadList.GetUpload(PredicateCombiner.Or(predicates.ToArray()));
+            Upload upload = this.uploadList.GetUpload(TinyHelpers.PredicateOr(predicates.ToArray()));
             if (upload == null)
             {
                 return UploaderResult.NothingDone;
@@ -201,13 +201,20 @@ namespace Drexel.VidUp.Youtube
                         break;
                     }
 
-                    upload = this.uploadList.GetUpload(
-                        PredicateCombiner.And(
-                            new Predicate<Upload>[]
-                            {
-                                PredicateCombiner.Or(predicates.ToArray()),
-                                upload2 => !uploadsOfSession.Contains(upload2)
-                            }));
+                    if (!upload.ErrorsContainQuotaError)
+                    {
+                        upload = this.uploadList.GetUpload(
+                            TinyHelpers.PredicateAnd(
+                                new Predicate<Upload>[]
+                                {
+                                    TinyHelpers.PredicateOr(predicates.ToArray()),
+                                    upload2 => !uploadsOfSession.Contains(upload2)
+                                }));
+                    }
+                    else
+                    {
+                        upload = null;
+                    }
                 }
             }
 

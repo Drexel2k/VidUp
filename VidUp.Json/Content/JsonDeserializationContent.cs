@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -7,6 +8,8 @@ using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
+using TraceLevel = System.Diagnostics.TraceLevel;
 
 namespace Drexel.VidUp.Json.Content
 {
@@ -64,12 +67,12 @@ namespace Drexel.VidUp.Json.Content
         private bool deserializeYoutubeAccountList()
         {
             Tracer.Write($"JsonDeserializationContent.deserializeYoutubeAccountList: Start.");
-            if (!File.Exists(this.playlistListFilePath))
+            if (!File.Exists(this.youtubeAccountListFilePath))
             {
                 DeserializationRepositoryContent.YoutubeAccountList = new YoutubeAccountList(null);
-                DeserializationRepositoryContent.YoutubeAccountList.AddYoutubeAccount(new YoutubeAccount());
+                DeserializationRepositoryContent.YoutubeAccountList.AddYoutubeAccount(new YoutubeAccount("Default"));
                 Tracer.Write($"JsonDeserializationContent.deserializeYoutubeAccountList: Adding default account.");
-                return false;
+                return true;
             }
 
 

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Security;
+using System.Text;
 using System.Text.RegularExpressions;
 using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
@@ -40,7 +39,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private DateTime? publishAt;
         [JsonProperty]
-        private string uploadErrorMessage;
+        private List<StatusInformation> uploadErrors;
         [JsonProperty]
         private string title;
         [JsonProperty]
@@ -148,13 +147,13 @@ namespace Drexel.VidUp.Business
                     this.bytesSent = 0;
                     this.uploadStart = null;
                     this.uploadEnd = null;
-                    this.uploadErrorMessage = null;
+                    this.uploadErrors.Clear();
                 }
 
                 if (value == UplStatus.Uploading)
                 {
                     this.uploadStart = DateTime.Now;
-                    this.uploadErrorMessage = null;
+                    this.uploadErrors.Clear();
                 }
 
                 if (value == UplStatus.Finished)
@@ -164,7 +163,7 @@ namespace Drexel.VidUp.Business
 
                 if (value == UplStatus.Stopped)
                 {
-                    this.uploadErrorMessage = null;
+                    this.uploadErrors.Clear();
                 }
 
                 this.LastModified = DateTime.Now;
@@ -265,12 +264,18 @@ namespace Drexel.VidUp.Business
         { 
             get
             {
-                return this.uploadErrorMessage;
-            }
-            set
-            {
-                this.uploadErrorMessage = value;
-                this.LastModified = DateTime.Now;
+                StringBuilder stringBuilder = new StringBuilder();
+                if (this.ErrorsContainQuotaError)
+                {
+                    stringBuilder.AppendLine($"{TinyHelpers.QuotaExceededString}");
+                }
+
+                foreach (StatusInformation uploadError in this.uploadErrors)
+                {
+                    stringBuilder.AppendLine(uploadError.Message); 
+                }
+
+                return TinyHelpers.TrimLineBreakAtEnd(stringBuilder.ToString());
             }
         }
 
@@ -446,10 +451,15 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        public bool ErrorsContainQuotaError
+        {
+            get => this.uploadErrors.Any(error => error.IsQuotaError == true);
+        }
+
         [JsonConstructor]
         private Upload()
         {
-            
+            this.uploadErrors = new List<StatusInformation>();
         }
 
         public Upload(string filePath, Template template)
@@ -496,6 +506,7 @@ namespace Drexel.VidUp.Business
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
             this.tags = new List<string>();
+            this.uploadErrors = new List<StatusInformation>();
             this.visibility = Visibility.Private;
 
             //to ensure at least file name is set as title.
@@ -524,6 +535,19 @@ namespace Drexel.VidUp.Business
             this.tags.AddRange(tags);
             this.LastModified = DateTime.Now;
             this.verifyAndSetUploadStatus();
+        }
+
+        public void AddUploadError(StatusInformation statusInformation)
+        {
+            if (statusInformation != null)
+            {
+                this.uploadErrors.Add(statusInformation);
+            }
+        }
+
+        public void ClearUploadErrors()
+        {
+            this.uploadErrors.Clear();
         }
 
         public void CopyTemplateValues()
