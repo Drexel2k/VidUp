@@ -358,6 +358,7 @@ namespace Drexel.VidUp.Business
         private Template()
         {
         }
+
         //for fake templates(e.g. All and None Templates for filter)
         public Template(string name)
         {

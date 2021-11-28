@@ -43,9 +43,9 @@ namespace Drexel.VidUp.Test
             mainWindowViewModel.TabNo = 1;
             TemplateImageFileHandlingTests.templateViewModel = (TemplateViewModel) mainWindowViewModel.CurrentViewModel;
 
-            TemplateImageFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, TemplateImageFileHandlingTests.t1RootFolder, null, TemplateImageFileHandlingTests.templateList);
-            TemplateImageFileHandlingTests.t2 = new Template("T2", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList);
-            TemplateImageFileHandlingTests.t3 = new Template("T3", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList);
+            TemplateImageFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, TemplateImageFileHandlingTests.t1RootFolder, null, TemplateImageFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            TemplateImageFileHandlingTests.t2 = new Template("T2", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            TemplateImageFileHandlingTests.t3 = new Template("T3", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
 
             TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t1);
             TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t2);

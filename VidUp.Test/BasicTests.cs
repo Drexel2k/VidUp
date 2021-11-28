@@ -117,9 +117,9 @@ namespace Drexel.VidUp.Test
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel) mainWindowViewModel.CurrentViewModel;
             
-            List<Upload> uploads = new List<Upload>();
-            uploads.Add(new Upload(BasicTests.video1TargetFilePath));
-            uploadListViewModel.AddUploads(uploads);
+            List<string> files = new List<string>();
+            files.Add(BasicTests.video1TargetFilePath);
+            uploadListViewModel.AddFiles(files.ToArray());
 
             Assert.IsTrue(uploadList.UploadCount == 1);
             Assert.IsTrue(uploadList.GetUpload(0).FilePath == BasicTests.video1TargetFilePath);
@@ -188,7 +188,7 @@ namespace Drexel.VidUp.Test
 
             mainWindowViewModel.TabNo = 1;
             TemplateViewModel templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;
-            templateViewModel.AddTemplate(new Template(BasicTests.testTemplateName, null, TemplateMode.FolderBased, BasicTests.t1RootFolder, null, templateList));
+            templateViewModel.AddTemplate(new Template(BasicTests.testTemplateName, null, TemplateMode.FolderBased, BasicTests.t1RootFolder, null, templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount));
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 1);
@@ -247,7 +247,7 @@ namespace Drexel.VidUp.Test
 
             mainWindowViewModel.TabNo = 2;
             PlaylistViewModel playlistViewModel = (PlaylistViewModel)mainWindowViewModel.CurrentViewModel;
-            playlistViewModel.AddPlaylist(new Playlist(BasicTests.testPlaylistId, BasicTests.testPlaylistName));
+            playlistViewModel.AddPlaylist(new Playlist(BasicTests.testPlaylistId, BasicTests.testPlaylistName, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount));
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 0);
@@ -302,10 +302,11 @@ namespace Drexel.VidUp.Test
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
-            List<Upload> uploads = new List<Upload>();
-            Upload upload = new Upload(BasicTests.video2TargetFilePath);
-            uploads.Add(upload);
-            uploadListViewModel.AddUploads(uploads);
+            List<string> files = new List<string>();
+            files.Add(BasicTests.video2TargetFilePath);
+            uploadListViewModel.AddFiles(files.ToArray());
+
+            Upload upload = uploadList.Uploads[0];
 
             Assert.IsTrue(upload.Template == null);
             Assert.IsTrue(upload.Description == null);
@@ -391,10 +392,11 @@ namespace Drexel.VidUp.Test
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
-            List<Upload> uploads = new List<Upload>();
-            Upload upload = new Upload(BasicTests.video1TargetFilePath);
-            uploads.Add(upload);
-            uploadListViewModel.AddUploads(uploads);
+            List<string> files = new List<string>();
+            files.Add(BasicTests.video1TargetFilePath);
+            uploadListViewModel.AddFiles(files.ToArray());
+            
+            Upload upload = uploadList.Uploads[0];
 
             Assert.IsTrue(upload.Template == templateList.GetTemplate(0));
             Assert.IsTrue(upload.Description == BasicTests.testTemplateDescription);
@@ -487,14 +489,14 @@ namespace Drexel.VidUp.Test
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
-            List<Upload> uploads = new List<Upload>();
-            
-            Upload uploadWithoutTemplateMatch = new Upload(BasicTests.video2TargetFilePath);
-            uploads.Add(uploadWithoutTemplateMatch);
-            Upload uploadWithTemplateMatch = new Upload(BasicTests.video1TargetFilePath);
-            uploads.Add(uploadWithTemplateMatch);
+            List<string> files = new List<string>();
+            files.Add(BasicTests.video2TargetFilePath);
+            files.Add(BasicTests.video1TargetFilePath);
+            uploadListViewModel.AddFiles(files.ToArray());
 
-            uploadListViewModel.AddUploads(uploads);
+            //files are sorted by name on adding, there fore the sequence is different now.
+            Upload uploadWithoutTemplateMatch = uploadList.Uploads[1];
+            Upload uploadWithTemplateMatch = uploadList.Uploads[0];
 
             Assert.IsTrue(uploadWithoutTemplateMatch.Template == null);
             Assert.IsTrue(uploadWithoutTemplateMatch.Description == null);

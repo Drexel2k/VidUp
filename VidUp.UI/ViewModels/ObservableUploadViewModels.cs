@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -49,6 +50,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 uploadList.CollectionChanged += uploadListCollectionChanged;
             }
+        }
+
+        //for testing
+        public UploadViewModel this [int index]
+        {
+            get => this.uploadViewModels[index];
         }
 
         private void uploadListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
