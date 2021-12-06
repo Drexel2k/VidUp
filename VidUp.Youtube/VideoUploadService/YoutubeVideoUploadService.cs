@@ -356,7 +356,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             }
                             catch (Exception e)
                             {
-                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not get range header: {e.Message}.");
+                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not get range header: {e.GetType().ToString()}: {e.Message}.");
                                 Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header exception: {e.ToString()}.");
 
                                 if (requestTry >= 3)
@@ -487,9 +487,10 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 }
                 catch (Exception e)
                 {
+                    //HttpException above !message.IsSuccessStatusCode...
                     if (!(e is HttpRequestException))
                     {
-                        upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed: {e.Message}."));
+                        upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed: {e.GetType().ToString()}: {e.Message}."));
                         Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Exception: {e.ToString()}.");
                     }
 

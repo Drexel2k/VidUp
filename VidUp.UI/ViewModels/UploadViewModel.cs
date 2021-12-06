@@ -773,6 +773,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadStatusChangedSubscription = EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
             this.resumableSessionUriChangedSubscription = EventAggregator.Instance.Subscribe<ResumableSessionUriChangedMessage>(this.resumableSessionUriChanged);
             this.errorMessageChangedSubscription = EventAggregator.Instance.Subscribe<ErrorMessageChangedMessage>(this.errorMessageChanged);
+            this.publishAtChangedSubscription = EventAggregator.Instance.Subscribe<PublishAtChangedMessage>(this.publishAtChanged);
         }
 
         private void attributeReset(AttributeResetMessage attributeResetMessage)
