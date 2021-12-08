@@ -37,27 +37,27 @@
 
                     <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,7,5" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
-                            <StackPanel Width="200">
-                                <Button  Command="{Binding YoutubeAccountAuthenticateCommand}" Padding="0" Margin="0">
+                            <StackPanel>
+                                <Button  Command="{Binding YoutubeAccountAuthenticateCommand}" Padding="0" Margin="0" BorderThickness="0">
                                     <Button.Style>
                                         <Style TargetType="{x:Type Button}">
                                             <Setter Property="Content">
                                                 <Setter.Value>
-                                                    <Image Source="../Images/googlesignin.png" />
+                                                    <Image Source="../Images/googlesignin.png" Margin="0" />
                                                 </Setter.Value>
                                             </Setter>
                                             <Style.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter Property="Content">
                                                         <Setter.Value>
-                                                            <Image Source="../Images/googlesigninfocus.png" />
+                                                            <Image Source="../Images/googlesigninfocus.png" Margin="0" />
                                                         </Setter.Value>
                                                     </Setter>
                                                 </Trigger>
                                                 <Trigger Property="IsPressed" Value="True">
                                                     <Setter Property="Content">
                                                         <Setter.Value>
-                                                            <Image Source="../Images/googlesigninpressed.png" />
+                                                            <Image Source="../Images/googlesigninpressed.png" Margin="0" />
                                                         </Setter.Value>
                                                     </Setter>
                                                 </Trigger>
