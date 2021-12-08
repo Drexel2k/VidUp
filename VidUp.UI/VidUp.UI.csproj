@@ -34,6 +34,12 @@
     <None Remove="Images\dragdrop.png" />
     <None Remove="Images\edit.png" />
     <None Remove="Images\file-document-box-edit.png" />
+    <None Remove="Images\googlesignin.jpg" />
+    <None Remove="Images\googlesignin.png" />
+    <None Remove="Images\googlesigninfocus.jpg" />
+    <None Remove="Images\googlesigninfocus.png" />
+    <None Remove="Images\googlesigninpressed.jpg" />
+    <None Remove="Images\googlesigninpressed.png" />
     <None Remove="Images\minus.png" />
     <None Remove="Images\vidup.ico" />
   </ItemGroup>
@@ -49,6 +55,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\file-document-box-edit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\googlesignin.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\googlesigninfocus.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\googlesigninpressed.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\minus.png">
