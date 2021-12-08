@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 namespace Drexel.VidUp.Business
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class Playlist : INotifyPropertyChanged
+    public class Playlist
     {
         [JsonProperty]
         private string playlistId;
@@ -25,7 +25,6 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.lastModified = value;
-                this.raisePropertyChanged("LastModified");
             }
         }
 
@@ -40,7 +39,6 @@ namespace Drexel.VidUp.Business
                 }
                 this.playlistId = value;
                 this.lastModifiedInternal = DateTime.Now;
-                this.raisePropertyChanged("PlaylistId");
             }
         }
 
@@ -51,7 +49,6 @@ namespace Drexel.VidUp.Business
             {
                 this.title = value;
                 this.lastModifiedInternal = DateTime.Now;
-                this.raisePropertyChanged("Title");
             }
         }
 
@@ -72,8 +69,6 @@ namespace Drexel.VidUp.Business
             get => this.youtubeAccount;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         [JsonConstructor]
         private Playlist()
         {
@@ -92,16 +87,6 @@ namespace Drexel.VidUp.Business
             this.youtubeAccount = youtubeAccount;
             this.created = DateTime.Now;
             this.lastModified = this.created;
-        }
-
-        private void raisePropertyChanged(string propertyName)
-        {
-            // take a copy to prevent thread issues
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
         }
     }
 }

@@ -1,13 +1,16 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.UI.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
 
-    public class PlaylistComboboxViewModel : INotifyPropertyChanged
+    public class PlaylistComboboxViewModel : INotifyPropertyChanged, IDisposable
     {
         private Playlist playlist;
         private bool visible = true;
+        private Subscription playlistDisplayPropertyChangedSubscription;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Playlist Playlist
@@ -52,18 +55,13 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.playlist = playlist;
 
-            if (playlist != null)
-            {
-                this.playlist.PropertyChanged += playlistPropertyChanged;
-            }
+            this.playlistDisplayPropertyChangedSubscription = EventAggregator.Instance.Subscribe<PlaylistDisplayPropertyChangedMessage>(this.onPlaylistDisplayPropertyChanged);
         }
 
-        private void playlistPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void onPlaylistDisplayPropertyChanged(PlaylistDisplayPropertyChangedMessage obj)
         {
-            if(e.PropertyName == "Title")
-            {
-                this.raisePropertyChanged("Title");
-            }
+            this.raisePropertyChanged("TitleWithYoutubeAccountName");
+            this.raisePropertyChanged("Title");
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -73,6 +71,14 @@ namespace Drexel.VidUp.UI.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public void Dispose()
+        {
+            if (this.playlistDisplayPropertyChangedSubscription != null)
+            {
+                this.playlistDisplayPropertyChangedSubscription.Dispose();
             }
         }
     }

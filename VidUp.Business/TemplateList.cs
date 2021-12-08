@@ -283,6 +283,14 @@ namespace Drexel.VidUp.Business
             {
                 if (template.Playlist == playlist)
                 {
+                    foreach (Upload upload in template.Uploads)
+                    {
+                        if (upload.Playlist == playlist)
+                        {
+                            upload.Playlist = null;
+                        }
+                    }
+
                     template.Playlist = null;
                 }
             }

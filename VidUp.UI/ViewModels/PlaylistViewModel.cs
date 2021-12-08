@@ -151,6 +151,7 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.playlist.Title = value;
+                EventAggregator.Instance.Publish(new PlaylistDisplayPropertyChangedMessage("title"));
                 this.raisePropertyChangedAndSerializePlaylistList("Title");
             }
         }

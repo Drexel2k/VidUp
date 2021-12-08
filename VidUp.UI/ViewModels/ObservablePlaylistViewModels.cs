@@ -101,6 +101,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     PlaylistComboboxViewModel oldViewModel = this.playlistComboboxViewModels.Find(viewModel => viewModel.Playlist == playlist);
                     int index = this.playlistComboboxViewModels.IndexOf(oldViewModel);
                     this.playlistComboboxViewModels.Remove(oldViewModel);
+                    oldViewModel.Dispose();
 
                     if (this.playlistListsByAccount != null)
                     {
