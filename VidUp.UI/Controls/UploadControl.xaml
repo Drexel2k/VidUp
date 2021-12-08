@@ -210,7 +210,7 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="Playlist: " Width="47" />
-                <materialDesign:PackIcon Kind="PlaylistCheck" Foreground="Gray"  ToolTip="Playlist will be set after publication." ToolTipService.ShowDuration="60000" Visibility="{Binding ShowPlaylistHint, Mode=OneWay}" Margin="0 5 0 0" />
+                <materialDesign:PackIcon Kind="PlaylistCheck" Foreground="Gray"  ToolTip="Playlist will be set after publication." ToolTipService.ShowDuration="60000" Background="Transparent" Visibility="{Binding ShowPlaylistHint, Mode=OneWay}" Margin="0 5 0 0" />
                 <ComboBox ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" DisplayMemberPath="TitleWithYoutubeAccountName" Width="203" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Right" Margin="0 0 7 0" VerticalAlignment="Top" Padding="6 4 6 6" />
             </DockPanel>
 
