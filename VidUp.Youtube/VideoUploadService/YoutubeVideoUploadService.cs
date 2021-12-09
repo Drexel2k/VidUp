@@ -202,7 +202,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                 if (e.InnerException is TimeoutException)
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.Upload: resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout.");
-                                    upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout."));
+                                    upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout."));
                                     error = true;
                                     uploadTry++;
                                     continue;
@@ -221,8 +221,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             }
                             catch (Exception e)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
-                                upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.Upload: HttpClient.PutAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.GetType().ToString()}: {e.Message}."));
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
+                                upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.GetType().ToString()}: {e.Message}."));
 
                                 error = true;
                                 uploadTry++;
@@ -305,11 +305,21 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             short requestTry = 1;
 
             StringBuilder errors = new StringBuilder();
-            while (requestTry <= 3)
+
+            do
             {
+                if (requestTry > 3)
+                {
+                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End header, failed 3 times.");
+                    upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.getResumePositionAsync: Getting resume position failed 3 times. Errors: {errors.ToString()}"));
+                    resetEvent.WaitOne();
+                    upload.UploadStatus = UplStatus.Failed;
+                    return false;
+                }
+
                 try
                 {
-                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Requesting resume position.");
+                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Requesting resume position, try {requestTry}.");
                     StreamContent streamContent = HttpHelper.GetStreamContentContentRangeOnly(new FileInfo(upload.FilePath).Length);
                     using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
                         upload.YoutubeAccount, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
@@ -320,8 +330,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (responseMessage.StatusCode != HttpStatusCode.PermanentRedirect)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                                StatusInformation statusInformation = new StatusInformation($"YoutubeVideoUploadService.getResumePositionAsync: Could not resume position: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: HttpResponseMessage unexpected status code: {(int) responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                StatusInformation statusInformation = new StatusInformation($"YoutubeVideoUploadService.getResumePositionAsync: Could not resume position: {(int) responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                 upload.AddUploadError(statusInformation);
                                 if (statusInformation.IsQuotaError)
                                 {
@@ -331,72 +341,53 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                     return false;
                                 }
 
-                                responseMessage.EnsureSuccessStatusCode();
-                            }
-
-                            Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Read header.");
-
-                            try
-                            {
-                                string range = responseMessage.Headers.GetValues("Range").First();
-                                if (!string.IsNullOrWhiteSpace(range))
-                                {
-                                    string[] parts = range.Split('-');
-                                    upload.BytesSent = Convert.ToInt64(parts[1]) + 1;
-                                }
-
-                                return true;
-                            }
-                            catch (InvalidOperationException e)
-                            {
-                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found, BytesSent set to 0: {e.Message}.");
-                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found, restarting upload, exception: {e.ToString()}.");
-                                upload.BytesSent = 0;
-                                return true;
-                            }
-                            catch (Exception e)
-                            {
-                                errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not get range header: {e.GetType().ToString()}: {e.Message}.");
-                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header exception: {e.ToString()}.");
-
-                                if (requestTry >= 3)
-                                {
-                                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End header, failed 3 times.");
-                                    upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.getResumePositionAsync: Getting resume position failed 3 times. Errors: {errors.ToString()}"));
-                                    resetEvent.WaitOne();
-                                    upload.UploadStatus = UplStatus.Failed;
-                                    return false;
-                                }
-
-                                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                                //no EnsureStatusCode here as the only expected code is 503.
                                 requestTry++;
+                            }
+                            else
+                            {
+                                Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Read header.");
+
+                                try
+                                {
+                                    string range = responseMessage.Headers.GetValues("Range").First();
+                                    if (!string.IsNullOrWhiteSpace(range))
+                                    {
+                                        string[] parts = range.Split('-');
+                                        upload.BytesSent = Convert.ToInt64(parts[1]) + 1;
+                                    }
+
+                                    return true;
+                                }
+                                catch (InvalidOperationException e)
+                                {
+                                    errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found, BytesSent set to 0: {e.Message}.");
+                                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found, restarting upload, exception: {e.ToString()}.");
+                                    upload.BytesSent = 0;
+                                    return true;
+                                }
+                                catch (Exception e)
+                                {
+                                    errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not get range header: {e.GetType().ToString()}: {e.Message}.");
+                                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header exception: {e.ToString()}.");
+
+                                    await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                                    requestTry++;
+                                }
                             }
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    if (!(e is HttpRequestException))
-                    {
-                        errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Getting upload index failed: {e.Message}.");
-                        Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Exception: {e.ToString()}.");
-                    }
-
-                    if (requestTry >= 3)
-                    {
-                        Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End all, failed 3 times.");
-                        upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.getResumePositionAsync: Getting resume position failed 3 times. Errors: {errors.ToString()}"));
-                        resetEvent.WaitOne();
-                        upload.UploadStatus = UplStatus.Failed;
-                        return false;
-                    }
+                    errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Getting upload index failed: {e.Message}.");
+                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Exception: {e.ToString()}.");
 
                     await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                     requestTry++;
                 }
             }
-
-            throw new NotImplementedException("Should not happen.");
+            while (true);
         }
 
         private static async Task<bool> requestNewUploadAsync(Upload upload, AutoResetEvent resetEvent)

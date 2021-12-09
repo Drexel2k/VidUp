@@ -49,8 +49,7 @@ namespace Drexel.VidUp.Youtube.PlaylistService
                         ? new Uri($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={YoutubePlaylistService.maxResults}")
                         : new Uri($"{YoutubePlaylistService.playlistsEndpoint}?part=snippet&mine=true&maxResults={YoutubePlaylistService.maxResults}&pageToken={pageToken}");
 
-                    using (HttpResponseMessage responseMessage =
-                        await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
+                    using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
                     {
                         using (responseMessage)
                         using (responseMessage.Content)

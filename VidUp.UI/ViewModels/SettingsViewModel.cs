@@ -308,6 +308,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async void authenticateYoutubeAccountAsync(object obj)
         {
+            Tracer.Write($"SettingsViewModel.authenticateYoutubeAccountAsync: Start.");
             lock (this.authenticateYoutubeAccountLock)
             {
                 if (this.authenticatingYoutubeAccount)
@@ -319,10 +320,22 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("AuthenticatingYoutubeAccount");
             }
 
-            await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(this.selectedYoutubeAccount.YoutubeAccount).ConfigureAwait(false);
+            try
+            {
+                await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(this.selectedYoutubeAccount.YoutubeAccount);
+            }
+            catch (Exception e)
+            {
+                Tracer.Write($"SettingsViewModel.authenticateYoutubeAccountAsync: YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync Exception: {e.ToString()}.");
+                ConfirmControl control = new ConfirmControl($"Authentication error:: {e.GetType().ToString()}: {e.Message}.", false);
+
+                await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
+            }
 
             this.authenticatingYoutubeAccount = false;
             this.raisePropertyChanged("AuthenticatingYoutubeAccount");
+
+            Tracer.Write($"SettingsViewModel.authenticateYoutubeAccountAsync: End.");
         }
 
         private async void deleteYoutubeAccountAsync(object obj)

@@ -38,6 +38,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
         //get access token from API
         public static async Task<AccessToken> GetNewAccessTokenAsync(YoutubeAccount youtubeAccount)
         {
+            Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Start.");
             //check for refresh token, if not there, get it
             if (string.IsNullOrWhiteSpace(youtubeAccount.RefreshToken))
             {
@@ -58,18 +59,28 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             // sends the request
 
             byte[] contentBytes = Encoding.ASCII.GetBytes(tokenRequestBody);
-            using (ByteArrayContent content = new ByteArrayContent(contentBytes))
+            using (ByteArrayContent byteArrayContent = new ByteArrayContent(contentBytes))
             {
-                content.Headers.ContentLength = contentBytes.Length;
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+                byteArrayContent.Headers.ContentLength = contentBytes.Length;
+                byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, content).ConfigureAwait(false))
+                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, byteArrayContent).ConfigureAwait(false))
                 {
+                    string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!message.IsSuccessStatusCode)
+                    {
+                        Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                        Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
+                        message.EnsureSuccessStatusCode();
+                    }
+
                     message.EnsureSuccessStatusCode();
                     Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
 
                     AccessToken accessToken = new AccessToken(tokenEndpointDecoded["access_token"],
                         DateTime.Now.AddSeconds(Convert.ToInt32(tokenEndpointDecoded["expires_in"])));
+
+                    Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
                     return accessToken;
                 }
             }
@@ -78,6 +89,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
         //initial authentication, get refresh token from API
         public static async Task SetRefreshTokenOnYoutubeAccountAsync(YoutubeAccount youtubeAccount)
         {
+            Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Start.");
             // Generates state and PKCE values.
             string state = randomDataBase64url(32);
             string code_verifier = randomDataBase64url(32);
@@ -160,20 +172,28 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
 
             // sends the request
             byte[] contentBytes = Encoding.ASCII.GetBytes(tokenRequestBody);
-            using (ByteArrayContent content = new ByteArrayContent(contentBytes))
+            using (ByteArrayContent byteArrayContent = new ByteArrayContent(contentBytes))
             {
-                content.Headers.ContentLength = contentBytes.Length;
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+                byteArrayContent.Headers.ContentLength = contentBytes.Length;
+                byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, content).ConfigureAwait(false))
+                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, byteArrayContent).ConfigureAwait(false))
                 {
-                    message.EnsureSuccessStatusCode();
+                    string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!message.IsSuccessStatusCode)
+                    {
+                        Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                        Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
+                        message.EnsureSuccessStatusCode();
+                    }
 
                     Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
                     youtubeAccount.RefreshToken = tokenEndpointDecoded["refresh_token"];
                     JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
                 }
             }
+
+            Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
         }
 
         /// <summary>
