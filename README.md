@@ -9,12 +9,9 @@ videos to playlists after publication etc. by the use of project templates.
 During uploads it prevents standby etc. and shuts down the system after
 all uploads finished e.g.
 
-You can find more information here (German language sorry!):
-https://letsplayforum.de/thread/178125-drexel-s-vidup-ein-templatebasierter-youtube-uploader/
-
-Twitter: https://twitter.com/DrexelsVidUp
-
-Binaries of releases:
-https://1drv.ms/u/s!AlNGd4g1Vh9rmHAvaCyZ5nvtOkDF?e=5vhucP
+You can find more information here:
+https://www.vidup.info/
+https://twitter.com/DrexelsVidUp
+https://letsplayforum.de/thread/178125-drexel-s-vidup-ein-templatebasierter-youtube-uploader/ (German language sorry!)
 
 You can contact me via Discord: Drexel#4886 or in the above mentioned forum post.
