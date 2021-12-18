@@ -10,6 +10,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string message;
         private bool isQuotaError;
+        private bool isAuthenticationError;
 
         public string Message
         {
@@ -19,6 +20,11 @@ namespace Drexel.VidUp.Business
         public bool IsQuotaError
         {
             get => this.isQuotaError;
+        }
+
+        public bool IsAuthenticationError
+        {
+            get => this.isAuthenticationError;
         }
 
         [JsonConstructor]
@@ -37,6 +43,7 @@ namespace Drexel.VidUp.Business
             this.message = message;
 
             this.setQuotaError();
+            this.setAuthenticationError();
         }
 
         private void setQuotaError()
@@ -47,10 +54,19 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        private void setAuthenticationError()
+        {
+            if (this.message.Contains("Authentication"))
+            {
+                this.isAuthenticationError = true;
+            }
+        }
+
         [OnDeserialized]
         private void afterDeserialization(StreamingContext context)
         {
             this.setQuotaError();
+            this.setAuthenticationError();
         }
     }
 }

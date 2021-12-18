@@ -390,6 +390,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         if (getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation != null)
                         {
                             success = false;
+                            Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Could not receive playlist content:\n{getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation.Message}");
                             messages.Add(new StatusInformation($"{DateTime.Now} Could not receive playlist content:\n{getPlaylistsAndRemoveNotExistingPlaylistsResult.StatusInformation.Message}"));
                         }
                         else
@@ -450,6 +451,7 @@ namespace Drexel.VidUp.UI.ViewModels
                                     if (getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation != null)
                                     {
                                         success = false;
+                                        Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Video public check not successful:\n{getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation.Message}");
                                         messages.Add(new StatusInformation($"{DateTime.Now} Could not check if videos are public:\n{getPublicVideosAndRemoveNotExisingUploadsResult.StatusInformation.Message}"));
                                     }
                                     else
@@ -488,7 +490,7 @@ namespace Drexel.VidUp.UI.ViewModels
                                                 if (addUploadsToPlaylistIfPublicResult.StatusInformation != null)
                                                 {
                                                     success = false;
-                                                    messages.Add(new StatusInformation($"{DateTime.Now}  {addUploadsToPlaylistIfPublicResult.StatusInformation.Message}"));
+                                                    messages.Add(new StatusInformation($"{DateTime.Now} Could not add public videos to playlists:\n{addUploadsToPlaylistIfPublicResult.StatusInformation.Message}"));
                                                 }
 
                                                 if (addUploadsToPlaylistIfPublicResult.UploadsNotAddedByPlaylist.Count > 0)
@@ -501,7 +503,7 @@ namespace Drexel.VidUp.UI.ViewModels
                                                         tempStringBuilderForChangeLists.AppendLine($"{notAddedUploads.Key.Title} ({notAddedUploads.Key.PlaylistId})");
                                                         foreach (Upload upload in notAddedUploads.Value)
                                                         {
-                                                            tempStringBuilderForChangeLists.AppendLine($"   {upload.Title} ({upload.VideoId})");
+                                                            tempStringBuilderForChangeLists.AppendLine($"   {upload.Title} ({upload.VideoId}): {upload.UploadErrorMessage}");
                                                         }
                                                     }
 
@@ -596,6 +598,11 @@ namespace Drexel.VidUp.UI.ViewModels
             if (messages.Any(messageInternal => messageInternal.IsQuotaError))
             {
                 message.AppendLine(TinyHelpers.QuotaExceededString);
+            }
+
+            if (messages.Any(messageInternal => messageInternal.IsAuthenticationError))
+            {
+                message.AppendLine(TinyHelpers.AuthenticationErrorString);
             }
 
             foreach (StatusInformation statusInformation in messages)
@@ -754,7 +761,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 foreach (KeyValuePair<Playlist, List<Upload>> playlistVideosWithoutPlaylist in uploadsWithoutPlaylistByPlaylist)
                 {
-
                     foreach (Upload upload in playlistVideosWithoutPlaylist.Value)
                     {
                         //if video id is not included in response it was deleted on YT.
@@ -807,8 +813,11 @@ namespace Drexel.VidUp.UI.ViewModels
                         AddToPlaylistResult addToPlaylistResult = await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
                         if (addToPlaylistResult.StatusInformation != null)
                         {
-                            result.StatusInformation = addToPlaylistResult.StatusInformation;
-                            return result;
+                            if (addToPlaylistResult.StatusInformation.IsQuotaError)
+                            {
+                                result.StatusInformation = addToPlaylistResult.StatusInformation;
+                                return result;
+                            }
                         }
 
                         if (!addToPlaylistResult.Success)

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -473,7 +474,6 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                     using (ByteArrayContent byteArrayContent = HttpHelper.GetStreamContent(contentJson, "application/json"))
                     using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
                         upload.YoutubeAccount, HttpMethod.Post, $"{YoutubeVideoUploadService.videoUploadEndpoint}?part=snippet,status&uploadType=resumable").ConfigureAwait(false))
-
                     {
                         byteArrayContent.Headers.Add("Slug", httpHeaderCompatibleString);
                         byteArrayContent.Headers.Add("X-Upload-Content-Length", fileInfo.Length.ToString());

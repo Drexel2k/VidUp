@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
@@ -64,6 +65,13 @@ namespace Drexel.VidUp.Youtube.VideoService
                             batch++;
                             videoIdsBatch = YoutubeVideoService.getBatch(videoIds, batch, 50);
                         }
+                    }
+                    catch (AuthenticationException e)
+                    {
+                        StatusInformation statusInformation = new StatusInformation(e.Message);
+                        result.StatusInformation = statusInformation;
+                        Tracer.Write($"YoutubeVideoService.IsPublic: End, authentication error.");
+                        return result;
                     }
                     catch (Exception e)
                     {

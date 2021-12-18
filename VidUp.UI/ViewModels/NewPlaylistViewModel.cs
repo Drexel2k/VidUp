@@ -105,10 +105,21 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (getPlaylistsResult.StatusInformation != null)
                 {
-                    this.showPlaylistReceiveError = true;
-                    this.playlistReceiveErrorMessage = TinyHelpers.QuotaExceededString;
-                    this.raisePropertyChanged("ShowPlaylistReceiveError");
-                    this.raisePropertyChanged("PlaylistReceiveErrorMessage");
+                    if (getPlaylistsResult.StatusInformation.IsQuotaError)
+                    {
+                        this.showPlaylistReceiveError = true;
+                        this.playlistReceiveErrorMessage = TinyHelpers.QuotaExceededString;
+                        this.raisePropertyChanged("ShowPlaylistReceiveError");
+                        this.raisePropertyChanged("PlaylistReceiveErrorMessage");
+                    }
+
+                    if (getPlaylistsResult.StatusInformation.IsAuthenticationError)
+                    {
+                        this.showPlaylistReceiveError = true;
+                        this.playlistReceiveErrorMessage = TinyHelpers.AuthenticationErrorString;
+                        this.raisePropertyChanged("ShowPlaylistReceiveError");
+                        this.raisePropertyChanged("PlaylistReceiveErrorMessage");
+                    }
                 }
 
                 foreach (PlaylistApi playlist in getPlaylistsResult.Playlists)

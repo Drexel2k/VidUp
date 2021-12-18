@@ -270,6 +270,11 @@ namespace Drexel.VidUp.Business
                     stringBuilder.AppendLine(TinyHelpers.QuotaExceededString);
                 }
 
+                if (this.ErrorsContainAuthenticationError)
+                {
+                    stringBuilder.AppendLine(TinyHelpers.AuthenticationErrorString);
+                }
+
                 foreach (StatusInformation uploadError in this.uploadErrors)
                 {
                     stringBuilder.AppendLine(uploadError.Message); 
@@ -454,6 +459,11 @@ namespace Drexel.VidUp.Business
         public bool ErrorsContainQuotaError
         {
             get => this.uploadErrors.Any(error => error.IsQuotaError == true);
+        }
+
+        public bool ErrorsContainAuthenticationError
+        {
+            get => this.uploadErrors.Any(error => error.IsAuthenticationError == true);
         }
 
         [JsonConstructor]

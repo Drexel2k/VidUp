@@ -39,49 +39,60 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
         public static async Task<AccessToken> GetNewAccessTokenAsync(YoutubeAccount youtubeAccount)
         {
             Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Start.");
-            //check for refresh token, if not there, get it
-            if (string.IsNullOrWhiteSpace(youtubeAccount.RefreshToken))
+
+            try
             {
-                await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(youtubeAccount).ConfigureAwait(false);
-            }
-
-            string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
-            string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
-            //here we should have the refresh token
-            // builds the  request
-            string tokenRequestBody = string.Format(
-                "refresh_token={0}&client_id={1}&client_secret={2}&grant_type=refresh_token",
-                youtubeAccount.RefreshToken,
-                clientId,
-                clientSecret
-            );
-
-            // sends the request
-
-            byte[] contentBytes = Encoding.ASCII.GetBytes(tokenRequestBody);
-            using (ByteArrayContent byteArrayContent = new ByteArrayContent(contentBytes))
-            {
-                byteArrayContent.Headers.ContentLength = contentBytes.Length;
-                byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, byteArrayContent).ConfigureAwait(false))
+                //check for refresh token, if not there, get it
+                if (string.IsNullOrWhiteSpace(youtubeAccount.RefreshToken))
                 {
-                    string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    if (!message.IsSuccessStatusCode)
-                    {
-                        Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
-                        Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
-                        message.EnsureSuccessStatusCode();
-                    }
-
-                    message.EnsureSuccessStatusCode();
-                    Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
-
-                    AccessToken accessToken = new AccessToken(tokenEndpointDecoded["access_token"], DateTime.Now.AddSeconds(Convert.ToInt32(tokenEndpointDecoded["expires_in"])));
-
-                    Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
-                    return accessToken;
+                    await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(youtubeAccount).ConfigureAwait(false);
                 }
+
+                string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
+                string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
+                //here we should have the refresh token
+                // builds the  request
+                string tokenRequestBody = string.Format(
+                    "refresh_token={0}&client_id={1}&client_secret={2}&grant_type=refresh_token",
+                    youtubeAccount.RefreshToken,
+                    clientId,
+                    clientSecret
+                );
+
+                // sends the request
+
+                byte[] contentBytes = Encoding.ASCII.GetBytes(tokenRequestBody);
+                using (ByteArrayContent byteArrayContent = new ByteArrayContent(contentBytes))
+                {
+                    byteArrayContent.Headers.ContentLength = contentBytes.Length;
+                    byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+                    using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, byteArrayContent).ConfigureAwait(false))
+                    {
+                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        if (!message.IsSuccessStatusCode)
+                        {
+                            Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                            Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
+                            throw new AuthenticationException($"Authentication error: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                        }
+
+                        Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+                        AccessToken accessToken = new AccessToken(tokenEndpointDecoded["access_token"], DateTime.Now.AddSeconds(Convert.ToInt32(tokenEndpointDecoded["expires_in"])));
+
+                        Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
+                        return accessToken;
+                    }
+                }
+            }
+            catch (AuthenticationException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new AuthenticationException("Authentication error: Error on getting access token", e);
             }
         }
 
@@ -90,112 +101,124 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
         {
             Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Start.");
             // Generates state and PKCE values.
-            string state = randomDataBase64url(32);
-            string code_verifier = randomDataBase64url(32);
-            string code_challenge = base64urlencodeNoPadding(sha256(code_verifier));
-            const string code_challenge_method = "S256";
 
-            // Creates a redirect URI using an available port on the loopback address.
-            string redirectURI = string.Format("http://{0}:{1}/", IPAddress.Loopback, YoutubeAuthentication.getRandomUnusedPort());
-
-            // Creates an HttpListener to listen for requests on that redirect URI.
-            var http = new HttpListener();
-            http.Prefixes.Add(redirectURI);
-            http.Start();
-
-            string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
-            string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
-
-            // Creates the OAuth 2.0 authorization request.
-            string authorizationRequest = string.Format("{0}?response_type=code&scope={6}&redirect_uri={1}&client_id={2}&state={3}&code_challenge={4}&code_challenge_method={5}",
-                YoutubeAuthentication.authorizationEndpoint,
-                Uri.EscapeDataString(redirectURI),
-                clientId,
-                state,
-                code_challenge,
-                code_challenge_method,
-                Uri.EscapeDataString(YoutubeAuthentication.scopes));
-
-            var ps = new ProcessStartInfo(authorizationRequest)
+            try
             {
-                UseShellExecute = true,
-                Verb = "open"
-            };
-            // Opens request in the browser.
-            Process.Start(ps);
+                string state = randomDataBase64url(32);
+                string code_verifier = randomDataBase64url(32);
+                string code_challenge = base64urlencodeNoPadding(sha256(code_verifier));
+                const string code_challenge_method = "S256";
 
-            // Waits for the OAuth authorization response.
-            var context = await http.GetContextAsync().ConfigureAwait(false);
+                // Creates a redirect URI using an available port on the loopback address.
+                string redirectURI = string.Format("http://{0}:{1}/", IPAddress.Loopback, YoutubeAuthentication.getRandomUnusedPort());
 
-            // Sends an HTTP response to the browser.
-            var response = context.Response;
-            string responseString = "<html><head><meta http-equiv='refresh' content='10;url=https://google.com'></head><body>Please return to the app.</body></html>";
-            var buffer = Encoding.UTF8.GetBytes(responseString);
-            response.ContentLength64 = buffer.Length;
-            var responseOutput = response.OutputStream;
-            responseOutput.Write(buffer, 0, buffer.Length);
-            responseOutput.Close();
-            http.Stop();
+                // Creates an HttpListener to listen for requests on that redirect URI.
+                var http = new HttpListener();
+                http.Prefixes.Add(redirectURI);
+                http.Start();
 
-            // Checks for errors.
-            if (context.Request.QueryString.Get("error") != null)
-            {
-                string error = $"Authentication error: {context.Request.QueryString.Get("error")}";
-                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: {error}.");
-                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                throw new AuthenticationException($"Authentication error: {error}");
-            }
-            if (context.Request.QueryString.Get("code") == null || context.Request.QueryString.Get("state") == null)
-            {
-                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code or State is null.");
-                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                throw new AuthenticationException("Authentication error: Code or State is null.");
-            }
+                string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
+                string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
 
-            // extracts the code
-            var code = context.Request.QueryString.Get("code");
-            var incoming_state = context.Request.QueryString.Get("state");
+                // Creates the OAuth 2.0 authorization request.
+                string authorizationRequest = string.Format("{0}?response_type=code&scope={6}&redirect_uri={1}&client_id={2}&state={3}&code_challenge={4}&code_challenge_method={5}",
+                    YoutubeAuthentication.authorizationEndpoint,
+                    Uri.EscapeDataString(redirectURI),
+                    clientId,
+                    state,
+                    code_challenge,
+                    code_challenge_method,
+                    Uri.EscapeDataString(YoutubeAuthentication.scopes));
 
-            // Compares the receieved state to the expected value, to ensure that
-            // this app made the request which resulted in authorization.
-            if (incoming_state != state)
-            {
-                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code and State differ.");
-                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                throw new AuthenticationException("Authentication error: Code and State differ.");
-            }
-
-            // Starts the code exchange for refresh token at the token endpoint.
-            // builds the  request
-            string tokenRequestBody = string.Format("code={0}&redirect_uri={1}&client_id={2}&code_verifier={3}&client_secret={4}&scope=&grant_type=authorization_code",
-                code,
-                Uri.EscapeDataString(redirectURI),
-                Credentials.ClientId,
-                code_verifier,
-                clientSecret
-                );
-
-            // sends the request
-            byte[] contentBytes = Encoding.ASCII.GetBytes(tokenRequestBody);
-            using (ByteArrayContent byteArrayContent = new ByteArrayContent(contentBytes))
-            {
-                byteArrayContent.Headers.ContentLength = contentBytes.Length;
-                byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-                using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, byteArrayContent).ConfigureAwait(false))
+                var ps = new ProcessStartInfo(authorizationRequest)
                 {
-                    string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    if (!message.IsSuccessStatusCode)
-                    {
-                        Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
-                        Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                        message.EnsureSuccessStatusCode();
-                    }
+                    UseShellExecute = true,
+                    Verb = "open"
+                };
+                // Opens request in the browser.
+                Process.Start(ps);
 
-                    Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
-                    youtubeAccount.RefreshToken = tokenEndpointDecoded["refresh_token"];
-                    JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
+                // Waits for the OAuth authorization response.
+                var context = await http.GetContextAsync().ConfigureAwait(false);
+
+                // Sends an HTTP response to the browser.
+                var response = context.Response;
+                string responseString = "<html><head><meta http-equiv='refresh' content='10;url=https://google.com'></head><body>Please return to the app.</body></html>";
+                var buffer = Encoding.UTF8.GetBytes(responseString);
+                response.ContentLength64 = buffer.Length;
+                var responseOutput = response.OutputStream;
+                responseOutput.Write(buffer, 0, buffer.Length);
+                responseOutput.Close();
+                http.Stop();
+
+                // Checks for errors.
+                if (context.Request.QueryString.Get("error") != null)
+                {
+                    string error = $"Authentication error: {context.Request.QueryString.Get("error")}";
+                    Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: {error}.");
+                    Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
+                    throw new AuthenticationException($"Authentication error: {error}");
                 }
+                if (context.Request.QueryString.Get("code") == null || context.Request.QueryString.Get("state") == null)
+                {
+                    Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code or State is null.");
+                    Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
+                    throw new AuthenticationException("Authentication error: Code or State is null.");
+                }
+
+                // extracts the code
+                var code = context.Request.QueryString.Get("code");
+                var incoming_state = context.Request.QueryString.Get("state");
+
+                // Compares the receieved state to the expected value, to ensure that
+                // this app made the request which resulted in authorization.
+                if (incoming_state != state)
+                {
+                    Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code and State differ.");
+                    Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
+                    throw new AuthenticationException("Authentication error: Code and State differ.");
+                }
+
+                // Starts the code exchange for refresh token at the token endpoint.
+                // builds the  request
+                string tokenRequestBody = string.Format("code={0}&redirect_uri={1}&client_id={2}&code_verifier={3}&client_secret={4}&scope=&grant_type=authorization_code",
+                    code,
+                    Uri.EscapeDataString(redirectURI),
+                    Credentials.ClientId,
+                    code_verifier,
+                    clientSecret
+                    );
+
+                // sends the request
+                byte[] contentBytes = Encoding.ASCII.GetBytes(tokenRequestBody);
+                using (ByteArrayContent byteArrayContent = new ByteArrayContent(contentBytes))
+                {
+                    byteArrayContent.Headers.ContentLength = contentBytes.Length;
+                    byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+                    using (HttpResponseMessage message = await YoutubeAuthentication.client.PostAsync(YoutubeAuthentication.tokenEndpoint, byteArrayContent).ConfigureAwait(false))
+                    {
+                        string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        if (!message.IsSuccessStatusCode)
+                        {
+                            Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                            Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
+                            throw new AuthenticationException($"Authentication error: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                        }
+
+                        Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
+                        youtubeAccount.RefreshToken = tokenEndpointDecoded["refresh_token"];
+                        JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
+                    }
+                }
+            }
+            catch (AuthenticationException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new AuthenticationException("Authentication error: Error on getting refresh token", e);
             }
 
             Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");

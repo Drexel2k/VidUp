@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
@@ -23,7 +24,17 @@ namespace Drexel.VidUp.Youtube.PlaylistService
             if (statusInformation != null)
             {
                 result.StatusInformation = statusInformation;
-                Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, quota exceeded.");
+
+                if (statusInformation.IsQuotaError)
+                {
+                    Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, quota exceeded.");
+                }
+
+                if (statusInformation.IsAuthenticationError)
+                {
+                    Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, authentication error.");
+                }
+
                 return result;
             }
             
@@ -83,13 +94,28 @@ namespace Drexel.VidUp.Youtube.PlaylistService
                                 StatusInformation statusInformation = await YoutubePlaylistService.addPlaylistsToResultAsync(response.NextPageToken, result, youtubeAccount).ConfigureAwait(false);
                                 if (statusInformation != null)
                                 {
-                                    Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, quota exceeded.");
+                                    if (statusInformation.IsQuotaError)
+                                    {
+                                        Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, quota exceeded.");
+                                    }
+
+                                    if (statusInformation.IsAuthenticationError)
+                                    {
+                                        Tracer.Write($"YoutubePlaylistService.GetPlaylists: End, authentication error.");
+                                    }
+
                                     return statusInformation;
                                 }
                             }
                         }
                     }
                 }
+            }
+            catch (AuthenticationException e)
+            {
+                StatusInformation statusInformation = new StatusInformation(e.Message);
+                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, authentication error.");
+                return statusInformation;
             }
             catch (Exception e)
             {
