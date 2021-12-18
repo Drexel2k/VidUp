@@ -702,7 +702,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             if (postUploadActionInternal != PostUploadAction.None && e.DataSent && !e.UploadStopped && appStatusInternal == AppStatus.Idle)
             {
-                Tracer.Write($"MainWindowViewModel.doPostUploadTasks: performing post upload action.");
+                Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Performing post upload action.");
 
                 if (this.postponePostUploadAction && !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostponePostUploadActionProcessName))
                 {
