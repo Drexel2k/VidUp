@@ -91,13 +91,16 @@ namespace Drexel.VidUp.Youtube.PlaylistService
                     }
                 }
             }
-            catch (HttpRequestException)
-            {
-                throw;
-            }
             catch (Exception e)
             {
-                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                //HttpRequestExceptions with no inner exceptions shall not be logged, because they are from successful
+                //http requests but with not successful http status and are logged above.
+                //All other exceptions shall be logged, too.
+                if (!(e is HttpRequestException) || e.InnerException != null)
+                {
+                    Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                }
+
                 throw;
             }
 

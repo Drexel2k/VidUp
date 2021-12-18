@@ -152,7 +152,6 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                                 //http 404 = playlist does not exist anymore on youtube
                                 playlist.NotExistsOnYoutube = true;
                                 return null;
-
                             }
 
                             //unexpected http status
@@ -177,13 +176,16 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                     }
                 }
             }
-            catch (HttpRequestException)
-            {
-                throw;
-            }
             catch (Exception e)
             {
-                Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                //HttpRequestExceptions with no inner exceptions shall not be logged, because they are from successful
+                //http requests but with not successful http status and are logged above.
+                //All other exceptions shall be logged, too.
+                if (!(e is HttpRequestException) || e.InnerException != null)
+                {
+                    Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
+                }
+
                 throw;
             }
 
