@@ -871,39 +871,34 @@ namespace Drexel.VidUp.Business
 
         private string getPlaceholderContents()
         {
+            string placeholderString = Path.GetFileName(this.FilePath);
             // since we already know there's a template if this code is called, no need to null check the template
-            if (this.template.UsePlaceholderFile)
+
+            string extension = ".txt";
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();
+            string folder = Path.GetDirectoryName(this.filePath);
+            if (!string.IsNullOrWhiteSpace(this.template.PlaceholderFolderPath))
             {
-                string extension = ".txt";
-                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this.filePath).ToLower();
+                folder = this.template.PlaceholderFolderPath;
+            }
 
-                if (!string.IsNullOrWhiteSpace(this.template.PlaceholderFolderPath) && Directory.Exists(this.template.PlaceholderFolderPath))
-                {
-                    foreach (string currentFile in Directory.GetFiles(this.template.PlaceholderFolderPath))
-                    {
-                        if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower())
-                        {
-                            if (Path.GetExtension(currentFile).Equals(extension))
-                            {
-                                return File.ReadAllText(currentFile);
-                            }
-                        }
-                    }
-                }
+            if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+            {
+                return placeholderString;
+            }
 
-                foreach (string currentFile in Directory.GetFiles(Path.GetDirectoryName(this.filePath)))
+            foreach (string currentFile in Directory.GetFiles(folder))
+            {
+                if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower())
                 {
-                    if (fileNameWithoutExtension == Path.GetFileNameWithoutExtension(currentFile).ToLower() && Path.GetFullPath(currentFile).ToLower() != Path.GetFullPath(this.filePath).ToLower())
+                    if (Path.GetExtension(currentFile).Equals(extension))
                     {
-                        if (Path.GetExtension(currentFile).Equals(extension))
-                        {
-                            return File.ReadAllText(currentFile);
-                        }
+                        placeholderString += $" {File.ReadAllText(currentFile)}";
                     }
                 }
             }
 
-            return Path.GetFileName(this.FilePath);
+            return placeholderString;
         }
 
         public void ResetPublishAt()

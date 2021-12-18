@@ -505,16 +505,6 @@ namespace Drexel.VidUp.UI.ViewModels
             get => Cultures.RelevantCultureInfos;
         }
 
-        public bool UsePlaceholderFile
-        {
-            get => this.template != null ? this.template.UsePlaceholderFile : false;
-            set
-            {
-                this.template.UsePlaceholderFile = value;
-                this.raisePropertyChanged("UsePlaceholderFile");
-            }
-        }
-
         public string PlaceholderFolderPath
         {
             get => this.template != null ? this.template.PlaceholderFolderPath : null;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -44,8 +43,6 @@ namespace Drexel.VidUp.Business
         private string thumbnailFallbackFilePath;
         [JsonProperty]
         private bool isDefault;
-        [JsonProperty]
-        private bool usePlaceholderFile;
         [JsonProperty]
         private string placeholderFolderPath;
         [JsonProperty]
@@ -226,16 +223,6 @@ namespace Drexel.VidUp.Business
                 this.isDefault = value;
                 this.LastModified = DateTime.Now;
                 this.onIsDefaultChanged();
-            }
-        }
-
-        public bool UsePlaceholderFile
-        {
-            get => this.usePlaceholderFile;
-            set
-            {
-                this.usePlaceholderFile = value;
-                this.LastModified = DateTime.Now;
             }
         }
 

@@ -40,7 +40,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        private void playlistListCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void playlistListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Remove)
             {

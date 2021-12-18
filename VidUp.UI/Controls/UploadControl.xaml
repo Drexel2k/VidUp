@@ -91,7 +91,7 @@
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
-                <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 5 5" ToolTip="You can use placeholers #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in file name, #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 5 5" ToolTip="You can use place holders #0#, #1#, ... in title. #0# will be replace with 1st occurence of #some text# in video file name (and text in a text file which's file name equals video file name without extension in folder of the video or place holder folder set in template), #1# with 2nd occurence and so on." ToolTipService.ShowDuration="60000" Background="Transparent" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Label Content="{Binding TitleCharacterCount, Mode=OneWay}" Background="{Binding TitleColor, Mode=OneWay}" Width="33" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" VerticalAlignment="Top" />
                     <Label Content="/ 100" Width="50" Height="20" Padding="0 1 0 0" Margin="4 3 0 0" VerticalAlignment="Top" />
@@ -117,6 +117,7 @@
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Description: " Width="71" HorizontalAlignment="Left" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 0" ToolTip="You can also use place holders in the same way as in the title." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Label Content="{Binding DescriptionCharacterCount }" Background="{Binding DescriptionColor, Mode=OneWay}" Width="33" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" VerticalAlignment="Top" />
                         <Label Content="{Binding MaxDescriptionCharacters}" Width="50" Height="20" Padding="0 1 0 0" Margin="4 3 0 0"  VerticalAlignment="Top" />
@@ -139,7 +140,7 @@
                         <materialDesign:PackIcon Kind="Refresh" />
                     </Button>
                     <Label Content="Tags: " Width="33" />
-                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                    <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 0" ToolTip="Enter tags comma separated, e.g. 'tag 1,tag 2,tag 3'. You can also use place holders in the same way as in the title." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Label Content="{Binding TagsCharacterCount }" Background="{Binding TagsColor, Mode=OneWay}" Width="33" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" VerticalAlignment="Top" />
                         <Label Content="/ 500" Width="50" Padding="0 1 0 0" Margin="4 3 0 0" VerticalAlignment="Top" />
