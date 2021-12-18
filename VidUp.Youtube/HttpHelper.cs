@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.AuthenticationService;
 
 namespace Drexel.VidUp.Youtube
@@ -19,9 +20,9 @@ namespace Drexel.VidUp.Youtube
 
         private static Dictionary<YoutubeAccount, AccessToken> youtubeAccessTokenExpiryByAccount = new Dictionary<YoutubeAccount, AccessToken>();
         private static TimeSpan oneMinute = new TimeSpan(0, 1, 0);
+
         static HttpHelper()
         {
-
             HttpHelper.standardClient  = new HttpClient();
 
             HttpHelper.uploadClient = new HttpClient();
@@ -44,43 +45,54 @@ namespace Drexel.VidUp.Youtube
 
         public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(YoutubeAccount youtubeAccount, HttpMethod method, string uri)
         {
+            Tracer.Write($"HttpHelper.GetAuthenticatedRequestMessageAsync: Start with uri.");
             await HttpHelper.ensureAccessTokenAsync(youtubeAccount).ConfigureAwait(false);
             HttpRequestMessage message = new HttpRequestMessage(method, uri);
             message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount].Token);
+            Tracer.Write($"HttpHelper.GetAuthenticatedRequestMessageAsync: End with uri.");
             return message;
         }
 
         public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(YoutubeAccount youtubeAccount, HttpMethod method)
         {
+            Tracer.Write($"HttpHelper.GetAuthenticatedRequestMessageAsync: Start.");
             await HttpHelper.ensureAccessTokenAsync(youtubeAccount).ConfigureAwait(false);
             HttpRequestMessage message = new HttpRequestMessage();
             message.Method = method;
             message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount].Token);
+            Tracer.Write($"HttpHelper.GetAuthenticatedRequestMessageAsync: End.");
             return message;
         }
 
         private static async Task ensureAccessTokenAsync(YoutubeAccount youtubeAccount)
         {
+            Tracer.Write($"HttpHelper.ensureAccessTokenAsync: Start.");
             if (!HttpHelper.youtubeAccessTokenExpiryByAccount.ContainsKey(youtubeAccount) || HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount].Expiry - DateTime.Now < oneMinute)
             {
                 AccessToken token = await YoutubeAuthentication.GetNewAccessTokenAsync(youtubeAccount).ConfigureAwait(false);
                 HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount] = token;
             }
+
+            Tracer.Write($"HttpHelper.ensureAccessTokenAsync: End.");
         }
 
         public static StreamContent GetStreamContentContentRangeOnly(long length)
         {
+            Tracer.Write($"HttpHelper.GetStreamContentContentRangeOnly: Start.");
             StreamContent content = new StreamContent(Stream.Null);
             content.Headers.ContentLength = 0;
             content.Headers.Add("Content-Range", string.Format("bytes */{0}", length.ToString()));
 
+            Tracer.Write($"HttpHelper.GetStreamContentContentRangeOnly: End.");
             return content;
         }
 
         public static ByteArrayContent GetStreamContent(string content, string contentType)
         {
+            Tracer.Write($"HttpHelper.GetStreamContent: Start.");
             if (string.IsNullOrWhiteSpace(contentType))
             {
+                Tracer.Write($"HttpHelper.GetStreamContent: End.");
                 throw new ArgumentException("contentType");
             }
 
@@ -89,11 +101,13 @@ namespace Drexel.VidUp.Youtube
             streamContent.Headers.ContentLength = bytes.Length;
             streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
+            Tracer.Write($"HttpHelper.GetStreamContent: End.");
             return streamContent;
         }
 
         public static StreamContent GetStreamContentResumableUpload(Stream data, long orirginalLength, long startByteIndex, string contentType)
         {
+            Tracer.Write($"HttpHelper.GetStreamContentResumableUpload: Start.");
             StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
@@ -109,14 +123,18 @@ namespace Drexel.VidUp.Youtube
                 content.Headers.Add("Content-Range", rangeString);
             }
 
+            Tracer.Write($"HttpHelper.GetStreamContentResumableUpload: End.");
             return content;
         }
 
         public static StreamContent GetStreamContentUpload(Stream data, string contentType)
         {
+            Tracer.Write($"HttpHelper.GetStreamContentUpload: Start.");
             StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
             content.Headers.ContentLength = data.Length;
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+
+            Tracer.Write($"HttpHelper.GetStreamContentUpload: End.");
             return content;
         }
     }

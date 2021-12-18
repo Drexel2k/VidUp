@@ -306,7 +306,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                     }
                 }
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 this.memoryBuffer.Complete();
                 return;
@@ -323,7 +323,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                     this.currentData = this.memoryBuffer.Receive();
                     this.currentDataPosition = 0;
                 }
-                catch (InvalidOperationException e)
+                catch (InvalidOperationException)
                 {
                     return 0;
                 }

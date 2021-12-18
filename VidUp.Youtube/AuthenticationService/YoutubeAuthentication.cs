@@ -77,8 +77,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                     message.EnsureSuccessStatusCode();
                     Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
 
-                    AccessToken accessToken = new AccessToken(tokenEndpointDecoded["access_token"],
-                        DateTime.Now.AddSeconds(Convert.ToInt32(tokenEndpointDecoded["expires_in"])));
+                    AccessToken accessToken = new AccessToken(tokenEndpointDecoded["access_token"], DateTime.Now.AddSeconds(Convert.ToInt32(tokenEndpointDecoded["expires_in"])));
 
                     Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
                     return accessToken;
@@ -130,7 +129,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
 
             // Sends an HTTP response to the browser.
             var response = context.Response;
-            string responseString = string.Format("<html><head><meta http-equiv='refresh' content='10;url=https://google.com'></head><body>Please return to the app.</body></html>");
+            string responseString = "<html><head><meta http-equiv='refresh' content='10;url=https://google.com'></head><body>Please return to the app.</body></html>";
             var buffer = Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
             var responseOutput = response.OutputStream;
@@ -141,11 +140,15 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             // Checks for errors.
             if (context.Request.QueryString.Get("error") != null)
             {
-                throw new AuthenticationException(string.Format("Authentication error: {0}", context.Request.QueryString.Get("error")));
+                string error = $"Authentication error: {context.Request.QueryString.Get("error")}";
+                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: {error}.");
+                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
+                throw new AuthenticationException($"Authentication error: {error}");
             }
-            if (context.Request.QueryString.Get("code") == null
-                || context.Request.QueryString.Get("state") == null)
+            if (context.Request.QueryString.Get("code") == null || context.Request.QueryString.Get("state") == null)
             {
+                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code or State is null.");
+                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
                 throw new AuthenticationException("Authentication error: Code or State is null.");
             }
 
@@ -157,6 +160,8 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             // this app made the request which resulted in authorization.
             if (incoming_state != state)
             {
+                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code and State differ.");
+                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
                 throw new AuthenticationException("Authentication error: Code and State differ.");
             }
 
@@ -164,7 +169,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             // builds the  request
             string tokenRequestBody = string.Format("code={0}&redirect_uri={1}&client_id={2}&code_verifier={3}&client_secret={4}&scope=&grant_type=authorization_code",
                 code,
-                System.Uri.EscapeDataString(redirectURI),
+                Uri.EscapeDataString(redirectURI),
                 Credentials.ClientId,
                 code_verifier,
                 clientSecret

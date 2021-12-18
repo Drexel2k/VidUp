@@ -361,7 +361,16 @@ namespace Drexel.VidUp.UI.ViewModels
         public bool PostponePostUploadAction
         {
             get => this.postponePostUploadAction;
-            set => this.postponePostUploadAction = value;
+            set
+            {
+                if (!value)
+                {
+                    this.cancelPostUploadAction();
+                }
+
+                this.postponePostUploadAction = value;
+                this.raisePropertyChanged("PostponePostUploadAction");
+            }
         }
 
         public string PostponePostUploadActionProcessName
@@ -639,6 +648,13 @@ namespace Drexel.VidUp.UI.ViewModels
             this.appStatus = AppStatus.Uploading;
             this.uploadStats = e.UploadStats;
 
+            this.cancelPostUploadAction();
+
+            this.raisePropertyChanged("AppStatus");
+        }
+
+        private void cancelPostUploadAction()
+        {
             lock (this.postUploadActionLock)
             {
                 if (this.postUploadActionCancellationTokenSource != null)
@@ -648,8 +664,6 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.postUploadActionCancellationTokenSource = null;
                 }
             }
-
-            this.raisePropertyChanged("AppStatus");
         }
 
         private void uploadListViewModelOnUploadFinished(object sender, UploadFinishedEventArgs e)
@@ -663,7 +677,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 //this.postUploadActionCancellationTokenSource is cancelled and nulled on start of a new upload session,
                 //it should be always null here, if it is not the case, it would mean quick start of at least 2 upload sessions
-                //which call the finished event nearly simultaneously, then only one doPostUploadAction task is created.
+                //which call the finished event nearly simultaneously, then only one doPostUploadTasks task is created.
                 if (this.postUploadActionCancellationTokenSource == null)
                 {
                     this.postUploadActionCancellationTokenSource = new CancellationTokenSource();
@@ -675,21 +689,25 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            this.doPostUploadAction(e, cancellationToken);
+            this.doPostUploadTasks(e, cancellationToken);
         }
 
-        private async Task doPostUploadAction(UploadFinishedEventArgs e, CancellationToken cancellationToken)
+        private async Task doPostUploadTasks(UploadFinishedEventArgs e, CancellationToken cancellationToken)
         {
-            Tracer.Write($"MainWindowViewModel.doPostUploadAction: Start.");
+            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Start.");
 
             bool postponed = false;
-            if (this.postUploadAction != PostUploadAction.None && e.DataSent && !e.UploadStopped && this.appStatus == AppStatus.Idle)
+            PostUploadAction postUploadActionInternal = this.postUploadAction;
+            AppStatus appStatusInternal = this.appStatus;
+
+            if (postUploadActionInternal != PostUploadAction.None && e.DataSent && !e.UploadStopped && appStatusInternal == AppStatus.Idle)
             {
-                if (this.postponePostUploadAction &&
-                    !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostponePostUploadActionProcessName))
+                Tracer.Write($"MainWindowViewModel.doPostUploadTasks: performing post upload action.");
+
+                if (this.postponePostUploadAction && !string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.PostponePostUploadActionProcessName))
                 {
                     postponed = true;
-                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing post upload action.");
+                    Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Postponing post upload action if necessary.");
                     string processName = Path.GetFileNameWithoutExtension(Settings.Instance.UserSettings.PostponePostUploadActionProcessName);
                     bool processRunning = true;
                     while (processRunning)
@@ -697,7 +715,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         Process[] processes = Process.GetProcessesByName(processName);
                         if (processes.Length > 0)
                         {
-                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing process found, delaying 5 minutes.", TraceLevel.Detailed);
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Postponing process found, delaying 5 minutes.", TraceLevel.Detailed);
                             try
                             {
                                 //await Task.Delay(10000, cancellationToken).ConfigureAwait(false); //10 seconds
@@ -705,79 +723,108 @@ namespace Drexel.VidUp.UI.ViewModels
                             }
                             catch (TaskCanceledException)
                             {
-                                Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing canceled.");
+                                Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Postponing canceled.");
                                 return;
                             }
                         }
                         else
                         {
-                            Tracer.Write($"MainWindowViewModel.doPostUploadAction: Postponing process '{processName}' not found.");
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Postponing process '{processName}' not found.");
                             processRunning = false;
                         }
                     }
                 }
-            }
 
-            //Setting could be changed while waiting for postponing process to finish
-            if (this.postUploadAction != PostUploadAction.None && e.DataSent && !e.UploadStopped && this.appStatus == AppStatus.Idle)
-            {
-                Tracer.Write($"MainWindowViewModel.doPostUploadAction: Performing post upload action {this.postUploadAction}.");
+                //Setting could be changed while waiting for postponing process to finish
+                postUploadActionInternal = this.postUploadAction;
+                appStatusInternal = this.appStatus;
 
-                switch (this.postUploadAction)
+                if (postUploadActionInternal != PostUploadAction.None && appStatusInternal == AppStatus.Idle)
                 {
-                    case PostUploadAction.SleepMode:
-                        Application.SetSuspendState(PowerState.Suspend, false, false);
-                        break;
-                    case PostUploadAction.Hibernate:
-                        Application.SetSuspendState(PowerState.Hibernate, false, false);
-                        break;
-                    case PostUploadAction.Shutdown:
-                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: End, shutdown system.");
-                        ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
-                        break;
-                    case PostUploadAction.FlashTaskbar:
-                        this.notifyTaskbarItemInfo();
-                        break;
-                    case PostUploadAction.Close:
-                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: End, exit app.");
-                        System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
-                        break;
-                    default:
-                        break;
+                    Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Performing post upload action {this.postUploadAction}.");
+
+                    switch (this.postUploadAction)
+                    {
+                        case PostUploadAction.SleepMode:
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Sleep.");
+                            Application.SetSuspendState(PowerState.Suspend, false, false);
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Sleep ended.");
+                            break;
+                        case PostUploadAction.Hibernate:
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Hibernate.");
+                            Application.SetSuspendState(PowerState.Hibernate, false, false);
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Hibernate ended.");
+                            break;
+                        case PostUploadAction.Shutdown:
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: End, shutdown system.");
+                            ShutDownHelper.ExitWin(ExitWindows.ShutDown, ShutdownReason.MajorOther | ShutdownReason.MinorOther);
+                            break;
+                        case PostUploadAction.FlashTaskbar:
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Flash taskbar.");
+                            this.notifyTaskbarItemInfo();
+                            break;
+                        case PostUploadAction.Close:
+                            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: End, exit app.");
+                            System.Windows.Application.Current.Dispatcher.Invoke(() => System.Windows.Application.Current.Shutdown());
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    Tracer.Write($"MainWindowViewModel.doPostUploadTasks: No post upload action to perform after postponing.");
+
+                    if (postUploadActionInternal == PostUploadAction.None)
+                    {
+                        Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Post upload action was none.");
+                    }
+
+                    if (postUploadActionInternal == PostUploadAction.None && postponed)
+                    {
+                        //post upload action was set to none by user while postponing was running
+                        Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Post upload action was set to none by user while waiting for postponing process.");
+                    }
+
+                    if (appStatusInternal != AppStatus.Idle)
+                    {
+                        Tracer.Write($"MainWindowViewModel.doPostUploadTasks: App status was not idle.");
+                    }
                 }
             }
             else
             {
-                if (this.postUploadAction == PostUploadAction.None)
+                Tracer.Write($"MainWindowViewModel.doPostUploadTasks: No post upload action to perform.");
+
+                if (postUploadActionInternal == PostUploadAction.None)
                 {
-                    if (postponed)
-                    {
-                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: Post upload action was set to none while waiting for postponing process.");
-                    }
-                    else
-                    {
-                        Tracer.Write($"MainWindowViewModel.doPostUploadAction: No post upload action to perform.");
-                    }
+                    Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Post upload action was none.");
                 }
 
+                if (appStatusInternal != AppStatus.Idle)
+                {
+                    Tracer.Write($"MainWindowViewModel.doPostUploadTasks: App status was not idle.");
+                }
 
                 if (e.DataSent != true)
                 {
-                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: No data was sent during upload session.");
+                    Tracer.Write($"MainWindowViewModel.doPostUploadTasks: No data was sent during upload session.");
                 }
 
                 if (e.UploadStopped)
                 {
-                    Tracer.Write($"MainWindowViewModel.doPostUploadAction: Upload was stopped manually.");
+                    Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Upload was stopped manually.");
                 }
             }
 
             //for all post upload actions which don't close VidUp the result shall stay 10 seconds.
+            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Resetting taskbar and upload stats in 10 seconds.");
             await Task.Delay(10000);
+            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Resetting taskbar and upload stats.");
             this.resetTaskbarItemInfo();
             this.updateStats();
 
-            Tracer.Write($"MainWindowViewModel.doPostUploadAction: End.");
+            Tracer.Write($"MainWindowViewModel.doPostUploadTasks: End.");
         }
 
         private ReSerialize deserializeContent()
