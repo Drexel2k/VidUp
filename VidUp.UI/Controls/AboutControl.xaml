@@ -20,16 +20,18 @@
             <RowDefinition />
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0">Drexel's Vidup - A Youtube Video Uploader</TextBlock>
         <TextBlock Grid.Row="1">Copyright (C) 2020-2021  Drexel Development</TextBlock>
         <TextBlock Grid.Row="2">Published under<LineBreak />AFFERO GENERAL PUBLIC LICENSE, see license.rtf</TextBlock>
         <TextBlock Grid.Row="3">drexel.development@gmail.com</TextBlock>
-        <TextBlock Grid.Row="4">GitHub: <Hyperlink NavigateUri="https://github.com/Drexel2k/VidUp" RequestNavigate="hyperlinkRequestNavigate">https://github.com/Drexel2k/VidUp</Hyperlink></TextBlock>
-        <TextBlock Grid.Row="5" Text="{Binding Version}" />
-        <TextBlock Grid.Row="6"> </TextBlock>
-        <TextBlock Grid.Row="7">Visit me: <Hyperlink NavigateUri="https://www.youtube.com/drexel2k" RequestNavigate="hyperlinkRequestNavigate">https://www.youtube.com/drexel2k</Hyperlink></TextBlock>
-        <Button Grid.Row="8" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
+        <TextBlock Grid.Row="4">Homepage: <Hyperlink NavigateUri="https://www.vidup.info/" RequestNavigate="hyperlinkRequestNavigate">https://www.vidup.info/</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="5">GitHub: <Hyperlink NavigateUri="https://github.com/Drexel2k/VidUp" RequestNavigate="hyperlinkRequestNavigate">https://github.com/Drexel2k/VidUp</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="6" Text="{Binding Version}" />
+        <TextBlock Grid.Row="7"> </TextBlock>
+        <TextBlock Grid.Row="8">Visit me: <Hyperlink NavigateUri="https://www.youtube.com/drexel2k" RequestNavigate="hyperlinkRequestNavigate">https://www.youtube.com/drexel2k</Hyperlink></TextBlock>
+        <Button Grid.Row="9" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>
             </Button.CommandParameter>

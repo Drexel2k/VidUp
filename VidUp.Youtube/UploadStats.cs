@@ -17,17 +17,19 @@ namespace Drexel.VidUp.Youtube
         private long currentUploadSpeedInBytesPerSecond;
 
         //total file size of all files to upload to check changes, changes only on upload list changes
-        private long totalFileLengthToUpload;
+        private long totalFileLengthToSend;
         //total remaining bytes of all files to uploads, changes only on upload list changes
         private long totalRemainingBytes;
 
         //total file size of all files which were tried to upload, e.g. finished or failed, changes on upload change
         private long totalFileLengthProcessed;
+        //remaining bytes uploaded of all files which were tried to upload, e.g. finished or failed, changes on upload change
+        private long totalBytesSent;
         //bytes sent of current upload, changes on upload change
         private long currentUploadBytesSentInitial;
 
         //reset on every update to avoid reevaluations for some of the stats
-        private long currentRemainingBytesLeftToUpload;
+        private long currentRemainingBytesLeftToSend;
         private AutoResetEvent resetEvent;
 
         public float TotalProgressPercentage
@@ -40,7 +42,7 @@ namespace Drexel.VidUp.Youtube
                 }
                 else
                 {
-                    return (this.totalFileLengthProcessed + (this.currentUpload.BytesSent - this.currentUploadBytesSentInitial)) / (float)this.totalRemainingBytes;
+                    return (this.totalBytesSent + (this.currentUpload.BytesSent - this.currentUploadBytesSentInitial)) / (float)this.totalRemainingBytes;
                 }
             } 
         }
@@ -77,7 +79,7 @@ namespace Drexel.VidUp.Youtube
         {
             get
             {
-                return (int)((float)this.currentRemainingBytesLeftToUpload / Constants.ByteMegaByteFactor);
+                return (int)((float)this.currentRemainingBytesLeftToSend / Constants.ByteMegaByteFactor);
             }
 
         }
@@ -88,7 +90,7 @@ namespace Drexel.VidUp.Youtube
             {
                 if (this.currentUploadSpeedInBytesPerSecond > 0)
                 {
-                    float seconds = this.currentRemainingBytesLeftToUpload / (float) this.currentUploadSpeedInBytesPerSecond;
+                    float seconds = this.currentRemainingBytesLeftToSend / (float) this.currentUploadSpeedInBytesPerSecond;
                     return TimeSpan.FromSeconds(seconds);
                 }
 
@@ -130,16 +132,17 @@ namespace Drexel.VidUp.Youtube
         {
             this.resetEvent.WaitOne();
 
-            this.currentRemainingBytesLeftToUpload = this.resumeUploads ? this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetRemainingBytesOfFilesToUpload(this.uploaded);
+            this.currentRemainingBytesLeftToSend = this.resumeUploads ? this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetRemainingBytesOfFilesToUpload(this.uploaded);
 
             //check if upload has been added, removed, paused, reset...
             long currentTotalBytesLeftToUpload = (this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetTotalBytesOfFilesToUpload(this.uploaded)) + this.totalFileLengthProcessed;
-            long delta = currentTotalBytesLeftToUpload - this.totalFileLengthToUpload;
+            long delta = currentTotalBytesLeftToUpload - this.totalFileLengthToSend;
             if (delta != 0)
             {
-                this.totalFileLengthToUpload = this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetTotalBytesOfFilesToUpload(this.uploaded);
+                this.totalFileLengthToSend = this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetTotalBytesOfFilesToUpload(this.uploaded);
                 this.totalRemainingBytes = this.resumeUploads ? this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetRemainingBytesOfFilesToUpload(this.uploaded);
                 this.totalFileLengthProcessed = 0;
+                this.totalBytesSent = 0;
             }
 
             this.resetEvent.Set();
@@ -149,7 +152,7 @@ namespace Drexel.VidUp.Youtube
         {
             this.uploadList = uploadList;
             this.resumeUploads = resumeUploads;
-            this.totalFileLengthToUpload = this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(null) : this.uploadList.GetTotalBytesOfFilesToUpload(null);
+            this.totalFileLengthToSend = this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(null) : this.uploadList.GetTotalBytesOfFilesToUpload(null);
             this.totalRemainingBytes = this.resumeUploads ? this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(null) : this.uploadList.GetRemainingBytesOfFilesToUpload(null);
         }
 
@@ -157,6 +160,7 @@ namespace Drexel.VidUp.Youtube
         {
             if (this.currentUpload != null)
             {
+                this.totalBytesSent += this.currentUpload.FileLength - this.currentUploadBytesSentInitial;
                 this.totalFileLengthProcessed += this.currentUpload.FileLength;
                 this.uploaded.Add(this.currentUpload);
             }
