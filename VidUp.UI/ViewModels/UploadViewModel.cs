@@ -644,11 +644,10 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return ".....................................................................................................................................................................................................................";
+                return this.upload.ThumbnailFilePath;
             }
             set
             {
-                string oldFilePath = this.upload.ThumbnailFilePath;
                 this.upload.ThumbnailFilePath = value;
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
