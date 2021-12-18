@@ -490,6 +490,7 @@ namespace Drexel.VidUp.UI.ViewModels
                                                 if (addUploadsToPlaylistIfPublicResult.StatusInformation != null)
                                                 {
                                                     success = false;
+                                                    Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Could not add public videos to playlists:\n{addUploadsToPlaylistIfPublicResult.StatusInformation.Message}");
                                                     messages.Add(new StatusInformation($"{DateTime.Now} Could not add public videos to playlists:\n{addUploadsToPlaylistIfPublicResult.StatusInformation.Message}"));
                                                 }
 
@@ -600,7 +601,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 message.AppendLine(TinyHelpers.QuotaExceededString);
             }
 
-            if (messages.Any(messageInternal => messageInternal.IsAuthenticationError))
+            if (messages.Any(messageInternal => messageInternal.IsApiAuthenticationError))
             {
                 message.AppendLine(TinyHelpers.AuthenticationErrorString);
             }

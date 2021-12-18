@@ -270,7 +270,7 @@ namespace Drexel.VidUp.Business
                     stringBuilder.AppendLine(TinyHelpers.QuotaExceededString);
                 }
 
-                if (this.ErrorsContainAuthenticationError)
+                if (this.ErrorsContainApiAuthenticationError)
                 {
                     stringBuilder.AppendLine(TinyHelpers.AuthenticationErrorString);
                 }
@@ -461,9 +461,9 @@ namespace Drexel.VidUp.Business
             get => this.uploadErrors.Any(error => error.IsQuotaError == true);
         }
 
-        public bool ErrorsContainAuthenticationError
+        public bool ErrorsContainApiAuthenticationError
         {
-            get => this.uploadErrors.Any(error => error.IsAuthenticationError == true);
+            get => this.uploadErrors.Any(error => error.IsApiAuthenticationError == true);
         }
 
         [JsonConstructor]

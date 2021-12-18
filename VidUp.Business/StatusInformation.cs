@@ -11,6 +11,7 @@ namespace Drexel.VidUp.Business
         private string message;
         private bool isQuotaError;
         private bool isAuthenticationError;
+        private bool isApiAuthenticationError;
 
         public string Message
         {
@@ -25,6 +26,11 @@ namespace Drexel.VidUp.Business
         public bool IsAuthenticationError
         {
             get => this.isAuthenticationError;
+        }
+
+        public bool IsApiAuthenticationError
+        {
+            get => this.isApiAuthenticationError;
         }
 
         [JsonConstructor]
@@ -44,6 +50,7 @@ namespace Drexel.VidUp.Business
 
             this.setQuotaError();
             this.setAuthenticationError();
+            this.setApiAuthenticationError();
         }
 
         private void setQuotaError()
@@ -62,11 +69,20 @@ namespace Drexel.VidUp.Business
             }
         }
 
+        private void setApiAuthenticationError()
+        {
+            if (this.message.Contains("API declines authentication"))
+            {
+                this.isApiAuthenticationError = true;
+            }
+        }
+
         [OnDeserialized]
         private void afterDeserialization(StreamingContext context)
         {
             this.setQuotaError();
             this.setAuthenticationError();
+            this.setApiAuthenticationError();
         }
     }
 }

@@ -74,7 +74,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                         {
                             Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
                             Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
-                            throw new AuthenticationException($"Authentication error: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                            throw new AuthenticationException($"Authentication error: API declines authentication: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
                         }
 
                         Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
@@ -92,7 +92,8 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             }
             catch (Exception e)
             {
-                throw new AuthenticationException("Authentication error: Error on getting access token", e);
+                Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End, Unexpected Exception: {e.ToString()}.");
+                throw new AuthenticationException($"Authentication error: Error on getting access token: {e.Message}", e);
             }
         }
 
@@ -157,13 +158,13 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                     string error = $"Authentication error: {context.Request.QueryString.Get("error")}";
                     Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: {error}.");
                     Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                    throw new AuthenticationException($"Authentication error: {error}");
+                    throw new AuthenticationException($"Authentication error: API declines authentication: {error}");
                 }
                 if (context.Request.QueryString.Get("code") == null || context.Request.QueryString.Get("state") == null)
                 {
                     Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code or State is null.");
                     Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                    throw new AuthenticationException("Authentication error: Code or State is null.");
+                    throw new AuthenticationException("Authentication error: API declines authentication: Code or State is null.");
                 }
 
                 // extracts the code
@@ -176,7 +177,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                 {
                     Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Authentication error: Code and State differ.");
                     Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                    throw new AuthenticationException("Authentication error: Code and State differ.");
+                    throw new AuthenticationException("Authentication error: API declines authentication: Code and State differ.");
                 }
 
                 // Starts the code exchange for refresh token at the token endpoint.
@@ -203,7 +204,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                         {
                             Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
                             Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                            throw new AuthenticationException($"Authentication error: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                            throw new AuthenticationException($"Authentication error: API declines authentication: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
                         }
 
                         Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await message.Content.ReadAsStringAsync().ConfigureAwait(false));
@@ -218,7 +219,8 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             }
             catch (Exception e)
             {
-                throw new AuthenticationException("Authentication error: Error on getting refresh token", e);
+                Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End, Unexpected Exception: {e.ToString()}.");
+                throw new AuthenticationException($"Authentication error: Error on getting refresh token: {e.Message}", e);
             }
 
             Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
