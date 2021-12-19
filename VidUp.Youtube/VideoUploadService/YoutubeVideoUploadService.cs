@@ -181,9 +181,9 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                                 return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, false);
                                             }
 
-                                            responseMessage.EnsureSuccessStatusCode();
+                                            throw new HttpStatusException((int)responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
                                         }
-
+                                  
                                         YoutubeVideoPostResponse response = JsonConvert.DeserializeObject<YoutubeVideoPostResponse>(content);
                                         upload.VideoId = response.Id;
 
@@ -217,17 +217,19 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                     return YoutubeVideoUploadService.getResult(upload.BytesSent, initialUploadBytesSent, true);
                                 }
                             }
+                            catch (HttpStatusException e)
+                            {
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
+                                upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'."));
+
+                                error = true;
+                                uploadTry++;
+                            }
                             catch (Exception e)
                             {
-                                //HttpRequestExceptions with no inner exceptions shall not be logged, because they are from successful
-                                //http requests but with not successful http status and are logged above.
-                                //All other exceptions shall be logged, too.
-                                if (!(e is HttpRequestException) || e.InnerException != null)
-                                {
-                                    Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
-                                    upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.GetType().ToString()}: {e.Message}."));
-                                }
-
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
+                                upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.GetType().ToString()}: {e.Message}."));
+                                
                                 error = true;
                                 uploadTry++;
                             }
@@ -353,9 +355,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                     return false;
                                 }
 
-                                //no EnsureStatusCode here as the only expected code is 503.
-                                error = true;
-                                requestTry++;
+                                throw new HttpStatusException((int)responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
                             }
                             else
                             {
@@ -387,6 +387,14 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             }
                         }
                     }
+                }
+                catch (HttpStatusException e)
+                {
+                    errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Getting upload index failed: {e.Message}.");
+                    Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'.");
+
+                    error = true;
+                    requestTry++;
                 }
                 catch (Exception e)
                 {
@@ -480,13 +488,13 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                         byteArrayContent.Headers.Add("X-Upload-Content-Type", MimeTypesMap.GetMimeType(upload.FilePath));
                         requestMessage.Content = byteArrayContent;
 
-                        using (HttpResponseMessage message = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
+                        using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
                         {
-                            string content = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            if (!message.IsSuccessStatusCode)
+                            string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            if (!responseMessage.IsSuccessStatusCode)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
-                                StatusInformation statusInformation = new StatusInformation($"YoutubeVideoUploadService.requestNewUpload: Could not request new upload: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
+                                Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                                StatusInformation statusInformation = new StatusInformation($"YoutubeVideoUploadService.requestNewUpload: Could not request new upload: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                                 upload.AddUploadError(statusInformation);
                                 if (statusInformation.IsQuotaError)
                                 {
@@ -496,26 +504,26 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                     return false;
                                 }
 
-                                message.EnsureSuccessStatusCode();
+                                throw new HttpStatusException((int)responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
                             }
 
                             Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Read header.");
-                            upload.ResumableSessionUri = message.Headers.GetValues("Location").First();
+                            upload.ResumableSessionUri = responseMessage.Headers.GetValues("Location").First();
                             Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End.");
                         }
                     }
                 }
+                catch (HttpStatusException e)
+                {
+                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'.");
+                    error = true;
+                    requestTry++;
+                }
                 catch (Exception e)
                 {
-                    //HttpRequestExceptions with no inner exceptions shall not be logged, because they are from successful
-                    //http requests but with not successful http status and are logged above.
-                    //All other exceptions shall be logged, too.
-                    if (!(e is HttpRequestException) || e.InnerException != null)
-                    {
-                        upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed: {e.GetType().ToString()}: {e.Message}."));
-                        Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Exception: {e.ToString()}.");
-                    }
-
+                    upload.AddUploadError(new StatusInformation($"YoutubeVideoUploadService.requestNewUpload: Requesting new upload failed: {e.GetType().ToString()}: {e.Message}."));
+                    Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Exception: {e.ToString()}.");
+                    
                     error = true;
                     requestTry++;
                 }

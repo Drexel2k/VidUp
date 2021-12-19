@@ -75,8 +75,7 @@ namespace Drexel.VidUp.Youtube.PlaylistService
                                     return statusInformation;
                                 }
 
-                                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                                responseMessage.EnsureSuccessStatusCode();
+                                throw new HttpStatusException((int)responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
                             }
 
                             YoutubePlaylistsGetResponse response = JsonConvert.DeserializeObject<YoutubePlaylistsGetResponse>(content);
@@ -117,16 +116,14 @@ namespace Drexel.VidUp.Youtube.PlaylistService
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, authentication error.");
                 return statusInformation;
             }
+            catch (HttpStatusException e)
+            {
+                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'.");
+                throw;
+            }
             catch (Exception e)
             {
-                //HttpRequestExceptions with no inner exceptions shall not be logged, because they are from successful
-                //http requests but with not successful http status and are logged above.
-                //All other exceptions shall be logged, too.
-                if (!(e is HttpRequestException) || e.InnerException != null)
-                {
-                    Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
-                }
-
+                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
                 throw;
             }
 

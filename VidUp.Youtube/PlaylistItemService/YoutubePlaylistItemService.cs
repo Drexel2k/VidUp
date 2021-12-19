@@ -136,12 +136,13 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
             Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: Start.");
             try
             {
-                using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(playlist.YoutubeAccount, HttpMethod.Get).ConfigureAwait(false))
+                using (HttpRequestMessage requestMessage = await HttpHelper
+                    .GetAuthenticatedRequestMessageAsync(playlist.YoutubeAccount, HttpMethod.Get).ConfigureAwait(false))
                 {
                     Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: Get Playlist info.");
-                    requestMessage.RequestUri = string.IsNullOrWhiteSpace(pageToken)
-                        ? new Uri($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlist.PlaylistId}&maxResults={YoutubePlaylistItemService.maxResults}")
-                        : new Uri($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlist.PlaylistId}&maxResults={YoutubePlaylistItemService.maxResults}&pageToken={pageToken}");
+                    requestMessage.RequestUri = string.IsNullOrWhiteSpace(pageToken) ? 
+                        new Uri($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlist.PlaylistId}&maxResults={YoutubePlaylistItemService.maxResults}") :
+                        new Uri($"{YoutubePlaylistItemService.playlistItemsEndpoint}?part=snippet&playlistId={playlist.PlaylistId}&maxResults={YoutubePlaylistItemService.maxResults}&pageToken={pageToken}");
 
                     using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
                     using (responseMessage.Content)
@@ -149,7 +150,8 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                         string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            StatusInformation statusInformation = new StatusInformation($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: Could not get playlist items: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
+                            StatusInformation statusInformation = new StatusInformation(
+                                $"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: Could not get playlist items: {(int) responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
                             if (statusInformation.IsQuotaError)
                             {
                                 Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, quota exceeded.");
@@ -163,9 +165,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                                 return null;
                             }
 
-                            //unexpected http status
-                            Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                            responseMessage.EnsureSuccessStatusCode();
+                            throw new HttpStatusException((int) responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
                         }
 
                         YoutubePlaylistItemsGetResponse response = JsonConvert.DeserializeObject<YoutubePlaylistItemsGetResponse>(content);
@@ -186,12 +186,14 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                             {
                                 if (statusInformation.IsQuotaError)
                                 {
-                                    Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, quota exceeded.");
+                                    Tracer.Write(
+                                        $"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, quota exceeded.");
                                 }
 
                                 if (statusInformation.IsAuthenticationError)
                                 {
-                                    Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, authentication error.");
+                                    Tracer.Write(
+                                        $"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, authentication error.");
                                 }
 
                                 return statusInformation;
@@ -206,16 +208,15 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                 Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, authentication error.");
                 return statusInformation;
             }
+            catch (HttpStatusException e)
+            {
+                //unexpected http status
+                Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'.");
+                throw;
+            }
             catch (Exception e)
             {
-                //HttpRequestExceptions with no inner exceptions shall not be logged, because they are from successful
-                //http requests but with not successful http status and are logged above.
-                //All other exceptions shall be logged, too.
-                if (!(e is HttpRequestException) || e.InnerException != null)
-                {
-                    Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
-                }
-
+                Tracer.Write($"YoutubePlaylistItemService.addPlaylistContentToResult: End, HttpClient.GetAsync Exception: {e.ToString()}.");
                 throw;
             }
 

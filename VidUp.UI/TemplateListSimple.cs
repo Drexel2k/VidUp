@@ -38,8 +38,7 @@ namespace Drexel.VidUp.UI
             //template is removed from uploads in event listener in MainWindowViewModel.templateListCollectionChanged
             //todo: Move to event aggregator
 
-            this.raiseNotifyCollectionChanged(
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, template));
+            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, template));
         }
     }
 }

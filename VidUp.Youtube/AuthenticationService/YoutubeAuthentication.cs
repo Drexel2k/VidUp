@@ -74,6 +74,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                         {
                             Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
                             Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
+                            //todo throw HttpRequestException, create own AuthenticationException with api response indicator
                             throw new AuthenticationException($"Authentication error: API declines authentication: HttpResponseMessage unexpected status code: {(int)message.StatusCode} {message.ReasonPhrase} with content '{content}'.");
                         }
 

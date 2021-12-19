@@ -50,8 +50,7 @@ namespace Drexel.VidUp.Youtube.VideoService
                                         return result;
                                     }
 
-                                    Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                                    responseMessage.EnsureSuccessStatusCode();
+                                    throw new HttpStatusException((int)responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
                                 }
 
                                 YoutubeVideosGetResponse response = JsonConvert.DeserializeObject<YoutubeVideosGetResponse>(content);
@@ -73,16 +72,14 @@ namespace Drexel.VidUp.Youtube.VideoService
                         Tracer.Write($"YoutubeVideoService.IsPublic: End, authentication error.");
                         return result;
                     }
+                    catch (HttpStatusException e)
+                    {
+                        Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'.");
+                        throw;
+                    }
                     catch (Exception e)
                     {
-                        //HttpRequestExceptions with no inner exceptions shall not be logged, because they are from successful
-                        //http requests but with not successful http status and are logged above.
-                        //All other exceptions shall be logged, too.
-                        if (!(e is HttpRequestException) || e.InnerException != null)
-                        {
-                            Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpClient.GetAsync Exception: {e.ToString()}.");
-                        }
-
+                        Tracer.Write($"YoutubeVideoService.IsPublic: End, HttpClient.GetAsync Exception: {e.ToString()}.");
                         throw;
                     }
 
