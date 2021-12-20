@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Authentication;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube.AuthenticationService;
+using Drexel.VidUp.Youtube.Http;
 using Drexel.VidUp.Youtube.PlaylistService.Data;
-using Drexel.VidUp.Youtube.VideoService.Data;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Youtube.PlaylistService
@@ -68,14 +68,7 @@ namespace Drexel.VidUp.Youtube.PlaylistService
                             string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                             if (!responseMessage.IsSuccessStatusCode)
                             {
-                                StatusInformation statusInformation = new StatusInformation(content);
-                                if (statusInformation.IsQuotaError)
-                                {
-                                    Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, quota exceeded.");
-                                    return statusInformation;
-                                }
-
-                                throw new HttpStatusException((int)responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
+                                throw new HttpStatusException(responseMessage.ReasonPhrase, (int)responseMessage.StatusCode, content);
                             }
 
                             YoutubePlaylistsGetResponse response = JsonConvert.DeserializeObject<YoutubePlaylistsGetResponse>(content);
@@ -112,13 +105,26 @@ namespace Drexel.VidUp.Youtube.PlaylistService
             }
             catch (AuthenticationException e)
             {
-                StatusInformation statusInformation = new StatusInformation(e.Message);
+                StatusInformationType statusInformationType = StatusInformationType.AuthenticationError;
+                if (e.IsApiResponseError)
+                {
+                    statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
+                }
+
+                StatusInformation statusInformation = new StatusInformation(e.Message, statusInformationType);
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, authentication error.");
                 return statusInformation;
             }
             catch (HttpStatusException e)
             {
-                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'.");
+                Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
+                StatusInformation statusInformation = StatusInformationCreator.Create("YoutubePlaylistService.addPlaylistsToResult", e);
+                if (statusInformation.IsQuotaError)
+                {
+                    Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, quota exceeded.");
+                    return statusInformation;
+                }
+
                 throw;
             }
             catch (Exception e)

@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube.AuthenticationService;
+using Drexel.VidUp.Youtube.Http;
 using HeyRed.Mime;
 
 namespace Drexel.VidUp.Youtube.ThumbnailService
@@ -26,29 +28,52 @@ namespace Drexel.VidUp.Youtube.ThumbnailService
                     try
                     {
                         using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                            upload.YoutubeAccount, HttpMethod.Post, $"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}").ConfigureAwait(false))
+                                upload.YoutubeAccount, HttpMethod.Post,
+                                $"{YoutubeThumbnailService.thumbnailEndpoint}?videoId={upload.VideoId}")
+                            .ConfigureAwait(false))
                         {
 
                             requestMessage.Content = streamContent;
                             Tracer.Write($"YoutubeThumbnailService.AddThumbnail: Add thumbnail.");
 
-                            using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient.SendAsync(requestMessage).ConfigureAwait(false))
+                            using (HttpResponseMessage responseMessage = await HttpHelper.StandardClient
+                                .SendAsync(requestMessage).ConfigureAwait(false))
                             using (responseMessage.Content)
                             {
                                 string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                                 if (!responseMessage.IsSuccessStatusCode)
                                 {
-                                    Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'.");
-                                    upload.AddUploadError(new StatusInformation($"YoutubeThumbnailService.AddThumbnail: Could not add thumbnail: {(int)responseMessage.StatusCode} {responseMessage.ReasonPhrase} with content '{content}'."));
-                                    return false;
+                                    throw new HttpStatusException(responseMessage.ReasonPhrase, (int)responseMessage.StatusCode, content);
                                 }
                             }
                         }
                     }
+                    catch (AuthenticationException e)
+                    {
+                        Tracer.Write(
+                            $"YoutubeThumbnailService.AddThumbnail: End, authentication exception: {e.ToString()}.");
+
+                        StatusInformationType statusInformationType = StatusInformationType.AuthenticationError;
+                        if (e.IsApiResponseError)
+                        {
+                            statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
+                        }
+
+                        StatusInformation statusInformation = new StatusInformation($"YoutubeThumbnailService.AddThumbnail: HttpClient.SendAsync authentication error: {e.GetType().Name}: {e.Message}.", statusInformationType);
+                        upload.AddUploadError(statusInformation);
+
+                        return false;
+                    }
+                    catch (HttpStatusException e)
+                    {
+                        Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
+                        upload.AddUploadError(StatusInformationCreator.Create("YoutubeThumbnailService.AddThumbnail", "Could not add thumbnail", e));
+                        return false;
+                    }
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.SendAsync Exception: {e.ToString()}.");
-                        upload.AddUploadError(new StatusInformation($"YoutubeThumbnailService.AddThumbnail: HttpClient.SendAsync Exception: {e.GetType().ToString()}: {e.Message}."));
+                        upload.AddUploadError(StatusInformationCreator.Create("YoutubeThumbnailService.AddThumbnail", "HttpClient.SendAsync error", e));
                         return false;
                     }
 

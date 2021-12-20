@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Authentication;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
+using Drexel.VidUp.Youtube.AuthenticationService;
+using Drexel.VidUp.Youtube.Http;
 using Drexel.VidUp.Youtube.VideoService.Data;
 using Newtonsoft.Json;
 
@@ -42,15 +43,7 @@ namespace Drexel.VidUp.Youtube.VideoService
                                 string content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                                 if (!responseMessage.IsSuccessStatusCode)
                                 {
-                                    StatusInformation statusInformation = new StatusInformation(content);
-                                    if (statusInformation.IsQuotaError)
-                                    {
-                                        result.StatusInformation = statusInformation;
-                                        Tracer.Write($"YoutubeVideoService.IsPublic: End, quota exceeded.");
-                                        return result;
-                                    }
-
-                                    throw new HttpStatusException((int)responseMessage.StatusCode, responseMessage.ReasonPhrase, content);
+                                    throw new HttpStatusException(responseMessage.ReasonPhrase, (int)responseMessage.StatusCode, content);
                                 }
 
                                 YoutubeVideosGetResponse response = JsonConvert.DeserializeObject<YoutubeVideosGetResponse>(content);
@@ -67,14 +60,23 @@ namespace Drexel.VidUp.Youtube.VideoService
                     }
                     catch (AuthenticationException e)
                     {
-                        StatusInformation statusInformation = new StatusInformation(e.Message);
+                        Tracer.Write($"YoutubeVideoService.IsPublic: Authentication exception: {e.ToString()}.");
+                        StatusInformation statusInformation = StatusInformationCreator.Create("YoutubeVideoService.IsPublic", e);
                         result.StatusInformation = statusInformation;
                         Tracer.Write($"YoutubeVideoService.IsPublic: End, authentication error.");
                         return result;
                     }
                     catch (HttpStatusException e)
                     {
-                        Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {e.StatusCode} {e.ReasonPhrase} with content '{e.Content}'.");
+                        Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
+                        StatusInformation statusInformation = StatusInformationCreator.Create("YoutubeVideoService.IsPublic", e);
+                        if (statusInformation.IsQuotaError)
+                        {
+                            result.StatusInformation = statusInformation;
+                            Tracer.Write($"YoutubeVideoService.IsPublic: End, quota exceeded.");
+                            return result;
+                        }
+
                         throw;
                     }
                     catch (Exception e)

@@ -4,14 +4,13 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.AuthenticationService;
 
-namespace Drexel.VidUp.Youtube
+namespace Drexel.VidUp.Youtube.Http
 {
     public static class HttpHelper
     {

@@ -113,7 +113,7 @@ namespace Drexel.VidUp.UI.ViewModels
                         this.raisePropertyChanged("PlaylistReceiveErrorMessage");
                     }
 
-                    if (getPlaylistsResult.StatusInformation.IsApiAuthenticationError)
+                    if (getPlaylistsResult.StatusInformation.IsAuthenticationApiResponseError)
                     {
                         this.showPlaylistReceiveError = true;
                         this.playlistReceiveErrorMessage = TinyHelpers.AuthenticationErrorString;

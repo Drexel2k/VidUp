@@ -326,8 +326,18 @@ namespace Drexel.VidUp.UI.ViewModels
             }
             catch (Exception e)
             {
+                string message = "Authentication error";
+                AuthenticationException authenticationException = e as AuthenticationException;
+                if (authenticationException != null)
+                {
+                    if (authenticationException.IsApiResponseError)
+                    {
+                        message += ", server denied authentication";
+                    }
+                }
+
                 Tracer.Write($"SettingsViewModel.authenticateYoutubeAccountAsync: YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync Exception: {e.ToString()}.");
-                ConfirmControl control = new ConfirmControl($"Authentication error:: {e.GetType().ToString()}: {e.Message}.", false);
+                ConfirmControl control = new ConfirmControl($"{message}: {e.GetType().Name}: {e.Message}.", false);
 
                 await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
             }

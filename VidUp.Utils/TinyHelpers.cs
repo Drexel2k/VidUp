@@ -5,7 +5,7 @@ namespace Drexel.VidUp.Utils
     public class TinyHelpers
     {
         public static string QuotaExceededString = "VidUp's YouTube access is closed for today (API quota exceeded). Try again after midnight pacific time (UTC-8).";
-        public static string AuthenticationErrorString = "Authentication error. If the error is permanent, maybe try re-sign in under Settings->YouTube Account->Kebab menu.";
+        public static string AuthenticationErrorString = "Authentication denied. If the error is permanent, maybe try re-sign in under Settings->YouTube Account->Kebab menu.";
 
         public static string TrimLineBreakAtEnd(string text)
         {

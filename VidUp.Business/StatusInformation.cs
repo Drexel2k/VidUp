@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Business
@@ -9,9 +8,8 @@ namespace Drexel.VidUp.Business
     {
         [JsonProperty]
         private string message;
-        private bool isQuotaError;
-        private bool isAuthenticationError;
-        private bool isApiAuthenticationError;
+        [JsonProperty]
+        private StatusInformationType statusInformationType;
 
         public string Message
         {
@@ -20,17 +18,54 @@ namespace Drexel.VidUp.Business
 
         public bool IsQuotaError
         {
-            get => this.isQuotaError;
+            get
+            {
+                if ((this.statusInformationType & StatusInformationType.QuotaError) == StatusInformationType.QuotaError)
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
 
         public bool IsAuthenticationError
         {
-            get => this.isAuthenticationError;
+            get
+            {
+                if ((this.statusInformationType & StatusInformationType.AuthenticationError) == StatusInformationType.AuthenticationError)
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
 
-        public bool IsApiAuthenticationError
+        public bool IsAuthenticationApiResponseError
         {
-            get => this.isApiAuthenticationError;
+            get
+            {
+                if ((this.statusInformationType & StatusInformationType.AuthenticationApiResponseError) == StatusInformationType.AuthenticationApiResponseError)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsOtherError
+        {
+            get
+            {
+                if ((this.statusInformationType & StatusInformationType.Other) == StatusInformationType.Other)
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
 
         [JsonConstructor]
@@ -39,7 +74,7 @@ namespace Drexel.VidUp.Business
 
         }
 
-        public StatusInformation(string message)
+        public StatusInformation(string message, StatusInformationType statusInformationType)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
@@ -48,41 +83,7 @@ namespace Drexel.VidUp.Business
 
             this.message = message;
 
-            this.setQuotaError();
-            this.setAuthenticationError();
-            this.setApiAuthenticationError();
-        }
-
-        private void setQuotaError()
-        {
-            if (this.message.Contains("quotaExceeded"))
-            {
-                this.isQuotaError = true;
-            }
-        }
-
-        private void setAuthenticationError()
-        {
-            if (this.message.Contains("Authentication"))
-            {
-                this.isAuthenticationError = true;
-            }
-        }
-
-        private void setApiAuthenticationError()
-        {
-            if (this.message.Contains("API declines authentication"))
-            {
-                this.isApiAuthenticationError = true;
-            }
-        }
-
-        [OnDeserialized]
-        private void afterDeserialization(StreamingContext context)
-        {
-            this.setQuotaError();
-            this.setAuthenticationError();
-            this.setApiAuthenticationError();
+            this.statusInformationType = statusInformationType;
         }
     }
 }
