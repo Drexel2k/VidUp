@@ -39,7 +39,7 @@ namespace Drexel.VidUp.Utils
         private string postponePostUploadActionProcessName;
 
         [JsonProperty]
-        private bool useIndividualYouTubeApiCredentials;
+        private bool useCustomYouTubeApiCredentials;
 
         [JsonProperty]
         private string clientId;
@@ -107,10 +107,10 @@ namespace Drexel.VidUp.Utils
             set => this.postponePostUploadActionProcessName = value;
         }
 
-        public bool UseIndividualYouTubeApiCredentials
+        public bool UseCustomYouTubeApiCredentials
         {
-            get => this.useIndividualYouTubeApiCredentials;
-            set => this.useIndividualYouTubeApiCredentials = value;
+            get => this.useCustomYouTubeApiCredentials;
+            set => this.useCustomYouTubeApiCredentials = value;
         }
 
         public string ClientId

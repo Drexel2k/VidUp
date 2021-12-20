@@ -16,7 +16,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private string refreshToken;
         [JsonProperty]
-        private string refreshTokenIndividualApiCredentials;
+        private string refreshTokenCustomApiCredentials;
 
         private bool isDummy = false;
         private Func<string> getAccountName;
@@ -32,10 +32,10 @@ namespace Drexel.VidUp.Business
             set => this.refreshToken = value;
         }
 
-        public string RefreshTokenIndividualApiCredentials
+        public string RefreshTokenCustomApiCredentials
         {
-            get => this.refreshTokenIndividualApiCredentials;
-            set => this.refreshTokenIndividualApiCredentials = value;
+            get => this.refreshTokenCustomApiCredentials;
+            set => this.refreshTokenCustomApiCredentials = value;
         }
 
         public string Name

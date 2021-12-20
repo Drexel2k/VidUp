@@ -48,19 +48,19 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public bool UseIndividualYouTubeApiCredentials
+        public bool UseCustomYouTubeApiCredentials
         {
-            get { return Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials; }
+            get { return Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials; }
             set
             {
-                if (value != Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                if (value != Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                 {
                     HttpHelper.ClearAccessTokens();
                 }
 
-                Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials = value;
+                Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
-                this.raisePropertyChanged("UseIndividualYouTubeApiCredentials");
+                this.raisePropertyChanged("UseCustomYouTubeApiCredentials");
             }
         }
 
@@ -69,7 +69,7 @@ namespace Drexel.VidUp.UI.ViewModels
             get => Settings.Instance.UserSettings.ClientId;
             set
             {
-                if (value != Settings.Instance.UserSettings.ClientId && Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                if (value != Settings.Instance.UserSettings.ClientId && Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                 {
                     HttpHelper.ClearAccessTokens();
                 }
@@ -85,7 +85,7 @@ namespace Drexel.VidUp.UI.ViewModels
             get => Settings.Instance.UserSettings.ClientSecret;
             set
             {
-                if (value != Settings.Instance.UserSettings.ClientSecret && Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                if (value != Settings.Instance.UserSettings.ClientSecret && Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                 {
                     HttpHelper.ClearAccessTokens();
                 }

@@ -132,7 +132,7 @@
                     <StackPanel Orientation="Vertical"  Grid.Row="0" Grid.Column="1">
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Enable Inidividual Credentials" Width="165" />
-                            <ToggleButton IsChecked="{Binding UseIndividualYouTubeApiCredentials}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
+                            <ToggleButton IsChecked="{Binding UseCustomYouTubeApiCredentials}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="VidUp uses the YouTube Data API to upload videos, this API needs a login beside the YouTube/Google account login. This API login is limited in the amout of requests per day (API quota exceeded) and shared between all users.&#x0a;You can enter your own API login here (not your YouTube/Google account login), if VidUp's default API acess is closed too often for the rest of the day by too many requests e.g." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">

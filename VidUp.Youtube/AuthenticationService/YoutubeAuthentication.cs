@@ -47,9 +47,9 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                 //check for refresh token, if not there, get it
 
                 string refreshToken = youtubeAccount.RefreshToken;
-                if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                 {
-                    refreshToken = youtubeAccount.RefreshTokenIndividualApiCredentials;
+                    refreshToken = youtubeAccount.RefreshTokenCustomApiCredentials;
                 }
 
                 if (string.IsNullOrWhiteSpace(refreshToken))
@@ -64,7 +64,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                 string clientId = Credentials.ClientId;
                 string clientSecret = Credentials.ClientSecret;
 
-                if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                 {
                     clientId = Settings.Instance.UserSettings.ClientId;
                     clientSecret = Settings.Instance.UserSettings.ClientSecret;
@@ -136,7 +136,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                 string clientId = Credentials.ClientId;
                 string clientSecret = Credentials.ClientSecret;
 
-                if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                 {
                     clientId = Settings.Instance.UserSettings.ClientId;
                     clientSecret = Settings.Instance.UserSettings.ClientSecret;
@@ -223,9 +223,9 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                         }
 
                         Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false));
-                        if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                        if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                         {
-                            youtubeAccount.RefreshTokenIndividualApiCredentials = tokenEndpointDecoded["refresh_token"];
+                            youtubeAccount.RefreshTokenCustomApiCredentials = tokenEndpointDecoded["refresh_token"];
                         }
                         else
                         {
