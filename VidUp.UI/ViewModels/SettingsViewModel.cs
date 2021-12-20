@@ -11,6 +11,7 @@ using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.AuthenticationService;
+using Drexel.VidUp.Youtube.Http;
 using MaterialDesignThemes.Wpf;
 
 
@@ -44,6 +45,54 @@ namespace Drexel.VidUp.UI.ViewModels
                 Settings.Instance.UserSettings.Trace = value;
                 JsonSerializationSettings.JsonSerializer.SerializeSettings();
                 this.raisePropertyChanged("Tracing");
+            }
+        }
+
+        public bool UseIndividualYouTubeApiCredentials
+        {
+            get { return Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials; }
+            set
+            {
+                if (value != Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                {
+                    HttpHelper.ClearAccessTokens();
+                }
+
+                Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                this.raisePropertyChanged("UseIndividualYouTubeApiCredentials");
+            }
+        }
+
+        public string ClientId
+        {
+            get => Settings.Instance.UserSettings.ClientId;
+            set
+            {
+                if (value != Settings.Instance.UserSettings.ClientId && Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                {
+                    HttpHelper.ClearAccessTokens();
+                }
+
+                Settings.Instance.UserSettings.ClientId = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                this.raisePropertyChanged("ClientId");
+            }
+        }
+
+        public string ClientSecret
+        {
+            get => Settings.Instance.UserSettings.ClientSecret;
+            set
+            {
+                if (value != Settings.Instance.UserSettings.ClientSecret && Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                {
+                    HttpHelper.ClearAccessTokens();
+                }
+
+                Settings.Instance.UserSettings.ClientSecret = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                this.raisePropertyChanged("ClientSecret");
             }
         }
 

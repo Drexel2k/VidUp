@@ -539,8 +539,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                         statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
                     }
 
-                    StatusInformation statusInformation = new StatusInformation($"YoutubeVideoUploadService.requestNewUpload: Authentication error: {e.GetType().Name}: {e.Message}.", statusInformationType);
-                    upload.AddUploadError(statusInformation);
+                    upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.requestNewUpload", e));
 
                     error = true;
                     requestTry++;

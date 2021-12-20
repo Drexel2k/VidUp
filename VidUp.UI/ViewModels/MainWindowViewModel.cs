@@ -420,69 +420,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.initialize(user, subFolder, out uploadList, out templateList, out playlistList);
         }
 
-        private YoutubeAccountList checkLegacyRefreshtokenFile(ReSerialize reSerialize)
-        {
-            string oldFile = $"{Settings.Instance.StorageFolder}\\uploadrefreshtoken";
-            if (File.Exists(oldFile))
-            {
-                string refreshtoken = File.ReadAllText(oldFile);
-                YoutubeAccount youtubeAccount = new YoutubeAccount("Default");
-                youtubeAccount.RefreshToken = string.IsNullOrWhiteSpace(refreshtoken) ? null : refreshtoken;
-                List<YoutubeAccount> list = new List<YoutubeAccount>();
-                list.Add(youtubeAccount);
-                YoutubeAccountList youtubeAccountList = new YoutubeAccountList(list);
-                File.Delete(oldFile);
-                reSerialize.YoutubeAccountList = true;
-                return youtubeAccountList;
-            }
-
-            return null;
-        }
-
-        private void setDefaultAccountOnContent(ReSerialize reSerialize)
-        {
-            foreach (Template template in this.templateList)
-            {
-                Type uploadType = typeof(Template);
-                FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
-                youtubeAccountFieldInfo.SetValue(template, this.youtubeAccountList[0]);
-                reSerialize.TemplateList = true;
-            }
-
-            foreach (Playlist playlist in this.playlistList)
-            {
-                Type uploadType = typeof(Playlist);
-                FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
-                youtubeAccountFieldInfo.SetValue(playlist, this.youtubeAccountList[0]);
-                reSerialize.PlaylistList = true;
-            }
-
-            List<Upload> allUploads = new List<Upload>();
-            foreach (Upload upload in this.uploadList)
-            {
-                allUploads.Add(upload);
-            }
-
-            foreach (Template template in this.templateList)
-            {
-                foreach (Upload upload in template.Uploads)
-                {
-                    if (!allUploads.Contains(upload))
-                    {
-                        allUploads.Add(upload);
-                    }
-                }
-            }
-
-            foreach (Upload upload in allUploads)
-            {
-                Type uploadType = typeof(Upload);
-                FieldInfo youtubeAccountFieldInfo = uploadType.GetField("youtubeAccount", BindingFlags.NonPublic | BindingFlags.Instance);
-                youtubeAccountFieldInfo.SetValue(upload, this.youtubeAccountList[0]);
-                reSerialize.AllUploads = true;
-            }
-        }
-
         private void initialize(string folderSuffix, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
         {
             if (string.IsNullOrWhiteSpace(folderSuffix))
@@ -831,12 +768,10 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             Tracer.Write($"MainWindowViewModel.deserializeContent: Start.");
 
-            //compatibility code, will be removed in future versions
             ReSerialize reSerialize = new ReSerialize();
-            YoutubeAccountList list = this.checkLegacyRefreshtokenFile(reSerialize);
 
             JsonDeserializationContent deserializer = new JsonDeserializationContent(Settings.Instance.StorageFolder, Settings.Instance.ThumbnailFallbackImageFolder);
-            deserializer.Deserialize(reSerialize, list);
+            deserializer.Deserialize(reSerialize);
 
             this.youtubeAccountList = DeserializationRepositoryContent.YoutubeAccountList;
             this.templateList = DeserializationRepositoryContent.TemplateList;
@@ -845,12 +780,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.PropertyChanged += this.uploadListPropertyChanged;
 
             this.playlistList = DeserializationRepositoryContent.PlaylistList;
-
-            //compatibility code, will be removed in future versions
-            if (reSerialize.YoutubeAccountList)
-            {
-                this.setDefaultAccountOnContent(reSerialize);
-            }
 
             this.uploadList.CheckFileUsage = this.templateList.TemplateContainsFallbackThumbnail;
             this.templateList.CheckFileUsage = this.uploadList.UploadContainsFallbackThumbnail;

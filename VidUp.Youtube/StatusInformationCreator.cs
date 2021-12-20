@@ -26,9 +26,11 @@ namespace Drexel.VidUp.Youtube
             {
                 statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
                 message += ", server denied authentication";
+                HttpStatusException httpStatusException = (HttpStatusException) e.InnerException;
+                return new StatusInformation($"{source}: {message}: {httpStatusException.StatusCode} {httpStatusException.Message} with content '{httpStatusException.Content}'.", statusInformationType);
             }
 
-            return new StatusInformation($"{source}: {message}: {e.Message}", statusInformationType);
+            return new StatusInformation($"{source}: {message}: {e.InnerException.GetType().Name}: {e.InnerException.Message}.", statusInformationType);
         }
 
         public static StatusInformation Create(string source, string message, HttpStatusException e)
@@ -45,7 +47,7 @@ namespace Drexel.VidUp.Youtube
 
             if (string.IsNullOrWhiteSpace(message))
             {
-                message = "Server response not ok";
+                message = "Server denied request";
             }
 
             return new StatusInformation($"{source}: {message}: {e.StatusCode} {e.Message} with content '{e.Content}'.", statusInformationType);

@@ -45,7 +45,14 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             {
                 Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Checking refresh token.");
                 //check for refresh token, if not there, get it
-                if (string.IsNullOrWhiteSpace(youtubeAccount.RefreshToken))
+
+                string refreshToken = youtubeAccount.RefreshToken;
+                if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                {
+                    refreshToken = youtubeAccount.RefreshTokenIndividualApiCredentials;
+                }
+
+                if (string.IsNullOrWhiteSpace(refreshToken))
                 {
                     Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: No refresh token for account, requesting refresh token.");
                     await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(youtubeAccount).ConfigureAwait(false);
@@ -53,11 +60,19 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
 
                 Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Refresh token found.");
                 Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Requesting access token.");
-                string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
-                string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
+
+                string clientId = Credentials.ClientId;
+                string clientSecret = Credentials.ClientSecret;
+
+                if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                {
+                    clientId = Settings.Instance.UserSettings.ClientId;
+                    clientSecret = Settings.Instance.UserSettings.ClientSecret;
+                }
+
                 //here we should have the refresh token
                 // builds the  request
-                string tokenRequestBody = $"refresh_token={youtubeAccount.RefreshToken}&client_id={clientId}&client_secret={clientSecret}&grant_type=refresh_token";
+                string tokenRequestBody = $"refresh_token={refreshToken}&client_id={clientId}&client_secret={clientSecret}&grant_type=refresh_token";
 
                 // sends the request
                 byte[] contentBytes = Encoding.ASCII.GetBytes(tokenRequestBody);
@@ -87,12 +102,12 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             {
                 Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
                 Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End.");
-                throw new AuthenticationException($"HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.", e, true);
+                throw new AuthenticationException($"Error on getting access token.", e, true);
             }
             catch (Exception e)
             {
                 Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: End, Unexpected Exception: {e.ToString()}.");
-                throw new AuthenticationException($"Error on getting access token: {e.Message}", e, false);
+                throw new AuthenticationException($"Error on getting access token.", e, false);
             }
         }
 
@@ -118,8 +133,14 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                 http.Prefixes.Add(redirectUri);
                 http.Start();
 
-                string clientId = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientId) ? Credentials.ClientId : Settings.Instance.UserSettings.ClientId;
-                string clientSecret = string.IsNullOrWhiteSpace(Settings.Instance.UserSettings.ClientSecret) ? Credentials.ClientSecret : Settings.Instance.UserSettings.ClientSecret;
+                string clientId = Credentials.ClientId;
+                string clientSecret = Credentials.ClientSecret;
+
+                if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                {
+                    clientId = Settings.Instance.UserSettings.ClientId;
+                    clientSecret = Settings.Instance.UserSettings.ClientSecret;
+                }
 
                 // Creates the OAuth 2.0 authorization request.
                 string authorizationRequest = $"{YoutubeAuthentication.authorizationEndpoint}?response_type=code&scope={Uri.EscapeDataString(YoutubeAuthentication.scopes)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&client_id={clientId}&state={state}&code_challenge={codeChallenge}&code_challenge_method={codeChallengeMethod}";
@@ -183,7 +204,7 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                 Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: State ok.");
                 // Starts the code exchange for refresh token at the token endpoint.
                 // builds the  request
-                string tokenRequestBody = $"code={code}&redirect_uri={Uri.EscapeDataString(redirectUri)}&client_id={Credentials.ClientId}&code_verifier={codeVerifier}&client_secret={clientSecret}&scope=&grant_type=authorization_code";
+                string tokenRequestBody = $"code={code}&redirect_uri={Uri.EscapeDataString(redirectUri)}&client_id={clientId}&code_verifier={codeVerifier}&client_secret={clientSecret}&scope=&grant_type=authorization_code";
 
                 Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Getting refresh token.");
                 // sends the request
@@ -202,7 +223,15 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                         }
 
                         Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false));
-                        youtubeAccount.RefreshToken = tokenEndpointDecoded["refresh_token"];
+                        if (Settings.Instance.UserSettings.UseIndividualYouTubeApiCredentials)
+                        {
+                            youtubeAccount.RefreshTokenIndividualApiCredentials = tokenEndpointDecoded["refresh_token"];
+                        }
+                        else
+                        {
+                            youtubeAccount.RefreshToken = tokenEndpointDecoded["refresh_token"];
+                        }
+
                         JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
                     }
                 }
@@ -211,12 +240,12 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             {
                 Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
                 Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
-                throw new AuthenticationException($"HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.", e, true);
+                throw new AuthenticationException($"Error on getting refresh token.", e, true);
             }
             catch (Exception e)
             {
                 Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End, Unexpected Exception: {e.ToString()}.");
-                throw new AuthenticationException($"Error on getting refresh token: {e.Message}", e, false);
+                throw new AuthenticationException($"Error on getting refresh token.", e, false);
             }
 
             Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");

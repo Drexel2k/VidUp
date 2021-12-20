@@ -42,6 +42,11 @@ namespace Drexel.VidUp.Youtube.Http
             get => HttpHelper.uploadClient;
         }
 
+        public static void ClearAccessTokens()
+        {
+            HttpHelper.youtubeAccessTokenExpiryByAccount.Clear();
+        }
+
         public static async Task<HttpRequestMessage> GetAuthenticatedRequestMessageAsync(YoutubeAccount youtubeAccount, HttpMethod method, string uri)
         {
             Tracer.Write($"HttpHelper.GetAuthenticatedRequestMessageAsync: Start with uri.");

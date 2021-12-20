@@ -105,15 +105,8 @@ namespace Drexel.VidUp.Youtube.PlaylistService
             }
             catch (AuthenticationException e)
             {
-                StatusInformationType statusInformationType = StatusInformationType.AuthenticationError;
-                if (e.IsApiResponseError)
-                {
-                    statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
-                }
-
-                StatusInformation statusInformation = new StatusInformation(e.Message, statusInformationType);
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, authentication error.");
-                return statusInformation;
+                return StatusInformationCreator.Create("YoutubePlaylistService.addPlaylistsToResult", e);
             }
             catch (HttpStatusException e)
             {

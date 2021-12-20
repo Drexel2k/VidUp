@@ -40,18 +40,11 @@ namespace Drexel.VidUp.Json.Content
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
 
-        public void Deserialize(ReSerialize reSerialize, YoutubeAccountList list)
+        public void Deserialize(ReSerialize reSerialize)
         {
             Tracer.Write($"JsonDeserializationContent.Deserialize: Start.");
-            if (list == null)
-            {
-                reSerialize.YoutubeAccountList = this.deserializeYoutubeAccountList();
-            }
-            else
-            {
-                DeserializationRepositoryContent.YoutubeAccountList = list;
-            }
 
+            reSerialize.YoutubeAccountList = this.deserializeYoutubeAccountList();
             reSerialize.PlaylistList = this.deserializePlaylistList();
             reSerialize.AllUploads = this.deserializeAllUploads();
             reSerialize.TemplateList = this.deserializeTemplateList();
@@ -74,7 +67,6 @@ namespace Drexel.VidUp.Json.Content
                 Tracer.Write($"JsonDeserializationContent.deserializeYoutubeAccountList: Adding default account.");
                 return true;
             }
-
 
             JsonSerializer serializer = new JsonSerializer();
             using (StreamReader sr = new StreamReader(this.youtubeAccountListFilePath))
