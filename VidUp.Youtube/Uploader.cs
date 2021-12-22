@@ -25,6 +25,7 @@ namespace Drexel.VidUp.Youtube
     public delegate void ErrorMessageChangedHandler(object sender, Upload upload);
 
     public delegate void UploadBytesSentHandler(object sender, Upload upload);
+
     public class Uploader
     {
         private UploadList uploadList;
@@ -50,6 +51,15 @@ namespace Drexel.VidUp.Youtube
             set
             {
                 YoutubeVideoUploadService.MaxUploadInBytesPerSecond = value;
+            }
+        }
+
+        public bool ResumeUploads
+        {
+            set
+            {
+                this.resumeUploads = value;
+                this.uploadStats.ResumeUploads = value;
             }
         }
 
@@ -160,7 +170,8 @@ namespace Drexel.VidUp.Youtube
             using (System.Timers.Timer timer = new System.Timers.Timer(2000))
             {
                 timer.Elapsed += (sender, args) => this.onTimerElapsed();
-                
+                timer.Start();
+
                 while (upload != null)
                 {
                     this.currentUpload = upload;
@@ -175,31 +186,42 @@ namespace Drexel.VidUp.Youtube
 
                     this.lastSerialization = DateTime.Now;
                     YoutubeVideoUploadService.MaxUploadInBytesPerSecond = maxUploadInBytesPerSecond;
-                    timer.Start();
-                    UploadResult videoResult = await YoutubeVideoUploadService.UploadAsync(upload, this.resumableSessionUriSet, this.tokenSource.Token, resetEvent).ConfigureAwait(false);
 
-                    this.onUploadStatusChanged(upload);
 
-                    if (videoResult == UploadResult.Finished)
+                    if (upload.YoutubeAccount.IsAuthenticated)
                     {
-                        dataSent = true;
-                        await YoutubeThumbnailService.AddThumbnailAsync(upload).ConfigureAwait(false);
-                        await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
+                        UploadResult videoResult = await YoutubeVideoUploadService.UploadAsync(upload, this.resumableSessionUriSet, this.tokenSource.Token, resetEvent).ConfigureAwait(false);
+
+                        this.onUploadStatusChanged(upload);
+
+                        if (videoResult == UploadResult.Finished)
+                        {
+                            dataSent = true;
+                            await YoutubeThumbnailService.AddThumbnailAsync(upload).ConfigureAwait(false);
+                            await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
+                        }
+
+                        this.onErrorMessageChanged(upload);
+
+                        if (videoResult == UploadResult.FailedWithDataSent || videoResult == UploadResult.StoppedWithDataSent)
+                        {
+                            dataSent = true;
+                        }
+
+                        JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+
+                        if (videoResult == UploadResult.StoppedWithDataSent || videoResult == UploadResult.StoppedWithoutDataSent)
+                        {
+                            this.uploadStopped = true;
+                            break;
+                        }
                     }
-
-                    this.onErrorMessageChanged(upload);
-
-                    if (videoResult == UploadResult.FailedWithDataSent || videoResult == UploadResult.StoppedWithDataSent)
+                    else
                     {
-                        dataSent = true;
-                    }
-
-                    JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-
-                    if (videoResult == UploadResult.StoppedWithDataSent  || videoResult == UploadResult.StoppedWithoutDataSent)
-                    {
-                        this.uploadStopped = true;
-                        break;
+                        upload.AddUploadError(new StatusInformation("Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu.", StatusInformationType.AuthenticationError));
+                        upload.UploadStatus = UplStatus.Failed;
+                        this.onUploadStatusChanged(upload);
+                        this.onErrorMessageChanged(upload);
                     }
 
                     if (!upload.ErrorsContainQuotaError)

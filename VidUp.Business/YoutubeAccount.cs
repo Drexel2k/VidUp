@@ -38,6 +38,32 @@ namespace Drexel.VidUp.Business
             set => this.refreshTokenCustomApiCredentials = value;
         }
 
+        public string ActiveRefreshToken
+        {
+            get
+            {
+                if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
+                {
+                    return this.refreshTokenCustomApiCredentials;
+                }
+
+                return this.refreshToken;
+            }
+        }
+
+        public bool IsAuthenticated
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(this.ActiveRefreshToken))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         public string Name
         {
             get => this.name;

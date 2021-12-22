@@ -123,6 +123,11 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
+        public bool ResumeUploads
+        {
+            set => this.resumeUploads = value;
+        }
+
         public UploadStats(AutoResetEvent resetEvent)
         {
             this.resetEvent = resetEvent;
@@ -135,8 +140,8 @@ namespace Drexel.VidUp.Youtube
             this.currentRemainingBytesLeftToSend = this.resumeUploads ? this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetRemainingBytesOfFilesToUpload(this.uploaded);
 
             //check if upload has been added, removed, paused, reset...
-            long currentTotalBytesLeftToUpload = (this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetTotalBytesOfFilesToUpload(this.uploaded)) + this.totalFileLengthProcessed;
-            long delta = currentTotalBytesLeftToUpload - this.totalFileLengthToSend;
+            long currentTotalBytesInSession = (this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetTotalBytesOfFilesToUpload(this.uploaded)) + this.totalFileLengthProcessed;
+            long delta = currentTotalBytesInSession - this.totalFileLengthToSend;
             if (delta != 0)
             {
                 this.totalFileLengthToSend = this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetTotalBytesOfFilesToUpload(this.uploaded);

@@ -43,22 +43,16 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
 
             try
             {
-                Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Checking refresh token.");
+                Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Getting refresh token.");
                 //check for refresh token, if not there, get it
 
-                string refreshToken = youtubeAccount.RefreshToken;
-                if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
+                if (!youtubeAccount.IsAuthenticated)
                 {
-                    refreshToken = youtubeAccount.RefreshTokenCustomApiCredentials;
+                    Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: No refresh token for account found.");
+                    throw new ArgumentException("RefreshToken must not be null. Sign in first.");
                 }
 
-                if (string.IsNullOrWhiteSpace(refreshToken))
-                {
-                    Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: No refresh token for account, requesting refresh token.");
-                    await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(youtubeAccount).ConfigureAwait(false);
-                }
-
-                Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Refresh token found.");
+                string refreshToken = youtubeAccount.ActiveRefreshToken;
                 Tracer.Write($"YoutubeAuthentication.GetNewAccessTokenAsync: Requesting access token.");
 
                 string clientId = Credentials.ClientId;
@@ -225,10 +219,12 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
                         Dictionary<string, string> tokenEndpointDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false));
                         if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
                         {
+                            Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Setting default refresh token.");
                             youtubeAccount.RefreshTokenCustomApiCredentials = tokenEndpointDecoded["refresh_token"];
                         }
                         else
                         {
+                            Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: Setting custom refresh token.");
                             youtubeAccount.RefreshToken = tokenEndpointDecoded["refresh_token"];
                         }
 
@@ -249,6 +245,23 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
             }
 
             Tracer.Write($"YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync: End.");
+        }
+
+        public static void DeleteRefreshTokenOnYoutubeAccountAsync(YoutubeAccount youtubeAccount)
+        {
+            Tracer.Write($"YoutubeAuthentication.DeleteRefreshTokenOnYoutubeAccountAsync: Start.");
+            if (Settings.Instance.UserSettings.UseCustomYouTubeApiCredentials)
+            {
+                Tracer.Write($"YoutubeAuthentication.DeleteRefreshTokenOnYoutubeAccountAsync: Deleting default refresh token.");
+                youtubeAccount.RefreshTokenCustomApiCredentials = null;
+            }
+            else
+            {
+                Tracer.Write($"YoutubeAuthentication.DeleteRefreshTokenOnYoutubeAccountAsync: Deleting custom refresh token.");
+                youtubeAccount.RefreshToken = null;
+            }
+
+            Tracer.Write($"YoutubeAuthentication.DeleteRefreshTokenOnYoutubeAccountAsync: End.");
         }
 
         /// <summary>

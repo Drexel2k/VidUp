@@ -446,6 +446,7 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
             EventAggregator.Instance.Subscribe<UploadStatsChangedMessage>(this.uploadStatsChanged);
             EventAggregator.Instance.Subscribe<AutoSettingPlaylistsStateChangedMessage>(this.autoSettingPlaylistsStateChanged);
+            EventAggregator.Instance.Subscribe<YoutubeAccountStatusChangedMessage>(this.youtubeAccountStatusChangedChanged);
 
             Template.DummyAccount = new YoutubeAccount("Dummy", this.getYoutubeAccountName);
             this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, true, false, false);
@@ -871,6 +872,11 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("AutoSettingPlaylists");
             this.raisePropertyChanged("AutoSettingPlaylistsText");
             this.raisePropertyChanged("AutoSettingPlaylistsColor");
+        }
+
+        private void youtubeAccountStatusChangedChanged(YoutubeAccountStatusChangedMessage obj)
+        {
+            this.updateStats();
         }
 
         private void uploadStatsChanged(UploadStatsChangedMessage uploadStatsChangedMessage)

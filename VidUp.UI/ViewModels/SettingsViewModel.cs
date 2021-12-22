@@ -30,7 +30,8 @@ namespace Drexel.VidUp.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         private GenericCommand newYoutubeAccountCommand;
-        private GenericCommand youtubeAccountAuthenticateCommand;
+        private GenericCommand youtubeAccountSignInCommand;
+        private GenericCommand youtubeAccountSignOutCommand;
         private GenericCommand youtubeAccountDeleteCommand;
         private object authenticateYoutubeAccountLock = new object();
         private bool authenticatingYoutubeAccount = false;
@@ -169,19 +170,19 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.newYoutubeAccountCommand;
         }
 
-        public GenericCommand YoutubeAccountAuthenticateCommand
+        public GenericCommand YoutubeAccountSignInCommand
         {
-            get => this.youtubeAccountAuthenticateCommand;
+            get => this.youtubeAccountSignInCommand;
+        }
+
+        public GenericCommand YoutubeAccountSignOutCommand
+        {
+            get => this.youtubeAccountSignOutCommand;
         }
 
         public GenericCommand YoutubeAccountDeleteCommand
         {
             get => this.youtubeAccountDeleteCommand;
-        }
-
-        public bool AuthenticatingYoutubeAccount
-        {
-            get => authenticatingYoutubeAccount;
         }
 
         #endregion properties
@@ -203,7 +204,8 @@ namespace Drexel.VidUp.UI.ViewModels
             this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels[0];
 
             this.newYoutubeAccountCommand = new GenericCommand(this.openNewYoutubeAccountDialogAsync);
-            this.youtubeAccountAuthenticateCommand = new GenericCommand(this.authenticateYoutubeAccountAsync);
+            this.youtubeAccountSignInCommand = new GenericCommand(this.signInYoutubeAccountAsync);
+            this.youtubeAccountSignOutCommand = new GenericCommand(this.signOutYoutubeAccountAsync);
             this.youtubeAccountDeleteCommand = new GenericCommand(this.deleteYoutubeAccountAsync);
 
             this.observableCultureInfoViewModels = new ObservableCollection<CultureViewModel>();
@@ -355,9 +357,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private async void authenticateYoutubeAccountAsync(object obj)
+        private async void signInYoutubeAccountAsync(object obj)
         {
-            Tracer.Write($"SettingsViewModel.authenticateYoutubeAccountAsync: Start.");
+            Tracer.Write($"SettingsViewModel.signInYoutubeAccountAsync: Start.");
             lock (this.authenticateYoutubeAccountLock)
             {
                 if (this.authenticatingYoutubeAccount)
@@ -366,7 +368,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.authenticatingYoutubeAccount = true;
-                this.raisePropertyChanged("AuthenticatingYoutubeAccount");
             }
 
             try
@@ -385,16 +386,25 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                 }
 
-                Tracer.Write($"SettingsViewModel.authenticateYoutubeAccountAsync: YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync Exception: {e.ToString()}.");
+                Tracer.Write($"SettingsViewModel.signInYoutubeAccountAsync: YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync Exception: {e.ToString()}.");
                 ConfirmControl control = new ConfirmControl($"{message}: {e.GetType().Name}: {e.Message}.", false);
 
                 await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
             }
 
             this.authenticatingYoutubeAccount = false;
-            this.raisePropertyChanged("AuthenticatingYoutubeAccount");
+            EventAggregator.Instance.Publish(new YoutubeAccountStatusChangedMessage());
 
-            Tracer.Write($"SettingsViewModel.authenticateYoutubeAccountAsync: End.");
+            Tracer.Write($"SettingsViewModel.signInYoutubeAccountAsync: End.");
+        }
+
+        private void signOutYoutubeAccountAsync(object obj)
+        {
+            Tracer.Write($"SettingsViewModel.signOutYoutubeAccountAsync: Start.");
+            YoutubeAuthentication.DeleteRefreshTokenOnYoutubeAccountAsync(this.selectedYoutubeAccount.YoutubeAccount);
+            JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
+            EventAggregator.Instance.Publish(new YoutubeAccountStatusChangedMessage());
+            Tracer.Write($"SettingsViewModel.signOutYoutubeAccountAsync: End.");
         }
 
         private async void deleteYoutubeAccountAsync(object obj)

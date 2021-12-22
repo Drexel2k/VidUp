@@ -61,7 +61,7 @@
                     <Fluent:RibbonGroupBox Header="Upload">
                         <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon UploadMultiple}"  Command="{Binding StartUploadingCommand}" />
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}" IsEnabled="{Binding DataContext.AppStatus, Converter={converters:AppStatusIsUploadingConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}">
                                 <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
                             </Fluent:CheckBox>
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />

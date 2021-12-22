@@ -7,31 +7,49 @@
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="330">
-    <Grid Margin="16" Width="300">
+             d:DesignHeight="300" d:DesignWidth="450">
+    <Grid Margin="16" Width="420">
 
         <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
+            <RowDefinition MinHeight="20" />
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0">Drexel's Vidup - A Youtube Video Uploader</TextBlock>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock Text="Drexel's Vidup - A Youtube Video Uploader - Version "/>
+            <TextBlock Text="{Binding Version}"/>
+        </StackPanel>
         <TextBlock Grid.Row="1">Copyright (C) 2020-2021  Drexel Development</TextBlock>
-        <TextBlock Grid.Row="2">Published under<LineBreak />AFFERO GENERAL PUBLIC LICENSE, see license.rtf</TextBlock>
-        <TextBlock Grid.Row="3">drexel.development@gmail.com</TextBlock>
-        <TextBlock Grid.Row="4">Homepage: <Hyperlink NavigateUri="https://www.vidup.info/" RequestNavigate="hyperlinkRequestNavigate">https://www.vidup.info/</Hyperlink></TextBlock>
-        <TextBlock Grid.Row="5">GitHub: <Hyperlink NavigateUri="https://github.com/Drexel2k/VidUp" RequestNavigate="hyperlinkRequestNavigate">https://github.com/Drexel2k/VidUp</Hyperlink></TextBlock>
-        <TextBlock Grid.Row="6" Text="{Binding Version}" />
-        <TextBlock Grid.Row="7"> </TextBlock>
-        <TextBlock Grid.Row="8">Visit me: <Hyperlink NavigateUri="https://www.youtube.com/drexel2k" RequestNavigate="hyperlinkRequestNavigate">https://www.youtube.com/drexel2k</Hyperlink></TextBlock>
-        <Button Grid.Row="9" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
+        <TextBlock Grid.Row="2">
+            License/Terms of Service:
+            <TextBlock>
+                <!--<Hyperlink Command="{Binding CommandPath}" CommandParameter="{Binding Path=RecordID}">-->
+                <Hyperlink NavigateUri="{Binding LicenseUri}" RequestNavigate="hyperlinkRequestNavigate">
+                    <TextBlock Text="GNU Affero General Public License" />
+                </Hyperlink>
+            </TextBlock>
+        </TextBlock>
+
+        <TextBlock Grid.Row="4">drexel.development@gmail.com</TextBlock>
+        <TextBlock Grid.Row="5">Homepage: <Hyperlink NavigateUri="https://www.vidup.info/" RequestNavigate="hyperlinkRequestNavigate">https://www.vidup.info/</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="6">GitHub: <Hyperlink NavigateUri="https://github.com/Drexel2k/VidUp" RequestNavigate="hyperlinkRequestNavigate">https://github.com/Drexel2k/VidUp</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="8">VidUp Privacy Policy: <Hyperlink NavigateUri="https://www.vidup.info/vidup-privacy-policy/" RequestNavigate="hyperlinkRequestNavigate">https://www.vidup.info/vidup-privacy-policy/</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="9">Google Privacy Policy (YouTube Data API and YouTube are owned by Google):</TextBlock>
+        <TextBlock Grid.Row="10"><Hyperlink NavigateUri="https://policies.google.com/privacy?hl=en-US" RequestNavigate="hyperlinkRequestNavigate">https://policies.google.com/privacy?hl=en-US</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="12">Visit me: <Hyperlink NavigateUri="https://www.youtube.com/drexel2k" RequestNavigate="hyperlinkRequestNavigate">https://www.youtube.com/drexel2k</Hyperlink></TextBlock>
+        <Button Grid.Row="14" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>
             </Button.CommandParameter>

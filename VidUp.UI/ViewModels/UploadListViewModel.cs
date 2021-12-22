@@ -181,6 +181,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 if (this.resumeUploads != value)
                 {
                     this.resumeUploads = value;
+                    Uploader uploader = this.uploader;
+                    if (uploader != null)
+                    {
+                        uploader.ResumeUploads = value;
+                    }
                     this.observableUploadViewModels.ResumeUploads = value;
                     this.raisePropertyChanged("ResumeUploads");
                 }

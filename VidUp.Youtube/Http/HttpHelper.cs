@@ -70,9 +70,10 @@ namespace Drexel.VidUp.Youtube.Http
 
         private static async Task ensureAccessTokenAsync(YoutubeAccount youtubeAccount)
         {
-            Tracer.Write($"HttpHelper.ensureAccessTokenAsync: Start.");
+            Tracer.Write($"HttpHelper.ensureAccessTokenAsync: Start, checking for access token.");
             if (!HttpHelper.youtubeAccessTokenExpiryByAccount.ContainsKey(youtubeAccount) || HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount].Expiry - DateTime.Now < oneMinute)
             {
+                Tracer.Write($"HttpHelper.ensureAccessTokenAsync: No access token found, requesting access token.");
                 AccessToken token = await YoutubeAuthentication.GetNewAccessTokenAsync(youtubeAccount).ConfigureAwait(false);
                 HttpHelper.youtubeAccessTokenExpiryByAccount[youtubeAccount] = token;
             }

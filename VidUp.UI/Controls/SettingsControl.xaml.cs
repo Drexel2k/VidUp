@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Diagnostics;
 using System.Windows.Controls;
 using Drexel.VidUp.UI.ViewModels;
 
@@ -18,6 +19,12 @@ namespace Drexel.VidUp.UI.Controls
         public SettingsControl()
         {
             InitializeComponent();
+        }
+
+        private void hyperlinkRequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+            e.Handled = true;
         }
     }
 }

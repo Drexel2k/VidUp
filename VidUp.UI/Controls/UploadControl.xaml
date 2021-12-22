@@ -170,7 +170,11 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="YT Acc.: " Width="68" />
-                <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" IsEnabled="{Binding ControlsEnabled}" Width="201" VerticalAlignment="Top"  Padding="6 4 6 6" />
+                <DockPanel Width="201" LastChildFill="True">
+                    <materialDesign:PackIcon Kind="Warning" ToolTip="Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu." ToolTipService.ShowDuration="60000" Visibility="{Binding SelectedYoutubeAccount, Mode=OneWay, Converter={converters:YoutubeAccountAuthenticatedCollapsedConverter}}" Margin="0 4 5 0" Background="Transparent" />
+                    <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top"  Padding="6 4 6 6" />
+                </DockPanel>
+                
             </StackPanel>
 
             <StackPanel  Grid.Row="7" Grid.Column="3" Orientation="Horizontal">

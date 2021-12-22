@@ -532,13 +532,6 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 catch (AuthenticationException e)
                 {
                     Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Authentication exception: {e.ToString()}.");
-
-                    StatusInformationType statusInformationType = StatusInformationType.AuthenticationError;
-                    if (e.IsApiResponseError)
-                    {
-                        statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
-                    }
-
                     upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.requestNewUpload", e));
 
                     error = true;

@@ -65,7 +65,10 @@ namespace Drexel.VidUp.Business
             long length = 0;
             List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
 
-            foreach (Upload upload in uploadsInternal.FindAll(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
+            foreach (Upload upload in uploadsInternal.FindAll(
+                upload => (upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading) 
+                          //upload currently uploading shall always be in result
+                          && (upload.YoutubeAccount.IsAuthenticated || upload.UploadStatus == UplStatus.Uploading)))
             {
                 if (upload.UploadStatus == UplStatus.ReadyForUpload)
                 {
@@ -87,8 +90,10 @@ namespace Drexel.VidUp.Business
             List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
 
             foreach (Upload upload in uploadsInternal.FindAll(
-                upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
-                          upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed))
+                upload => (upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
+                          upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed)
+                          //upload currently uploading shall always be in result
+                          && (upload.YoutubeAccount.IsAuthenticated || upload.UploadStatus == UplStatus.Uploading)))
             {
                 if (File.Exists(upload.FilePath))
                 {
@@ -111,7 +116,10 @@ namespace Drexel.VidUp.Business
             long length = 0;
             List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
 
-            foreach (Upload upload in uploadsInternal.FindAll(upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading))
+            foreach (Upload upload in uploadsInternal.FindAll(
+                upload => (upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading)
+                          //upload currently uploading shall always be in result
+                          && (upload.YoutubeAccount.IsAuthenticated || upload.UploadStatus == UplStatus.Uploading)))
             {
                 length += upload.FileLength;
             }
@@ -125,8 +133,10 @@ namespace Drexel.VidUp.Business
             List<Upload> uploadsInternal = this.getUploadsInternal(uploadsToIgnore);
 
             foreach (Upload upload in uploadsInternal.FindAll(
-                upload => upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
-                          upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed))
+                upload => (upload.UploadStatus == UplStatus.ReadyForUpload || upload.UploadStatus == UplStatus.Uploading ||
+                          upload.UploadStatus == UplStatus.Stopped || upload.UploadStatus == UplStatus.Failed)
+                          //upload currently uploading shall always be in result
+                          && (upload.YoutubeAccount.IsAuthenticated || upload.UploadStatus == UplStatus.Uploading)))
             {
                 length += upload.FileLength;
             }
