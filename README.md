@@ -1,5 +1,5 @@
 # VidUp
-A template based Youtube video uploader
+A Youtube video uploader
 
 VidUp eases the process of uploading an publishing videos on YouTube, 
 especially if you upload videos belonging to a series on a regular basis.
