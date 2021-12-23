@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="InnoBin\" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if $(ConfigurationName) == Release (if $(PlatformName) == AnyCPU (&quot;$(ProjectDir)InnoBin\ISCC.exe&quot; &quot;$(ProjectDir)setup.iss&quot;))" />
+  </Target>
+
+</Project>
