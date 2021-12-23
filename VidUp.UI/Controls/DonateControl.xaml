@@ -32,9 +32,6 @@
         <TextBlock Grid.Row="8">Recurring donation (German platform): <Hyperlink NavigateUri="https://steadyhq.com/en/drexelsvidup" RequestNavigate="hyperlinkRequestNavigate">SteadyHQ</Hyperlink></TextBlock>
 
         <Button Grid.Row="9" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
-            <Button.CommandParameter>
-                <system:Boolean>True</system:Boolean>
-            </Button.CommandParameter>
             CLOSE
         </Button>
 

@@ -106,14 +106,13 @@ end;
 procedure CreateAgreementPages(Sender: TObject);
 var
   AgreementFileName: string;
-  AgreementFilePath: string;
   RichText: AnsiString;
 begin
    // create first agreement page
   FirstAgreementPage :=
     CreateOutputMsgMemoPage(
       wpWelcome, SetupMessage(msgWizardLicense), SetupMessage(msgLicenseLabel),
-      'Please read the following Licesense Agreement/Terms of Service. You must accept this agreement before continuing with the installation. By accepting the License agreement, you also accept the linked YouTube Terms of Service.', '');
+      'Please read the following Licesense Agreement/Terms of Service. You must accept this terms before continuing with the installation. By accepting this terms and using the app you also accept the YouTube Terms of Service.', '');
 
   FirstAgreementPage.RichEditViewer.Top := 51;
   FirstAgreementPage.RichEditViewer.Height := 177;
@@ -121,8 +120,7 @@ begin
   // display file
   AgreementFileName := 'license.rtf';
   ExtractTemporaryFile(AgreementFileName);
-  AgreementFilePath := ExpandConstant('{tmp}\' + AgreementFileName);
-  LoadStringFromFile(AgreementFilePath, RichText);
+  LoadStringFromFile(ExpandConstant('{tmp}\' + AgreementFileName), RichText);
   FirstAgreementPage.RichEditViewer.UseRichEdit := True;
   FirstAgreementPage.RichEditViewer.RTFText := RichText;
 
@@ -151,7 +149,7 @@ begin
   SecondAgreementPage :=
     CreateOutputMsgMemoPage(
       100, 'Privacy Policy', SetupMessage(msgLicenseLabel),
-      'Please read the following Privacy Policy. You must accept this policy before continuing with the installation. By accepting the Privacy Policy, you also accept the linked Google Privacy Policy.', '');
+      'Please read the following Privacy Policy. You must accept this policy before continuing with the installation. By accepting this privacy policy and using the app you also accept the Google Privacy Policy.', '');
 
   SecondAgreementPage.RichEditViewer.Top := 51;
   SecondAgreementPage.RichEditViewer.Height := 177;
@@ -159,8 +157,7 @@ begin
   // display file
   AgreementFileName := 'privacy.rtf';
   ExtractTemporaryFile(AgreementFileName);
-  AgreementFilePath := ExpandConstant('{tmp}\' + AgreementFileName);
-  LoadStringFromFile(AgreementFilePath, RichText);
+  LoadStringFromFile(ExpandConstant('{tmp}\' + AgreementFileName), RichText);
   SecondAgreementPage.RichEditViewer.UseRichEdit := True;
   SecondAgreementPage.RichEditViewer.RTFText := RichText;
 

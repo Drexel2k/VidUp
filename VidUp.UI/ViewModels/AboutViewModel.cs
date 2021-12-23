@@ -19,9 +19,15 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                string s = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "license.rtf");
-                Uri uri = new Uri(s);
-                return uri;
+                return new Uri(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "license.rtf"));
+            }
+        }
+
+        public Uri PrivacyUri
+        {
+            get
+            {
+                return new Uri(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "privacy.rtf"));
             }
         }
 

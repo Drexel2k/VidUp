@@ -37,7 +37,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 DataContext = new AboutViewModel()
             };
 
-            bool result = (bool)await DialogHost.Show(view, "RootDialog").ConfigureAwait(false);
+            await DialogHost.Show(view, "RootDialog").ConfigureAwait(false);
         }
 
         private async void openDonateDialogAsync(object obj)
@@ -47,7 +47,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 // DataContext = new DonateViewModel()
             };
 
-            bool result = (bool)await DialogHost.Show(view, "RootDialog").ConfigureAwait(false);
+            await DialogHost.Show(view, "RootDialog").ConfigureAwait(false);
         }
     }
 }
