@@ -45,7 +45,9 @@ begin
   begin
     Net5FirstChar := Copy(Net5String, 1, 1)
     if Net5FirstChar = '5' then
+    begin
       Result:= true;
+    end;
   end
 end;
 
@@ -71,14 +73,20 @@ begin
 
   { get the uninstall string of the old app }
   UninstallString := GetUninstallString();
-  if UninstallString <> '' then begin
+  if UninstallString <> '' then
+  begin
     UninstallString := RemoveQuotes(UninstallString);
     if Exec(UninstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES','', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    begin
       Result := 3
-    else
+    end else
+    begin
       Result := 2;
+    end;
   end else
+  begin
     Result := 1;
+  end;
 end;
 
 
@@ -91,10 +99,19 @@ var
   SecondAgreementPageAcceptedRadio: TRadioButton;
   SecondAgreementPageNotAcceptedRadio: TRadioButton;   
 
-procedure FirstAgreementPageAccepted(Sender: TObject);
+procedure AgreementPageAccepted(Sender: TObject);
 begin
-  // update Next button when user (un)accepts the agreement
-  WizardForm.NextButton.Enabled := FirstAgreementPageAcceptedRadio.Checked;
+  if (Sender = FirstAgreementPageAcceptedRadio) or (Sender = FirstAgreementPageNotAcceptedRadio) then
+  begin
+    // update Next button when user (un)accepts the agreement
+    WizardForm.NextButton.Enabled := FirstAgreementPageAcceptedRadio.Checked;
+  end;
+
+  if (Sender = SecondAgreementPageAcceptedRadio) or (Sender = SecondAgreementPageNotAcceptedRadio) then
+  begin
+    // update Next button when user (un)accepts the agreement
+    WizardForm.NextButton.Enabled := SecondAgreementPageAcceptedRadio.Checked;
+  end;
 end;
 
 procedure SecondAgreementPageAccepted(Sender: TObject);
@@ -103,83 +120,63 @@ begin
   WizardForm.NextButton.Enabled := SecondAgreementPageAcceptedRadio.Checked;
 end;
 
-procedure CreateAgreementPages(Sender: TObject);
+function CreateRadioButton(Parent: TNewNotebookPage; Top: Integer; Caption: String): TRadioButton;
+begin
+  Result := TRadioButton.Create(WizardForm);
+  Result.Parent := Parent;
+  Result.Caption := Caption;
+  Result.Left := 0;
+  Result.Top := Top;
+  Result.Width := 487;
+  Result.Height := 21;
+  Result.Anchors := [akLeft, akBottom];
+  Result.OnClick := @AgreementPageAccepted;
+end;
+
+function CreateAgreementPage(AfterID: Integer; Caption: String; Description: String; RtfFile: String): TOutputMsgMemoWizardPage;
 var
-  AgreementFileName: string;
   RichText: AnsiString;
 begin
    // create first agreement page
-  FirstAgreementPage :=
+  Result :=
     CreateOutputMsgMemoPage(
-      wpWelcome, SetupMessage(msgWizardLicense), SetupMessage(msgLicenseLabel),
-      'Please read the following Licesense Agreement/Terms of Service. You must accept this terms before continuing with the installation. By accepting this terms and using the app you also accept the YouTube Terms of Service.', '');
+      AfterID, Caption, SetupMessage(msgLicenseLabel),
+      Description, '');
 
-  FirstAgreementPage.RichEditViewer.Top := 51;
-  FirstAgreementPage.RichEditViewer.Height := 177;
+  Result.RichEditViewer.Top := 51;
+  Result.RichEditViewer.Height := 177;
 
   // display file
-  AgreementFileName := 'license.rtf';
-  ExtractTemporaryFile(AgreementFileName);
-  LoadStringFromFile(ExpandConstant('{tmp}\' + AgreementFileName), RichText);
-  FirstAgreementPage.RichEditViewer.UseRichEdit := True;
-  FirstAgreementPage.RichEditViewer.RTFText := RichText;
+  ExtractTemporaryFile(RtfFile);
+  LoadStringFromFile(ExpandConstant('{tmp}\' + RtfFile), RichText);
+  Result.RichEditViewer.UseRichEdit := True;
+  Result.RichEditViewer.RTFText := RichText;
+end;
+
+procedure CreateAgreementPages();
+begin
+   // create first agreement page
+  FirstAgreementPage := CreateAgreementPage(wpWelcome, SetupMessage(msgWizardLicense),
+    'Please read the following Licesense Agreement/Terms of Service. You must accept this terms before continuing with the installation. By accepting this terms and using the app you also accept the YouTube Terms of Service.',
+    'license.rtf');
 
   // create buttons
-  FirstAgreementPageAcceptedRadio := TRadioButton.Create(WizardForm);
-  FirstAgreementPageAcceptedRadio.Parent := FirstAgreementPage.Surface;
-  FirstAgreementPageAcceptedRadio.Caption := 'I &accept the agreement';
-  FirstAgreementPageAcceptedRadio.Left := 0;
-  FirstAgreementPageAcceptedRadio.Top := 330;
-  FirstAgreementPageAcceptedRadio.Width := 487;
-  FirstAgreementPageAcceptedRadio.Height := 21;
-  FirstAgreementPageAcceptedRadio.OnClick := @FirstAgreementPageAccepted;
-  FirstAgreementPageNotAcceptedRadio := TRadioButton.Create(WizardForm);
-  FirstAgreementPageNotAcceptedRadio.Parent := FirstAgreementPage.Surface;
-  FirstAgreementPageNotAcceptedRadio.Caption := 'I &do not accept the agreement';
-  FirstAgreementPageNotAcceptedRadio.Left := 0;
-  FirstAgreementPageNotAcceptedRadio.Top := 355;
-  FirstAgreementPageNotAcceptedRadio.Width := 487;
-  FirstAgreementPageNotAcceptedRadio.Height := 21;
-  FirstAgreementPageNotAcceptedRadio.OnClick := @FirstAgreementPageAccepted;
+  FirstAgreementPageAcceptedRadio := CreateRadioButton(FirstAgreementPage.Surface, 241, 'I &accept the agreement');
+  FirstAgreementPageNotAcceptedRadio := CreateRadioButton(FirstAgreementPage.Surface, 266, 'I &do not accept the agreement');
 
-  // Initially not accepted
+  // initially not accepted
   FirstAgreementPageNotAcceptedRadio.Checked := True;
 
   // create second agreement page
-  SecondAgreementPage :=
-    CreateOutputMsgMemoPage(
-      100, 'Privacy Policy', SetupMessage(msgLicenseLabel),
-      'Please read the following Privacy Policy. You must accept this policy before continuing with the installation. By accepting this privacy policy and using the app you also accept the Google Privacy Policy.', '');
-
-  SecondAgreementPage.RichEditViewer.Top := 51;
-  SecondAgreementPage.RichEditViewer.Height := 177;
-
-  // display file
-  AgreementFileName := 'privacy.rtf';
-  ExtractTemporaryFile(AgreementFileName);
-  LoadStringFromFile(ExpandConstant('{tmp}\' + AgreementFileName), RichText);
-  SecondAgreementPage.RichEditViewer.UseRichEdit := True;
-  SecondAgreementPage.RichEditViewer.RTFText := RichText;
+  SecondAgreementPage := CreateAgreementPage(100, 'Privacy Policy',
+    'Please read the following Privacy Policy. You must accept this policy before continuing with the installation. By accepting this privacy policy and using the app you also accept the Google Privacy Policy.',
+    'privacy.rtf');
 
   // create buttons
-  SecondAgreementPageAcceptedRadio := TRadioButton.Create(WizardForm);
-  SecondAgreementPageAcceptedRadio.Parent := SecondAgreementPage.Surface;
-  SecondAgreementPageAcceptedRadio.Caption := 'I &accept the agreement';
-  SecondAgreementPageAcceptedRadio.Left := 0;
-  SecondAgreementPageAcceptedRadio.Top := 330;
-  SecondAgreementPageAcceptedRadio.Width := 487;
-  SecondAgreementPageAcceptedRadio.Height := 21;
-  SecondAgreementPageAcceptedRadio.OnClick := @SecondAgreementPageAccepted;
-  SecondAgreementPageNotAcceptedRadio := TRadioButton.Create(WizardForm);
-  SecondAgreementPageNotAcceptedRadio.Parent := SecondAgreementPage.Surface;
-  SecondAgreementPageNotAcceptedRadio.Caption := 'I &do not accept the agreement';
-  SecondAgreementPageNotAcceptedRadio.Left := 0;
-  SecondAgreementPageNotAcceptedRadio.Top := 355;
-  SecondAgreementPageNotAcceptedRadio.Width := 487;
-  SecondAgreementPageNotAcceptedRadio.Height := 21;
-  SecondAgreementPageNotAcceptedRadio.OnClick := @SecondAgreementPageAccepted;
+  SecondAgreementPageAcceptedRadio := CreateRadioButton(SecondAgreementPage.Surface, 241, 'I &accept the agreement');
+  SecondAgreementPageNotAcceptedRadio := CreateRadioButton(SecondAgreementPage.Surface, 266, 'I &do not accept the agreement');
 
-  // Initially not accepted
+  // initially not accepted
   SecondAgreementPageNotAcceptedRadio.Checked := True;
 end;
 
@@ -216,18 +213,13 @@ end;
 procedure CurPageChanged(CurPageID: Integer);
 begin
   // Update Next button when user gets to agreement pages
-  if CurPageID = FirstAgreementPage.ID then
+  if (CurPageID = FirstAgreementPage.ID) or (CurPageID = SecondAgreementPage.ID) then
   begin
-    FirstAgreementPageAccepted(nil);
+    WizardForm.NextButton.Enabled := false;
   end;
-  if CurPageID = SecondAgreementPage.ID then
-  begin
-    SecondAgreementPageAccepted(nil);
-  end;
-
 end;
 
 procedure InitializeWizard();
 begin
-  CreateAgreementPages(nil);
+  CreateAgreementPages();
 end;
