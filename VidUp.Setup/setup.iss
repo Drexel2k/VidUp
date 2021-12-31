@@ -127,8 +127,8 @@ begin
   Result.Caption := Caption;
   Result.Left := 0;
   Result.Top := Top;
-  Result.Width := 487;
-  Result.Height := 21;
+  Result.Width := ScaleX(417);
+  Result.Height := ScaleY(17);
   Result.Anchors := [akLeft, akBottom];
   Result.OnClick := @AgreementPageAccepted;
 end;
@@ -137,14 +137,11 @@ function CreateAgreementPage(AfterID: Integer; Caption: String; Description: Str
 var
   RichText: AnsiString;
 begin
-   // create first agreement page
   Result :=
-    CreateOutputMsgMemoPage(
-      AfterID, Caption, SetupMessage(msgLicenseLabel),
-      Description, '');
+    CreateOutputMsgMemoPage(AfterID, Caption, SetupMessage(msgLicenseLabel), Description, '');
 
-  Result.RichEditViewer.Top := 51;
-  Result.RichEditViewer.Height := 177;
+  Result.RichEditViewer.Top := ScaleY(50);
+  Result.RichEditViewer.Height := ScaleY(135);
 
   // display file
   ExtractTemporaryFile(RtfFile);
@@ -161,8 +158,8 @@ begin
     'license.rtf');
 
   // create buttons
-  FirstAgreementPageAcceptedRadio := CreateRadioButton(FirstAgreementPage.Surface, 241, 'I &accept the agreement');
-  FirstAgreementPageNotAcceptedRadio := CreateRadioButton(FirstAgreementPage.Surface, 266, 'I &do not accept the agreement');
+  FirstAgreementPageAcceptedRadio := CreateRadioButton(FirstAgreementPage.Surface, ScaleY(196), 'I &accept the agreement');
+  FirstAgreementPageNotAcceptedRadio := CreateRadioButton(FirstAgreementPage.Surface, ScaleY(216), 'I &do not accept the agreement');
 
   // initially not accepted
   FirstAgreementPageNotAcceptedRadio.Checked := True;
@@ -173,8 +170,8 @@ begin
     'privacy.rtf');
 
   // create buttons
-  SecondAgreementPageAcceptedRadio := CreateRadioButton(SecondAgreementPage.Surface, 241, 'I &accept the agreement');
-  SecondAgreementPageNotAcceptedRadio := CreateRadioButton(SecondAgreementPage.Surface, 266, 'I &do not accept the agreement');
+  SecondAgreementPageAcceptedRadio := CreateRadioButton(SecondAgreementPage.Surface, ScaleY(196), 'I &accept the agreement');
+  SecondAgreementPageNotAcceptedRadio := CreateRadioButton(SecondAgreementPage.Surface, ScaleY(216), 'I &do not accept the agreement');
 
   // initially not accepted
   SecondAgreementPageNotAcceptedRadio.Checked := True;
@@ -202,7 +199,7 @@ begin
       ResultCode := UnInstallOldVersion();
       if(ResultCode <> 3) then
       begin
-        MsgBox('Could not unstiall old version. Please remove it manually.', mbInformation, MB_OK);
+        MsgBox('Could not uninstall old version. Please remove it manually.', mbInformation, MB_OK);
         Abort();
       end;
     end; 
