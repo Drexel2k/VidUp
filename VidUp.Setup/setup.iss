@@ -11,7 +11,7 @@ UninstallDisplayIcon={app}\VidUp.exe
 Compression=lzma2
 SolidCompression=yes
 OutputBaseFilename=VidUp.Setup.Ver.Release.x64
-OutputDir=..\VidUp.Setup\bin\Release\
+OutputDir=..\VidUp.Setup\bin\Release\x64\
 
 [Files]
 Source: ..\VidUp.UI\bin\Release\x64\net5.0-windows\*; DestDir: "{app}"; Flags: recursesubdirs
