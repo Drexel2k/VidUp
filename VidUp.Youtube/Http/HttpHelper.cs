@@ -20,6 +20,10 @@ namespace Drexel.VidUp.Youtube.Http
         private static Dictionary<YoutubeAccount, AccessToken> youtubeAccessTokenExpiryByAccount = new Dictionary<YoutubeAccount, AccessToken>();
         private static TimeSpan oneMinute = new TimeSpan(0, 1, 0);
 
+        //buffer is set to constant value like 1024, 4096, 16384 etc.
+        //eg. if set to 10240 buffer will be 16384.
+        private static int bufferSize = 32 * 1024;
+
         static HttpHelper()
         {
             HttpHelper.standardClient  = new HttpClient();
@@ -27,10 +31,6 @@ namespace Drexel.VidUp.Youtube.Http
             HttpHelper.uploadClient = new HttpClient();
             HttpHelper.uploadClient.Timeout = Timeout.InfiniteTimeSpan;
         }
-
-        //buffer is set to constant value like 1024, 4096, 16384 etc.
-        //eg. if set to 10240 buffer will be 16384.
-        private static int bufferSize = 32 * 1024;
 
         public static HttpClient StandardClient
         {
@@ -113,6 +113,7 @@ namespace Drexel.VidUp.Youtube.Http
         public static StreamContent GetStreamContentResumableUpload(Stream data, long orirginalLength, long startByteIndex, string contentType)
         {
             Tracer.Write($"HttpHelper.GetStreamContentResumableUpload: Start.");
+            Tracer.Write($"HttpHelper.GetStreamContentResumableUpload: StreamContent buffer size: {HttpHelper.bufferSize}.");
             StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
@@ -135,6 +136,7 @@ namespace Drexel.VidUp.Youtube.Http
         public static StreamContent GetStreamContentUpload(Stream data, string contentType)
         {
             Tracer.Write($"HttpHelper.GetStreamContentUpload: Start.");
+            Tracer.Write($"HttpHelper.GetStreamContentUpload: StreamContent buffer size: {HttpHelper.bufferSize}.");
             StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
             content.Headers.ContentLength = data.Length;
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);

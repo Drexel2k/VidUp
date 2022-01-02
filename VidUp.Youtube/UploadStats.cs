@@ -146,6 +146,7 @@ namespace Drexel.VidUp.Youtube
             {
                 this.totalFileLengthToSend = this.resumeUploads ? this.uploadList.GetTotalBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetTotalBytesOfFilesToUpload(this.uploaded);
                 this.totalRemainingBytes = this.resumeUploads ? this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(this.uploaded) : this.uploadList.GetRemainingBytesOfFilesToUpload(this.uploaded);
+                this.currentUploadBytesSentInitial = this.currentUpload.BytesSent;
                 this.totalFileLengthProcessed = 0;
                 this.totalBytesSent = 0;
             }
