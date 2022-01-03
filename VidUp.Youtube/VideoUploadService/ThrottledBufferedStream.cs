@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 
 namespace Drexel.VidUp.Youtube.VideoUploadService
 {
@@ -15,14 +15,12 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
         private const int keepHistoryForInSeconds = 30;
         private const int historyForStatsInSeconds = 20;
 
-        private BufferBlock<byte[]> readBuffer;
-        private BufferBlock<byte[]> memoryBuffer;
-        private int readCapacity = 40 * 1024 * 1024;
-        private const int maxBufferBlockCount = 6;
+        private int readCapacity = 100 * 1024 * 1024;
+        private BlockingCollection<byte[]> memoryBuffer = new BlockingCollection<byte[]>(1);
+        private int memoryBufferSize = 50 * 1024 * 1024;
 
         private byte[] currentData;
         private int currentDataPosition;
-        private int currentDataSize = 10 * 1024 * 1024;
 
         private Stream baseStream;
         private long position;
@@ -62,7 +60,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 if (minTick > this.currentTicks - ThrottledBufferedStream.historyForStatsInSeconds * ThrottledBufferedStream.tickMultiplierForSeconds)
                 {
                     TimeSpan duration = DateTime.Now - new DateTime(minTick);
-                    return (int) ((sum / duration.TotalMilliseconds) * 1000);
+                    return (int)((sum / duration.TotalMilliseconds) * 1000);
                 }
                 else
                 {
@@ -162,15 +160,6 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             this.position = position;
             this.maximumBytesPerSecondRead = maximumBytesPerSecond;
 
-            DataflowBlockOptions readBufferOptions = new DataflowBlockOptions();
-            readBufferOptions.BoundedCapacity = 1;
-            this.readBuffer = new BufferBlock<byte[]>(readBufferOptions);
-
-            DataflowBlockOptions memoryBufferOptions = new DataflowBlockOptions();
-            memoryBufferOptions.BoundedCapacity = ThrottledBufferedStream.maxBufferBlockCount;
-            this.memoryBuffer = new BufferBlock<byte[]>(memoryBufferOptions);
-
-            Task.Run(this.fillReadBuffer);
             Task.Run(this.fillMemoryBuffer);
         }
 
@@ -238,7 +227,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             return bytesRead;
         }
 
-        private void fillReadBuffer()
+        private void fillMemoryBuffer()
         {
             while (true)
             {
@@ -246,7 +235,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 int bytesRead = this.baseStream.Read(buffer, 0, this.readCapacity);
                 if (bytesRead == 0)
                 {
-                    this.readBuffer.Complete();
+                    this.memoryBuffer.CompleteAdding();
                     return;
                 }
 
@@ -257,70 +246,32 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                     buffer = temp;
                 }
 
-                Task<bool> task = this.readBuffer.SendAsync(buffer);
 
-                task.Wait();
-                if (!task.Result)
+                int bufferPosition = 0;
+                while (bufferPosition < buffer.Length)
                 {
-                    throw new Exception("Could not process upload file.");
-                }
-            }
-        }
-
-        private void fillMemoryBuffer()
-        {
-            try
-            {
-                while (true)
-                {
-                    //blocks until data is received or throws InvalidOperationException if queue is empty and completed.
-                    byte[] buffer = this.readBuffer.Receive();
-
-                    int remainder;
-                    int limit = Math.DivRem(buffer.Length, (this.currentDataSize), out remainder) - 1;
-
-                    for (int i = 0; i <= limit; i++)
+                    int bytesToRead = this.memoryBufferSize;
+                    if (bufferPosition + this.memoryBufferSize > buffer.Length)
                     {
-                        byte[] bufferSmall = new byte[this.currentDataSize];
-                        Array.Copy(buffer, this.currentDataSize * i, bufferSmall, 0, this.currentDataSize);
-                        Task<bool> task = memoryBuffer.SendAsync(bufferSmall);
-
-                        task.Wait();
-                        if (!task.Result)
-                        {
-                            throw new Exception("Could not process upload file.");
-                        }
+                        bytesToRead = buffer.Length - bufferPosition;
                     }
 
-                    if (remainder > 0)
-                    {
-                        byte[] bufferSmall = new byte[remainder];
-                        Array.Copy(buffer, this.currentDataSize * (limit + 1), bufferSmall, 0, remainder);
-                        Task<bool> task = memoryBuffer.SendAsync(bufferSmall);
-
-                        task.Wait();
-                        if (!task.Result)
-                        {
-                            throw new Exception("Could not process upload file.");
-                        }
-                    }
+                    byte[] temp = new byte[bytesToRead];
+                    Array.Copy(buffer, bufferPosition, temp, 0, bytesToRead);
+                    bufferPosition += bytesToRead;
+                    this.memoryBuffer.Add(temp);
                 }
-            }
-            catch (InvalidOperationException)
-            {
-                this.memoryBuffer.Complete();
-                return;
             }
         }
 
         private int readInternal(byte[] buffer, int offset, int count)
         {
-            if (this.currentData == null || this.currentDataPosition == this.currentData.Length)
+            if (this.currentData == null || this.currentDataPosition >= this.currentData.Length)
             {
                 try
                 {
-                    //blocks until data is received or throws InvalidOperationException if queue is empty and completed.
-                    this.currentData = this.memoryBuffer.Receive();
+                    //blocks until data is received or throws InvalidOperationException if collection is completed.
+                    this.currentData = this.memoryBuffer.Take();
                     this.currentDataPosition = 0;
                 }
                 catch (InvalidOperationException)
@@ -335,19 +286,14 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 bytesToRead = count;
             }
 
-            int bytesLeftInCurrentData = this.currentData.Length - this.currentDataPosition;
-            if (bytesToRead <= bytesLeftInCurrentData)
+            if (this.currentDataPosition + bytesToRead > this.currentData.Length)
             {
-                Array.Copy(this.currentData, this.currentDataPosition, buffer, offset, bytesToRead);
-                this.currentDataPosition += bytesToRead;
-                return bytesToRead;
+                bytesToRead = this.currentData.Length - this.currentDataPosition;
             }
-            else
-            {
-                Array.Copy(this.currentData, this.currentDataPosition, buffer, offset, bytesLeftInCurrentData);
-                this.currentDataPosition += bytesLeftInCurrentData;
-                return bytesLeftInCurrentData;
-            }
+
+            Array.Copy(this.currentData, this.currentDataPosition, buffer, offset, bytesToRead);
+            this.currentDataPosition += bytesToRead;
+            return bytesToRead;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
