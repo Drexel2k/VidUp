@@ -1,7 +1,7 @@
 ﻿[Setup]
 AppName=VidUp
 AppId=VidUpDrexelDevelopment
-AppVersion=1.12.1
+AppVersion=1.13.0
 WizardStyle=modern
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
@@ -14,7 +14,7 @@ OutputBaseFilename=VidUp.Setup.Ver.Release.x64
 OutputDir=..\VidUp.Setup\bin\Release\x64\
 
 [Files]
-Source: ..\VidUp.UI\bin\Release\x64\net5.0-windows\*; DestDir: "{app}"; Flags: recursesubdirs
+Source: ..\VidUp.UI\bin\Release\x64\net6.0-windows\*; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
 Name: "{group}\VidUp"; Filename: "{app}\VidUp.exe"
@@ -32,19 +32,19 @@ begin
   Result := UninstallString;
 end;
 
-function IsNet5Installed(): Boolean;
+function IsNet6Installed(): Boolean;
 var
-  Net5Path: String;
-  Net5String: String;
-  Net5FirstChar: String;
+  Net6Path: String;
+  Net6String: String;
+  Net6FirstChar: String;
 begin
-  Net5Path := 'Software\dotnet\Setup\InstalledVersions\x64\sharedhost';
-  Net5String := '';
+  Net6Path := 'Software\dotnet\Setup\InstalledVersions\x64\sharedhost';
+  Net6String := '';
   Result := false;
-  if RegQueryStringValue(HKLM, Net5Path, 'Version', Net5String) then
+  if RegQueryStringValue(HKLM, Net6Path, 'Version', Net6String) then
   begin
-    Net5FirstChar := Copy(Net5String, 1, 1)
-    if Net5FirstChar = '5' then
+    Net6FirstChar := Copy(Net6String, 1, 1)
+    if Net6FirstChar = '6' then
     begin
       Result:= true;
     end;
@@ -181,7 +181,7 @@ end;
 function InitializeSetup(): Boolean;
 begin
     Result := true;
-    if not IsNet5Installed() then
+    if not IsNet6Installed() then
     begin
         MsgBox('.NET 5 ist required to run this app, please download from https://dotnet.microsoft.com/download/dotnet/5.0 and install it.', mbInformation, MB_OK);
         Result := false;
