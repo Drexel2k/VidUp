@@ -183,7 +183,7 @@ begin
     Result := true;
     if not IsNet6Installed() then
     begin
-        MsgBox('.NET 5 ist required to run this app, please download from https://dotnet.microsoft.com/download/dotnet/5.0 and install it.', mbInformation, MB_OK);
+        MsgBox('.NET 6 ist required to run this app, please download .NET Desktop Runtime from https://dotnet.microsoft.com/en-us/download/dotnet/6.0 and install it.', mbInformation, MB_OK);
         Result := false;
     end;
 end;
