@@ -272,10 +272,10 @@
                 </StackPanel>
             </StackPanel>
 
-            <Label Grid.Row="11" Grid.Column="1" Content="File Size: " Width="110" />
-            <Label Grid.Row="11" Grid.Column="2" Content="{Binding FileSizeInMegaByte}"  Background="{Binding FileSizeColor, Mode=OneWay}" Width="67" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" HorizontalAlignment="Left" VerticalAlignment="top" />
-            <Label Grid.Row="11" Grid.Column="2" Content="Uploaded: " Width="90" HorizontalAlignment="Right" />
-            <Label Grid.Row="11" Grid.Column="3" Content="{Binding UploadedInMegaByte}" Width="100" HorizontalAlignment="Left" />
+            <Label Grid.Row="11" Grid.Column="1" Content="Uploaded: " Width="100" />
+            <Label Grid.Row="11" Grid.Column="2" Content="{Binding UploadedInMegaByte}" Width="100" HorizontalAlignment="Left" />
+            <Label Grid.Row="11" Grid.Column="2" Content="File Size: " Width="90" HorizontalAlignment="Right" />
+            <Label Grid.Row="11" Grid.Column="3" Content="{Binding FileSizeInMegaByte}"  Background="{Binding FileSizeColor, Mode=OneWay}" Width="67" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" HorizontalAlignment="Left" VerticalAlignment="top" />
 
         </Grid>
 

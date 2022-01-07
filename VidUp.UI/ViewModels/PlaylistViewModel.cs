@@ -13,7 +13,6 @@ using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using Drexel.VidUp.Youtube.PlaylistItemService;
-using Drexel.VidUp.Youtube.PlaylistService;
 using Drexel.VidUp.Youtube.VideoService;
 using MaterialDesignThemes.Wpf;
 using Timer = System.Timers.Timer;
@@ -325,8 +324,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void raisePropertyChangedAndSerializePlaylistList(string propertyName)
         {
-            this.raisePropertyChanged(propertyName);
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
+            this.raisePropertyChanged(propertyName);
         }
 
         //exposed for testing

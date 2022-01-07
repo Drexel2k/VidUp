@@ -324,10 +324,13 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.upload.Title = value;
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+
                 this.raisePropertyChanged("Title");
                 this.raisePropertyChanged("YtTitle");
                 this.raisePropertyChanged("TitleColor");
                 this.raisePropertyChanged("TitleCharacterCount");
+                this.raisePropertyChanged("Title");
+                this.raiseUploadStatusProperties();
             }
         }
 
@@ -374,10 +377,13 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             {
                 this.upload.Description = value;
+
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+
                 this.raisePropertyChanged("Description");
                 this.raisePropertyChanged("DescriptionColor");
                 this.raisePropertyChanged("DescriptionCharacterCount");
+                this.raiseUploadStatusProperties();
             }
         }
 
@@ -420,10 +426,13 @@ namespace Drexel.VidUp.UI.ViewModels
             set
             { ;
                 this.upload.SetTags(value.Split(','));
+
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+
                 this.raisePropertyChanged("TagsAsString");
                 this.raisePropertyChanged("TagsColor");
                 this.raisePropertyChanged("TagsCharacterCount");
+                this.raiseUploadStatusProperties();
             }
         }
 
@@ -863,8 +872,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             if (uploadStatusChangedMessage.Upload == this.upload)
             {
-                this.raisePropertyChanged("UploadStatus");
-                this.raisePropertyChanged("UploadStatusColor");
+                this.raiseUploadStatusProperties();
                 this.raisePropertyChanged("UploadStatusColorAnimation");
                 this.raisePropertyChanged("UploadStart");
                 this.raisePropertyChanged("UploadEnd");
@@ -906,6 +914,12 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("PublishAtTime");
             this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
             this.raisePropertyChanged("SelectedVisibility");
+        }
+
+        private void raiseUploadStatusProperties()
+        {
+            this.raisePropertyChanged("UploadStatus");
+            this.raisePropertyChanged("UploadStatusColor");
         }
 
         private void removeComboBoxValue(object parameter)
@@ -973,8 +987,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-            this.raisePropertyChanged("UploadStatus");
-            this.raisePropertyChanged("UploadStatusColor");
+            this.raiseUploadStatusProperties();
             this.raisePropertyChanged("UploadStatusColorAnimation");
             this.raisePropertyChanged("UploadedInMegaByte");
             this.raisePropertyChanged("UploadStart");
@@ -994,7 +1007,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.upload.UploadStatus = UplStatus.Paused;
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-            this.raisePropertyChanged("UploadStatus");
+            this.raiseUploadStatusProperties();
         }
 
         private void openThumbnailDialog(object parameter)

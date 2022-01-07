@@ -81,7 +81,6 @@
                         On OAuth Authentication VidUp stores a refresh token to request access tokens to access your YouTube account. On sign out the refresh token is deleted. If you want to revoke VidUp's access to your Google account/YouTube channel totally, you can do it in your Google account's security settings: 
                         <Hyperlink NavigateUri="https://security.google.com/settings/security/permissions" RequestNavigate="hyperlinkRequestNavigate">https://security.google.com/settings/security/permissions</Hyperlink>.
                     </TextBlock>
-
                 </Grid>
 
             </GroupBox>
@@ -123,37 +122,6 @@
 
             <GroupBox Grid.Row="2" Grid.Column="0" Padding="0" Margin="0 10 0 0">
                 <GroupBox.Header>
-                    <TextBlock Text="YOUTUBE API CREDENTIALS" Margin="2" />
-                </GroupBox.Header>
-
-                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition MinHeight="30"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Vertical"  Grid.Row="0" Grid.Column="1">
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Enable Custom Credentials" Width="165" />
-                            <ToggleButton IsChecked="{Binding UseCustomYouTubeApiCredentials}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
-                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="VidUp uses the YouTube Data API to upload videos, this API needs a login beside the YouTube/Google account login. This API login is limited in the amout of requests per day (API quota exceeded) and shared between all users.&#x0a;You can enter your own API login here (not your YouTube/Google account login), if VidUp's default API acess is closed too often for the rest of the day by too many requests e.g." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Client ID: " Width="87"/>
-                            <TextBox Width="450"  Text="{Binding ClientId, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Client Secret: " Width="87"/>
-                            <TextBox Width="270"  Text="{Binding ClientSecret, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </GroupBox>
-
-            <GroupBox Grid.Row="3" Grid.Column="0" Padding="0" Margin="0 10 0 0">
-                <GroupBox.Header>
                     <TextBlock Text="VIDEO LANGUAGE FILTER" Margin="2" />
                 </GroupBox.Header>
                 <Grid Height="Auto" Width="620" Margin="0 0 0 3">
@@ -185,6 +153,40 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="3" Grid.Column="0" Padding="0" Margin="0 10 0 0">
+                <GroupBox.Header>
+                    <TextBlock Text="YOUTUBE API CREDENTIALS" Margin="2" />
+                </GroupBox.Header>
+
+                <Grid Height="Auto" Width="620" Margin="0 0 0 3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Vertical"  Grid.Row="0" Grid.Column="1">
+                        <TextBlock TextWrapping="Wrap" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="5 5 60 5">
+                            Please note! API credentials created after July 2020 causes that videos uploaded with these credentials cannot not be made public. Please see the <Hyperlink NavigateUri="https://developers.google.com/youtube/v3/revision_history#release_notes_07_28_2020" RequestNavigate="hyperlinkRequestNavigate">API Revision History</Hyperlink> for more details.
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Enable Custom Credentials" Width="165" />
+                            <ToggleButton IsChecked="{Binding UseCustomYouTubeApiCredentials}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="VidUp uses the YouTube Data API to upload videos, this API needs a login beside the YouTube/Google account login. This API login is limited in the amout of requests per day (API quota exceeded) and shared between all users.&#x0a;You can enter your own API login here (not your YouTube/Google account login), if VidUp's default API acess is closed too often for the rest of the day by too many requests e.g." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Client ID: " Width="87"/>
+                            <TextBox Width="450"  Text="{Binding ClientId, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Client Secret: " Width="87"/>
+                            <TextBox Width="270"  Text="{Binding ClientSecret, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </GroupBox>
         </Grid>
