@@ -13,5 +13,3 @@ You can find more information here:
 https://www.vidup.info/
 https://twitter.com/DrexelsVidUp
 https://letsplayforum.de/thread/178125-drexel-s-vidup-ein-templatebasierter-youtube-uploader/ (German language sorry!)
-
-You can contact me via Discord: Drexel#4886 or in the above mentioned forum post.
