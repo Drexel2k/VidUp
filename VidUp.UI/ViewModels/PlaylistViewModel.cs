@@ -473,7 +473,7 @@ namespace Drexel.VidUp.UI.ViewModels
                                             string removedUploadsDeletedOnYoutubeString = tempStringBuilderForChangeLists.ToString();
 
                                             Tracer.Write($"PlaylistViewModel.autoSetPlaylists: At least one upload was removed on Youtube:\n{removedUploadsDeletedOnYoutubeString}");
-                                            messages.Add(StatusInformationCreator.Create($"{DateTime.Now} These videos were removed on Youtube.\n{removedUploadsDeletedOnYoutubeString}"));
+                                            messages.Add(StatusInformationCreator.Create($"{DateTime.Now} These videos were removed on Youtube:\n{removedUploadsDeletedOnYoutubeString}"));
                                         }
 
                                         if (uploadsWithoutPlaylistByPlaylist.Count > 0)

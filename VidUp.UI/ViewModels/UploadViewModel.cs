@@ -325,12 +325,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-                this.raisePropertyChanged("Title");
-                this.raisePropertyChanged("YtTitle");
-                this.raisePropertyChanged("TitleColor");
-                this.raisePropertyChanged("TitleCharacterCount");
-                this.raisePropertyChanged("Title");
-                this.raiseUploadStatusProperties();
+                this.raiseTitleProperties();
             }
         }
 
@@ -380,10 +375,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-                this.raisePropertyChanged("Description");
-                this.raisePropertyChanged("DescriptionColor");
-                this.raisePropertyChanged("DescriptionCharacterCount");
-                this.raiseUploadStatusProperties();
+                this.raiseDescriptionProperties();
             }
         }
 
@@ -429,10 +421,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-                this.raisePropertyChanged("TagsAsString");
-                this.raisePropertyChanged("TagsColor");
-                this.raisePropertyChanged("TagsCharacterCount");
-                this.raiseUploadStatusProperties();
+                this.raiseTagsProperties();
             }
         }
 
@@ -503,11 +492,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string FileSizeInMegaByte
-        {
-            get => $"{((int)((float)this.upload.FileLength / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} MB";
-        }
-
         public SolidColorBrush FileSizeColor
         {
             get
@@ -523,9 +507,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string UploadedInMegaByte
+        public string UploadedTotalInfo
         {
-            get => $"{((int)((float)this.upload.BytesSent / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} MB";
+            get => $"{((int)((float)this.upload.BytesSent / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} / {((int)((float)this.upload.FileLength / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} MB";
         }
 
         public string UploadErrorMessage
@@ -795,27 +779,17 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (attributeResetMessage.Attribute == "title")
                 {
-                    this.raisePropertyChanged("Title");
-                    this.raisePropertyChanged("YtTitle");
-                    this.raisePropertyChanged("TitleColor");
-                    this.raisePropertyChanged("TitleCharacterCount");
-                    this.raisePropertyChanged("ResetStateCommandEnabled");
+                    this.raiseTitleProperties();
                 }
 
                 if (attributeResetMessage.Attribute == "description")
                 {
-                    this.raisePropertyChanged("Description");
-                    this.raisePropertyChanged("DescriptionColor");
-                    this.raisePropertyChanged("DescriptionCharacterCount");
-                    this.raisePropertyChanged("ResetStateCommandEnabled");
+                    this.raiseDescriptionProperties();
                 }
 
                 if (attributeResetMessage.Attribute == "tags")
                 {
-                    this.raisePropertyChanged("TagsAsString");
-                    this.raisePropertyChanged("TagsColor");
-                    this.raisePropertyChanged("TagsCharacterCount");
-                    this.raisePropertyChanged("ResetStateCommandEnabled");
+                    this.raiseTagsProperties();
                 }
 
                 if (attributeResetMessage.Attribute == "visibility")
@@ -855,7 +829,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             if (bytesSentMessage.Upload == this.upload)
             {
-                this.raisePropertyChanged("UploadedInMegaByte");
+                this.raisePropertyChanged("UploadedTotalInfo");
             }
         }
 
@@ -881,7 +855,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadErrorMessage");
                 this.raisePropertyChanged("ControlsEnabled");
                 this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-                this.raisePropertyChanged("UploadedInMegaByte");
+                this.raisePropertyChanged("UploadedTotalInfo");
             }
         }
 
@@ -920,6 +894,34 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             this.raisePropertyChanged("UploadStatus");
             this.raisePropertyChanged("UploadStatusColor");
+        }
+
+        private void raiseTitleProperties()
+        {
+            this.raisePropertyChanged("Title");
+            this.raisePropertyChanged("YtTitle");
+            this.raisePropertyChanged("TitleColor");
+            this.raisePropertyChanged("TitleCharacterCount");
+            this.raisePropertyChanged("ResetStateCommandEnabled");
+            this.raiseUploadStatusProperties();
+            this.raiseUploadStatusProperties();
+        }
+
+        private void raiseDescriptionProperties()
+        {
+            this.raisePropertyChanged("Description");
+            this.raisePropertyChanged("DescriptionColor");
+            this.raisePropertyChanged("DescriptionCharacterCount");
+            this.raiseUploadStatusProperties();
+            this.raisePropertyChanged("ResetStateCommandEnabled");
+        }
+        private void raiseTagsProperties()
+        {
+            this.raisePropertyChanged("TagsAsString");
+            this.raisePropertyChanged("TagsColor");
+            this.raisePropertyChanged("TagsCharacterCount");
+            this.raiseUploadStatusProperties();
+            this.raisePropertyChanged("ResetStateCommandEnabled");
         }
 
         private void removeComboBoxValue(object parameter)
@@ -989,7 +991,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.raiseUploadStatusProperties();
             this.raisePropertyChanged("UploadStatusColorAnimation");
-            this.raisePropertyChanged("UploadedInMegaByte");
+            this.raisePropertyChanged("UploadedTotalInfo");
             this.raisePropertyChanged("UploadStart");
             this.raisePropertyChanged("UploadEnd");
             this.raisePropertyChanged("UploadErrorMessage");
@@ -1071,16 +1073,15 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     case "title":
                         this.upload.CopyTitleFromTemplate();
-                        this.raisePropertyChanged("YtTitle");
-                        this.raisePropertyChanged("Title");
+                        this.raiseTitleProperties();
                         break;
                     case "description":
                         this.upload.CopyDescriptionFromTemplate();
-                        this.raisePropertyChanged("Description");
+                        this.raiseDescriptionProperties();
                         break;
                     case "tags":
                         this.upload.CopyTagsFromtemplate();
-                        this.raisePropertyChanged("TagsAsString");
+                        this.raiseTagsProperties();
                         break;
                     case "visibility":
                         this.upload.CopyVisibilityFromTemplate();

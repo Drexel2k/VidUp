@@ -174,7 +174,7 @@
                     <materialDesign:PackIcon Kind="Warning" ToolTip="Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu." ToolTipService.ShowDuration="60000" Visibility="{Binding SelectedYoutubeAccount, Mode=OneWay, Converter={converters:YoutubeAccountAuthenticatedCollapsedConverter}}" Margin="0 4 5 0" Background="Transparent" />
                     <ComboBox  ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" IsEnabled="{Binding ControlsEnabled}" VerticalAlignment="Top"  Padding="6 4 6 6" />
                 </DockPanel>
-                
+
             </StackPanel>
 
             <StackPanel  Grid.Row="7" Grid.Column="3" Orientation="Horizontal">
@@ -245,14 +245,14 @@
                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
                 <Label Content="D. Lang.: " Width="55" />
-                
+
             </StackPanel>
 
             <StackPanel Grid.Row="9" Grid.Column="2" Orientation="Horizontal">
                 <ComboBox SelectedItem="{Binding SelectedDescriptionLanguage}" ItemsSource="{Binding Languages}" DisplayMemberPath="EnglishName" Width="190" IsEnabled="{Binding ControlsEnabled}" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="6 4 6 6" />
                 <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 0" ToolTip="Language of the video's title and description." ToolTipService.ShowDuration="60000" Background="Transparent" />
             </StackPanel>
-           
+
 
             <StackPanel  Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />
@@ -273,9 +273,7 @@
             </StackPanel>
 
             <Label Grid.Row="11" Grid.Column="1" Content="Uploaded: " Width="100" />
-            <Label Grid.Row="11" Grid.Column="2" Content="{Binding UploadedInMegaByte}" Width="100" HorizontalAlignment="Left" />
-            <Label Grid.Row="11" Grid.Column="2" Content="File Size: " Width="90" HorizontalAlignment="Right" />
-            <Label Grid.Row="11" Grid.Column="3" Content="{Binding FileSizeInMegaByte}"  Background="{Binding FileSizeColor, Mode=OneWay}" Width="67" Height="20" Padding="2 1 2 0" Margin="0 3 0 0" HorizontalAlignment="Left" VerticalAlignment="top" />
+            <Label Grid.Row="11" Grid.Column="2" Content="{Binding UploadedTotalInfo}" Width="200" HorizontalAlignment="Left" />
 
         </Grid>
 
