@@ -269,11 +269,9 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
         /// </summary>
         /// <param name="length">Input length (nb. output will be longer)</param>
         /// <returns></returns>
-        public static string randomDataBase64url(uint length)
+        public static string randomDataBase64url(int length)
         {
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-            byte[] bytes = new byte[length];
-            rng.GetBytes(bytes);
+            byte[] bytes = RandomNumberGenerator.GetBytes(length);
             return YoutubeAuthentication.base64urlencodeNoPadding(bytes);
         }
 
@@ -282,11 +280,10 @@ namespace Drexel.VidUp.Youtube.AuthenticationService
         /// </summary>
         /// <param name="inputStirng"></param>
         /// <returns></returns>
-        public static byte[] sha256(string inputStirng)
+        public static byte[] sha256(string inputString)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(inputStirng);
-            SHA256Managed sha256 = new SHA256Managed();
-            return sha256.ComputeHash(bytes);
+            byte[] bytes = SHA256.HashData(Encoding.ASCII.GetBytes(inputString));
+            return bytes;
         }
 
         /// <summary>
