@@ -1,7 +1,7 @@
 ﻿[Setup]
 AppName=VidUp
 AppId=VidUpDrexelDevelopment
-AppVersion=1.13.0
+AppVersion=1.13.1
 WizardStyle=modern
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64

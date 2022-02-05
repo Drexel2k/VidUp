@@ -425,7 +425,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 bool result = (bool) await DialogHost.Show(control, "RootDialog").ConfigureAwait(true);
                 if (result)
                 {
-                    string accountName = this.selectedYoutubeAccount.YoutubeAccount.Name;
+                    YoutubeAccount selectedYoutubeAccount = this.selectedYoutubeAccount.YoutubeAccount;
                     if (this.observableYoutubeAccountViewModels[0].YoutubeAccount.Name == this.selectedYoutubeAccount.YoutubeAccount.Name)
                     {
                         this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels[1];
@@ -435,8 +435,8 @@ namespace Drexel.VidUp.UI.ViewModels
                         this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels[0];
                     }
 
-                    EventAggregator.Instance.Publish(new BeforeYoutubeAccountDeleteMessage(this.youtubeAccounts.GetYoutubeAccount(accountName)));
-                    this.youtubeAccounts.Remove(accountName);
+                    EventAggregator.Instance.Publish(new BeforeYoutubeAccountDeleteMessage(selectedYoutubeAccount));
+                    this.youtubeAccounts.Remove(selectedYoutubeAccount);
                     JsonSerializationContent.JsonSerializer.SerializePlaylistList();
                     JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                     JsonSerializationContent.JsonSerializer.SerializeAllUploads();

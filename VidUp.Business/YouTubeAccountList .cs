@@ -50,9 +50,8 @@ namespace Drexel.VidUp.Business
             return this.youtubeAccounts.FindIndex(predicate);
         }
 
-        public void Remove(string name)
+        public void Remove(YoutubeAccount youtubeAccount)
         {
-            YoutubeAccount youtubeAccount = this.youtubeAccounts.Find(acc => acc.Name == name);
             if (youtubeAccount != null)
             {
                 this.youtubeAccounts.Remove(youtubeAccount);
