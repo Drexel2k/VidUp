@@ -61,7 +61,7 @@ namespace Drexel.VidUp.Youtube.VideoService
                     catch (AuthenticationException e)
                     {
                         Tracer.Write($"YoutubeVideoService.IsPublic: Authentication exception: {e.ToString()}.");
-                        StatusInformation statusInformation = StatusInformationCreator.Create("YoutubeVideoService.IsPublic", e);
+                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not check if videos are public.", e);
                         result.StatusInformation = statusInformation;
                         Tracer.Write($"YoutubeVideoService.IsPublic: End, authentication error.");
                         return result;
@@ -69,7 +69,7 @@ namespace Drexel.VidUp.Youtube.VideoService
                     catch (HttpStatusException e)
                     {
                         Tracer.Write($"YoutubeVideoService.IsPublic: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                        StatusInformation statusInformation = StatusInformationCreator.Create("YoutubeVideoService.IsPublic", e);
+                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not check if videos are public.", e);
                         if (statusInformation.IsQuotaError)
                         {
                             result.StatusInformation = statusInformation;

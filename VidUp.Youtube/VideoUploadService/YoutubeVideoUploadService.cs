@@ -85,7 +85,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: End, file doesn't exist.");
 
-                upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.Upload", "File does not exist."));
+                upload.AddStatusInformation(StatusInformationCreator.Create("File does not exist."));
                 resetEvent.WaitOne();
                 upload.UploadStatus = UplStatus.Failed;
                 return UploadResult.FailedWithoutDataSent;
@@ -124,7 +124,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: End, Upload not successful after 3 tries for resume position {lastResumePositionBeforeError}.");
 
-                                upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.Upload", $"Upload not successful after 3 tries for resume position {lastResumePositionBeforeError}."));
+                                upload.AddStatusInformation(StatusInformationCreator.Create($"Upload not successful after 3 tries for resume position {lastResumePositionBeforeError}."));
                                 resetEvent.WaitOne();
                                 upload.UploadStatus = UplStatus.Failed;
 
@@ -154,6 +154,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                 uploadTry = 1;
                                 lastResumePositionBeforeError = upload.BytesSent;
                             }
+
+                            upload.AddStatusInformation(StatusInformationCreator.Create($"Resumed upload on position {upload.BytesSent} try {uploadTry}."));
                         }
 
                         Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: resume position {upload.BytesSent} Try {uploadTry}.");
@@ -197,8 +199,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             {
                                 if (e.InnerException is TimeoutException)
                                 {
-                                    Tracer.Write($"YoutubeVideoUploadService.Upload: resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout.");
-                                    upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.Upload", $"HttpClient.SendAsync resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout."));
+                                    Tracer.Write($"YoutubeVideoUploadService.Upload: resume position {lastResumePositionBeforeError} try {uploadTry} upload timeout, current position {upload.BytesSent}.");
+                                    upload.AddStatusInformation(StatusInformationCreator.Create($"Timeout on upload resume position {lastResumePositionBeforeError} try {uploadTry}, current position {upload.BytesSent}."));
                                     error = true;
                                     uploadTry++;
                                     continue;
@@ -225,17 +227,18 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                     statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
                                 }
 
-                                StatusInformation statusInformation = new StatusInformation($"YoutubeVideoUploadService.Upload: Authentication error: {e.GetType().Name}: {e.Message}.", statusInformationType);
-                                upload.AddUploadError(statusInformation);
+                                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create($"Could not upload.", e);
+                                upload.AddStatusInformation(statusInformation);
 
                                 error = true;
                                 uploadTry++;
                             }
                             catch (HttpStatusException e)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code resume position {lastResumePositionBeforeError} try {uploadTry}: {e.StatusCode} {e.Message} with content {e.Content}.");
-                                StatusInformation statusInformation = StatusInformationCreator.Create("YoutubeVideoUploadService.Upload", $"Upload failed with resume position {lastResumePositionBeforeError} try {uploadTry}", e);
-                                upload.AddUploadError(statusInformation);
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpResponseMessage unexpected status code resume position {lastResumePositionBeforeError} try {uploadTry}, current position {upload.BytesSent}: {e.StatusCode} {e.Message} with content {e.Content}.");
+                                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create($"Upload failed with resume position {lastResumePositionBeforeError} try {uploadTry}, current position {upload.BytesSent}.", e);
+
+                                upload.AddStatusInformation(statusInformation);
                                 if (statusInformation.IsQuotaError)
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End, quota exceeded.");
@@ -250,7 +253,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             catch (Exception e)
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
-                                upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.Upload", $"HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}", e));
+                                upload.AddStatusInformation(StatusInformationCreator.Create($"Upload failed with resume position {lastResumePositionBeforeError} try {uploadTry}, current position {upload.BytesSent}.", e));
                                 
                                 error = true;
                                 uploadTry++;
@@ -264,7 +267,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             {
                 Tracer.Write($"YoutubeVideoUploadService.Upload: End, Unexpected Exception: {e.ToString()}.");
 
-                upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.Upload", e));
+                upload.AddStatusInformation(StatusInformationCreator.Create("YoutubeVideoUploadService.Upload", e));
                 
                 resetEvent.WaitOne();
                 upload.UploadStatus = UplStatus.Failed;
@@ -341,7 +344,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                     if (requestTry > 3)
                     {
                         Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: End, failed 3 times."); ;
-                        upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.getResumePositionAsync", $"Getting resume position failed 3 times. Errors: {errors.ToString()}."));
+                        upload.AddStatusInformation(StatusInformationCreator.Create($"Getting resume position failed 3 times. Errors: {errors.ToString()}."));
                         resetEvent.WaitOne();
                         upload.UploadStatus = UplStatus.Failed;
                         return false;
@@ -384,13 +387,13 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                 catch (InvalidOperationException e)
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found, restarting upload, exception: {e.ToString()}.");
-                                    errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Range header not found, BytesSent set to 0: {e.Message}.");
+                                    errors.AppendLine($"Youtube delivers no resume position information, restarting upload from beginning: {e.Message}.");
                                     upload.BytesSent = 0;
                                 }
                                 catch (Exception e)
                                 {
                                     Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: Range header exception: {e.ToString()}.");
-                                    errors.AppendLine($"YoutubeVideoUploadService.getResumePositionAsync: Could not get range header: {e.GetType().Name}: {e.Message}.");
+                                    errors.AppendLine($"Could not get resume position information: {e.GetType().Name}: {e.Message}.");
 
                                     error = true;
                                     requestTry++;
@@ -409,8 +412,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                         statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
                     }
 
-                    StatusInformation statusInformation = new StatusInformation($"YoutubeVideoUploadService.getResumePositionAsync: Authentication error: {e.GetType().Name}: {e.Message}.", statusInformationType);
-                    upload.AddUploadError(statusInformation);
+                    StatusInformation statusInformation = StatusInformationCreatorYoutube.Create($"Could not get resume position.", e);
+                    upload.AddStatusInformation(statusInformation);
 
                     error = true;
                     requestTry++;
@@ -418,8 +421,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 catch (HttpStatusException e)
                 {
                     Tracer.Write($"YoutubeVideoUploadService.getResumePositionAsync: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                    StatusInformation statusInformation = StatusInformationCreator.Create("YoutubeVideoUploadService.getResumePositionAsync", "Could not get resume position", e);
-                    upload.AddUploadError(statusInformation);
+                    StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not get resume position.", e);
+                    upload.AddStatusInformation(statusInformation);
                     if (statusInformation.IsQuotaError)
                     {
                         resetEvent.WaitOne();
@@ -499,7 +502,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                     if (requestTry > 3)
                     {
                         Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: End, failed 3 times.");
-                        upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.requestNewUpload", "Requesting new upload failed 3 times."));
+                        upload.AddStatusInformation(StatusInformationCreator.Create("Requesting new upload failed 3 times."));
                         resetEvent.WaitOne();
                         upload.UploadStatus = UplStatus.Failed;
                         return false;
@@ -540,7 +543,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 catch (AuthenticationException e)
                 {
                     Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Authentication exception: {e.ToString()}.");
-                    upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.requestNewUpload", e));
+                    upload.AddStatusInformation(StatusInformationCreatorYoutube.Create("Could not request new upload.", e));
 
                     error = true;
                     requestTry++;
@@ -548,8 +551,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 catch (HttpStatusException e)
                 {
                     Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                    StatusInformation statusInformation = StatusInformationCreator.Create("YoutubeVideoUploadService.requestNewUpload", e);
-                    upload.AddUploadError(statusInformation);
+                    StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not request new upload.", e);
+                    upload.AddStatusInformation(statusInformation);
                     if (statusInformation.IsQuotaError)
                     {
                         resetEvent.WaitOne();
@@ -564,7 +567,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                 catch (Exception e)
                 {
                     Tracer.Write($"YoutubeVideoUploadService.requestNewUpload: Exception: {e.ToString()}.");
-                    upload.AddUploadError(StatusInformationCreator.Create("YoutubeVideoUploadService.requestNewUpload", "Requesting new upload failed", e));
+                    upload.AddStatusInformation(StatusInformationCreator.Create("Could not request new upload.", e));
 
                     error = true;
                     requestTry++;

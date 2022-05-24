@@ -50,30 +50,23 @@ namespace Drexel.VidUp.Youtube.ThumbnailService
                     }
                     catch (AuthenticationException e)
                     {
-                        Tracer.Write(
-                            $"YoutubeThumbnailService.AddThumbnail: End, authentication exception: {e.ToString()}.");
+                        Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, authentication exception: {e.ToString()}.");
 
-                        StatusInformationType statusInformationType = StatusInformationType.AuthenticationError;
-                        if (e.IsApiResponseError)
-                        {
-                            statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
-                        }
-
-                        StatusInformation statusInformation = new StatusInformation($"YoutubeThumbnailService.AddThumbnail: HttpClient.SendAsync authentication error: {e.GetType().Name}: {e.Message}.", statusInformationType);
-                        upload.AddUploadError(statusInformation);
+                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create($"Could not add thumbnail to video.", e);
+                        upload.AddStatusInformation(statusInformation);
 
                         return false;
                     }
                     catch (HttpStatusException e)
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                        upload.AddUploadError(StatusInformationCreator.Create("YoutubeThumbnailService.AddThumbnail", "Could not add thumbnail", e));
+                        upload.AddStatusInformation(StatusInformationCreatorYoutube.Create("Could not add thumbnail to video.", e));
                         return false;
                     }
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.SendAsync Exception: {e.ToString()}.");
-                        upload.AddUploadError(StatusInformationCreator.Create("YoutubeThumbnailService.AddThumbnail", "HttpClient.SendAsync error", e));
+                        upload.AddStatusInformation(StatusInformationCreator.Create("Could not add thumbnail to video.", e));
                         return false;
                     }
 

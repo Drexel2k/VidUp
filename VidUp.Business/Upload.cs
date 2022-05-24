@@ -39,7 +39,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private DateTime? publishAt;
         [JsonProperty]
-        private List<StatusInformation> uploadErrors;
+        private List<StatusInformation> statusInformation;
         [JsonProperty]
         private string title;
         [JsonProperty]
@@ -147,7 +147,7 @@ namespace Drexel.VidUp.Business
                     this.bytesSent = 0;
                     this.uploadStart = null;
                     this.uploadEnd = null;
-                    this.uploadErrors.Clear();
+                    this.statusInformation.Clear();
                 }
 
                 if (value == UplStatus.Uploading)
@@ -158,7 +158,7 @@ namespace Drexel.VidUp.Business
                         this.uploadStart = DateTime.Now;
                     }
                     
-                    this.uploadErrors.Clear();
+                    this.statusInformation.Clear();
                 }
 
                 if (value == UplStatus.Finished)
@@ -168,7 +168,7 @@ namespace Drexel.VidUp.Business
 
                 if (value == UplStatus.Stopped)
                 {
-                    this.uploadErrors.Clear();
+                    this.statusInformation.Clear();
                 }
 
                 this.LastModified = DateTime.Now;
@@ -265,27 +265,11 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public string UploadErrorMessage
+        public ReadOnlyCollection<StatusInformation> UploadErrors
         { 
             get
             {
-                StringBuilder stringBuilder = new StringBuilder();
-                if (this.ErrorsContainQuotaError)
-                {
-                    stringBuilder.AppendLine(TinyHelpers.QuotaExceededString);
-                }
-
-                if (this.ErrorsContainAuthenticationApiResponseError)
-                {
-                    stringBuilder.AppendLine(TinyHelpers.AuthenticationErrorString);
-                }
-
-                foreach (StatusInformation uploadError in this.uploadErrors)
-                {
-                    stringBuilder.AppendLine(uploadError.Message); 
-                }
-
-                return TinyHelpers.TrimLineBreakAtEnd(stringBuilder.ToString());
+                return this.statusInformation.AsReadOnly();
             }
         }
 
@@ -461,20 +445,10 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public bool ErrorsContainQuotaError
-        {
-            get => this.uploadErrors.Any(error => error.IsQuotaError == true);
-        }
-
-        public bool ErrorsContainAuthenticationApiResponseError
-        {
-            get => this.uploadErrors.Any(error => error.IsAuthenticationApiResponseError == true);
-        }
-
         [JsonConstructor]
         private Upload()
         {
-            this.uploadErrors = new List<StatusInformation>();
+            this.statusInformation = new List<StatusInformation>();
         }
 
         public Upload(string filePath, Template template)
@@ -521,7 +495,7 @@ namespace Drexel.VidUp.Business
             this.lastModified = this.created;
             this.uploadStatus = UplStatus.ReadyForUpload;
             this.tags = new List<string>();
-            this.uploadErrors = new List<StatusInformation>();
+            this.statusInformation = new List<StatusInformation>();
             this.visibility = Visibility.Private;
 
             //to ensure at least file name is set as title.
@@ -552,17 +526,17 @@ namespace Drexel.VidUp.Business
             this.verifyAndSetUploadStatus();
         }
 
-        public void AddUploadError(StatusInformation statusInformation)
+        public void AddStatusInformation(StatusInformation statusInformation)
         {
             if (statusInformation != null)
             {
-                this.uploadErrors.Add(statusInformation);
+                this.statusInformation.Add(statusInformation);
             }
         }
 
         public void ClearUploadErrors()
         {
-            this.uploadErrors.Clear();
+            this.statusInformation.Clear();
         }
 
         public void CopyTemplateValues()

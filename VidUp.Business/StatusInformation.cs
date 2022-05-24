@@ -7,6 +7,8 @@ namespace Drexel.VidUp.Business
     public class StatusInformation
     {
         [JsonProperty]
+        private DateTime dateTime;
+        [JsonProperty]
         private string message;
         [JsonProperty]
         private StatusInformationType statusInformationType;
@@ -14,6 +16,11 @@ namespace Drexel.VidUp.Business
         public string Message
         {
             get => this.message;
+        }
+
+        public DateTime DateTime
+        {
+            get => this.dateTime;
         }
 
         public bool IsQuotaError
@@ -81,8 +88,8 @@ namespace Drexel.VidUp.Business
                 throw new ArgumentException("Message must not be null.");
             }
 
+            this.dateTime = DateTime.Now;
             this.message = message;
-
             this.statusInformationType = statusInformationType;
         }
     }

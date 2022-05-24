@@ -227,13 +227,13 @@ namespace Drexel.VidUp.Youtube
                     }
                     else
                     {
-                        upload.AddUploadError(new StatusInformation("Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu.", StatusInformationType.AuthenticationError));
+                        upload.AddStatusInformation(StatusInformationCreator.Create("Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu.", StatusInformationType.AuthenticationError));
                         upload.UploadStatus = UplStatus.Failed;
                         this.onUploadStatusChanged(upload);
                         this.onErrorMessageChanged(upload);
                     }
 
-                    if (!upload.ErrorsContainQuotaError)
+                    if (!upload.UploadErrors.Any(error => error.IsQuotaError == true))
                     {
                         upload = this.uploadList.GetUpload(
                             TinyHelpers.PredicateAnd(

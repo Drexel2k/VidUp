@@ -629,13 +629,13 @@ namespace Drexel.VidUp.UI.ViewModels
             UploadStats uploadStats = new UploadStats(resetEvent);
             this.onUploadStarted(new UploadStartedEventArgs(uploadStats));
 
-            this.uploader = new Uploader(this.uploadList);
+            this.uploader = new Uploader(this.uploadList, this.maxUploadInBytesPerSecond);
             this.uploader.UploadBytesSent += (sender, upload) => this.onUploadBytesSent(upload);
             this.uploader.UploadStatusChanged += (sender, upload) => this.onUploadStatusChanged(upload);
             this.uploader.ResumableSessionUriSet += (sender, upload) => this.onResumableSessionUriSet(upload);
             this.uploader.UploadStatsUpdated += (sender) => this.onUploadStatsUpdated();
             this.uploader.ErrorMessageChanged += (sender, upload) => this.onErrorMessageChanged(upload);
-            UploaderResult uploadResult = await uploader.UploadAsync(uploadStats, resume, this.maxUploadInBytesPerSecond, resetEvent).ConfigureAwait(false);
+            UploaderResult uploadResult = await uploader.UploadAsync(uploadStats, resume, resetEvent).ConfigureAwait(false);
             bool uploadStopped = uploader.UploadStopped;
             this.uploader = null;
 

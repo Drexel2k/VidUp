@@ -15,6 +15,9 @@ namespace Drexel.VidUp.Youtube.PlaylistService
     {
         private static string playlistsEndpoint = "https://www.googleapis.com/youtube/v3/playlists";
         private static int maxResults = 50;
+
+
+        //gets playlists from api without content.
         public static async Task<GetPlaylistsResult> GetPlaylistsAsync(YoutubeAccount youtubeAccount)
         {
             Tracer.Write($"YoutubePlaylistService.GetPlaylists: Start.");
@@ -106,12 +109,12 @@ namespace Drexel.VidUp.Youtube.PlaylistService
             catch (AuthenticationException e)
             {
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, authentication error.");
-                return StatusInformationCreator.Create("YoutubePlaylistService.addPlaylistsToResult", e);
+                return StatusInformationCreatorYoutube.Create("Could not receive playlists.", e);
             }
             catch (HttpStatusException e)
             {
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                StatusInformation statusInformation = StatusInformationCreator.Create("YoutubePlaylistService.addPlaylistsToResult", e);
+                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not receive playlists.", e);
                 if (statusInformation.IsQuotaError)
                 {
                     Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, quota exceeded.");
