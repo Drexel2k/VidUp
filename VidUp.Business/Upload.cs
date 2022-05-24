@@ -152,7 +152,12 @@ namespace Drexel.VidUp.Business
 
                 if (value == UplStatus.Uploading)
                 {
-                    this.uploadStart = DateTime.Now;
+                    //set only on initial upload start, not on continued upload
+                    if (this.uploadStart == null)
+                    {
+                        this.uploadStart = DateTime.Now;
+                    }
+                    
                     this.uploadErrors.Clear();
                 }
 

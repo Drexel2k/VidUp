@@ -855,12 +855,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             if (Settings.Instance.UserSettings.AutoSetPlaylists)
             {
-                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists enabled by user, setting up timer.");
+                Tracer.Write($"PlaylistViewModel.setAutoSetPlaylistsTimer: Autosetting playlists enabled by user, setting up timer.");
                 this.calculateTimeAndSetAutoSetPlaylistsTimer();
             }
             else
             {
-                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Autosetting playlists disabled by user, stopping timer.");
+                Tracer.Write($"PlaylistViewModel.setAutoSetPlaylistsTimer: Autosetting playlists disabled by user, stopping timer.");
                 this.autoSetPlaylistTimer.Stop();
             }
         }
@@ -868,18 +868,18 @@ namespace Drexel.VidUp.UI.ViewModels
         private void calculateTimeAndSetAutoSetPlaylistsTimer()
         {
             TimeSpan span = DateTime.Now - Settings.Instance.UserSettings.LastAutoAddToPlaylist;
-            Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Last autoset is {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds ago.");
+            Tracer.Write($"PlaylistViewModel.calculateTimeAndSetAutoSetPlaylistsTimer: Last autoset is {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds ago.");
 
             if (span.TotalSeconds > this.intervalInSeconds)
             {
-                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Starting autosetting playlists immediately.");
+                Tracer.Write($"PlaylistViewModel.calculateTimeAndSetAutoSetPlaylistsTimer: Starting autosetting playlists immediately.");
                 this.autoSetPlaylistsAsync(null);
             }
             else
             {
                 double nextAutoSetPlaylists = ((this.intervalInSeconds - span.TotalSeconds) * 1000);
                 span = TimeSpan.FromMilliseconds(nextAutoSetPlaylists);
-                Tracer.Write($"PlaylistViewModel.PlaylistViewModel: Scheduling autosetting playlists in {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds.");
+                Tracer.Write($"PlaylistViewModel.calculateTimeAndSetAutoSetPlaylistsTimer: Scheduling autosetting playlists in {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds.");
 
                 this.autoSetPlaylistTimer.Interval = nextAutoSetPlaylists;
                 EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(true, $"Next auto setting playlists: {DateTime.Now.AddMilliseconds(this.autoSetPlaylistTimer.Interval)}."));

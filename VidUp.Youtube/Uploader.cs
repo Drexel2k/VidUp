@@ -50,7 +50,11 @@ namespace Drexel.VidUp.Youtube
         {
             set
             {
+                Tracer.Write($"Uploader.MaxUploadInBytesPerSecond: Start, setting MaxUploadInBytesPerSecond: {value}.");
+
                 YoutubeVideoUploadService.MaxUploadInBytesPerSecond = value;
+
+                Tracer.Write($"Uploader.MaxUploadInBytesPerSecond: End.");
             }
         }
 
@@ -65,16 +69,23 @@ namespace Drexel.VidUp.Youtube
 
         public bool UploadStopped { get => this.uploadStopped; }
 
-        public Uploader(UploadList uploadList)
+        public Uploader(UploadList uploadList, long maxUploadInBytesPerSecond)
         {
+            Tracer.Write($"Uploader.Uploader: Start with maxUploadInBytesPerSecond: {maxUploadInBytesPerSecond}.");
             if (uploadList == null)
             {
                 throw new ArgumentException("uploadList must not be null.");
             }
 
+
             this.uploadList = uploadList;
 
             this.tokenSource = new CancellationTokenSource();
+
+            
+            YoutubeVideoUploadService.MaxUploadInBytesPerSecond = maxUploadInBytesPerSecond;
+
+            Tracer.Write($"Uploader.Uploader: End.");
         }
 
         private void onUploadStatsUpdated()
@@ -142,9 +153,9 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        public async Task<UploaderResult> UploadAsync(UploadStats uploadStats, bool resumeUploads, long maxUploadInBytesPerSecond, AutoResetEvent resetEvent)
+        public async Task<UploaderResult> UploadAsync(UploadStats uploadStats, bool resumeUploads, AutoResetEvent resetEvent)
         {
-            Tracer.Write($"Uploader.Upload: Start with resumeUploads: {resumeUploads}, maxUploadInBytesPerSecond: {maxUploadInBytesPerSecond}.");
+            Tracer.Write($"Uploader.Upload: Start with resumeUploads: {resumeUploads}.");
             this.uploadStats = uploadStats;
             this.resumeUploads = resumeUploads;
 
@@ -185,8 +196,6 @@ namespace Drexel.VidUp.Youtube
                     this.onUploadStatusChanged(upload);
 
                     this.lastSerialization = DateTime.Now;
-                    YoutubeVideoUploadService.MaxUploadInBytesPerSecond = maxUploadInBytesPerSecond;
-
 
                     if (upload.YoutubeAccount.IsAuthenticated)
                     {

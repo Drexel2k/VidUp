@@ -30,12 +30,20 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
         {
             set
             {
+                Tracer.Write($"YoutubeVideoUploadService.MaxUploadInBytesPerSecond: Sart, setting MaxUploadInBytesPerSecond: {value}.");
                 YoutubeVideoUploadService.maxUploadInBytesPerSecond = value;
                 ThrottledBufferedStream stream = YoutubeVideoUploadService.stream;
                 if (stream != null)
                 {
+                    Tracer.Write($"YoutubeVideoUploadService.MaxUploadInBytesPerSecond:Setting throttle in stream.");
                     stream.MaximumBytesPerSecond = value;
                 }
+                else
+                {
+                    Tracer.Write($"YoutubeVideoUploadService.MaxUploadInBytesPerSecond: No upload stream.");
+                }
+
+                Tracer.Write($"YoutubeVideoUploadService.MaxUploadInBytesPerSecond: End.");
             }
         }
 
