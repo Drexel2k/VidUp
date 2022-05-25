@@ -7,7 +7,7 @@ namespace Drexel.VidUp.Youtube
 {
     public static class StatusInformationCreatorYoutube
     {
-        public static StatusInformation Create(string message, AuthenticationException e)
+        public static StatusInformation Create(string code, string message, AuthenticationException e)
         {
             StatusInformationType statusInformationType = StatusInformationType.AuthenticationError;
 
@@ -17,13 +17,13 @@ namespace Drexel.VidUp.Youtube
                 statusInformationType |= StatusInformationType.AuthenticationApiResponseError;
                 messageAdditional += "Server denied authentication";
                 HttpStatusException httpStatusException = (HttpStatusException) e.InnerException;
-                return new StatusInformation($"{message} {messageAdditional}: {httpStatusException.StatusCode} {httpStatusException.Message} with content '{httpStatusException.Content}'.", statusInformationType);
+                return new StatusInformation(code, $"{message} {messageAdditional}: {httpStatusException.StatusCode} {httpStatusException.Message} with content '{httpStatusException.Content}'.", statusInformationType);
             }
 
-            return new StatusInformation($"{message} {messageAdditional}: {e.InnerException.GetType().Name}: {e.InnerException.Message}.", statusInformationType);
+            return new StatusInformation(code, $"{message} {messageAdditional}: {e.InnerException.GetType().Name}: {e.InnerException.Message}.", statusInformationType);
         }
 
-        public static StatusInformation Create(string source, string message, HttpStatusException e)
+        public static StatusInformation Create(string code, string source, string message, HttpStatusException e)
         {
             StatusInformationType statusInformationType;
             if (e.Content.Contains("quotaExceeded"))
@@ -46,12 +46,12 @@ namespace Drexel.VidUp.Youtube
                 sourceString = $"{source}: ";
             }
 
-            return new StatusInformation($"{sourceString}{message} {e.StatusCode} {e.Message} with content '{e.Content}'.", statusInformationType);
+            return new StatusInformation(code, $"{sourceString}{message} {e.StatusCode} {e.Message} with content '{e.Content}'.", statusInformationType);
         }
 
-        public static StatusInformation Create(string message, HttpStatusException e)
+        public static StatusInformation Create(string code, string message, HttpStatusException e)
         {
-            return StatusInformationCreatorYoutube.Create(null, message, e);
+            return StatusInformationCreatorYoutube.Create(code, null, message, e);
         }
     }
 }

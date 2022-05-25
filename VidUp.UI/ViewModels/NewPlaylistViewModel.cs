@@ -124,7 +124,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     if (getPlaylistsResult.StatusInformation.IsAuthenticationError)
                     {
                         this.showPlaylistReceiveError = true;
-                        this.playlistReceiveErrorMessage = $"Authentication failed: {getPlaylistsResult.StatusInformation.Message}.";
+                        this.playlistReceiveErrorMessage = $"Authentication failed: {getPlaylistsResult.StatusInformation.Message}. ({getPlaylistsResult.StatusInformation.Code})";
                         this.raisePropertyChanged("ShowPlaylistReceiveError");
                         this.raisePropertyChanged("PlaylistReceiveErrorMessage");
                     }

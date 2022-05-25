@@ -109,12 +109,12 @@ namespace Drexel.VidUp.Youtube.PlaylistService
             catch (AuthenticationException e)
             {
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, authentication error.");
-                return StatusInformationCreatorYoutube.Create("Could not receive playlists.", e);
+                return StatusInformationCreatorYoutube.Create("ERR0015", "Could not receive playlists.", e);
             }
             catch (HttpStatusException e)
             {
                 Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not receive playlists.", e);
+                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("ERR0016", "Could not receive playlists.", e);
                 if (statusInformation.IsQuotaError)
                 {
                     Tracer.Write($"YoutubePlaylistService.addPlaylistsToResult: End, quota exceeded.");

@@ -227,7 +227,7 @@ namespace Drexel.VidUp.Youtube
                     }
                     else
                     {
-                        upload.AddStatusInformation(StatusInformationCreator.Create("Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu.", StatusInformationType.AuthenticationError));
+                        upload.AddStatusInformation(StatusInformationCreator.Create("ERR0017", "Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu.", StatusInformationType.AuthenticationError));
                         upload.UploadStatus = UplStatus.Failed;
                         this.onUploadStatusChanged(upload);
                         this.onErrorMessageChanged(upload);

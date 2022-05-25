@@ -525,7 +525,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 //    return message;
                 //}
 
-                return StatusInformationToStringConverter.GetStatusInformationString(this.upload.UploadErrors, true);
+                return StatusInformationToStringConverter.GetStatusInformationString(this.upload.UploadErrors, true, true);
             }
         }
 

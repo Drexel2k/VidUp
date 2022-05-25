@@ -52,7 +52,7 @@ namespace Drexel.VidUp.Youtube.ThumbnailService
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, authentication exception: {e.ToString()}.");
 
-                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create($"Could not add thumbnail to video.", e);
+                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("ERR0007", $"Could not add thumbnail to video.", e);
                         upload.AddStatusInformation(statusInformation);
 
                         return false;
@@ -60,13 +60,13 @@ namespace Drexel.VidUp.Youtube.ThumbnailService
                     catch (HttpStatusException e)
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                        upload.AddStatusInformation(StatusInformationCreatorYoutube.Create("Could not add thumbnail to video.", e));
+                        upload.AddStatusInformation(StatusInformationCreatorYoutube.Create("ERR0008", "Could not add thumbnail to video.", e));
                         return false;
                     }
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubeThumbnailService.AddThumbnail: End, HttpClient.SendAsync Exception: {e.ToString()}.");
-                        upload.AddStatusInformation(StatusInformationCreator.Create("Could not add thumbnail to video.", e));
+                        upload.AddStatusInformation(StatusInformationCreator.Create("ERR0009", "Could not add thumbnail to video.", e));
                         return false;
                     }
 

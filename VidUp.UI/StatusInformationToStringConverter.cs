@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Drexel.VidUp.Business;
@@ -8,7 +9,8 @@ namespace Drexel.VidUp.UI
 {
     public static class StatusInformationToStringConverter
     {
-        public static string GetStatusInformationString(IEnumerable<StatusInformation> statusInformation, bool withDateTimeInfo)
+        //showAllCodes = false shows only error codes, not information codes.
+        public static string GetStatusInformationString(IEnumerable<StatusInformation> statusInformation, bool withDateTimeInfo, bool showAllCodes)
         {
             if(statusInformation == null)
             {
@@ -27,15 +29,26 @@ namespace Drexel.VidUp.UI
                 stringBuilder.AppendLine(TinyHelpers.AuthenticationErrorString);
             }
 
+
+
             foreach (StatusInformation statusInfo in statusInformation)
             {
+                string codeString = $" ({statusInfo.Code})";
+                if (statusInfo.Code.StartsWith("I", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if(!showAllCodes)
+                    {
+                        codeString =String.Empty;
+                    }
+                }
+
                 if (withDateTimeInfo)
                 {
-                    stringBuilder.AppendLine($"{statusInfo.DateTime} {statusInfo.Message}");
+                    stringBuilder.AppendLine($"{statusInfo.DateTime} {statusInfo.Message}{codeString}");
                 }
                 else
                 {
-                    stringBuilder.AppendLine(statusInfo.Message);
+                    stringBuilder.AppendLine($"{statusInfo.Message}{codeString}");
                 }
             }
 

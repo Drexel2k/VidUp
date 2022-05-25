@@ -9,9 +9,16 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private DateTime dateTime;
         [JsonProperty]
+        private string code;
+        [JsonProperty]
         private string message;
         [JsonProperty]
         private StatusInformationType statusInformationType;
+
+        public string Code
+        {
+            get => this.code;
+        }
 
         public string Message
         {
@@ -81,14 +88,20 @@ namespace Drexel.VidUp.Business
 
         }
 
-        public StatusInformation(string message, StatusInformationType statusInformationType)
+        public StatusInformation(string code, string message, StatusInformationType statusInformationType)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
                 throw new ArgumentException("Message must not be null.");
             }
 
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentException("Code must not be null.");
+            }
+
             this.dateTime = DateTime.Now;
+            this.code = code;
             this.message = message;
             this.statusInformationType = statusInformationType;
         }

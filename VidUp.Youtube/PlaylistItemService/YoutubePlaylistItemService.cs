@@ -61,7 +61,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                     }
                     catch (AuthenticationException e)
                     {
-                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not add video to playlist.", e);
+                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("ERR0010", "Could not add video to playlist.", e);
                         result.StatusInformation = statusInformation;
                         result.Success = false;
                         upload.AddStatusInformation(statusInformation);
@@ -72,7 +72,7 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                     {
                         Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
 
-                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not add video to playlist.", e);
+                        StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("ERR0011", "Could not add video to playlist.", e);
                         if (statusInformation.IsQuotaError)
                         {
                             result.StatusInformation = statusInformation;
@@ -82,14 +82,14 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
                             return result;
                         }
 
-                        upload.AddStatusInformation(StatusInformationCreatorYoutube.Create("Could not add video to playlist.", e));
+                        upload.AddStatusInformation(StatusInformationCreatorYoutube.Create("ERR0012", "Could not add video to playlist.", e));
                         result.Success = false;
                         return result;
                     }
                     catch (Exception e)
                     {
                         Tracer.Write($"YoutubePlaylistItemService.AddToPlaylist: End, HttpClient.SendAsync Exception: {e.ToString()}.");
-                        upload.AddStatusInformation(StatusInformationCreator.Create("Could not add video to playlist.", e));
+                        upload.AddStatusInformation(StatusInformationCreator.Create("ERR0001", "Could not add video to playlist.", e));
                         result.Success = false;
                         return result;
                     }
@@ -200,14 +200,14 @@ namespace Drexel.VidUp.Youtube.PlaylistItemService
             catch (AuthenticationException e)
             {
                 Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, authentication error.");
-                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not receive playlist videos.", e);
+                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("ERR0013", "Could not receive playlist videos.", e);
 
                 return statusInformation;
             }
             catch (HttpStatusException e)
             {
                 Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: HttpResponseMessage unexpected status code: {e.StatusCode} {e.Message} with content '{e.Content}'.");
-                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("Could not receive playlist videos.", e);
+                StatusInformation statusInformation = StatusInformationCreatorYoutube.Create("ERR0014", "Could not receive playlist videos.", e);
                 if (statusInformation.IsQuotaError)
                 {
                     Tracer.Write($"YoutubePlaylistItemService.addPlaylistItemsToResultAsync: End, quota exceeded.");
