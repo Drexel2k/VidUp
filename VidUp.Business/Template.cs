@@ -385,6 +385,30 @@ namespace Drexel.VidUp.Business
             this.youtubeAccount = youtubeAccount;
         }
 
+        public Template(Template template, string name, TemplateList templateList):
+            this(name, template.ImageFilePathForEditing, template.TemplateMode, template.RootFolderPath, template.PartOfFileName, templateList, template.YoutubeAccount)
+        {
+            this.thumbnailFolderPath = template.ThumbnailFolderPath;
+            this.thumbnailFallbackFilePath = template.ThumbnailFallbackFilePath;
+            this.placeholderFolderPath = template.PlaceholderFolderPath;
+            this.title = template.Title;
+            this.description = template.Description;
+            this.tags.AddRange(template.Tags);
+            this.visibility = template.YtVisibility;
+
+            this.usePublishAtSchedule = template.UsePublishAtSchedule;
+            if (template.PublishAtSchedule != null)
+            {
+                this.publishAtSchedule = new Schedule(template.publishAtSchedule);
+            }
+
+            this.videoLanguage = template.VideoLanguage;
+            this.category = template.Category;
+            this.descriptionLanguage = template.DescriptionLanguage;
+            this.playlist = template.Playlist;
+            this.setPlaylistAfterPublication = template.SetPlaylistAfterPublication;
+        }
+
         private void setName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))

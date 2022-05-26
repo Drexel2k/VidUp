@@ -51,12 +51,14 @@
                     <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="0,5,7,5" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
                             <StackPanel>
+                                <Button Content="Copy Template" Command="{Binding ActionCommand}" CommandParameter="copy" />
+                                <Separator/>
                                 <Button Content="Remove Playlist" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="playlist" />
                                 <Button Content="Remove Video Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="videolanguage" />
                                 <Button Content="Remove Description Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="descriptionlanguage" />
                                 <Button Content="Remove Category" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="category" />
                                 <Separator/>
-                                <Button Content="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding Guid}"/>
+                                <Button Content="Delete" Command="{Binding ActionCommand}" CommandParameter="delete"/>
                             </StackPanel>
                         </materialDesign:PopupBox>
                     </Button>

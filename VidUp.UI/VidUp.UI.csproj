@@ -96,6 +96,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Controls\CopyTemplateControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="Controls\NewYoutubeAccountControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>

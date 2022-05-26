@@ -286,6 +286,11 @@ namespace Drexel.VidUp.Business
 
         public Schedule(Schedule schedule) :this()
         {
+            if(schedule == null)
+            {
+                throw new ArgumentException("schedule must not be null.");
+            }
+
             this.scheduleFrequency = schedule.ScheduleFrequency;
             this.startDate = schedule.StartDate;
 

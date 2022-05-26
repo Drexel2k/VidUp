@@ -31,7 +31,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private YoutubeAccount youtubeAccountForCreatingTemplates;
 
         private GenericCommand newTemplateCommand;
-        private GenericCommand deleteCommand;
+        private GenericCommand actionCommand;
         private GenericCommand removeComboBoxValueCommand;
         private GenericCommand openFileDialogCommand;
         private GenericCommand resetCommand;
@@ -217,11 +217,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand DeleteCommand
+        public GenericCommand ActionCommand
         {
             get
             {
-                return this.deleteCommand;
+                return this.actionCommand;
             }
         }
 
@@ -594,7 +594,7 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialogAsync);
-            this.deleteCommand = new GenericCommand(this.DeleteTemplate);
+            this.actionCommand = new GenericCommand(this.ActionCommandExecute);
             this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
             this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
             this.resetCommand = new GenericCommand(this.resetValue);
@@ -681,16 +681,48 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public void DeleteTemplate(Object guid)
-        {       
-            Template template = this.templateList.GetTemplate(System.Guid.Parse((string)guid));
+        public void ActionCommandExecute(object obj)
+        {
+            switch (obj)
+            {
+                case "delete":
+                    this.deleteCurrentTemplate();
+                    break;
+                case "copy":
+                    this.openCopyTemplateDialogAsync();
+                    break;
+                default:
+                    throw new ArgumentException("Unknown ActionCommandExecute parameter.");
+                    break;
+            }
 
-            //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
-            //will set the SelectedTemplate to null which causes problems if there are templates left
-            TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template != template && vm.Visible == true);
+            
+        }
+
+        private async void openCopyTemplateDialogAsync()
+        {
+            var view = new CopyTemplateControl
+            {
+                DataContext = new CopyTemplateViewModel(this.template.Name, Settings.Instance.TemplateImageFolder, this.observableYoutubeAccountViewModels, this.youtubeAccountForCreatingTemplates)
+            };
+
+            bool result = (bool)await DialogHost.Show(view, "RootDialog");
+            if (result)
+            {
+                CopyTemplateViewModel data = (CopyTemplateViewModel)view.DataContext;
+                Template template = new Template(this.template, data.Name, this.templateList);
+                this.AddTemplate(template);
+            }
+        }
+
+        private void deleteCurrentTemplate()
+        {
+            //remember template to deleta as changing viewmodel will also change the current template
+            Template templateToDelete = this.template;
+            TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template != this.template && vm.Visible == true);
             this.SelectedTemplate = viewModel;
 
-            this.templateList.Delete(template);
+            this.templateList.Delete(templateToDelete);
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
