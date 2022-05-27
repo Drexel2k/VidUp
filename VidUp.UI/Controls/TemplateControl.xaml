@@ -217,7 +217,7 @@
                         <ToggleButton IsChecked="{Binding UsePublishAtSchedule}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="4 4 0 0" />
                         <!--<Button Command="{Binding OpenPublishAtCommand }" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" Margin="4 4 0 0" Width="60" Height="20" Padding="0" Content="Edit" VerticalContentAlignment="Top" />-->
                         <Label Content="Publish At Schedule" Width="116" HorizontalAlignment="Left" />
-                        <Button Command="{Binding OpenPublishAtCommand }" VerticalContentAlignment="Top" Margin="0 3 0 0" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" Width="20" Height="20" Padding="0" Visibility="{Binding UsePublishAtSchedule, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}">
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="openpublishat"  VerticalContentAlignment="Top" Margin="0 3 0 0" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" Width="20" Height="20" Padding="0" Visibility="{Binding UsePublishAtSchedule, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}">
                             <Image Source="../Images/edit.png" />
                         </Button>
                     </StackPanel>

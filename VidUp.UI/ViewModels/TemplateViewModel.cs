@@ -33,7 +33,6 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand newTemplateCommand;
         //command execution doesn't need any parameter, parameter ist only action to do.
         private GenericCommand parameterlessCommand;
-        private GenericCommand openPublishAtCommand;
 
         private string lastThumbnailFallbackFilePathAdded = null;
         private string lastImageFilePathAdded;
@@ -220,14 +219,6 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.parameterlessCommand;
-            }
-        }
-
-        public GenericCommand OpenPublishAtCommand
-        {
-            get
-            {
-                return this.openPublishAtCommand;
             }
         }
 
@@ -570,7 +561,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialogAsync);
             this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
-            this.openPublishAtCommand = new GenericCommand(this.openPublishAtAsync);
         }
 
         private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
@@ -653,9 +643,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void parameterlessCommandAction(object parameter)
+        private void parameterlessCommandAction(object target)
         {
-            switch (parameter)
+            switch (target)
             {
                 case "delete":
                     this.deleteCurrentTemplate();
@@ -692,6 +682,9 @@ namespace Drexel.VidUp.UI.ViewModels
                     break;
                 case "resetroot":
                     this.resetValue("root");
+                    break;
+                case "openpublishat":
+                    this.openPublishAtAsync();
                     break;
                 case "removecomboplaylist":
                     this.removeComboBoxValue("playlist");
@@ -857,7 +850,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private async void openPublishAtAsync(object obj)
+        private async void openPublishAtAsync()
         {
             var view = new PublishAtScheduleControl
             {
