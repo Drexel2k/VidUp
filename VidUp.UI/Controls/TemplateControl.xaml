@@ -51,14 +51,14 @@
                     <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="0,5,7,5" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
                             <StackPanel>
-                                <Button Content="Copy Template" Command="{Binding ActionCommand}" CommandParameter="copy" />
+                                <Button Content="Copy Template" Command="{Binding ParameterlessCommand}" CommandParameter="copy" />
                                 <Separator/>
-                                <Button Content="Remove Playlist" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="playlist" />
-                                <Button Content="Remove Video Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="videolanguage" />
-                                <Button Content="Remove Description Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="descriptionlanguage" />
-                                <Button Content="Remove Category" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="category" />
+                                <Button Content="Remove Playlist" Command="{Binding ParameterlessCommand}" CommandParameter="removecomboplaylist" />
+                                <Button Content="Remove Video Language" Command="{Binding ParameterlessCommand}" CommandParameter="removecombovideolanguage" />
+                                <Button Content="Remove Description Language" Command="{Binding ParameterlessCommand}" CommandParameter="removecombodescriptionlanguage" />
+                                <Button Content="Remove Category" Command="{Binding ParameterlessCommand}" CommandParameter="removecombocategory" />
                                 <Separator/>
-                                <Button Content="Delete" Command="{Binding ActionCommand}" CommandParameter="delete"/>
+                                <Button Content="Delete" Command="{Binding ParameterlessCommand}" CommandParameter="delete"/>
                             </StackPanel>
                         </materialDesign:PopupBox>
                     </Button>
@@ -91,10 +91,10 @@
                             <TextBlock Text="{Binding RootFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
                         </Label>
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="To every file added from this folder or any subfolder this template is assigne automatically." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                        <Button Command="{Binding ResetCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="resetroot" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                             <Image Source="../Images/minus.png" />
                         </Button>
-                        <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="root" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="openfiledialogroot" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2" Visibility="{Binding SelectedTemplateMode, Mode=OneWay, Converter={converters:TemplateModeFileNameBasedVisibleConverter}}">
@@ -112,10 +112,10 @@
                             </Label>
                         </DockPanel>
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="For visualization of uploads in upload view. Recommended size: 620x50px." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                        <Button Command="{Binding ResetCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="resetpic" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                             <Image Source="../Images/minus.png" />
                         </Button>
-                        <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="pic" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0 " Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="openfiledialogpic" Style="{StaticResource MaterialDesignRaisedLightButton}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0 " Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
                     <StackPanel  Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <Label Content="Thumbnail Folder: " Width="115" />
@@ -123,10 +123,10 @@
                             <TextBlock Text="{Binding ThumbnailFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
                         </Label>
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="Thumbnails will be assigned automatically if the file names of the thumbnail and the video without extension are equal. Lookup location is the folder set here, then the folder of the video." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                        <Button Command="{Binding ResetCommand }" CommandParameter="thumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="resetthumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                             <Image Source="../Images/minus.png" />
                         </Button>
-                        <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="openfiledialogthumb" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
                     <StackPanel  Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
                         <DockPanel Width="491">
@@ -137,10 +137,10 @@
                             </Label>
                         </DockPanel>       
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="If no thumbnail is found in the thumbnail or the video folder, this default thumbnail will be assigned." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                        <Button Command="{Binding ResetCommand }" CommandParameter="thumbfallback" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="resetthumbfallback" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                             <Image Source="../Images/minus.png" />
                         </Button>
-                        <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="thumbfallback" Margin="0 4 0 0" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="openfiledialogthumbfallback" Margin="0 4 0 0" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
 
                     <StackPanel  Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">
@@ -149,10 +149,10 @@
                             <TextBlock Text="{Binding PlaceholderFolderPath, Mode=OneWay}" TextWrapping="Wrap" />
                         </Label>
                         <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="Folder for text files with place holder contents. File name of the place holder file must be equal to the video's file name (without extension)." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                        <Button Command="{Binding ResetCommand }" CommandParameter="placeholder" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="resetplaceholder" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                             <Image Source="../Images/minus.png" />
                         </Button>
-                        <Button Command="{Binding OpenFileDialogCommand }" CommandParameter="placeholder" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
+                        <Button Command="{Binding ParameterlessCommand }" CommandParameter="openfiledialogplaceholder" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0" Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" />
                     </StackPanel>
 
                     <StackPanel  Grid.Row="8" Grid.Column="1" Orientation="Horizontal" Grid.ColumnSpan="2">

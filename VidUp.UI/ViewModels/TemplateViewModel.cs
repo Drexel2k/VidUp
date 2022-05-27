@@ -31,10 +31,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private YoutubeAccount youtubeAccountForCreatingTemplates;
 
         private GenericCommand newTemplateCommand;
-        private GenericCommand actionCommand;
-        private GenericCommand removeComboBoxValueCommand;
-        private GenericCommand openFileDialogCommand;
-        private GenericCommand resetCommand;
+        //command execution doesn't need any parameter, parameter ist only action to do.
+        private GenericCommand parameterlessCommand;
         private GenericCommand openPublishAtCommand;
 
         private string lastThumbnailFallbackFilePathAdded = null;
@@ -217,27 +215,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand ActionCommand
+        public GenericCommand ParameterlessCommand
         {
             get
             {
-                return this.actionCommand;
-            }
-        }
-
-        public GenericCommand RemoveComboBoxValueCommand
-        {
-            get
-            {
-                return this.removeComboBoxValueCommand;
-            }
-        }
-
-        public GenericCommand OpenFileDialogCommand
-        {
-            get
-            {
-                return this.openFileDialogCommand;
+                return this.parameterlessCommand;
             }
         }
 
@@ -249,13 +231,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand ResetCommand
-        {
-            get
-            {
-                return this.resetCommand;
-            }
-        }
         public string Guid
         { 
             get => this.template != null ? this.template.Guid.ToString() : string.Empty; 
@@ -594,10 +569,7 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
             this.newTemplateCommand = new GenericCommand(this.OpenNewTemplateDialogAsync);
-            this.actionCommand = new GenericCommand(this.ActionCommandExecute);
-            this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
-            this.openFileDialogCommand = new GenericCommand(this.openFileDialog);
-            this.resetCommand = new GenericCommand(this.resetValue);
+            this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
             this.openPublishAtCommand = new GenericCommand(this.openPublishAtAsync);
         }
 
@@ -681,9 +653,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public void ActionCommandExecute(object obj)
+        private void parameterlessCommandAction(object parameter)
         {
-            switch (obj)
+            switch (parameter)
             {
                 case "delete":
                     this.deleteCurrentTemplate();
@@ -691,12 +663,52 @@ namespace Drexel.VidUp.UI.ViewModels
                 case "copy":
                     this.openCopyTemplateDialogAsync();
                     break;
+                case "openfiledialogplaceholder":
+                    this.openFileDialog("placeholder");
+                    break;
+                case "resetplaceholder":
+                    this.resetValue("placeholder");
+                    break;
+                case "openfiledialogthumbfallback":
+                    this.openFileDialog("thumbfallback");
+                    break;
+                case "resetthumbfallback":
+                    this.resetValue("thumbfallback");
+                    break;
+                case "openfiledialogthumb":
+                    this.openFileDialog("thumb");
+                    break;
+                case "resetthumb":
+                    this.resetValue("thumb");
+                    break;
+                case "openfiledialogpic":
+                    this.openFileDialog("pic");
+                    break;
+                case "resetpic":
+                    this.resetValue("pic");
+                    break;
+                case "openfiledialogroot":
+                    this.openFileDialog("root");
+                    break;
+                case "resetroot":
+                    this.resetValue("root");
+                    break;
+                case "removecomboplaylist":
+                    this.removeComboBoxValue("playlist");
+                    break;
+                case "removecombovideolanguage":
+                    this.removeComboBoxValue("videolanguage");
+                    break;
+                case "removecombodescriptionlanguage":
+                    this.removeComboBoxValue("descriptionlanguage");
+                    break;
+                case "removecombocategory":
+                    this.removeComboBoxValue("category");
+                    break;
                 default:
-                    throw new ArgumentException("Unknown ActionCommandExecute parameter.");
+                    throw new InvalidOperationException("Invalid parameter for ActionCommandExecute.");
                     break;
             }
-
-            
         }
 
         private async void openCopyTemplateDialogAsync()
@@ -728,9 +740,9 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
         }
 
-        private void removeComboBoxValue(object parameter)
+        private void removeComboBoxValue(string target)
         {
-            switch (parameter)
+            switch (target)
             {
                 case "playlist":
                     this.SelectedPlaylist = null;
@@ -745,14 +757,14 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.SelectedCategory = null;
                     break;
                 default:
-                    throw new InvalidOperationException("No parameter for removeComboBoxValue specified.");
+                    throw new InvalidOperationException("Invalid parameter for removeComboBoxValue.");
                     break;
             }
         }
 
-        private void openFileDialog(object parameter)
+        private void openFileDialog(string target)
         {
-            if ((string)parameter == "pic")
+            if (target == "pic")
             {
                 OpenFileDialog fileDialog = new OpenFileDialog();
                 DialogResult result = fileDialog.ShowDialog();
@@ -761,9 +773,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.ImageFilePathForEditing = fileDialog.FileName;
                 }
+
+                return;
             }
 
-            if ((string)parameter == "root")
+            if (target == "root")
             {
                 FolderBrowserDialog folderDialog = new FolderBrowserDialog();
                 DialogResult result = folderDialog.ShowDialog();
@@ -772,9 +786,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.RootFolderPath = folderDialog.SelectedPath;
                 }
+
+                return;
             }
 
-            if ((string)parameter == "thumb")
+            if (target == "thumb")
             {
                 FolderBrowserDialog folderDialog = new FolderBrowserDialog();
                 DialogResult result = folderDialog.ShowDialog();
@@ -783,9 +799,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.ThumbnailFolderPath = folderDialog.SelectedPath;
                 }
+
+                return;
             }
 
-            if ((string)parameter == "thumbfallback")
+            if (target == "thumbfallback")
             {
                 OpenFileDialog fileDialog = new OpenFileDialog();
                 DialogResult result = fileDialog.ShowDialog();
@@ -794,9 +812,11 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.ThumbnailFallbackFilePath = fileDialog.FileName;
                 }
+
+                return;
             }
 
-            if ((string)parameter == "placeholder")
+            if (target == "placeholder")
             {
                 FolderBrowserDialog folderDialog = new FolderBrowserDialog();
                 DialogResult result = folderDialog.ShowDialog();
@@ -805,34 +825,35 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     this.PlaceholderFolderPath = folderDialog.SelectedPath;
                 }
+
+                return;
             }
+
+            throw new InvalidOperationException("Invalid parameter for openFileDialog.");
         }
 
-        private void resetValue(object parameter)
+        private void resetValue(string target)
         {
-            if ((string)parameter == "pic")
+            switch (target)
             {
-                this.ImageFilePathForEditing = null;
-            }
-
-            if ((string)parameter == "root")
-            {
-                this.RootFolderPath = null;
-            }
-
-            if ((string)parameter == "thumb")
-            {
-                this.ThumbnailFolderPath = null;
-            }
-
-            if ((string)parameter == "thumbfallback")
-            {
-                this.ThumbnailFallbackFilePath = null;
-            }
-
-            if ((string)parameter == "placeholder")
-            {
-                this.PlaceholderFolderPath = null;
+                case "pic":
+                    this.ImageFilePathForEditing = null;
+                    break;
+                case "root":
+                    this.RootFolderPath = null;
+                    break;
+                case "thumb":
+                    this.ThumbnailFolderPath = null;
+                    break;
+                case "thumbfallback":
+                    this.ThumbnailFallbackFilePath = null;
+                    break;
+                case "placeholder":
+                    this.PlaceholderFolderPath = null;
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid parameter for resetValue.");
+                    break;
             }
         }
 
