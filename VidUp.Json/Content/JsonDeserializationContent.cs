@@ -63,7 +63,7 @@ namespace Drexel.VidUp.Json.Content
             if (!File.Exists(this.youtubeAccountListFilePath))
             {
                 DeserializationRepositoryContent.YoutubeAccountList = new YoutubeAccountList(null);
-                DeserializationRepositoryContent.YoutubeAccountList.AddYoutubeAccount(new YoutubeAccount("Default"));
+                DeserializationRepositoryContent.YoutubeAccountList.AddYoutubeAccount(new YoutubeAccount("Default Account"));
                 Tracer.Write($"JsonDeserializationContent.deserializeYoutubeAccountList: Adding default account.");
                 return true;
             }

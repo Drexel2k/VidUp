@@ -252,6 +252,9 @@
                         </Fluent:ComboBox>
                         <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxPlus}" Command="{Binding NewTemplateCommand}" />
                     </Fluent:RibbonGroupBox>
+                    <Fluent:RibbonGroupBox Header="Information" VerticalContentAlignment="Bottom">
+                        <Fluent:Button Header="Show Schedule Overview" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxSearch}" Command="{Binding ShowScheduleCommand}" />
+                    </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding ViewModels[2]}" Header="Playlists" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">

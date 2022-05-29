@@ -84,6 +84,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Controls\DisplayScheduleDayControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -98,6 +104,10 @@
   <ItemGroup>
     <Page Update="Controls\CopyTemplateControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Controls\DisplayScheduleDayControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="Controls\NewYoutubeAccountControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

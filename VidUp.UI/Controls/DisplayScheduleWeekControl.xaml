@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="Drexel.VidUp.UI.Controls.DisplayScheduleWeekControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:models="clr-namespace:Drexel.VidUp.UI.ViewModels"
+             xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
+             mc:Ignorable="d" 
+             d:DesignWidth="330">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ItemsControl Grid.Row="0" ItemsSource="{Binding DisplayScheduleControlDayViewModels}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="models:DisplayScheduleControlDayViewModel">
+                    <controls:DisplayScheduleDayControl />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>

@@ -1071,8 +1071,11 @@ namespace Drexel.VidUp.Business
         }
 
         //return next DateTime according to schedule after dateTimeAfter
-        public DateTime GetNextDateTime(DateTime dateTimeAfter)
+        //ignoreStartDateLimitations ignores currentDate+24hrs and uploadedUntil as earliest start date limitation
+        public DateTime GetNextDateTime(DateTime dateTimeAfter, bool ignoreStartDateLimitations)
         {
+            dateTimeAfter = this.getDateTimeAfter(dateTimeAfter, ignoreStartDateLimitations);
+
             switch (this.scheduleFrequency)
             {
                 case ScheduleFrequency.SpecificDate:
@@ -1123,7 +1126,6 @@ namespace Drexel.VidUp.Business
 
         private DateTime dailyGetNextDateTime(DateTime dateTimeAfter)
         {
-            dateTimeAfter = this.getDateTimeAfter(dateTimeAfter);
             DateTime potentialNextDate;
 
             if (this.dailyHasAdvancedSchedule)
@@ -1171,7 +1173,6 @@ namespace Drexel.VidUp.Business
 
         private DateTime weeklyGetNextDateTime(DateTime dateTimeAfter)
         {
-            dateTimeAfter = this.getDateTimeAfter(dateTimeAfter);
             DateTime potentialNextDate;
 
             if (this.weeklyHasAdvancedSchedule)
@@ -1216,8 +1217,8 @@ namespace Drexel.VidUp.Business
 
         private DateTime monthlyGetNextDateTimeMonthDateBased(DateTime dateTimeAfter)
         {
-            dateTimeAfter = this.getDateTimeAfter(dateTimeAfter);
             DateTime potentialNextDate;
+
             int potentialNextDateOriginalDay;
 
             if (this.monthlyHasAdvancedSchedule)
@@ -1272,7 +1273,6 @@ namespace Drexel.VidUp.Business
 
         private DateTime monthlyGetNextDateTimeMonthRelativeBased(DateTime dateTimeAfter)
         {
-            dateTimeAfter = this.getDateTimeAfter(dateTimeAfter);
             KeyValuePair<MonthRelativeCombination, DateTime> potentialNextDate;
 
             if (this.monthlyHasAdvancedSchedule)
@@ -1596,27 +1596,32 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        private DateTime getDateTimeAfter(DateTime dateTimeAfter)
+        private DateTime getDateTimeAfter(DateTime dateTimeAfter, bool ignoreStartDateLimitations)
         {
-            //Newly schedule upload shall be at least 24 hour in the future
-            DateTime dateTimeAfterResult = DateTime.Now.AddHours(24);
-
-            if (this.startDate > dateTimeAfterResult)
+            if (!ignoreStartDateLimitations)
             {
-                dateTimeAfterResult = this.startDate;
+                //Newly schedule upload shall be at least 24 hour in the future
+                DateTime in24Hours = DateTime.Now.AddHours(24);
+                if(in24Hours > dateTimeAfter)
+                {
+                    dateTimeAfter = in24Hours;
+                }
             }
 
-            if (this.uploadedUntil > dateTimeAfterResult)
+            if (this.startDate > dateTimeAfter)
             {
-                dateTimeAfterResult = this.uploadedUntil;
+                dateTimeAfter = this.startDate;
             }
 
-            if (dateTimeAfter > dateTimeAfterResult)
+            if(!ignoreStartDateLimitations)
             {
-                dateTimeAfterResult = dateTimeAfter;
+                if (this.uploadedUntil > dateTimeAfter)
+                {
+                    dateTimeAfter = this.uploadedUntil;
+                }
             }
 
-            return dateTimeAfterResult;
+            return dateTimeAfter;
         }
 
         private int dailyGetDayIndex(DateTime potentialNextDate)

@@ -12,6 +12,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateListBase templateList;
         private List<TemplateComboboxViewModel> templateComboboxViewModels;
 
+        //is needed as it is given as parameter ObservableTemplateViewModels objects which contain only
+        //templates and template viewmodels for one account and this ObservableTemplateViewModels objects
+        //listen to changes on their template lists.
         private Dictionary<YoutubeAccount, TemplateListBase> templateListsByAccount;
         private Dictionary<YoutubeAccount, ObservableTemplateViewModels> observableTemplateViewModelsByAccount;
 
@@ -83,22 +86,10 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void templateYoutubeAccountChanged(TemplateYoutubeAccountChangedMessage templateYoutubeAccountChangedMessage)
         {
+            //triggers adding/removing of template in ObservableTemplateViewModels objects
+            //which contain only templates and template viewmodels for one account
             this.templateListsByAccount[templateYoutubeAccountChangedMessage.OldAccount].Delete(templateYoutubeAccountChangedMessage.Template);
             this.addToAccountTemplates(templateYoutubeAccountChangedMessage.Template);
-        }
-
-        public ObservableTemplateViewModels(TemplateList templateList, YoutubeAccount youtubeAccount)
-        {
-            this.templateList = templateList;
-            this.templateComboboxViewModels = new List<TemplateComboboxViewModel>();
-
-            foreach (Template template in templateList)
-            {
-                TemplateComboboxViewModel templateViewModel = new TemplateComboboxViewModel(template);
-                this.templateComboboxViewModels.Add(templateViewModel);
-            }
-
-            this.templateList.CollectionChanged += this.templateListCollectionChanged;
         }
 
         private void templateListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

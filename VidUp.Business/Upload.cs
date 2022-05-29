@@ -765,14 +765,14 @@ namespace Drexel.VidUp.Business
                     DateTime nextPossibleDateTime = DateTime.MinValue;
                     if (this.template.PublishAtSchedule.ScheduleFrequency == ScheduleFrequency.SpecificDate)
                     {
-                        nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(nextPossibleDateTime);
+                        nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(nextPossibleDateTime, false);
                     }
                     else
                     {
                         bool isFree = false;
                         while (!isFree)
                         {
-                            nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(nextPossibleDateTime);
+                            nextPossibleDateTime = this.template.PublishAtSchedule.GetNextDateTime(nextPossibleDateTime, false);
 
                             IEnumerable<Upload> relevantUploads = this.Template.PublishAtSchedule.IgnoreUploadsBefore == null ?
                                 this.template.Uploads.Where(upload => upload != this).ToArray() :
