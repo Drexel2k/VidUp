@@ -1,7 +1,7 @@
 ﻿[Setup]
 AppName=VidUp
 AppId=VidUpDrexelDevelopment
-AppVersion=1.13.2
+AppVersion={#VERSION}
 WizardStyle=modern
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
@@ -10,11 +10,11 @@ DefaultGroupName=VidUp
 UninstallDisplayIcon={app}\VidUp.exe
 Compression=lzma2
 SolidCompression=yes
-OutputBaseFilename=VidUp.Setup.Ver.Release.x64
-OutputDir=..\VidUp.Setup\bin\Release\x64\
+OutputBaseFilename=VidUp.Setup.{#VERSION}.{#CONFIG}.x64
+OutputDir=..\VidUp.Setup\bin\{#CONFIG}\x64\
 
 [Files]
-Source: ..\VidUp.UI\bin\Release\x64\net6.0-windows\*; DestDir: "{app}"; Flags: recursesubdirs
+Source: {#SOURCEPATH}*; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
 Name: "{group}\VidUp"; Filename: "{app}\VidUp.exe"
@@ -34,21 +34,25 @@ end;
 
 function IsNet6Installed(): Boolean;
 var
-  Net6Path: String;
-  Net6String: String;
+  FindRec: TFindRec;
   Net6FirstChar: String;
 begin
-  Net6Path := 'Software\dotnet\Setup\InstalledVersions\x64\sharedhost';
-  Net6String := '';
-  Result := false;
-  if RegQueryStringValue(HKLM, Net6Path, 'Version', Net6String) then
-  begin
-    Net6FirstChar := Copy(Net6String, 1, 1)
-    if Net6FirstChar = '6' then
-    begin
-      Result:= true;
+  if FindFirst(ExpandConstant('{commonpf}\dotnet\shared\Microsoft.WindowsDesktop.App\*'), FindRec) then begin
+    try
+      repeat
+        if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
+        begin
+          Net6FirstChar := Copy(FindRec.Name, 1, 1)
+          if Net6FirstChar = '6' then
+          begin
+            Result:= true;
+          end;
+         end;
+      until Result or not FindNext(FindRec);
+    finally 
+      FindClose(FindRec);
     end;
-  end
+  end;
 end;
 
 
