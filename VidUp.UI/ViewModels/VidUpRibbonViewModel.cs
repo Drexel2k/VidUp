@@ -3,7 +3,7 @@ using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    public class VidUpViewModel
+    public class VidUpRibbonViewModel
     {
         private GenericCommand aboutCommand;
         private GenericCommand donateCommand;
@@ -24,7 +24,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public VidUpViewModel()
+        public VidUpRibbonViewModel()
         {
             this.aboutCommand = new GenericCommand(this.openAboutDialogAsync);
             this.donateCommand = new GenericCommand(this.openDonateDialogAsync);

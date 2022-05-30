@@ -473,12 +473,12 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
 
             this.ribbonViewModels[2] = new PlaylistRibbonViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
+            this.ribbonViewModels[4] = new VidUpRibbonViewModel();
 
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels,this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]);
             PlaylistComboboxViewModel selectedPlaylistViewModel = ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).SelectedPlaylist;
             this.viewModels[2] = new PlaylistViewModel(selectedPlaylistViewModel != null ? selectedPlaylistViewModel.Playlist : null);
             this.viewModels[3] = new SettingsViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
-            this.viewModels[4] = new VidUpViewModel();
         }
 
         private string getYoutubeAccountName()

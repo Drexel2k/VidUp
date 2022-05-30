@@ -57,7 +57,7 @@
         <TextBlock Grid.Row="8">(YouTube Data API and YouTube are owned by Google)</TextBlock>
 
         <TextBlock Grid.Row="10">Contact Information</TextBlock>
-        <TextBlock Grid.Row="11">E-Mail: <Hyperlink NavigateUri="vidup@vidup.info" RequestNavigate="hyperlinkRequestNavigate">vidup@vidup.info</Hyperlink></TextBlock>
+        <TextBlock Grid.Row="11">E-Mail: <Hyperlink NavigateUri="mailto:vidup@vidup.info" RequestNavigate="hyperlinkRequestNavigate">vidup@vidup.info</Hyperlink></TextBlock>
         <TextBlock Grid.Row="12">Homepage (with forum/support etc.): <Hyperlink NavigateUri="https://www.vidup.info/" RequestNavigate="hyperlinkRequestNavigate">https://www.vidup.info/</Hyperlink></TextBlock>
         <TextBlock Grid.Row="13">GitHub (source code): <Hyperlink NavigateUri="https://github.com/Drexel2k/VidUp" RequestNavigate="hyperlinkRequestNavigate">https://github.com/Drexel2k/VidUp</Hyperlink></TextBlock>
         <TextBlock Grid.Row="14">Visit me: <Hyperlink NavigateUri="https://www.youtube.com/drexel2k" RequestNavigate="hyperlinkRequestNavigate">https://www.youtube.com/drexel2k</Hyperlink></TextBlock>

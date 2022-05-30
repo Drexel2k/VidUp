@@ -32,7 +32,6 @@
         <DataTemplate DataType="{x:Type vm:PlaylistViewModel}">
             <controls:PlaylistControl />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:VidUpViewModel}"  />
         <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
             <controls:SettingsControl />
         </DataTemplate>
@@ -295,7 +294,7 @@
                         <Fluent:Button Header="New Youtube Account" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon AccountPlus}" Command="{Binding NewYoutubeAccountCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[4]}" Header="VidUp" >
+                <Fluent:RibbonTabItem DataContext="{Binding RibbonViewModels[4]}" Header="VidUp" >
                     <Fluent:RibbonGroupBox Header="Support">
                         <Fluent:Button Header="Donate" SizeDefinition="Large,Middle,Small" LargeIcon="{materialDesign:PackIcon Handshake, 36}" Icon="{materialDesign:PackIcon Handshake}" Command="{Binding DonateCommand}" />
                     </Fluent:RibbonGroupBox>
