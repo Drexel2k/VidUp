@@ -11,9 +11,6 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private bool formVaild = true;
 
-        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
-        private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
-
         public string Name
         {
             get
@@ -39,17 +36,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
-        {
-            get => this.observableYoutubeAccountViewModels;
-        }
-
-        public YoutubeAccountComboboxViewModel SelectedYouTubeAccount
-        {
-            get => this.selectedYoutubeAccount;
-            set => this.selectedYoutubeAccount = value;
-        }
-
         public bool FormValid
         {
             get => this.formVaild;
@@ -62,25 +48,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public CopyTemplateViewModel(string orirginalTemplateName, string templateImageFolder, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount)
+        public CopyTemplateViewModel(string orirginalTemplateName, string templateImageFolder)
         {
-            if (observableYoutubeAccountViewModels == null || observableYoutubeAccountViewModels.YoutubeAccountCount <= 0)
-            {
-                throw new ArgumentException("observableYoutubeAccountViewModels must not be null and must contain accounts.");
-            }
-
-            if (selectedYoutubeAccount == null)
-            {
-                throw new ArgumentException("selectedYoutubeAccount must not be null.");
-            }
-
             if(string.IsNullOrWhiteSpace(orirginalTemplateName))
             {
                 throw new ArgumentException("orirginalTemplateName must not be null or empty.");
             }
-
-            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
-            this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(selectedYoutubeAccount);
 
             this.name = $"Copy of {orirginalTemplateName}";
         }

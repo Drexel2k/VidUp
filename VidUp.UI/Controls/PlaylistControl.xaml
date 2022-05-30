@@ -29,7 +29,7 @@
                 <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Right" Margin="0,5,7,5" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                     <materialDesign:PopupBox  StaysOpen="False" >
                         <StackPanel>
-                            <Button Content="Delete" Command="{Binding DeletePlaylistCommand}" CommandParameter="{Binding PlaylistId}"/>
+                            <Button Content="Delete" Command="{Binding DeletePlaylistCommand}" />
                         </StackPanel>
                     </materialDesign:PopupBox>
                 </Button>

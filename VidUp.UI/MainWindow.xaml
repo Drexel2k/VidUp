@@ -231,7 +231,7 @@
                         </StackPanel>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[1]}" Header="Templates" >
+                <Fluent:RibbonTabItem DataContext="{Binding RibbonViewModels[1]}" Header="Templates" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
                         <Fluent:ComboBox VerticalAlignment="Bottom" Icon="images/file-document-box-edit.png" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" IsEditable="False">
                             <ComboBox.ItemTemplate>
@@ -249,10 +249,10 @@
                                 </Style>
                             </ComboBox.ItemContainerStyle>
                         </Fluent:ComboBox>
-                        <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxPlus}" Command="{Binding NewTemplateCommand}" />
+                        <Fluent:Button Header="New Template" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxPlus}" Command="{Binding ParameterlessCommand}" CommandParameter="newtemplate" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Information" VerticalContentAlignment="Bottom">
-                        <Fluent:Button Header="Show Schedule Overview" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxSearch}" Command="{Binding ShowScheduleCommand}" />
+                        <Fluent:Button Header="Show Schedule Overview" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxSearch}" Command="{Binding ParameterlessCommand}" CommandParameter="scheduleoverview" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
                 <Fluent:RibbonTabItem DataContext="{Binding RibbonViewModels[2]}" Header="Playlists" >

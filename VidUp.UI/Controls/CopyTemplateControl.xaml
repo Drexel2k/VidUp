@@ -7,7 +7,7 @@
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:viewModels="clr-namespace:Drexel.VidUp.UI.ViewModels"
+             xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
              mc:Ignorable="d" 
              d:DesignWidth="330">
     <Grid Margin="10,16,10,0" Width="310">

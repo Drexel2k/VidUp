@@ -72,7 +72,7 @@ namespace Drexel.VidUp.UI.ViewModels
         public PlaylistViewModel(Playlist playlist)
         {
             this.playlist = playlist;
-            this.deletePlaylistCommand = new GenericCommand(this.DeletePlaylist);
+            this.deletePlaylistCommand = new GenericCommand(this.deletePlaylist);
 
             EventAggregator.Instance.Subscribe<SelectedPlaylistChangedMessage>(this.selectedPlaylistChanged);
         }
@@ -93,7 +93,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public void DeletePlaylist(object playlistId)
+        private void deletePlaylist(object paramter)
         {
             EventAggregator.Instance.Publish(new PlaylistDeleteMessage(this.playlist));
         }

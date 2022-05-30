@@ -6,7 +6,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              x:Name="UCTemplate"
              xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
-             xmlns:viewModels="clr-namespace:Drexel.VidUp.UI.ViewModels"
+             xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
              IsEnabled="{Binding TemplateSet}">
     <ScrollViewer HorizontalScrollBarVisibility="Auto" Margin="4">
         <Grid Height="Auto" Width="Auto">
