@@ -7,10 +7,12 @@ namespace Drexel.VidUp.Setup
     {
         static void Main(string[] args)
         {
+            string dotfuscatorExe = Path.GetFullPath($@"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\PreEmptiveSolutions\DotfuscatorCE\dotfuscator.exe");
             string config = string.Empty;
             string platform = string.Empty;
             string version = string.Empty;
-            string sourcePath = string.Empty;
+            string dotfuscatorOut = string.Empty;
+            string innoIn = string.Empty;
 
             try
             {
@@ -36,25 +38,52 @@ namespace Drexel.VidUp.Setup
                     throw new ApplicationException("Only x64 setup is supported.");
                 }
 
-                sourcePath = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\{config}\\x64\\net6.0-windows\\");
+                if (!File.Exists(dotfuscatorExe))
+                {
+                    throw new ApplicationException("Dotfuscator not found.");
+                }
 
-                version = AssemblyName.GetAssemblyName(Path.Combine(sourcePath, "VidUp.dll")).Version.ToString();
+                dotfuscatorOut = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\dotfuscated\\{config}\\x64\\");
+                innoIn = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\dotfuscated\\{config}\\x64\\net6.0-windows\\");
+                if (Directory.Exists(innoIn))
+                {
+                    Directory.Delete(innoIn, true);
+                }
+
+                string dotfuscatorConfig = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\Dotfuscator{config}.xml");
+                string dotfuscatorFullParamter = $"{dotfuscatorConfig} -p=outdir={dotfuscatorOut}";
+                ProcessStartInfo dotfuscatorStartInfo = new ProcessStartInfo(dotfuscatorExe, dotfuscatorFullParamter);
+                dotfuscatorStartInfo.UseShellExecute = false;
+
+                int dotfuscatorExitCode;
+                using (Process p = Process.Start(dotfuscatorStartInfo))
+                {
+                    p.WaitForExit();
+                    dotfuscatorExitCode = p.ExitCode;
+                }
+
+                if (dotfuscatorExitCode > 0)
+                {
+                    throw new ApplicationException("Dotfuscator failed.");
+                }
+
+                version = AssemblyName.GetAssemblyName(Path.Combine(innoIn, "VidUp.dll")).Version.ToString();
                 version = version.Remove(version.Length - 2);
 
                 string innoExe = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\InnoBin\\ISCC.exe");
-                string innoIss = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\setup.iss");
-                string param = $"{innoIss} /DCONFIG=\"{config}\" /DVERSION=\"{version}\" /DSOURCEPATH=\"{sourcePath}\"";
-                ProcessStartInfo info = new ProcessStartInfo(innoExe, param);
-                info.UseShellExecute = false;
+                string innoConfig = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\setup.iss");
+                string innoFullParamter = $"{innoConfig} /DCONFIG=\"{config}\" /DVERSION=\"{version}\" /DSOURCEPATH=\"{innoIn}\"";
+                ProcessStartInfo innoStartInfo = new ProcessStartInfo(innoExe, innoFullParamter);
+                innoStartInfo.UseShellExecute = false;
 
-                int exitCode;
-                using (Process p = Process.Start(info))
+                int innoExitCode;
+                using (Process p = Process.Start(innoStartInfo))
                 {
                     p.WaitForExit();
-                    exitCode = p.ExitCode;
+                    innoExitCode = p.ExitCode;
                 }
 
-                if (exitCode > 0)
+                if (innoExitCode > 0)
                 {
                     throw new ApplicationException("InnoSetup failed.");
                 }
@@ -63,7 +92,7 @@ namespace Drexel.VidUp.Setup
                 Console.WriteLine();
                 Console.WriteLine($"Config: {config}");
                 Console.WriteLine($"Platform: {platform}");
-                Console.WriteLine($"Source path: {sourcePath}");
+                Console.WriteLine($"Source path: {innoIn}");
                 Console.WriteLine($"Version: {version}");
                 Console.WriteLine("Building Setup done.");
             }
@@ -74,7 +103,7 @@ namespace Drexel.VidUp.Setup
                 Console.WriteLine(e.Message);
                 Console.WriteLine($"Config: {config}");
                 Console.WriteLine($"Platform: {platform}");
-                Console.WriteLine($"Source path: {sourcePath}");
+                Console.WriteLine($"Source path: {innoIn}");
                 Console.WriteLine($"Version: {version}");
                 Console.WriteLine("Building Setup failed.");
             }
