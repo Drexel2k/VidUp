@@ -5,12 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
-             xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:models="clr-namespace:Drexel.VidUp.UI.ViewModels"
+             xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
              xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
              mc:Ignorable="d" 
              d:DesignWidth="330">
+    
+    <Control.Resources>
+        <DataTemplate DataType="{x:Type vm:DisplayScheduleControlWeekViewModel}">
+            <controls:DisplayScheduleWeekControl />
+        </DataTemplate>
+    </Control.Resources>
+    
     <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -23,17 +30,17 @@
         </Grid.ColumnDefinitions>
         
         <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding MonthInfo}"  FontWeight="Bold" Margin="0 0 0 5" />
+        
+        <!-- how to render DisplayScheduleControlWeekViewModel defined in Control.Resources-->
         <ItemsControl Grid.Row="1" Grid.Column="0" ItemsSource="{Binding DisplayScheduleControlWeekViewModels}" >
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Vertical" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="models:DisplayScheduleControlWeekViewModel">
-                    <controls:DisplayScheduleWeekControl />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
+            <!--<ItemsControl.ItemTemplate>
+                <DataTemplate DataType="models:DisplayScheduleControlWeekViewModel" />
+            </ItemsControl.ItemTemplate>-->
         </ItemsControl>
 
         <TextBlock Grid.Row="0" Grid.Column="1" Margin="20 0 0 0" Text="Templates"  FontWeight="Bold" />

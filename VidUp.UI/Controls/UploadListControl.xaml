@@ -6,10 +6,17 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls"
-             xmlns:models="clr-namespace:Drexel.VidUp.UI.ViewModels"
+             xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="UCUploads">
+
+    <Control.Resources>
+        <DataTemplate DataType="{x:Type vm:UploadViewModel}">
+            <controls:UploadControl Drop="CUpload_Dropped" />
+        </DataTemplate>
+    </Control.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl AllowDrop="True" ItemsSource="{Binding ObservableUploadViewModels}" Grid.Row="1">
             <ItemsControl.ItemsPanel>
@@ -17,11 +24,11 @@
                     <WrapPanel Orientation="Horizontal" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
+            <!--<ItemsControl.ItemTemplate>
                 <DataTemplate DataType="models:UploadViewModel">
                     <controls:UploadControl Drop="CUpload_Dropped" />
                 </DataTemplate>
-            </ItemsControl.ItemTemplate>
+            </ItemsControl.ItemTemplate>-->
         </ItemsControl>
     </ScrollViewer>
 </UserControl>
