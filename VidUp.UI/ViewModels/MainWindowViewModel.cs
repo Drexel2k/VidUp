@@ -194,7 +194,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return this.uploadStats.CurrentFileMbLeft.ToString("N0", CultureInfo.CurrentCulture);
+                    return this.uploadStats.CurrentFileMbLeft.ToString("N0");
                 }
 
                 return "n/a";
@@ -207,7 +207,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return this.uploadStats.CurrentSpeedInKiloBytesPerSecond.ToString("N0", CultureInfo.CurrentCulture);
+                    return this.uploadStats.CurrentSpeedInKiloBytesPerSecond.ToString("N0");
                 }
 
                 return "n/a";
@@ -236,18 +236,18 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 if (this.appStatus == AppStatus.Uploading)
                 {
-                    return this.uploadStats.TotalMbLeft.ToString("N0", CultureInfo.CurrentCulture);
+                    return this.uploadStats.TotalMbLeft.ToString("N0");
                 }
 
                 if (((UploadListViewModel)this.viewModels[0]).ResumeUploads)
                 {
                     return ((int)((float)this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(null) /
-                                   Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                                   Constants.ByteMegaByteFactor)).ToString("N0");
                 }
                 else
                 {
                     return ((int)((float)this.uploadList.GetRemainingBytesOfFilesToUpload(null) /
-                                  Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture);
+                                  Constants.ByteMegaByteFactor)).ToString("N0");
                 }
             }
         }
@@ -256,13 +256,12 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond / 1024).ToString("N0", CultureInfo.CurrentCulture); ;
+                return (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond / 1024).ToString("N0"); ;
             }
 
             set
             {
-                value = value.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator, string.Empty);
-                if (long.TryParse(value, out long kiloBytesPerSecond))
+                if (long.TryParse(value, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out long kiloBytesPerSecond))
                 {
                     long newUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
 

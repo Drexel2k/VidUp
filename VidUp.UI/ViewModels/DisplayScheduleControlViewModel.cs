@@ -1,6 +1,7 @@
 ﻿using Drexel.VidUp.Business;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Media;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -52,7 +53,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string MonthInfo
         {
-            get => currentMonth.ToString("MMMM yyyy");
+            get
+            {
+                CultureInfo cultureInfo = CultureInfo.GetCultureInfo("en-US");
+                return currentMonth.ToString("MMMM yyyy", cultureInfo);
+            }
         }
 
         public DisplayScheduleControlViewModel(IEnumerable<Template> templates)

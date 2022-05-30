@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows;
-using Drexel.VidUp.Business;
 using Drexel.VidUp.UI.ViewModels;
 using Drexel.VidUp.Utils;
 

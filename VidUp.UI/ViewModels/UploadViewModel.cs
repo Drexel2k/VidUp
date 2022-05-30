@@ -348,7 +348,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.upload.Title.Length.ToString("N0", CultureInfo.CurrentCulture);
+                return this.upload.Title.Length.ToString("N0");
             }
         }
 
@@ -384,7 +384,7 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.upload.Description != null ? 
-                    this.upload.Description.Length.ToString("N0", CultureInfo.CurrentCulture) : 0.ToString("N0", CultureInfo.CurrentCulture);
+                    this.upload.Description.Length.ToString("N0") : 0.ToString("N0");
             }
         }
 
@@ -407,7 +407,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return $"/ {YoutubeLimits.DescriptionLimit.ToString("N0", CultureInfo.CurrentCulture)}";
+                return $"/ {YoutubeLimits.DescriptionLimit.ToString("N0")}";
             }
         }
 
@@ -429,7 +429,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return this.upload.TagsCharacterCount.ToString("N0", CultureInfo.CurrentCulture);
+                return this.upload.TagsCharacterCount.ToString("N0");
             }
         }
 
@@ -509,7 +509,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public string UploadedTotalInfo
         {
-            get => $"{((int)((float)this.upload.BytesSent / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} / {((int)((float)this.upload.FileLength / Constants.ByteMegaByteFactor)).ToString("N0", CultureInfo.CurrentCulture)} MB";
+            get => $"{((int)((float)this.upload.BytesSent / Constants.ByteMegaByteFactor)).ToString("N0")} / {((int)((float)this.upload.FileLength / Constants.ByteMegaByteFactor)).ToString("N0")} MB";
         }
 
         public string UploadErrorMessage
