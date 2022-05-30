@@ -27,6 +27,7 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private int tabNo;
         private List<object> viewModels = new List<object>(new object[5]);
+        private List<object> ribbonViewModels = new List<object>(new object[5]);
 
         private AppStatus appStatus = AppStatus.Idle;
         private ObservableTemplateViewModels observableTemplateViewModels;
@@ -61,6 +62,11 @@ namespace Drexel.VidUp.UI.ViewModels
         public List<object> ViewModels
         {
             get => this.viewModels;
+        }
+
+        public List<object> RibbonViewModels
+        {
+            get => this.ribbonViewModels;
         }
 
         //is bound to grid row 1 (main window content) MainWindow.Xaml
@@ -341,7 +347,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public bool AutoSettingPlaylists
         {
-            get => ((PlaylistViewModel)this.viewModels[2]).AutoSettingPlaylists;
+            get => ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).AutoSettingPlaylists;
         }
 
         public string AutoSettingPlaylistsText
@@ -466,8 +472,11 @@ namespace Drexel.VidUp.UI.ViewModels
             uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
             uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
 
+            this.ribbonViewModels[2] = new PlaylistRibbonViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
+
             this.viewModels[1] = new TemplateViewModel(this.templateList, this.observableTemplateViewModels, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels,this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]);
-            this.viewModels[2] = new PlaylistViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
+            PlaylistComboboxViewModel selectedPlaylistViewModel = ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).SelectedPlaylist;
+            this.viewModels[2] = new PlaylistViewModel(selectedPlaylistViewModel != null ? selectedPlaylistViewModel.Playlist : null);
             this.viewModels[3] = new SettingsViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
             this.viewModels[4] = new VidUpViewModel();
         }

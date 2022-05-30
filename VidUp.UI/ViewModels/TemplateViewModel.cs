@@ -35,7 +35,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private GenericCommand showScheduleCommand;
 
 
-        //command execution doesn't need any parameter, parameter ist only action to do.
+        //command execution doesn't need any parameter, parameter is only action to do.
         private GenericCommand parameterlessCommand;
 
         private string lastThumbnailFallbackFilePathAdded = null;
@@ -723,7 +723,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.removeComboBoxValue("category");
                     break;
                 default:
-                    throw new InvalidOperationException("Invalid parameter for ActionCommandExecute.");
+                    throw new InvalidOperationException("Invalid parameter for parameterlessCommandAction.");
                     break;
             }
         }

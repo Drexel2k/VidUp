@@ -256,7 +256,7 @@
                         <Fluent:Button Header="Show Schedule Overview" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon TextBoxSearch}" Command="{Binding ShowScheduleCommand}" />
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[2]}" Header="Playlists" >
+                <Fluent:RibbonTabItem DataContext="{Binding RibbonViewModels[2]}" Header="Playlists" >
                     <Fluent:RibbonGroupBox Header="Manage" VerticalContentAlignment="Bottom">
                         <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon playlistedit}" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" IsEditable="False">
                             <ComboBox.ItemTemplate>
@@ -274,11 +274,11 @@
                                 </Style>
                             </ComboBox.ItemContainerStyle>
                         </Fluent:ComboBox>
-                        <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon playlistplus}" Command="{Binding NewPlaylistCommand}" />
+                        <Fluent:Button Header="New Playlist" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon playlistplus}" Command="{Binding ParameterlessCommand}" CommandParameter="newplaylist" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Update" VerticalContentAlignment="Bottom">
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:Button Header="Set Playlists" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon PlaylistCheck}"  Command="{Binding AutoSetPlaylistsCommand}"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
+                            <Fluent:Button Header="Set Playlists" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon PlaylistCheck}"  Command="{Binding ParameterlessCommand}" CommandParameter="autosetplaylists"  IsEnabled="{Binding AutoSettingPlaylists, Converter={converters:InvertBooleanConverter}}" />
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Sets playlists to published videos, if the playlist was configured to be set after publication and not at upload time in template." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
