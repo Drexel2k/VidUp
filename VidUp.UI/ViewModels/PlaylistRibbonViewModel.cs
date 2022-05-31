@@ -105,17 +105,12 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public PlaylistRibbonViewModel(PlaylistList playlistList, ObservablePlaylistViewModels observablePlaylistViewModels, TemplateList templateList,
+        public PlaylistRibbonViewModel(PlaylistList playlistList, TemplateList templateList,
             ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForRequestingPlaylists)
         {
             if (playlistList == null)
             {
                 throw new ArgumentException("PlaylistList must not be null.");
-            }
-
-            if (observablePlaylistViewModels == null)
-            {
-                throw new ArgumentException("ObservablePlaylistViewModels must not be null.");
             }
 
             if (templateList == null)
@@ -134,7 +129,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.playlistList = playlistList;
-            this.observablePlaylistViewModels = observablePlaylistViewModels;
+            this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList, true);
             this.templateList = templateList;
 
             this.SelectedPlaylist = this.observablePlaylistViewModels.PlaylistCount > 0 ? this.observablePlaylistViewModels[0] : null;
@@ -200,6 +195,32 @@ namespace Drexel.VidUp.UI.ViewModels
                 PlaylistComboboxViewModel viewModel = this.observablePlaylistViewModels.GetFirstViewModel(vm => vm.Visible == true);
                 this.SelectedPlaylist = viewModel;
                 this.raisePropertyChanged("SelectedPlaylist");
+            }
+
+
+            foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.observablePlaylistViewModels)
+            {
+                if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
+                {
+                    if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.Name == "All")
+                    {
+                        if (playlistComboboxViewModel.Visible == false)
+                        {
+                            playlistComboboxViewModel.Visible = true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (playlistComboboxViewModel.YoutubeAccountName == selectedYoutubeAccountChangedMessage.NewYoutubeAccount.Name)
+                    {
+                        playlistComboboxViewModel.Visible = true;
+                    }
+                    else
+                    {
+                        playlistComboboxViewModel.Visible = false;
+                    }
+                }
             }
         }
 

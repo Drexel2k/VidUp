@@ -50,7 +50,7 @@
             </Grid.RowDefinitions>
             <Fluent:Ribbon VerticalAlignment="Center" SelectedTabIndex="{Binding TabNo, Mode=TwoWay}">
                 <!--Tabs-->
-                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[0]}" Header="Upload" >
+                <Fluent:RibbonTabItem DataContext="{Binding RibbonViewModels[0]}" Header="Upload" >
                     <Fluent:RibbonGroupBox Header="Add Uploads">
                         <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FilePlus}" Command="{Binding AddUploadCommand}" />
                     </Fluent:RibbonGroupBox>

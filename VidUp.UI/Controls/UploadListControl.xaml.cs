@@ -23,7 +23,7 @@ namespace Drexel.VidUp.UI.Controls
             {
                 UploadControl uploadControlAtTargetPosition = (UploadControl) sender;
                 UploadListViewModel uploadListViewModel = (UploadListViewModel) this.DataContext;
-                uploadListViewModel.ReOrder(((UploadViewModel) uploadControlToMove.DataContext).Upload, ((UploadViewModel) uploadControlAtTargetPosition.DataContext).Upload);
+                uploadListViewModel.Reorder(((UploadViewModel) uploadControlToMove.DataContext).Upload, ((UploadViewModel) uploadControlAtTargetPosition.DataContext).Upload);
                 e.Handled = true;
             }
         }

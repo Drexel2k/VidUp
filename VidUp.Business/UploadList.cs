@@ -402,7 +402,7 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void ReOrder(Upload uploadToMove, Upload uploadAtTargetPosition)
+        public void Reorder(Upload uploadToMove, Upload uploadAtTargetPosition)
         {
             if (uploadToMove == uploadAtTargetPosition)
             {

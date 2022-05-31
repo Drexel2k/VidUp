@@ -19,7 +19,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateComboboxViewModel selectedTemplate;
 
         private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
-        private YoutubeAccount selectedYoutubeAccount;
+        private YoutubeAccount selectedYoutubeAccountForFiltering;
         private YoutubeAccount youtubeAccountForCreatingTemplates;
 
         //command execution doesn't need any parameter, parameter is only action to do.
@@ -65,17 +65,11 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public TemplateRibbonViewModel(TemplateList templateList, ObservableTemplateViewModels observableTemplateViewModels, 
-            ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount, YoutubeAccount youtubeAccountForCreatingTemplates)
+        public TemplateRibbonViewModel(TemplateList templateList, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount youtubeAccountForCreatingTemplates, YoutubeAccount selectedYoutubeAccountForFiltering)
         {
             if(templateList == null)
             {
                 throw new ArgumentException("TemplateList must not be null.");
-            }
-
-            if(observableTemplateViewModels == null)
-            {
-                throw new ArgumentException("ObservableTemplateViewModels must not be null.");
             }
 
             if (youtubeAccountForCreatingTemplates == null)
@@ -89,12 +83,12 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.templateList = templateList;
-            this.observableTemplateViewModels = observableTemplateViewModels;
+            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, true, false, false); ;
             this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
 
             this.SelectedTemplate = this.observableTemplateViewModels.TemplateCount > 0 ? this.observableTemplateViewModels[0] : null;
 
-            this.selectedYoutubeAccount = selectedYoutubeAccount;
+            this.selectedYoutubeAccountForFiltering = selectedYoutubeAccountForFiltering;
             this.youtubeAccountForCreatingTemplates = youtubeAccountForCreatingTemplates;
 
             EventAggregator.Instance.Subscribe<SelectedFilterYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
@@ -154,7 +148,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 throw new ArgumentException("Changed Youtube account must not be null.");
             }
 
-            this.selectedYoutubeAccount = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
+            this.selectedYoutubeAccountForFiltering = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
             this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
 
             if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
@@ -212,8 +206,8 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             var view = new DisplayScheduleControl
             {
-                DataContext = new DisplayScheduleControlViewModel(this.selectedYoutubeAccount.Name=="All" ?
-                    this.templateList : this.templateList.FindAll(template => template.YoutubeAccount == this.selectedYoutubeAccount))
+                DataContext = new DisplayScheduleControlViewModel(this.selectedYoutubeAccountForFiltering.Name=="All" ?
+                    this.templateList : this.templateList.FindAll(template => template.YoutubeAccount == this.selectedYoutubeAccountForFiltering))
             };
 
             await DialogHost.Show(view, "RootDialog");

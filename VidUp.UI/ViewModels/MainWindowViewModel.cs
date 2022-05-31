@@ -30,11 +30,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private List<object> ribbonViewModels = new List<object>(new object[5]);
 
         private AppStatus appStatus = AppStatus.Idle;
-        private ObservableTemplateViewModels observableTemplateViewModels;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAll;
-        private ObservablePlaylistViewModels observablePlaylistViewModels;
-        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
+
         private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModelsInclAll;
 
         private PostUploadAction postUploadAction;
@@ -245,7 +243,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     return this.uploadStats.TotalMbLeft.ToString("N0");
                 }
 
-                if (((UploadListViewModel)this.viewModels[0]).ResumeUploads)
+                if (((UploadRibbonViewModel)this.ribbonViewModels[0]).ResumeUploads)
                 {
                     return ((int)((float)this.uploadList.GetRemainingBytesOfFilesToUploadIncludingResumable(null) /
                                    Constants.ByteMegaByteFactor)).ToString("N0");
@@ -262,7 +260,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
-                return (((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond / 1024).ToString("N0"); ;
+                return (((UploadRibbonViewModel)this.ribbonViewModels[0]).MaxUploadInBytesPerSecond / 1024).ToString("N0"); ;
             }
 
             set
@@ -277,11 +275,11 @@ namespace Drexel.VidUp.UI.ViewModels
                         newUploadInBytesPerSecond = 0;
                     }
 
-                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = newUploadInBytesPerSecond;
+                   ((UploadRibbonViewModel)this.ribbonViewModels[0]).MaxUploadInBytesPerSecond = newUploadInBytesPerSecond;
                 }
                 else
                 {
-                    ((UploadListViewModel)this.viewModels[0]).MaxUploadInBytesPerSecond = 0;
+                    ((UploadRibbonViewModel)this.ribbonViewModels[0]).MaxUploadInBytesPerSecond = 0;
                 }
 
                 this.raisePropertyChanged("MaxUploadInKiloBytesPerSecond");
@@ -388,11 +386,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
-        {
-            get => this.observableYoutubeAccountViewModels;
-        }
-
         public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModelsInclAll
         {
             get => this.observableYoutubeAccountViewModelsInclAll;
@@ -408,11 +401,18 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.selectedYoutubeAccountChanged();
 
-                EventAggregator.Instance.Publish(new SelectedFilterYoutubeAccountChangedMessage(oldAccount, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]));
+                EventAggregator.Instance.Publish(new SelectedFilterYoutubeAccountChangedMessage(oldAccount, this.selectedYoutubeAccount.YoutubeAccount, this.getFirstNotAllAccount()));
+
+                //for dummy values in template combobox
                 EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
 
                 this.raisePropertyChanged("SelectedYoutubeAccount");
             }
+        }
+
+        private YoutubeAccount getFirstNotAllAccount()
+        {
+            return this.youtubeAccountList.Find(account => !account.IsDummy);
         }
 
         public MainWindowViewModel() : this(null, null, out _, out _, out _)
@@ -454,35 +454,41 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<YoutubeAccountStatusChangedMessage>(this.youtubeAccountStatusChangedChanged);
 
             Template.DummyAccount = new YoutubeAccount("Dummy", this.getYoutubeAccountName);
-            this.observableTemplateViewModels = new ObservableTemplateViewModels(this.templateList, true, false, false);
             this.observableTemplateViewModelsInclAllNone = new ObservableTemplateViewModels(this.templateList, false, true, true);
             this.observableTemplateViewModelsInclAll = new ObservableTemplateViewModels(this.templateList, false, true, false);
-            this.observablePlaylistViewModels = new ObservablePlaylistViewModels(this.playlistList, true);
 
-            this.observableYoutubeAccountViewModels = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, false);
             this.observableYoutubeAccountViewModelsInclAll = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, true);
             this.selectedYoutubeAccount = this.observableYoutubeAccountViewModelsInclAll[0];
 
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
-            UploadListViewModel uploadListViewModel = new UploadListViewModel(this.uploadList, this.observableTemplateViewModels, this.observableTemplateViewModelsInclAll,
-                this.observableTemplateViewModelsInclAllNone, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels, this.youtubeAccountList[0], this.selectedYoutubeAccount.YoutubeAccount);
-            this.viewModels[0] = uploadListViewModel;
-            uploadListViewModel.PropertyChanged += this.uploadListViewModelOnPropertyChanged;
-            uploadListViewModel.UploadStarted += this.uploadListViewModelOnUploadStarted;
-            uploadListViewModel.UploadFinished += this.uploadListViewModelOnUploadFinished;
-
-            this.ribbonViewModels[1] = new TemplateRibbonViewModel(this.templateList, this.observableTemplateViewModels, this.observableYoutubeAccountViewModels, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]);
-            this.ribbonViewModels[2] = new PlaylistRibbonViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
-            this.ribbonViewModels[3] = new SettingsRibbonViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
+            //order is important, ribbons are responsible for list management (e.g.PlaylistRibbonViewModel for PlaylistList and ObservablePlaylistViewModels)
+            this.ribbonViewModels[3] = new SettingsRibbonViewModel(this.youtubeAccountList);
+            this.ribbonViewModels[1] = new TemplateRibbonViewModel(this.templateList, ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels, this.getFirstNotAllAccount(), this.selectedYoutubeAccount.YoutubeAccount);
+            this.ribbonViewModels[2] = new PlaylistRibbonViewModel(this.playlistList, this.templateList, ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
+            this.ribbonViewModels[0] = new UploadRibbonViewModel(this.uploadList, ((TemplateRibbonViewModel)this.ribbonViewModels[1]).ObservableTemplateViewModels, this.observableTemplateViewModelsInclAll, this.observableTemplateViewModelsInclAllNone, 
+                ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).ObservablePlaylistViewModels, ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels, this.getFirstNotAllAccount(), this.selectedYoutubeAccount.YoutubeAccount);
             this.ribbonViewModels[4] = new VidUpRibbonViewModel();
 
+            this.viewModels[0] = new UploadListViewModel(((UploadRibbonViewModel)this.ribbonViewModels[0]).ObservableUploadViewModels, this.selectedYoutubeAccount.YoutubeAccount);
             TemplateComboboxViewModel selectedTemplateViewModel = ((TemplateRibbonViewModel)this.ribbonViewModels[1]).SelectedTemplate;
-            this.viewModels[1] = new TemplateViewModel(selectedTemplateViewModel != null ? selectedTemplateViewModel.Template : null, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels, this.selectedYoutubeAccount.YoutubeAccount);
+            this.viewModels[1] = new TemplateViewModel(selectedTemplateViewModel != null ? selectedTemplateViewModel.Template : null, ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).ObservablePlaylistViewModels, ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels, this.selectedYoutubeAccount.YoutubeAccount);
             PlaylistComboboxViewModel selectedPlaylistViewModel = ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).SelectedPlaylist;
             this.viewModels[2] = new PlaylistViewModel(selectedPlaylistViewModel != null ? selectedPlaylistViewModel.Playlist : null);
             YoutubeAccountComboboxViewModel selectedYoutubeAccountViewModel = ((SettingsRibbonViewModel)this.ribbonViewModels[3]).SelectedYoutubeAccount;
             this.viewModels[3] = new SettingsViewModel(selectedYoutubeAccountViewModel != null ? selectedYoutubeAccountViewModel.YoutubeAccount : null);
+
+
+            ((UploadRibbonViewModel)this.ribbonViewModels[0]).PropertyChanged += this.uploadListViewModelOnPropertyChanged;
+            ((UploadRibbonViewModel)this.ribbonViewModels[0]).UploadStarted += this.uploadListViewModelOnUploadStarted;
+            ((UploadRibbonViewModel)this.ribbonViewModels[0]).UploadFinished += this.uploadListViewModelOnUploadFinished;
+
+            //this.observableYoutubeAccountViewModels = ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels;
+        }
+
+        public void AddFiles(string[] files)
+        {
+            ((UploadRibbonViewModel)this.ribbonViewModels[0]).AddFiles(files);
         }
 
         private string getYoutubeAccountName()
@@ -543,34 +549,6 @@ namespace Drexel.VidUp.UI.ViewModels
                         else
                         {
                             templateComboboxViewModel.Visible = false;
-                        }
-                    }
-                }
-            }
-
-            foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.observablePlaylistViewModels)
-            {
-                if (selectedYoutubeAccount.YoutubeAccount.IsDummy)
-                {
-                    if (selectedYoutubeAccount.YoutubeAccount.Name == "All")
-                    {
-                        if (playlistComboboxViewModel.Visible == false)
-                        {
-                            playlistComboboxViewModel.Visible = true;
-                        }
-                    }
-                }
-                else
-                {
-                    if (!selectedYoutubeAccount.YoutubeAccount.IsDummy)
-                    {
-                        if (playlistComboboxViewModel.YoutubeAccountName == selectedYoutubeAccount.YoutubeAccount.Name)
-                        {
-                            playlistComboboxViewModel.Visible = true;
-                        }
-                        else
-                        {
-                            playlistComboboxViewModel.Visible = false;
                         }
                     }
                 }

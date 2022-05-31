@@ -29,11 +29,11 @@ namespace Drexel.VidUp.UI
             Tracer.Write($"MainWindow.fileDrop: Start.");
             base.OnDrop(e);
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)((MainWindowViewModel)this.DataContext).CurrentViewModel;
+            MainWindowViewModel minWindowViewModel = ((MainWindowViewModel)this.DataContext);
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 
             Tracer.Write($"MainWindow.fileDrop: Dropped {files.Length} files.");
-            uploadListViewModel.AddFiles(files);
+            minWindowViewModel.AddFiles(files);
             Tracer.Write($"MainWindow.fileDrop: End.");
         }
 

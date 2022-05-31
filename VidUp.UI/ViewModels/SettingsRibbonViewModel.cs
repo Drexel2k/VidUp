@@ -12,7 +12,7 @@ namespace Drexel.VidUp.UI.ViewModels
     //todo: move ribbon properties to separate view model
     public class SettingsRibbonViewModel : INotifyPropertyChanged
     {
-        private YoutubeAccountList youtubeAccounts;
+        private YoutubeAccountList youtubeAccountList;
         private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
         private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
 
@@ -63,20 +63,15 @@ namespace Drexel.VidUp.UI.ViewModels
 
         #endregion properties
 
-        public SettingsRibbonViewModel(YoutubeAccountList youtubeAccountList, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels)
+        public SettingsRibbonViewModel(YoutubeAccountList youtubeAccountList)
         {
             if (youtubeAccountList == null)
             {
                 throw new ArgumentException("YoutubeAccountList must not be null.");
             }
 
-            if (observableYoutubeAccountViewModels == null)
-            {
-                throw new ArgumentException("ObservableYoutubeAccountViewModels action must not be null.");
-            }
-
-            this.youtubeAccounts = youtubeAccountList;
-            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
+            this.youtubeAccountList = youtubeAccountList;
+            this.observableYoutubeAccountViewModels = new ObservableYoutubeAccountViewModels(this.youtubeAccountList, false);
             this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels[0];
 
             this.newYoutubeAccountCommand = new GenericCommand(this.openNewYoutubeAccountDialogAsync);
@@ -97,7 +92,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 NewYoutubeAccountViewModel data = (NewYoutubeAccountViewModel)view.DataContext;
                 
                 YoutubeAccount youtubeAccount = new YoutubeAccount(data.Name);
-                this.youtubeAccounts.AddYoutubeAccount(youtubeAccount);
+                this.youtubeAccountList.AddYoutubeAccount(youtubeAccount);
                 JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
 
                 this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(youtubeAccount);
@@ -106,7 +101,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private async void deleteYoutubeAccountAsync(YoutubeAccountDeleteMessage youtubeAccountDeleteMessage)
         {
-            if (this.youtubeAccounts.AccountCount <= 1)
+            if (this.youtubeAccountList.AccountCount <= 1)
             {
                 ConfirmControl control = new ConfirmControl(
                     $"You cannot delete the last Youtube account, at least one account must be left. Rename or reauthenticate (relink) the account or add a new account first.", false);
@@ -132,7 +127,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
 
                     EventAggregator.Instance.Publish(new BeforeYoutubeAccountDeleteMessage(youtubeAccountDeleteMessage.YoutubeAccount));
-                    this.youtubeAccounts.Delete(youtubeAccountDeleteMessage.YoutubeAccount);
+                    this.youtubeAccountList.Delete(youtubeAccountDeleteMessage.YoutubeAccount);
                     JsonSerializationContent.JsonSerializer.SerializePlaylistList();
                     JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                     JsonSerializationContent.JsonSerializer.SerializeAllUploads();

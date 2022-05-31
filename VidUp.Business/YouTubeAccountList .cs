@@ -69,11 +69,6 @@ namespace Drexel.VidUp.Business
             return this.youtubeAccounts.Find(youtubeAccount => youtubeAccount.Name == name);
         }
 
-        public ReadOnlyCollection<YoutubeAccount> GetReadOnlyYoutubeAccountList()
-        {
-            return this.youtubeAccounts.AsReadOnly();
-        }
-
         public YoutubeAccount Find(Predicate<YoutubeAccount> match)
         {
             return this.youtubeAccounts.Find(match);

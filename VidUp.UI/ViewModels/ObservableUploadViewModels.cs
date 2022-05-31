@@ -117,7 +117,7 @@ namespace Drexel.VidUp.UI.ViewModels
             return this.uploadViewModels.Find(uploadviewModel => uploadviewModel.Guid == guid.ToString());
         }
 
-        public void ReOrder(UploadList uploadList)
+        public void Reorder(UploadList uploadList)
         {
             List <UploadViewModel> reOrderedViewModels = new List<UploadViewModel>();
             foreach (Upload upload in uploadList)
