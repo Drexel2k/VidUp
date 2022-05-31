@@ -23,20 +23,45 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableCollection<CultureViewModel> observableCultureInfoViewModels;
         private string searchText = string.Empty;
 
-        private YoutubeAccountList youtubeAccounts;
-        private ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels;
-        private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
+        private YoutubeAccount youtubeAccount;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private GenericCommand newYoutubeAccountCommand;
-        private GenericCommand youtubeAccountSignInCommand;
-        private GenericCommand youtubeAccountSignOutCommand;
-        private GenericCommand youtubeAccountDeleteCommand;
+        private GenericCommand parameterlessCommand;
         private object authenticateYoutubeAccountLock = new object();
         private bool authenticatingYoutubeAccount = false;
 
         #region properties
+
+        public YoutubeAccount YoutubeAccount
+        {
+            get
+            {
+                return this.youtubeAccount;
+            }
+            set
+            {
+                if (this.youtubeAccount != value)
+                {
+                    this.youtubeAccount = value;
+                    //all properties changed
+                    this.raisePropertyChanged(null);
+                }
+            }
+        }
+
+        public string YoutubeAccountName
+        {
+            get => this.youtubeAccount.Name;
+            set
+            {
+                this.youtubeAccount.Name = value;
+                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
+
+                this.raisePropertyChanged("YoutubeAccountName");
+                EventAggregator.Instance.Publish(new YoutubeAccountDisplayPropertyChangedMessage("name"));
+            }
+        }
 
         public bool Tracing
         {
@@ -131,86 +156,30 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.observableCultureInfoViewModels;
         }
 
-        public YoutubeAccountComboboxViewModel SelectedYoutubeAccount
+        public GenericCommand ParameterlessCommand
         {
-            get => this.selectedYoutubeAccount;
-            set
-            {
-                this.selectedYoutubeAccount = value;
-                this.raisePropertyChanged("SelectedYoutubeAccount");
-                this.raisePropertyChanged("SelectedYoutubeAccountName");
-                this.raisePropertyChanged("SelectedYoutubeAccountFilePath");
-            }
-        }
-
-        public ObservableYoutubeAccountViewModels ObservableYoutubeAccountViewModels
-        {
-            get
-            {
-                return this.observableYoutubeAccountViewModels;
-            }
-        }
-
-        public string SelectedYoutubeAccountName
-        {
-            get => this.selectedYoutubeAccount.YoutubeAccount.Name;
-            set
-            { 
-                this.selectedYoutubeAccount.YoutubeAccount.Name = value;
-
-                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
-
-                this.raisePropertyChanged("SelectedYoutubeAccountName");
-
-            }
-        }
-
-        public GenericCommand NewYoutubeAccountCommand
-        {
-            get => this.newYoutubeAccountCommand;
-        }
-
-        public GenericCommand YoutubeAccountSignInCommand
-        {
-            get => this.youtubeAccountSignInCommand;
-        }
-
-        public GenericCommand YoutubeAccountSignOutCommand
-        {
-            get => this.youtubeAccountSignOutCommand;
-        }
-
-        public GenericCommand YoutubeAccountDeleteCommand
-        {
-            get => this.youtubeAccountDeleteCommand;
+            get => this.parameterlessCommand;
         }
 
         #endregion properties
 
-        public SettingsViewModel(YoutubeAccountList youtubeAccountList, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels)
+        public SettingsViewModel(YoutubeAccount youtubeAccount)
         {
-            if (youtubeAccountList == null)
-            {
-                throw new ArgumentException("YoutubeAccountList must not be null.");
-            }
+            this.youtubeAccount = youtubeAccount;
 
-            if (observableYoutubeAccountViewModels == null)
-            {
-                throw new ArgumentException("ObservableYoutubeAccountViewModels action must not be null.");
-            }
-
-            this.youtubeAccounts = youtubeAccountList;
-            this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
-            this.selectedYoutubeAccount = this.observableYoutubeAccountViewModels[0];
-
-            this.newYoutubeAccountCommand = new GenericCommand(this.openNewYoutubeAccountDialogAsync);
-            this.youtubeAccountSignInCommand = new GenericCommand(this.signInYoutubeAccountAsync);
-            this.youtubeAccountSignOutCommand = new GenericCommand(this.signOutYoutubeAccountAsync);
-            this.youtubeAccountDeleteCommand = new GenericCommand(this.deleteYoutubeAccountAsync);
+            this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
 
             this.observableCultureInfoViewModels = new ObservableCollection<CultureViewModel>();
 
             this.refreshObservableCultureInfoViewmodels();
+
+            EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
+        }
+
+        private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
+        {
+            //raises all properties changed
+            this.YoutubeAccount = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
         }
 
         private void cultureViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -337,27 +306,26 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public async void openNewYoutubeAccountDialogAsync(object obj)
+        private void parameterlessCommandAction(object target)
         {
-            var view = new NewYoutubeAccountControl
+            switch (target)
             {
-                DataContext = new NewYoutubeAccountViewModel()
-            };
-
-            bool result = (bool)await DialogHost.Show(view, "RootDialog");
-            if (result)
-            {
-                NewYoutubeAccountViewModel data = (NewYoutubeAccountViewModel)view.DataContext;
-                
-                YoutubeAccount youtubeAccount = new YoutubeAccount(data.Name);
-                this.youtubeAccounts.AddYoutubeAccount(youtubeAccount);
-                JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
-
-                this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels.GetViewModel(youtubeAccount);
+                case "signin":
+                    this.signInYoutubeAccountAsync();
+                    break;
+                case "signout":
+                    this.signOutYoutubeAccount();
+                    break;
+                case "delete":
+                    this.deleteYoutubeAccount();
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid parameter for parameterlessCommandAction.");
+                    break;
             }
         }
 
-        private async void signInYoutubeAccountAsync(object obj)
+        private async void signInYoutubeAccountAsync()
         {
             Tracer.Write($"SettingsViewModel.signInYoutubeAccountAsync: Start.");
             lock (this.authenticateYoutubeAccountLock)
@@ -372,7 +340,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             try
             {
-                await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(this.selectedYoutubeAccount.YoutubeAccount);
+                await YoutubeAuthentication.SetRefreshTokenOnYoutubeAccountAsync(this.youtubeAccount);
             }
             catch (Exception e)
             {
@@ -398,51 +366,18 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"SettingsViewModel.signInYoutubeAccountAsync: End.");
         }
 
-        private void signOutYoutubeAccountAsync(object obj)
+        private void signOutYoutubeAccount()
         {
             Tracer.Write($"SettingsViewModel.signOutYoutubeAccountAsync: Start.");
-            YoutubeAuthentication.DeleteRefreshTokenOnYoutubeAccountAsync(this.selectedYoutubeAccount.YoutubeAccount);
+            YoutubeAuthentication.DeleteRefreshTokenOnYoutubeAccountAsync(this.youtubeAccount);
             JsonSerializationContent.JsonSerializer.SerializeYoutubeAccountList();
             EventAggregator.Instance.Publish(new YoutubeAccountStatusChangedMessage());
             Tracer.Write($"SettingsViewModel.signOutYoutubeAccountAsync: End.");
         }
 
-        private async void deleteYoutubeAccountAsync(object obj)
+        private void deleteYoutubeAccount()
         {
-            if (this.youtubeAccounts.AccountCount <= 1)
-            {
-                ConfirmControl control = new ConfirmControl(
-                    $"You cannot delete the last Youtube account, at least one account must be left. Rename or reauthenticate (relink) the account or add a new account first.", false);
-
-                await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
-            }
-            else
-            {
-                ConfirmControl control = new ConfirmControl(
-                    $"WARNING! If you delete an account, all content (uploads, templates, playlists) belonging to this account will be deleted!", true);
-
-                //a collection is change later, so we must return to the Gui thread.
-                bool result = (bool) await DialogHost.Show(control, "RootDialog").ConfigureAwait(true);
-                if (result)
-                {
-                    YoutubeAccount selectedYoutubeAccount = this.selectedYoutubeAccount.YoutubeAccount;
-                    if (this.observableYoutubeAccountViewModels[0].YoutubeAccount.Name == this.selectedYoutubeAccount.YoutubeAccount.Name)
-                    {
-                        this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels[1];
-                    }
-                    else
-                    {
-                        this.SelectedYoutubeAccount = this.observableYoutubeAccountViewModels[0];
-                    }
-
-                    EventAggregator.Instance.Publish(new BeforeYoutubeAccountDeleteMessage(selectedYoutubeAccount));
-                    this.youtubeAccounts.Remove(selectedYoutubeAccount);
-                    JsonSerializationContent.JsonSerializer.SerializePlaylistList();
-                    JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                    JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-                    JsonSerializationContent.JsonSerializer.SerializeUploadList();
-                }
-            }
+            EventAggregator.Instance.Publish(new YoutubeAccountDeleteMessage(this.youtubeAccount));
         }
 
         private void raisePropertyChanged(string propertyName)

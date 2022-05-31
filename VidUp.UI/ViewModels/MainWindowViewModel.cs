@@ -408,7 +408,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.selectedYoutubeAccountChanged();
 
-                EventAggregator.Instance.Publish(new SelectedYoutubeAccountChangedMessage(oldAccount, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]));
+                EventAggregator.Instance.Publish(new SelectedFilterYoutubeAccountChangedMessage(oldAccount, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]));
                 EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("youtubeaccount"));
 
                 this.raisePropertyChanged("SelectedYoutubeAccount");
@@ -474,13 +474,15 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.ribbonViewModels[1] = new TemplateRibbonViewModel(this.templateList, this.observableTemplateViewModels, this.observableYoutubeAccountViewModels, this.selectedYoutubeAccount.YoutubeAccount, this.youtubeAccountList[0]);
             this.ribbonViewModels[2] = new PlaylistRibbonViewModel(this.playlistList, this.observablePlaylistViewModels, this.templateList, this.ObservableYoutubeAccountViewModels, this.youtubeAccountList[0]);
+            this.ribbonViewModels[3] = new SettingsRibbonViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
             this.ribbonViewModels[4] = new VidUpRibbonViewModel();
 
             TemplateComboboxViewModel selectedTemplateViewModel = ((TemplateRibbonViewModel)this.ribbonViewModels[1]).SelectedTemplate;
             this.viewModels[1] = new TemplateViewModel(selectedTemplateViewModel != null ? selectedTemplateViewModel.Template : null, this.observablePlaylistViewModels, this.observableYoutubeAccountViewModels, this.selectedYoutubeAccount.YoutubeAccount);
             PlaylistComboboxViewModel selectedPlaylistViewModel = ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).SelectedPlaylist;
             this.viewModels[2] = new PlaylistViewModel(selectedPlaylistViewModel != null ? selectedPlaylistViewModel.Playlist : null);
-            this.viewModels[3] = new SettingsViewModel(this.youtubeAccountList, this.observableYoutubeAccountViewModels);
+            YoutubeAccountComboboxViewModel selectedYoutubeAccountViewModel = ((SettingsRibbonViewModel)this.ribbonViewModels[3]).SelectedYoutubeAccount;
+            this.viewModels[3] = new SettingsViewModel(selectedYoutubeAccountViewModel != null ? selectedYoutubeAccountViewModel.YoutubeAccount : null);
         }
 
         private string getYoutubeAccountName()

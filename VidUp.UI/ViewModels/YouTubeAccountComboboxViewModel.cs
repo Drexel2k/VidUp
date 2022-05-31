@@ -1,14 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
-using System.DirectoryServices.ActiveDirectory;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.UI.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
 
-    public class YoutubeAccountComboboxViewModel : INotifyPropertyChanged
+    public class YoutubeAccountComboboxViewModel : INotifyPropertyChanged, IDisposable
     {
         private YoutubeAccount youtubeAccount;
+        private Subscription youtubeAccountDisplayPropertyChangedSubscription;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public YoutubeAccount YoutubeAccount
@@ -29,20 +31,13 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             this.youtubeAccount = youtubeAccount;
-            this.youtubeAccount.PropertyChanged += this.youtubeAccountPropertyChanged;
+
+            this.youtubeAccountDisplayPropertyChangedSubscription = EventAggregator.Instance.Subscribe<YoutubeAccountDisplayPropertyChangedMessage>(this.onYoutubeAccountDisplayPropertyChanged);
         }
 
-        private void youtubeAccountPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void onYoutubeAccountDisplayPropertyChanged(YoutubeAccountDisplayPropertyChangedMessage obj)
         {
-            if(e.PropertyName == "Name")
-            {
-                this.raisePropertyChanged("YoutubeAccountName");
-            }
-
-            if(e.PropertyName == "FilePath")
-            {
-                this.raisePropertyChanged("YoutubeAccountFilePath");
-            }
+            this.raisePropertyChanged("YoutubeAccountName");
         }
 
         private void raisePropertyChanged(string propertyName)
@@ -52,6 +47,14 @@ namespace Drexel.VidUp.UI.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public void Dispose()
+        {
+            if (this.youtubeAccountDisplayPropertyChangedSubscription != null)
+            {
+                this.youtubeAccountDisplayPropertyChangedSubscription.Dispose();
             }
         }
     }

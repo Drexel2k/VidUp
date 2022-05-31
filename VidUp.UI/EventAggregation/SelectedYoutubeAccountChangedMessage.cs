@@ -4,16 +4,13 @@ namespace Drexel.VidUp.UI.EventAggregation
 {
     public class SelectedYoutubeAccountChangedMessage
     {
-        public YoutubeAccount OldAccount { get; }
-        public YoutubeAccount NewAccount { get; }
+        public YoutubeAccount OldYoutubeAccount { get; }
+        public YoutubeAccount NewYoutubeAccount { get; }
 
-        public YoutubeAccount FirstNotAllAccount { get; }
-
-        public SelectedYoutubeAccountChangedMessage(YoutubeAccount oldAccount, YoutubeAccount newAccount, YoutubeAccount firstNotAllAccount)
+        public SelectedYoutubeAccountChangedMessage(YoutubeAccount oldYoutubeAccount, YoutubeAccount newYoutubeAccount)
         {
-            this.OldAccount = oldAccount;
-            this.NewAccount = newAccount;
-            this.FirstNotAllAccount = firstNotAllAccount;
+            this.OldYoutubeAccount = oldYoutubeAccount;
+            this.NewYoutubeAccount = newYoutubeAccount;
         }
     }
 }

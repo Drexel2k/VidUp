@@ -288,7 +288,7 @@
                         </StackPanel>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>
-                <Fluent:RibbonTabItem DataContext="{Binding ViewModels[3]}" Header="Settings">
+                <Fluent:RibbonTabItem DataContext="{Binding RibbonViewModels[3]}" Header="Settings">
                     <Fluent:RibbonGroupBox Header="Manage YT Accounts" VerticalContentAlignment="Bottom">
                         <Fluent:ComboBox VerticalAlignment="Bottom" Icon="{materialDesign:PackIcon AccountEdit}" ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" IsEditable="False" />
                         <Fluent:Button Header="New Youtube Account" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon AccountPlus}" Command="{Binding NewYoutubeAccountCommand}" />

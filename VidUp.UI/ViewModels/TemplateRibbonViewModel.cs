@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
-using System.IO;
-using System.Windows.Forms;
-using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
@@ -101,7 +97,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.selectedYoutubeAccount = selectedYoutubeAccount;
             this.youtubeAccountForCreatingTemplates = youtubeAccountForCreatingTemplates;
 
-            EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
+            EventAggregator.Instance.Subscribe<SelectedFilterYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
             this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
@@ -151,21 +147,21 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
+        private void selectedYoutubeAccountChanged(SelectedFilterYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
         {
-            if (selectedYoutubeAccountChangedMessage.NewAccount == null)
+            if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount == null)
             {
                 throw new ArgumentException("Changed Youtube account must not be null.");
             }
 
-            this.selectedYoutubeAccount = selectedYoutubeAccountChangedMessage.NewAccount;
-            this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.NewAccount;
+            this.selectedYoutubeAccount = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
+            this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
 
-            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
+            if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
             {
-                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.Name == "All")
                 {
-                    this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                    this.youtubeAccountForCreatingTemplates = selectedYoutubeAccountChangedMessage.FirstNotAllYoutubeAccount;
 
                     if (this.observableTemplateViewModels.TemplateCount >= 1)
                     {
@@ -180,7 +176,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
             else
             {
-                TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template.YoutubeAccount == selectedYoutubeAccountChangedMessage.NewAccount);
+                TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template.YoutubeAccount == selectedYoutubeAccountChangedMessage.NewYoutubeAccount);
                 this.SelectedTemplate = viewModel;
             }
         }

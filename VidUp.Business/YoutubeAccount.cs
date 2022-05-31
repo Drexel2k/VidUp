@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Drexel.VidUp.Business
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class YoutubeAccount : INotifyPropertyChanged
+    public class YoutubeAccount
     {
         [JsonProperty]
         private Guid guid;
@@ -70,7 +70,6 @@ namespace Drexel.VidUp.Business
             set
             {
                 this.name = value;
-                this.raisePropertyChanged("Name");
             }
         }
 
@@ -83,8 +82,6 @@ namespace Drexel.VidUp.Business
         {
             get => this.isDummy;
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         [JsonConstructor]
         public YoutubeAccount()
@@ -109,16 +106,6 @@ namespace Drexel.VidUp.Business
             this.name = name;
             this.getAccountName = getaccountName;
             this.isDummy = true;
-        }
-
-        private void raisePropertyChanged(string propertyName)
-        {
-            // take a copy to prevent thread issues
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
         }
     }
 }

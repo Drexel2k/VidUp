@@ -63,6 +63,8 @@ namespace Drexel.VidUp.UI.ViewModels
                     YoutubeAccountComboboxViewModel oldViewModel = this.youtubeAccountComboboxViewModels.Find(viewModel => viewModel.YoutubeAccount.Name == youtubeAccount.Name);
                     int index = this.youtubeAccountComboboxViewModels.IndexOf(oldViewModel);
                     this.youtubeAccountComboboxViewModels.Remove(oldViewModel);
+                    oldViewModel.Dispose();
+
                     this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldViewModel, index));
                 }
 

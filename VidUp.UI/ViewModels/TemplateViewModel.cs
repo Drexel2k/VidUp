@@ -9,7 +9,6 @@ using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.EventAggregation;
-using Drexel.VidUp.Utils;
 using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -182,7 +181,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.template.Name = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("Name");
-                EventAggregator.Instance.Publish<TemplateDisplayPropertyChangedMessage>(new TemplateDisplayPropertyChangedMessage("name"));
+                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("name"));
             }
         }
 
@@ -348,7 +347,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.template.IsDefault = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("IsDefault");
-                EventAggregator.Instance.Publish<TemplateDisplayPropertyChangedMessage>(new TemplateDisplayPropertyChangedMessage("default"));
+                EventAggregator.Instance.Publish(new TemplateDisplayPropertyChangedMessage("default"));
             }
         }
 
@@ -404,7 +403,29 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public List<CultureInfo> Languages
         {
-            get => Cultures.RelevantCultureInfos;
+            get
+            {
+
+                //Culture can be set on template before cultures were filtered in settings.
+                //So in a template can be a culture which is later filtered out.
+                List<CultureInfo> result = new List<CultureInfo>();
+                result.AddRange(Cultures.RelevantCultureInfos);
+
+                if (this.template != null)
+                {
+                    if (this.template.VideoLanguage != null && !result.Contains(this.template.VideoLanguage))
+                    {
+                        result.Add(this.template.VideoLanguage);
+                    }
+
+                    if (this.template.DescriptionLanguage != null &&  !result.Contains(this.template.DescriptionLanguage))
+                    {
+                        result.Add(this.template.DescriptionLanguage);
+                    }
+                }
+
+                return result;
+            }
         }
 
         public string PlaceholderFolderPath
@@ -492,7 +513,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-
 
         private void parameterlessCommandAction(object target)
         {

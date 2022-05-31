@@ -8,7 +8,6 @@ using System.Timers;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
-using Drexel.VidUp.UI;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.EventAggregation;
 using Drexel.VidUp.Utils;
@@ -142,7 +141,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.observableYoutubeAccountViewModels = observableYoutubeAccountViewModels;
             this.youtubeAccountForRequestingPlaylists = youtubeAccountForRequestingPlaylists;
-            EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
+            EventAggregator.Instance.Subscribe<SelectedFilterYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
 
             this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
@@ -179,19 +178,19 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
+        private void selectedYoutubeAccountChanged(SelectedFilterYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
         {
-            if (selectedYoutubeAccountChangedMessage.NewAccount == null)
+            if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount == null)
             {
                 throw new ArgumentException("Changed Youtube account must not be null.");
             }
 
-            this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.NewAccount;
-            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
+            this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
+            if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
             {
-                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.Name == "All")
                 {
-                    this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                    this.youtubeAccountForRequestingPlaylists = selectedYoutubeAccountChangedMessage.FirstNotAllYoutubeAccount;
                 }
             }
 

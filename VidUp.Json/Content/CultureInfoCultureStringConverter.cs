@@ -15,7 +15,9 @@ namespace Drexel.VidUp.Json.Content
                 return null;
             }
 
-            return Cultures.RelevantCultureInfos.Where(culture => culture.Name == (string)reader.Value).First();
+            //must be AllCultureInfos as culture can be set on template before cultures were filtered in settings.
+            //So in a template e.g. can be a culture which is later filtered out.
+            return Cultures.AllCultureInfos.Where(culture => culture.Name == (string)reader.Value).First();
         }
 
         public override void WriteJson(JsonWriter writer, CultureInfo value, JsonSerializer serializer)

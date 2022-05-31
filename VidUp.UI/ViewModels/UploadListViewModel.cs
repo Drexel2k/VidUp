@@ -404,7 +404,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.youtubeAccountForCreatingUploads = youtubeAccountForCreatingUploads;
             this.youtubeAccountForFiltering = youtubeAccountForFiltering;
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
-            EventAggregator.Instance.Subscribe<SelectedYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
+            EventAggregator.Instance.Subscribe<SelectedFilterYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
 
             this.deleteCommand = new GenericCommand(this.DeleteUpload);
             this.addUploadCommand = new GenericCommand(this.openUploadDialog);
@@ -422,28 +422,28 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadList.DeleteUploads(upload => upload.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
         }
 
-        private void selectedYoutubeAccountChanged(SelectedYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
+        private void selectedYoutubeAccountChanged(SelectedFilterYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
         {
-            if (selectedYoutubeAccountChangedMessage.NewAccount == null)
+            if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount == null)
             {
                 throw new ArgumentException("Changed Youtube account must not be null.");
             }
 
-            this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.NewAccount;
-            if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
+            this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
+            if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
             {
-                if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.Name == "All")
                 {
-                    if (selectedYoutubeAccountChangedMessage.FirstNotAllAccount == null)
+                    if (selectedYoutubeAccountChangedMessage.FirstNotAllYoutubeAccount == null)
                     {
                         throw new ArgumentException("FirstNotAllAccount Youtube account must not be null.");
                     }
 
-                    this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.FirstNotAllAccount;
+                    this.youtubeAccountForCreatingUploads = selectedYoutubeAccountChangedMessage.FirstNotAllYoutubeAccount;
                 }
             }
 
-            this.youtubeAccountForFiltering = selectedYoutubeAccountChangedMessage.NewAccount;
+            this.youtubeAccountForFiltering = selectedYoutubeAccountChangedMessage.NewYoutubeAccount;
             this.DeleteSelectedTemplate = this.observableTemplateViewModelsInclAllNone[0];
             this.DeleteSelectedUploadStatus = "Finished";
             this.RecalculatePublishAtSelectedTemplate = this.observableTemplateViewModelsInclAll[0];
@@ -456,9 +456,9 @@ namespace Drexel.VidUp.UI.ViewModels
 
             foreach (UploadViewModel observableUploadViewModel in this.observableUploadViewModels)
             {
-                if (selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
+                if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
                 {
-                    if (selectedYoutubeAccountChangedMessage.NewAccount.Name == "All")
+                    if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.Name == "All")
                     {
                         if (observableUploadViewModel.Visible == false)
                         {
@@ -468,9 +468,9 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
                 else
                 {
-                    if (!selectedYoutubeAccountChangedMessage.NewAccount.IsDummy)
+                    if (!selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
                     {
-                        if (observableUploadViewModel.SelectedYoutubeAccount.YoutubeAccount == selectedYoutubeAccountChangedMessage.NewAccount)
+                        if (observableUploadViewModel.SelectedYoutubeAccount.YoutubeAccount == selectedYoutubeAccountChangedMessage.NewYoutubeAccount)
                         {
                             observableUploadViewModel.Visible = true;
                         }

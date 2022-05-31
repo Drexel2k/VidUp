@@ -25,7 +25,6 @@ namespace Drexel.VidUp.Business
             if (Settings.Instance.UserSettings.VideoLanguagesFilter == null || Settings.Instance.UserSettings.VideoLanguagesFilter.Count <= 0)
             {
                 Cultures.RelevantCultureInfos.AddRange(CultureInfo.GetCultures(CultureTypes.SpecificCultures));
-
             }
             else
             {
