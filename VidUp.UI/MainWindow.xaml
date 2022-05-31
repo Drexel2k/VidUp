@@ -35,10 +35,6 @@
         <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
             <controls:SettingsControl />
         </DataTemplate>
-
-        <!-- booleans for command paramters-->
-        <system:Boolean x:Key="FalseValue">False</system:Boolean>
-        <system:Boolean x:Key="TrueValue">True</system:Boolean>
     </Window.Resources>
 
     <materialDesign:DialogHost Identifier="RootDialog">
@@ -52,24 +48,24 @@
                 <!--Tabs-->
                 <Fluent:RibbonTabItem DataContext="{Binding RibbonViewModels[0]}" Header="Upload" >
                     <Fluent:RibbonGroupBox Header="Add Uploads">
-                        <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FilePlus}" Command="{Binding AddUploadCommand}" />
+                        <Fluent:Button Header="Add Files" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FilePlus}" Command="{Binding ParameterlessCommand}" CommandParameter="addfiles" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Drag&amp;Drop Files Here">
                         <Image Source="images/dragdrop.png" Drop="fileDrop" AllowDrop="True" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Upload">
-                        <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon UploadMultiple}"  Command="{Binding StartUploadingCommand}" />
+                        <Fluent:Button Header="Start Upload" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon UploadMultiple}"  Command="{Binding ParameterlessCommand}" CommandParameter="startupload" />
                         <StackPanel Orientation="Horizontal">
                             <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding ResumeUploads}">
                                 <TextBlock Margin="0 4 0 0">Resume Uploads</TextBlock>
                             </Fluent:CheckBox>
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Try to resume failed and stopped uploads. If upload resuming fails permanently, reset state of the upload." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
-                        <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon Stop}"  Command="{Binding StopUploadingCommand}" />
+                        <Fluent:Button Header="Stop Uploading" SizeDefinition="Middle,Middle,Small" Icon="{materialDesign:PackIcon Stop}"  Command="{Binding ParameterlessCommand}" CommandParameter="stopupload" />
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Recalculate Publish At Dates">
 
-                        <Fluent:Button Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon Calendar}" Command="{Binding RecalculatePublishAtCommand}" />
+                        <Fluent:Button Header="Recalculate Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon Calendar}" Command="{Binding ParameterlessCommand}" CommandParameter="recalculatepublishat" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -113,7 +109,7 @@
                     </Fluent:RibbonGroupBox>
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
                         <!-- CommandParamter is to enable testing -->
-                        <Fluent:Button Header="Delete Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FileRemove}" Command="{Binding DeleteUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                        <Fluent:Button Header="Delete Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FileRemove}" Command="{Binding ParameterlessCommand}" CommandParameter="delete" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -153,7 +149,7 @@
                     <Fluent:RibbonGroupBox Header="Reset Upload Status">
                         <!-- CommandParamter is to enable testing -->
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon BackupRestore}" Command="{Binding ResetUploadsCommand}" CommandParameter="{StaticResource FalseValue}" />
+                            <Fluent:Button Header="Reset Uploads to:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon BackupRestore}" Command="{Binding ParameterlessCommand}" CommandParameter="resetstatus" />
                         <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetToUploadStatuses}" SelectedItem="{Binding ResetToSelectedUploadStatus}" Width="150">
                             <Fluent:ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -201,7 +197,7 @@
                     <Fluent:RibbonGroupBox Header="Reset To Template Values">
                         <!-- CommandParameter is to enable testing -->
                         <StackPanel Orientation="Horizontal">
-                            <Fluent:Button Header="Reset Attribute: " SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FileRestore}" Command="{Binding ResetAttributeCommand}" />
+                            <Fluent:Button Header="Reset Attribute: " SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FileRestore}" Command="{Binding ParameterlessCommand}" CommandParameter="resetattribute" />
                             <Fluent:ComboBox IsEditable="False" VerticalAlignment="Bottom"  ItemsSource="{Binding ResetAttributeAttributes}" SelectedItem="{Binding ResetAttributeSelectedAttribute}" Width="150">
                                 <Fluent:ComboBox.ItemTemplate>
                                     <DataTemplate>

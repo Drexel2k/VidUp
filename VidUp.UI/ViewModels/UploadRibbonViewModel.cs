@@ -29,15 +29,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private ObservableTemplateViewModels observableTemplateViewModelsInclAll;
         private ObservableTemplateViewModels observableTemplateViewModelsInclAllNone;
 
-        private GenericCommand addUploadCommand;
-        private GenericCommand startUploadingCommand;
-
-        private GenericCommand stopUploadingCommand;
-        private GenericCommand recalculatePublishAtCommand;
-        private GenericCommand resetRecalculatePublishAtStartDateCommand;
-        private GenericCommand deleteUploadsCommand;
-        private GenericCommand resetUploadsCommand;
-        private GenericCommand resetAttributeCommand;
+        private GenericCommand parameterlessCommand;
 
         private UploadStatus uploadStatus = UploadStatus.NotUploading;
         private Uploader uploader;
@@ -74,67 +66,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public GenericCommand AddUploadCommand
+        public GenericCommand ParameterlessCommand
         {
             get
             {
-                return this.addUploadCommand;
-            }
-        }
-
-        public GenericCommand StartUploadingCommand
-        {
-            get
-            {
-                return this.startUploadingCommand;
-            }
-        }
-
-        public GenericCommand StopUploadingCommand
-        {
-            get
-            {
-                return this.stopUploadingCommand;
-            }
-        }
-
-        public GenericCommand RecalculatePublishAtCommand
-        {
-            get
-            {
-                return this.recalculatePublishAtCommand;
-            }
-        }
-
-        public GenericCommand ResetRecalculatePublishAtStartDateCommand
-        {
-            get
-            {
-                return this.resetRecalculatePublishAtStartDateCommand;
-            }
-        }
-
-        public GenericCommand DeleteUploadsCommand
-        {
-            get
-            {
-                return this.deleteUploadsCommand;
-            }
-        }
-
-        public GenericCommand ResetUploadsCommand
-        {
-            get
-            {
-                return this.resetUploadsCommand;
-            }
-        }
-
-        public GenericCommand ResetAttributeCommand
-        {
-            get
-            {
-                return this.resetAttributeCommand;
+                return this.parameterlessCommand;
             }
         }
 
@@ -417,17 +353,41 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<BeforeYoutubeAccountDeleteMessage>(this.beforeYoutubeAccountDelete);
             EventAggregator.Instance.Subscribe<SelectedFilterYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
 
-            this.addUploadCommand = new GenericCommand(this.openUploadDialog);
-            this.startUploadingCommand = new GenericCommand(this.startUploadingAsync);
-            this.stopUploadingCommand = new GenericCommand(this.stopUploading);
-            this.recalculatePublishAtCommand = new GenericCommand(this.recalculatePublishAt);
-            this.resetRecalculatePublishAtStartDateCommand = new GenericCommand(this.resetRecalculatePublishAtStartDate);
-            this.deleteUploadsCommand = new GenericCommand(this.deleteUploadsAsync);
-            this.resetUploadsCommand = new GenericCommand(this.resetUploadsAsync);
-            this.resetAttributeCommand = new GenericCommand(this.resetAttributeAsync);
+            this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
 
             EventAggregator.Instance.Subscribe<UploadDeleteMessage>(this.DeleteUpload);
             EventAggregator.Instance.Subscribe<UploadListReorderMessage>(this.reorderUplods);
+        }
+
+        private void parameterlessCommandAction(object target)
+        {
+            switch (target)
+            {
+                case "addfiles":
+                    this.openAddFilesDialog();
+                    break;
+                case "startupload":
+                    this.startUploadingAsync();
+                    break;
+                case "stopupload":
+                    this.stopUploading();
+                    break;
+                case "recalculatepublishat":
+                    this.recalculatePublishAt();
+                    break;
+                case "delete":
+                    this.deleteUploadsAsync();
+                    break;
+                case "resetstatus":
+                    this.resetUploadStatusAsync();
+                    break;
+                case "resetattribute":
+                    this.resetAttributesAsync();
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid parameter for parameterlessCommandAction.");
+                    break;
+            }
         }
 
         private void reorderUplods(UploadListReorderMessage uploadListReorderMessage)
@@ -546,7 +506,7 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Publish(new UploadStatsChangedMessage());
         }
 
-        private void openUploadDialog(object obj)
+        private void openAddFilesDialog()
         {
             Tracer.Write($"UploadListViewModel.openUploadDialog: Start.");
             OpenFileDialog fileDialog = new OpenFileDialog();
@@ -588,7 +548,7 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"UploadListViewModel.AddUploads: End.");
         }
 
-        private async void startUploadingAsync(object obj)
+        private async void startUploadingAsync()
         {
             lock (this.uploadingLock)
             {
@@ -633,7 +593,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.uploadStatus = UploadStatus.NotUploading;
         }
 
-        private void stopUploading(object obj)
+        private void stopUploading()
         {
             if (this.uploadStatus == UploadStatus.Uploading)
             {
@@ -646,30 +606,26 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         //parameter skips dialog for testing
-        private async void deleteUploadsAsync(object parameter)
+        private async void deleteUploadsAsync()
         {
             Tracer.Write($"UploadListViewModel.deleteUploads(object parameter): Start.");
-            bool skipDialog = (bool)parameter;
             bool remove = true;
 
             //skip dialog on testing
-            if (!skipDialog)
+            if (this.deleteSelectedUploadStatus == "All" ||
+                (UplStatus) Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus) != UplStatus.Finished)
             {
-                if (this.deleteSelectedUploadStatus == "All" ||
-                    (UplStatus) Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus) != UplStatus.Finished)
-                {
-                    ConfirmControl control = new ConfirmControl(
-                        $"Do you really want to remove all uploads with template = '{this.deleteSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.deleteSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'?",
-                        true);
+                ConfirmControl control = new ConfirmControl(
+                    $"Do you really want to remove all uploads with template = '{this.deleteSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.deleteSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'?",
+                    true);
 
-                    remove = (bool) await DialogHost.Show(control, "RootDialog");
-                }
+                remove = (bool) await DialogHost.Show(control, "RootDialog");
             }
-
+            
             if (remove)
             {
                 Tracer.Write($"UploadListViewModel.deleteUploads: DialogResult OK.");
-                this.deleteUploads();
+                this.DeleteUploads();
             }
             else
             {
@@ -680,28 +636,24 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         //parameter skips dialog for testing
-        private async void resetUploadsAsync(object parameter)
+        private async void resetUploadStatusAsync()
         {
-            bool skipDialog = (bool)parameter;
             bool reset = true;
 
             //skip dialog on testing
-            if (!skipDialog)
-            {
-                ConfirmControl control = new ConfirmControl(
-                    $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.",
-                    true);
+            ConfirmControl control = new ConfirmControl(
+                $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.",
+                true);
 
-                reset = (bool)await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
-            }
-
+            reset = (bool)await DialogHost.Show(control, "RootDialog").ConfigureAwait(false);
+            
             if (reset)
             {
-                this.resetUploads();
+                this.resetUploadStatus();
             }
         }
 
-        private async void resetAttributeAsync(object parameter)
+        private async void resetAttributesAsync()
         {
             ConfirmControl control = new ConfirmControl(
                 $"Do you really want to reset attributes to template value with attribute = '{new EnumConverter().Convert(this.resetAttributeSelectedAttribute, typeof(string), null, CultureInfo.CurrentCulture)}' on all uploads with template = '{this.resetAttributeSelectedTemplate.Template.Name}' ?",
@@ -823,7 +775,7 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
         }
 
-        private void recalculatePublishAt(object obj)
+        private void recalculatePublishAt()
         {
             if (this.recalculatePublishAtSelectedTemplate.IsDummy)
             {
@@ -923,7 +875,8 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"UploadListViewModel.DeleteUpload: End.");
         }
 
-        private void deleteUploads()
+        //exposed for testing
+        public void DeleteUploads()
         {
             Tracer.Write($"UploadListViewModel.deleteUploads: Start.");
             Predicate<Upload>[] predicates = new Predicate<Upload>[2];
@@ -1009,7 +962,7 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): End.");
         }
 
-        private void resetUploads()
+        private void resetUploadStatus()
         {
             Predicate<Upload>[] predicates = new Predicate<Upload>[2];
 

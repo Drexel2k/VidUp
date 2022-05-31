@@ -20,11 +20,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private bool visible = true;
 
-        private GenericCommand pauseCommand;
-        private GenericCommand resetStateCommand;
+        private GenericCommand parameterlessCommand;
         private GenericCommand removeComboBoxValueCommand;
-        private GenericCommand openFileDialogCommand;
-        private GenericCommand resetThumbnailCommand;
         private GenericCommand resetToTemplateValueCommand;
 
         private ObservableTemplateViewModels observableTemplateViewModels;
@@ -73,19 +70,11 @@ namespace Drexel.VidUp.UI.ViewModels
             get => this.upload.Guid.ToString();
         }
 
-        public GenericCommand PauseCommand
+        public GenericCommand ParameterlessCommand
         {
             get
             {
-                return this.pauseCommand;
-            }
-        }
-
-        public GenericCommand ResetStateCommand
-        {
-            get
-            {
-                return this.resetStateCommand;
+                return this.parameterlessCommand;
             }
         }
 
@@ -94,22 +83,6 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.removeComboBoxValueCommand;
-            }
-        }
-
-        public GenericCommand OpenFileDialogCommand
-        {
-            get
-            {
-                return this.openFileDialogCommand;
-            }
-        }
-
-        public GenericCommand ResetThumbnailCommand
-        {
-            get
-            {
-                return this.resetThumbnailCommand;
             }
         }
 
@@ -753,11 +726,8 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.quarterHourViewModels = new QuarterHourViewModels(false);
 
-            this.resetStateCommand = new GenericCommand(this.resetUploadStateCommand);
-            this.pauseCommand = new GenericCommand(this.setPausedUploadState);
+            this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
             this.removeComboBoxValueCommand = new GenericCommand(this.removeComboBoxValue);
-            this.openFileDialogCommand = new GenericCommand(this.openThumbnailDialog);
-            this.resetThumbnailCommand = new GenericCommand(this.resetThumbnail);
             this.resetToTemplateValueCommand = new GenericCommand(this.resetToTemplateValue);
 
             this.attributeResetSubscription = EventAggregator.Instance.Subscribe<AttributeResetMessage>(this.attributeReset);
@@ -766,6 +736,28 @@ namespace Drexel.VidUp.UI.ViewModels
             this.resumableSessionUriChangedSubscription = EventAggregator.Instance.Subscribe<ResumableSessionUriChangedMessage>(this.resumableSessionUriChanged);
             this.errorMessageChangedSubscription = EventAggregator.Instance.Subscribe<ErrorMessageChangedMessage>(this.errorMessageChanged);
             this.publishAtChangedSubscription = EventAggregator.Instance.Subscribe<PublishAtChangedMessage>(this.publishAtChanged);
+        }
+
+        private void parameterlessCommandAction(object target)
+        {
+            switch (target)
+            {
+                case "resetstatus":
+                    this.resetUploadStatus();
+                    break;
+                case "pause":
+                    this.setPausedUploadStatus();
+                    break;
+                case "addthumbnail":
+                    this.openThumbnailDialog();
+                    break;
+                case "resetthumbnail":
+                    this.resetThumbnail();
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid parameter for parameterlessCommandAction.");
+                    break;
+            }
         }
 
         private void attributeReset(AttributeResetMessage attributeResetMessage)
@@ -965,12 +957,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void resetUploadStateCommand(object parameter)
-        {
-            this.resetUploadState();
-        }
-
-        private bool resetUploadState()
+        private bool resetUploadStatus()
         {
             if (!this.upload.VerifyForUpload())
             {
@@ -1005,14 +992,14 @@ namespace Drexel.VidUp.UI.ViewModels
             return true;
         }
 
-        private void setPausedUploadState(object parameter)
+        private void setPausedUploadStatus()
         {
             this.upload.UploadStatus = UplStatus.Paused;
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             this.raiseUploadStatusProperties();
         }
 
-        private void openThumbnailDialog(object parameter)
+        private void openThumbnailDialog()
         {
             if (this.UploadStatus == UplStatus.Finished)
             {
@@ -1053,7 +1040,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void resetThumbnail(object obj)
+        private void resetThumbnail()
         {
             if (this.UploadStatus == UplStatus.Finished)
             {

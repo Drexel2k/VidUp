@@ -55,8 +55,8 @@
             <Button Grid.Row="0" Grid.Column="3" HorizontalAlignment="Right" Margin="0,5,7,5"  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                 <materialDesign:PopupBox  StaysOpen="False" >
                     <StackPanel>
-                        <Button Content="Reset State" Command="{Binding ResetStateCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding ResetStateCommandEnabled}" />
-                        <Button Content="Pause" Command="{Binding PauseCommand}" CommandParameter="{Binding Guid}" IsEnabled="{Binding StateCommandsEnabled}" />
+                        <Button Content="Reset State" Command="{Binding ParameterlessCommand}" CommandParameter="resetstatus" IsEnabled="{Binding ResetStateCommandEnabled}" />
+                        <Button Content="Pause" Command="{Binding ParameterlessCommand}" CommandParameter="pause" IsEnabled="{Binding StateCommandsEnabled}" />
                         <Button Content="Remove Template" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="template" IsEnabled="{Binding ControlsEnabled}" />
                         <Button Content="Remove Playlist" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="playlist" IsEnabled="{Binding ControlsEnabled}" />
                         <Button Content="Remove Video Language" Command="{Binding RemoveComboBoxValueCommand}" CommandParameter="videolanguage" IsEnabled="{Binding ControlsEnabled}" />
@@ -106,10 +106,10 @@
                     <TextBlock Text="{Binding ThumbnailFilePath, Mode=OneWay}" TextWrapping="Wrap" />
                 </Label>
                 <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 5 5" ToolTip="A thumbnail will be assigned automatically if the file names of the thumbnail and the video without extension are equal. Lookup location is the folder set in the tempplate, then the folder of the video." ToolTipService.ShowDuration="60000" Background="Transparent" />
-                <Button Command="{Binding ResetThumbnailCommand }"  Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1 5 2 0" Width="12" Height="12" IsEnabled="{Binding ControlsEnabled}" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
+                <Button Command="{Binding ParameterlessCommand }" CommandParameter="resetthumbnail" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="1 5 2 0" Width="12" Height="12" IsEnabled="{Binding ControlsEnabled}" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                     <Image Source="../Images/minus.png" />
                 </Button>
-                <Button Command="{Binding OpenFileDialogCommand}" CommandParameter="{Binding Guid}" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0 " Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" IsEnabled="{Binding ControlsEnabled}" />
+                <Button Command="{Binding ParameterlessCommand}" CommandParameter="addthumbnail" Style="{StaticResource MaterialDesignRaisedLightButton}"  VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 0 0 " Width="80" Height="20" Padding="0" Content="Browse" VerticalContentAlignment="Top" IsEnabled="{Binding ControlsEnabled}" />
             </StackPanel>
             <StackPanel  Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Vertical">
                 <DockPanel>
