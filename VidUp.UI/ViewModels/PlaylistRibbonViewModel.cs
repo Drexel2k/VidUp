@@ -189,15 +189,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
-            //is null if there is no playlist in previously selected account
-            if (this.selectedPlaylist == null || this.selectedPlaylist.Visible == false)
-            {
-                PlaylistComboboxViewModel viewModel = this.observablePlaylistViewModels.GetFirstViewModel(vm => vm.Visible == true);
-                this.SelectedPlaylist = viewModel;
-                this.raisePropertyChanged("SelectedPlaylist");
-            }
-
-
             foreach (PlaylistComboboxViewModel playlistComboboxViewModel in this.observablePlaylistViewModels)
             {
                 if (selectedYoutubeAccountChangedMessage.NewYoutubeAccount.IsDummy)
@@ -222,6 +213,10 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                 }
             }
+
+            PlaylistComboboxViewModel viewModel = this.observablePlaylistViewModels.GetFirstViewModel(vm => vm.Visible == true);
+            this.SelectedPlaylist = viewModel;
+            this.raisePropertyChanged("SelectedPlaylist");
         }
 
         private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
