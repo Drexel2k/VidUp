@@ -415,17 +415,22 @@ namespace Drexel.VidUp.UI.ViewModels
             return this.youtubeAccountList.Find(account => !account.IsDummy);
         }
 
-        public MainWindowViewModel() : this(null, null, out _, out _, out _)
+        public MainWindowViewModel() : this(null, null, out _, out _, out _, out _)
         {
         }
 
         //for testing purposes
-        public MainWindowViewModel(string user, string subFolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        public MainWindowViewModel(string user, string subFolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList, out List<object> ribbonViewModels)
         {
-            this.initialize(user, subFolder, out uploadList, out templateList, out playlistList);
+            //reset event aggregator, as singleton it is test overarching...
+            Type myType = typeof(EventAggregator);
+            FieldInfo myFieldInfo = myType.GetField("instance", BindingFlags.NonPublic | BindingFlags.Static);
+            myFieldInfo.SetValue(null, null);
+
+            this.initialize(user, subFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
         }
 
-        private void initialize(string folderSuffix, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList)
+        private void initialize(string folderSuffix, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList, out List<object> ribbonViewModels)
         {
             if (string.IsNullOrWhiteSpace(folderSuffix))
             {
@@ -470,6 +475,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).ObservablePlaylistViewModels, ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels, this.getFirstNotAllAccount(), this.selectedYoutubeAccount.YoutubeAccount);
             this.ribbonViewModels[4] = new VidUpRibbonViewModel();
 
+            ribbonViewModels = this.ribbonViewModels;
+
             this.viewModels[0] = new UploadListViewModel(((UploadRibbonViewModel)this.ribbonViewModels[0]).ObservableUploadViewModels, this.selectedYoutubeAccount.YoutubeAccount);
             TemplateComboboxViewModel selectedTemplateViewModel = ((TemplateRibbonViewModel)this.ribbonViewModels[1]).SelectedTemplate;
             this.viewModels[1] = new TemplateViewModel(selectedTemplateViewModel != null ? selectedTemplateViewModel.Template : null, ((PlaylistRibbonViewModel)this.ribbonViewModels[2]).ObservablePlaylistViewModels, ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels, this.selectedYoutubeAccount.YoutubeAccount);
@@ -482,8 +489,6 @@ namespace Drexel.VidUp.UI.ViewModels
             ((UploadRibbonViewModel)this.ribbonViewModels[0]).PropertyChanged += this.uploadListViewModelOnPropertyChanged;
             ((UploadRibbonViewModel)this.ribbonViewModels[0]).UploadStarted += this.uploadListViewModelOnUploadStarted;
             ((UploadRibbonViewModel)this.ribbonViewModels[0]).UploadFinished += this.uploadListViewModelOnUploadFinished;
-
-            //this.observableYoutubeAccountViewModels = ((SettingsRibbonViewModel)this.ribbonViewModels[3]).ObservableYoutubeAccountViewModels;
         }
 
         public void AddFiles(string[] files)

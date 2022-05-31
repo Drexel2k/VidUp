@@ -17,7 +17,8 @@
     "tags": [],
     "visibility": "Private",
     "resumableSessionUri": null,
-    "bytesSent": 0
+    "bytesSent": 0,
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "e1957955-c88b-4185-90f5-ce1c9fbfe08d",
@@ -40,6 +41,7 @@
     ],
     "visibility": "Private",
     "resumableSessionUri": null,
-    "bytesSent": 0
+    "bytesSent": 0,
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   }
 ]

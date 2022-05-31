@@ -7,7 +7,6 @@ using Drexel.VidUp.Utils;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    //todo: move ribbon properties to separate view model
     public class UploadListViewModel : INotifyPropertyChanged
     {
         private GenericCommand deleteCommand;

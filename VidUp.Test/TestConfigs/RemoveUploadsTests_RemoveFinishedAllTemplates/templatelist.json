@@ -18,7 +18,8 @@
       "defaultPublishAtTime": "0001-01-01T00:00:00",
       "thumbnailFolderPath": null,
       "thumbnailFallbackFilePath": null,
-      "isDefault": false
+      "isDefault": false,
+      "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
     },
     {
       "guid": "63dcb6ac-3065-49c4-8725-0a58b637385f",
@@ -35,7 +36,8 @@
       "defaultPublishAtTime": "0001-01-01T00:00:00",
       "thumbnailFolderPath": null,
       "thumbnailFallbackFilePath": null,
-      "isDefault": false
+      "isDefault": false,
+      "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
     },
     {
       "guid": "19f37916-68e6-4425-af12-23af87b513c7",
@@ -55,7 +57,8 @@
       "defaultPublishAtTime": "0001-01-01T00:00:00",
       "thumbnailFolderPath": null,
       "thumbnailFallbackFilePath": null,
-      "isDefault": false
+      "isDefault": false,
+      "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
     },
     {
       "guid": "7f258a2d-171e-4cf0-8ba6-89966929b742",
@@ -75,7 +78,8 @@
       "defaultPublishAtTime": "0001-01-01T00:00:00",
       "thumbnailFolderPath": null,
       "thumbnailFallbackFilePath": null,
-      "isDefault": false
+      "isDefault": false,
+      "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
     },
     {
       "guid": "abb4b082-5db1-4767-a529-ac34592730d2",
@@ -92,7 +96,8 @@
       "defaultPublishAtTime": "0001-01-01T00:00:00",
       "thumbnailFolderPath": null,
       "thumbnailFallbackFilePath": null,
-      "isDefault": false
+      "isDefault": false,
+      "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
     },
     {
       "guid": "e2188eed-589d-4233-862c-bc2380cbaf01",
@@ -111,7 +116,8 @@
       "defaultPublishAtTime": "0001-01-01T00:00:00",
       "thumbnailFolderPath": null,
       "thumbnailFallbackFilePath": null,
-      "isDefault": false
+      "isDefault": false,
+      "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
     }
   ]
 }

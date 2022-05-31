@@ -14,7 +14,8 @@
     "title": "video3",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "e9d3be6a-c987-4b63-be32-e075a7e8a129",
@@ -31,7 +32,8 @@
     "title": "video4",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "c4af55c4-10e4-4676-9b66-a5d9b7d94afe",
@@ -48,7 +50,8 @@
     "title": "video5",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "ff328893-5e6c-4e00-b3d2-7dce42e474e7",
@@ -65,7 +68,8 @@
     "title": "video6",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "9dcd58c4-ef2a-427a-8629-44a812404611",
@@ -82,7 +86,8 @@
     "title": "video7",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "cb3ac8aa-4297-4d3c-9d09-4de6743a84e3",
@@ -99,7 +104,8 @@
     "title": "video8",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "aee98f41-c765-4bc7-91cd-a1ee40388bad",
@@ -116,7 +122,8 @@
     "title": "video9",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "4d7b3e4b-3eba-4d1f-94b2-0327db55987c",
@@ -133,7 +140,8 @@
     "title": "video10",
     "description": null,
     "tags": [],
-    "visibility": "Public"
+    "visibility": "Public",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "da2ede66-e9f9-415a-8fe0-007b8a168d36",
@@ -150,7 +158,8 @@
     "title": "video1",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   },
   {
     "guid": "4be32408-92c0-4d48-8a27-5d98305c79cd",
@@ -167,6 +176,7 @@
     "title": "video2",
     "description": null,
     "tags": [],
-    "visibility": "Private"
+    "visibility": "Private",
+    "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
   }
 ]

@@ -155,7 +155,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        internal TemplateComboboxViewModel GetViewModel(Template template)
+        public TemplateComboboxViewModel GetViewModel(Template template)
         {
             if (template != null)
             {

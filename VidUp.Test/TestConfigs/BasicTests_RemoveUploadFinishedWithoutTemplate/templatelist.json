@@ -22,7 +22,8 @@
       "isDefault": false,
       "playlist": "FirstPlaylistId",
       "usePublishAtSchedule": false,
-      "publishAtSchedule": null
+      "publishAtSchedule": null,
+      "youtubeAccount": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0"
     }
   ]
 }

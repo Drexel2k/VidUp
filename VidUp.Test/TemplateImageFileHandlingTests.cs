@@ -2,12 +2,14 @@
 using Drexel.VidUp.Business;
 using Drexel.VidUp.UI.ViewModels;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Drexel.VidUp.Test
 {
     public class TemplateImageFileHandlingTests
     {
-        private static TemplateViewModel templateViewModel;
+        private static MainWindowViewModel mainWindowViewModel;
+        private static TemplateRibbonViewModel templateRibbonViewModel;
         private static string t1RootFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, "T1Root");
         private static string templateImage1SourceFilePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestAssets", "image1.png");
         private static string templateImage1TargetFilePath;
@@ -39,23 +41,37 @@ namespace Drexel.VidUp.Test
             TemplateImageFileHandlingTests.templateImage1TargetFilePath = Path.Combine(BaseSettings.TemplateImageFolder, "image1.png");
             TemplateImageFileHandlingTests.templateImageFileExistedImage12TargetFilePath = Path.Combine(BaseSettings.TemplateImageFolder, "image12.png");
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, null, out _, out TemplateImageFileHandlingTests.templateList, out _);
-            mainWindowViewModel.TabNo = 1;
-            TemplateImageFileHandlingTests.templateViewModel = (TemplateViewModel) mainWindowViewModel.CurrentViewModel;
+            List<object> ribbonViewModels;
+            TemplateImageFileHandlingTests.mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, null, out _, out TemplateImageFileHandlingTests.templateList, out _, out ribbonViewModels);
+            TemplateImageFileHandlingTests.templateRibbonViewModel = (TemplateRibbonViewModel)ribbonViewModels[1];
 
-            TemplateImageFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, TemplateImageFileHandlingTests.t1RootFolder, null, TemplateImageFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
-            TemplateImageFileHandlingTests.t2 = new Template("T2", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
-            TemplateImageFileHandlingTests.t3 = new Template("T3", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            TemplateImageFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, TemplateImageFileHandlingTests.t1RootFolder, null, TemplateImageFileHandlingTests.templateList, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            TemplateImageFileHandlingTests.t2 = new Template("T2", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            TemplateImageFileHandlingTests.t3 = new Template("T3", null, TemplateMode.FolderBased, null, null, TemplateImageFileHandlingTests.templateList, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount);
 
-            TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t1);
-            TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t2);
-            TemplateImageFileHandlingTests.templateViewModel.AddTemplate(t3);
+            TemplateImageFileHandlingTests.templateRibbonViewModel.AddTemplate(t1);
+            TemplateImageFileHandlingTests.templateRibbonViewModel.AddTemplate(t2);
+            TemplateImageFileHandlingTests.templateRibbonViewModel.AddTemplate(t3);
         }
 
         [OneTimeTearDown]
         public static void CleanUp()
         {
-            TemplateImageFileHandlingTests.templateViewModel = null;
+            TemplateImageFileHandlingTests.mainWindowViewModel.Close();
+            TemplateImageFileHandlingTests.mainWindowViewModel = null;
+            TemplateImageFileHandlingTests.templateRibbonViewModel = null;
+            TemplateImageFileHandlingTests.t1RootFolder = null;
+            TemplateImageFileHandlingTests.templateImage1SourceFilePath = null;
+            TemplateImageFileHandlingTests.templateImage1TargetFilePath = null;
+            TemplateImageFileHandlingTests.templateImageFileExistedImage12TargetFilePath = null;
+
+            TemplateImageFileHandlingTests.t1 = null;
+            TemplateImageFileHandlingTests.t2 = null;
+            TemplateImageFileHandlingTests.t3 = null;
+
+            TemplateImageFileHandlingTests.templateList = null;
+
+
             if (Directory.Exists(BaseSettings.StorageFolder))
             {
                 Directory.Delete(BaseSettings.StorageFolder, true);
@@ -118,14 +134,20 @@ namespace Drexel.VidUp.Test
         [Test, Order(7)]
         public static void TestRemoveT1()
         {
-            TemplateImageFileHandlingTests.templateViewModel.DeleteTemplate(TemplateImageFileHandlingTests.t1.Guid.ToString());
+            TemplateImageFileHandlingTests.templateRibbonViewModel.SelectedTemplate = TemplateImageFileHandlingTests.templateRibbonViewModel.ObservableTemplateViewModels.GetViewModel(TemplateImageFileHandlingTests.t1);
+            TemplateImageFileHandlingTests.mainWindowViewModel.TabNo = 1;
+            TemplateViewModel templateViewModel = (TemplateViewModel)TemplateImageFileHandlingTests.mainWindowViewModel.CurrentViewModel;
+            templateViewModel.ParameterlessCommandAction("delete");
             Assert.IsTrue(File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
 
         [Test, Order(8)]
         public static void TestRemoveT2()
         {
-            TemplateImageFileHandlingTests.templateViewModel.DeleteTemplate(TemplateImageFileHandlingTests.t2.Guid.ToString());
+            TemplateImageFileHandlingTests.templateRibbonViewModel.SelectedTemplate = TemplateImageFileHandlingTests.templateRibbonViewModel.ObservableTemplateViewModels.GetViewModel(TemplateImageFileHandlingTests.t2);
+            TemplateImageFileHandlingTests.mainWindowViewModel.TabNo = 1;
+            TemplateViewModel templateViewModel = (TemplateViewModel)TemplateImageFileHandlingTests.mainWindowViewModel.CurrentViewModel;
+            templateViewModel.ParameterlessCommandAction("delete");
             Assert.IsTrue(!File.Exists(TemplateImageFileHandlingTests.templateImage1TargetFilePath));
         }
     }

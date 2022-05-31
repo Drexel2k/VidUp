@@ -48,16 +48,20 @@
     <None Remove="TestAssets\videowithimageinsamefolder.mkv" />
     <None Remove="TestAssets\videowithimageinsamefolder.png" />
     <None Remove="TestAssets\videowithimageinthumbfolder.mkv" />
+    <None Remove="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\accountlist.json" />
     <None Remove="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\playlistlist.json" />
     <None Remove="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\templatelist.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\accountlist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\playlistlist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\templatelist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\uploadlist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\uploads.json" />
+    <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\accountlist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\playlistlist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\templatelist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\uploadlist.json" />
     <None Remove="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\uploads.json" />
+    <None Remove="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\accountlist.json" />
     <None Remove="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\templatelist.json" />
     <None Remove="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\uploadlist.json" />
     <None Remove="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\uploads.json" />
@@ -125,10 +129,16 @@
     <Content Include="TestAssets\videowithimageinthumbfolder.mkv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\accountlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\playlistlist.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestConfigs\BasicTests_AddUploadWithoutTemplateMatch\templatelist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\accountlist.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\playlistlist.json">
@@ -143,6 +153,9 @@
     <Content Include="TestConfigs\BasicTests_RemoveUploadFinishedWithoutTemplate\uploads.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\accountlist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\playlistlist.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -153,6 +166,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestConfigs\BasicTests_RemoveUploadReadyToUploadWithoutTemplate\uploads.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\accountlist.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestConfigs\RemoveUploadsTests_RemoveFinishedAllTemplates\templatelist.json">

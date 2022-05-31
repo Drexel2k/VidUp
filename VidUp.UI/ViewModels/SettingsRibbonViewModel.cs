@@ -9,7 +9,6 @@ using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    //todo: move ribbon properties to separate view model
     public class SettingsRibbonViewModel : INotifyPropertyChanged
     {
         private YoutubeAccountList youtubeAccountList;

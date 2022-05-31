@@ -21,7 +21,6 @@ using EnumConverter = Drexel.VidUp.UI.Converters.EnumConverter;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    //todo: move ribbon properties to separate view model
     public class UploadRibbonViewModel : INotifyPropertyChanged
     {
         private UploadList uploadList;
@@ -654,7 +653,7 @@ namespace Drexel.VidUp.UI.ViewModels
             bool remove = true;
 
             //skip dialog on testing
-            if (skipDialog)
+            if (!skipDialog)
             {
                 if (this.deleteSelectedUploadStatus == "All" ||
                     (UplStatus) Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus) != UplStatus.Finished)

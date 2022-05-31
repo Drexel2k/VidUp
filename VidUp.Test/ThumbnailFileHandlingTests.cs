@@ -10,8 +10,10 @@ namespace Drexel.VidUp.Test
   
     public class ThumbnailFileHandlingTests
     {
+        private static TemplateRibbonViewModel templateRibbonViewModel;
+        private static SettingsRibbonViewModel settingsRibbonViewModel;
         private static TemplateViewModel templateViewModel;
-        private static UploadListViewModel uploadListViewModel;
+        private static UploadRibbonViewModel uploadRibbonViewModel;
 
         private static string t1RootFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, "T1Root");
         private static string t1RootVideo1FilePath = Path.Combine(ThumbnailFileHandlingTests.t1RootFolder, "videos", "video1.mkv");
@@ -28,6 +30,7 @@ namespace Drexel.VidUp.Test
 
         private static TemplateList templateList;
         private static MainWindowViewModel mainWindowViewModel;
+        private static UploadListViewModel uploadListViewModel;
 
         [OneTimeSetUp]
         public static void Initialize()
@@ -46,29 +49,33 @@ namespace Drexel.VidUp.Test
             ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath = Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image1.png");
             ThumbnailFileHandlingTests.thumbNailFallbackFileExistedImage12TargetFilePath = Path.Combine(BaseSettings.ThumbnailFallbackImageFolder, "image12.png");
 
-            ThumbnailFileHandlingTests.mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix,null, out _, out ThumbnailFileHandlingTests.templateList, out _);
+            List<object> ribbonViewModels;
+            ThumbnailFileHandlingTests.mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix,null, out _, out ThumbnailFileHandlingTests.templateList, out _, out ribbonViewModels);
             ThumbnailFileHandlingTests.uploadListViewModel = (UploadListViewModel)ThumbnailFileHandlingTests.mainWindowViewModel.CurrentViewModel;
             ThumbnailFileHandlingTests.mainWindowViewModel.TabNo = 1;
             ThumbnailFileHandlingTests.templateViewModel = (TemplateViewModel)ThumbnailFileHandlingTests.mainWindowViewModel.CurrentViewModel;
+            ThumbnailFileHandlingTests.uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            ThumbnailFileHandlingTests.templateRibbonViewModel = (TemplateRibbonViewModel)ribbonViewModels[1];
+            ThumbnailFileHandlingTests.settingsRibbonViewModel = (SettingsRibbonViewModel)ribbonViewModels[3];
 
             Directory.CreateDirectory(ThumbnailFileHandlingTests.t1RootFolder);
             Directory.CreateDirectory(Path.Combine(ThumbnailFileHandlingTests.t1RootFolder, "videos"));
             File.Copy(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestAssets", "video1.mkv"), ThumbnailFileHandlingTests.t1RootVideo1FilePath);
 
-            ThumbnailFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, ThumbnailFileHandlingTests.t1RootFolder, null, ThumbnailFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
-            ThumbnailFileHandlingTests.t2 = new Template("T2", null, TemplateMode.FolderBased, null, null, ThumbnailFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
-            ThumbnailFileHandlingTests.t3 = new Template("T3", null, TemplateMode.FolderBased, null, null, ThumbnailFileHandlingTests.templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            ThumbnailFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, ThumbnailFileHandlingTests.t1RootFolder, null, ThumbnailFileHandlingTests.templateList, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            ThumbnailFileHandlingTests.t2 = new Template("T2", null, TemplateMode.FolderBased, null, null, ThumbnailFileHandlingTests.templateList, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            ThumbnailFileHandlingTests.t3 = new Template("T3", null, TemplateMode.FolderBased, null, null, ThumbnailFileHandlingTests.templateList, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount);
 
-            ThumbnailFileHandlingTests.templateViewModel.AddTemplate(t1);
-            ThumbnailFileHandlingTests.templateViewModel.AddTemplate(t2);
-            ThumbnailFileHandlingTests.templateViewModel.AddTemplate(t3);
+            ThumbnailFileHandlingTests.templateRibbonViewModel.AddTemplate(t1);
+            ThumbnailFileHandlingTests.templateRibbonViewModel.AddTemplate(t2);
+            ThumbnailFileHandlingTests.templateRibbonViewModel.AddTemplate(t3);
         }
 
         [OneTimeTearDown]
         public static void CleanUp()
         {
-            ThumbnailFileHandlingTests.templateViewModel = null;
-            ThumbnailFileHandlingTests.uploadListViewModel = null;
+            ThumbnailFileHandlingTests.templateRibbonViewModel = null;
+            ThumbnailFileHandlingTests.uploadRibbonViewModel = null;
             ThumbnailFileHandlingTests.mainWindowViewModel.Close();
             ThumbnailFileHandlingTests.mainWindowViewModel = null;
 
@@ -103,9 +110,9 @@ namespace Drexel.VidUp.Test
         {
             List<string> files = new List<string>();
             files.Add(ThumbnailFileHandlingTests.t1RootVideo1FilePath);
-            ThumbnailFileHandlingTests.uploadListViewModel.AddFiles(files.ToArray());
+            ThumbnailFileHandlingTests.uploadRibbonViewModel.AddFiles(files.ToArray());
 
-            ThumbnailFileHandlingTests.u1 = ThumbnailFileHandlingTests.uploadListViewModel.ObservableUploadViewModels[0].Upload;
+            ThumbnailFileHandlingTests.u1 = ThumbnailFileHandlingTests.uploadRibbonViewModel.ObservableUploadViewModels[0].Upload;
 
             Assert.IsTrue(ThumbnailFileHandlingTests.u1.ThumbnailFilePath == ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath);
         }
@@ -205,31 +212,38 @@ namespace Drexel.VidUp.Test
         [Test, Order(16)]
         public void TestRemoveT1()
         {
-            ThumbnailFileHandlingTests.templateViewModel.DeleteTemplate(ThumbnailFileHandlingTests.t1.Guid.ToString());
+            ThumbnailFileHandlingTests.templateRibbonViewModel.SelectedTemplate = ThumbnailFileHandlingTests.templateRibbonViewModel.ObservableTemplateViewModels.GetViewModel(ThumbnailFileHandlingTests.t1);
+            ThumbnailFileHandlingTests.mainWindowViewModel.TabNo = 1;
+            TemplateViewModel templateViewModel = (TemplateViewModel)ThumbnailFileHandlingTests.mainWindowViewModel.CurrentViewModel;
+            templateViewModel.ParameterlessCommandAction("delete");
+
             Assert.IsTrue(File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
         }
 
         [Test, Order(17)]
         public void TestRemoveU1()
         {
-            ThumbnailFileHandlingTests.uploadListViewModel.DeleteUpload(ThumbnailFileHandlingTests.u1.Guid.ToString());
+            ThumbnailFileHandlingTests.mainWindowViewModel.TabNo = 0;
+            UploadListViewModel uploadListViewModel = (UploadListViewModel)ThumbnailFileHandlingTests.mainWindowViewModel.CurrentViewModel;
+            uploadListViewModel.DeleteUpload(ThumbnailFileHandlingTests.u1.Guid.ToString());
+
             Assert.IsTrue(!File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
         }
 
         [Test, Order(18)]
         public void ReAddT1AndU1()
         {
-            ThumbnailFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, ThumbnailFileHandlingTests.t1RootFolder, null, templateList, ThumbnailFileHandlingTests.mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
-            ThumbnailFileHandlingTests.templateViewModel.AddTemplate(t1);
+            ThumbnailFileHandlingTests.t1 = new Template("T1", null, TemplateMode.FolderBased, ThumbnailFileHandlingTests.t1RootFolder, null, templateList, ThumbnailFileHandlingTests.settingsRibbonViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount);
+            ThumbnailFileHandlingTests.templateRibbonViewModel.AddTemplate(t1);
 
             ThumbnailFileHandlingTests.t1.ThumbnailFallbackFilePath = ThumbnailFileHandlingTests.thumbNailFallbackImage1SourceFilePath;
             Assert.IsTrue(File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
 
             List<string> files = new List<string>();
             files.Add(ThumbnailFileHandlingTests.t1RootVideo1FilePath);
-            ThumbnailFileHandlingTests.uploadListViewModel.AddFiles(files.ToArray());
+            ThumbnailFileHandlingTests.uploadRibbonViewModel.AddFiles(files.ToArray());
 
-            ThumbnailFileHandlingTests.u1 = ThumbnailFileHandlingTests.uploadListViewModel.ObservableUploadViewModels[0].Upload;
+            ThumbnailFileHandlingTests.u1 = ThumbnailFileHandlingTests.uploadRibbonViewModel.ObservableUploadViewModels[0].Upload;
 
             Assert.IsTrue(ThumbnailFileHandlingTests.u1.ThumbnailFilePath == ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath);
         }
@@ -244,7 +258,8 @@ namespace Drexel.VidUp.Test
         [Test, Order(20)]
         public void TestRemoveT12()
         {
-            ThumbnailFileHandlingTests.templateViewModel.DeleteTemplate(ThumbnailFileHandlingTests.t1.Guid.ToString());
+            ThumbnailFileHandlingTests.templateRibbonViewModel.SelectedTemplate = ThumbnailFileHandlingTests.templateRibbonViewModel.ObservableTemplateViewModels.GetViewModel(ThumbnailFileHandlingTests.t1);
+            ThumbnailFileHandlingTests.templateViewModel.ParameterlessCommandAction("delete");
             Assert.IsTrue(!File.Exists(ThumbnailFileHandlingTests.thumbNailFallbackImage1TargetFilePath));
         }
     }

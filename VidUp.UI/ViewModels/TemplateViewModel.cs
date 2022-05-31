@@ -13,7 +13,6 @@ using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    //todo: move ribbon properties to separate view model
     public class TemplateViewModel : INotifyPropertyChanged
     {
         private Template template;
@@ -498,7 +497,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.selectedYoutubeAccount = selectedYoutubeAccount;
 
-            this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
+            this.parameterlessCommand = new GenericCommand(this.ParameterlessCommandAction);
 
             EventAggregator.Instance.Subscribe<SelectedTemplateChangedMessage>(this.selectedTemplateChanged);
         }
@@ -514,7 +513,8 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void parameterlessCommandAction(object target)
+        //exposed for testing
+        public void ParameterlessCommandAction(object target)
         {
             switch (target)
             {

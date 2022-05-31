@@ -89,7 +89,8 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 0);
@@ -113,13 +114,14 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel) mainWindowViewModel.CurrentViewModel;
             
             List<string> files = new List<string>();
             files.Add(BasicTests.video1TargetFilePath);
-            uploadListViewModel.AddFiles(files.ToArray());
+            mainWindowViewModel.AddFiles(files.ToArray());
 
             Assert.IsTrue(uploadList.UploadCount == 1);
             Assert.IsTrue(uploadList.GetUpload(0).FilePath == BasicTests.video1TargetFilePath);
@@ -184,11 +186,12 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             mainWindowViewModel.TabNo = 1;
-            TemplateViewModel templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;
-            templateViewModel.AddTemplate(new Template(BasicTests.testTemplateName, null, TemplateMode.FolderBased, BasicTests.t1RootFolder, null, templateList, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount));
+            TemplateRibbonViewModel templateRibbonViewModel = (TemplateRibbonViewModel)ribbonViewModels[1];
+            templateRibbonViewModel.AddTemplate(new Template(BasicTests.testTemplateName, null, TemplateMode.FolderBased, BasicTests.t1RootFolder, null, templateList, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount));
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 1);
@@ -243,11 +246,12 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             mainWindowViewModel.TabNo = 2;
-            PlaylistViewModel playlistViewModel = (PlaylistViewModel)mainWindowViewModel.CurrentViewModel;
-            playlistViewModel.AddPlaylist(new Playlist(BasicTests.testPlaylistId, BasicTests.testPlaylistName, mainWindowViewModel.ObservableYoutubeAccountViewModels[0].YoutubeAccount));
+            PlaylistRibbonViewModel playlistRibbonViewModel = (PlaylistRibbonViewModel)ribbonViewModels[2];
+            playlistRibbonViewModel.AddPlaylist(new Playlist(BasicTests.testPlaylistId, BasicTests.testPlaylistName, ((SettingsRibbonViewModel)ribbonViewModels[3]).ObservableYoutubeAccountViewModels[0].YoutubeAccount));
 
             Assert.IsTrue(uploadList.UploadCount == 0);
             Assert.IsTrue(templateList.TemplateCount == 0);
@@ -298,13 +302,14 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
             List<string> files = new List<string>();
             files.Add(BasicTests.video2TargetFilePath);
-            uploadListViewModel.AddFiles(files.ToArray());
+            mainWindowViewModel.AddFiles(files.ToArray());
 
             Upload upload = uploadList.Uploads[0];
 
@@ -388,13 +393,14 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
 
             List<string> files = new List<string>();
             files.Add(BasicTests.video1TargetFilePath);
-            uploadListViewModel.AddFiles(files.ToArray());
+            mainWindowViewModel.AddFiles(files.ToArray());
             
             Upload upload = uploadList.Uploads[0];
 
@@ -485,14 +491,15 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
+            UploadRibbonViewModel uploadRibbonViewModell = (UploadRibbonViewModel)ribbonViewModels[0];
 
             List<string> files = new List<string>();
             files.Add(BasicTests.video2TargetFilePath);
             files.Add(BasicTests.video1TargetFilePath);
-            uploadListViewModel.AddFiles(files.ToArray());
+            uploadRibbonViewModell.AddFiles(files.ToArray());
 
             //files are sorted by name on adding, there fore the sequence is different now.
             Upload uploadWithoutTemplateMatch = uploadList.Uploads[1];
@@ -620,7 +627,8 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -727,7 +735,8 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -832,7 +841,8 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -945,7 +955,8 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
             UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
             uploadListViewModel.DeleteCommand.Execute(uploadGuid);
@@ -1060,15 +1071,18 @@ namespace Drexel.VidUp.Test
             UploadList uploadList;
             TemplateList templateList;
             PlaylistList playlistList;
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
 
             mainWindowViewModel.TabNo = 1;
             TemplateViewModel templateViewModel = (TemplateViewModel)mainWindowViewModel.CurrentViewModel;
+            TemplateRibbonViewModel templateRibbonViewModel = (TemplateRibbonViewModel)ribbonViewModels[1];
 
             mainWindowViewModel.TabNo = 2;
             PlaylistViewModel playlistViewModel = (PlaylistViewModel)mainWindowViewModel.CurrentViewModel;
+            PlaylistRibbonViewModel playlistRibbonViewModel = (PlaylistRibbonViewModel)ribbonViewModels[2];
 
             Assert.IsTrue(uploadList.UploadCount == 2);
             Assert.IsTrue(templateList.TemplateCount == 1);
@@ -1083,24 +1097,24 @@ namespace Drexel.VidUp.Test
             Assert.IsTrue(template.Uploads.Count == 1);
             Assert.IsTrue(template.Uploads[0] == uploadWithTemplate);
 
-            Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.Count() == 2);
-            Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithTemplateGuid).Upload == uploadWithTemplate);
-            Assert.IsTrue(uploadListViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithoutTemplateGuid).Upload == uploadWithoutTemplate);
-            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[2].Template == template);
-            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0].Template == uploadListViewModel.DeleteSelectedTemplate.Template);
-            Assert.IsTrue(uploadListViewModel.ObservableTemplateViewModelsInclAllNone[0] == uploadListViewModel.DeleteSelectedTemplate);
-            Assert.IsTrue(uploadListViewModel.StatusesInclAll[5] == uploadListViewModel.DeleteSelectedUploadStatus);
+            Assert.IsTrue(uploadRibbonViewModel.ObservableUploadViewModels.Count() == 2);
+            Assert.IsTrue(uploadRibbonViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithTemplateGuid).Upload == uploadWithTemplate);
+            Assert.IsTrue(uploadRibbonViewModel.ObservableUploadViewModels.GetUploadByGuid(uploadWithoutTemplateGuid).Upload == uploadWithoutTemplate);
+            Assert.IsTrue(uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone[2].Template == template);
+            Assert.IsTrue(uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone[0].Template == uploadRibbonViewModel.DeleteSelectedTemplate.Template);
+            Assert.IsTrue(uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone[0] == uploadRibbonViewModel.DeleteSelectedTemplate);
+            Assert.IsTrue(uploadRibbonViewModel.StatusesInclAll[5] == uploadRibbonViewModel.DeleteSelectedUploadStatus);
 
             Assert.IsTrue(templateViewModel.Template == template);
-            Assert.IsTrue(templateViewModel.ObservableTemplateViewModels[0].Template == template);
+            Assert.IsTrue(templateRibbonViewModel.ObservableTemplateViewModels[0].Template == template);
             Assert.IsTrue(templateViewModel.ObservablePlaylistViewModels[0].Playlist == playlist);
-            Assert.IsTrue(templateViewModel.ObservableTemplateViewModels[0] == templateViewModel.SelectedTemplate);
-            Assert.IsTrue(templateViewModel.SelectedTemplate.Template == template);
+            Assert.IsTrue(templateRibbonViewModel.ObservableTemplateViewModels[0] == templateRibbonViewModel.SelectedTemplate);
+            Assert.IsTrue(templateRibbonViewModel.SelectedTemplate.Template == template);
             Assert.IsTrue(templateViewModel.ObservablePlaylistViewModels[0] == templateViewModel.SelectedPlaylist);
 
             Assert.IsTrue(playlistViewModel.Playlist == playlist);
-            Assert.IsTrue(playlistViewModel.ObservablePlaylistViewModels[0].Playlist == playlist);
-            Assert.IsTrue(playlistViewModel.ObservablePlaylistViewModels[0] == playlistViewModel.SelectedPlaylist);
+            Assert.IsTrue(playlistRibbonViewModel.ObservablePlaylistViewModels[0].Playlist == playlist);
+            Assert.IsTrue(playlistRibbonViewModel.ObservablePlaylistViewModels[0] == playlistRibbonViewModel.SelectedPlaylist);
         }
 
         //todo: add tests for editing upload/template/playlist

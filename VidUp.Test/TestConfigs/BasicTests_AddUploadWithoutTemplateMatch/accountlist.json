@@ -1,0 +1,10 @@
+{
+  "youtubeAccounts": [
+    {
+      "guid": "8aa4ba25-5c5e-4206-86f1-9de211b34bd0",
+      "name": "DefaultAccount",
+      "refreshToken": null,
+      "refreshTokenCustomApiCredentials": null
+    }
+  ]
+}

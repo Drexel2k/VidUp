@@ -18,7 +18,6 @@ using Timer = System.Timers.Timer;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    //todo: move ribbon properties to separate view model
     public class PlaylistRibbonViewModel : INotifyPropertyChanged
     {
         private PlaylistList playlistList;

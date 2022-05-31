@@ -5,10 +5,11 @@ namespace Drexel.VidUp.UI.EventAggregation
 {
     public class EventAggregator
     {
-        private static readonly EventAggregator instance = new EventAggregator();
+        private static EventAggregator instance;
+        private static object instanceLocker = new object();
 
-        private object locker = new object();
         private List<(Type eventType, Delegate method)> eventRegister = new List<(Type eventType, Delegate method)>();
+        private object eventRegisterLocker = new object();
 
         static EventAggregator()
         {
@@ -22,7 +23,14 @@ namespace Drexel.VidUp.UI.EventAggregation
         {
             get
             {
-                return EventAggregator.instance;
+                lock (EventAggregator.instanceLocker)
+                {
+                    if (EventAggregator.instance == null)
+                    {
+                        EventAggregator.instance = new EventAggregator();
+                    }
+                    return EventAggregator.instance;
+                }
             }
         
         }
@@ -30,7 +38,7 @@ namespace Drexel.VidUp.UI.EventAggregation
         {
             if (action != null)
             {
-                lock (locker)
+                lock (eventRegisterLocker)
                 {
                     this.eventRegister.Add((typeof(T), action));
                     return new Subscription(() =>
@@ -46,7 +54,7 @@ namespace Drexel.VidUp.UI.EventAggregation
         public void Publish<T>(T data)
         {
             List<(Type eventType, Delegate method)> eventRegister = null;
-            lock (locker)
+            lock (eventRegisterLocker)
             {
                 eventRegister= new List<(Type eventType, Delegate method)>(this.eventRegister);
             }

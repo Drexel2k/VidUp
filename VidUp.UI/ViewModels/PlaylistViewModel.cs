@@ -6,7 +6,6 @@ using Drexel.VidUp.UI.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
-    //todo: move ribbon properties to separate view model
     public class PlaylistViewModel : INotifyPropertyChanged
     {
         private Playlist playlist;

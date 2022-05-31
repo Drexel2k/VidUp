@@ -67,7 +67,8 @@ namespace Drexel.VidUp.Test
             string template789Guid = "e2188eed-589d-4233-862c-bc2380cbaf01";
             string template456Guid = "19f37916-68e6-4425-af12-23af87b513c7";
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _, out ribbonViewModels);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
             JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
@@ -77,9 +78,9 @@ namespace Drexel.VidUp.Test
                 templateUploadsCount.Add((string)((JValue)template["guid"]).Value, uploadsJArray.Count);
             }
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.DeleteUploadsCommand.Execute(true);
-            uploadListViewModel = null;
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            uploadRibbonViewModel.DeleteUploadsCommand.Execute(true);
+            uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
@@ -272,7 +273,8 @@ namespace Drexel.VidUp.Test
             string template789FilterGuid = "e2188eed-589d-4233-862c-bc2380cbaf01";
             string uploadVideo6Guid = "ff328893-5e6c-4e00-b3d2-7dce42e474e7";
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _, out ribbonViewModels);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
             JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
@@ -282,11 +284,11 @@ namespace Drexel.VidUp.Test
                 templateUploadsCount.Add((string)((JValue)template["guid"]).Value, uploadsJArray.Count);
             }
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.DeleteSelectedTemplate =
-                uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template789FilterGuid);
-            uploadListViewModel.DeleteUploadsCommand.Execute(true);
-            uploadListViewModel = null;
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            uploadRibbonViewModel.DeleteSelectedTemplate =
+                uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template789FilterGuid);
+            uploadRibbonViewModel.DeleteUploadsCommand.Execute(true);
+            uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
@@ -386,7 +388,9 @@ namespace Drexel.VidUp.Test
         {
             string uploadVideo5Guid = "c4af55c4-10e4-4676-9b66-a5d9b7d94afe";
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _, out ribbonViewModels);
+
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
             JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
@@ -396,11 +400,11 @@ namespace Drexel.VidUp.Test
                 templateUploadsCount.Add((string)((JValue)template["guid"]).Value, uploadsJArray.Count);
             }
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.DeleteSelectedTemplate =
-                uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "None");
-            uploadListViewModel.DeleteUploadsCommand.Execute(true);
-            uploadListViewModel = null;
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            uploadRibbonViewModel.DeleteSelectedTemplate =
+                uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "None");
+            uploadRibbonViewModel.DeleteUploadsCommand.Execute(true);
+            uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
@@ -473,7 +477,8 @@ namespace Drexel.VidUp.Test
             string template234FilterGuid = "2f80c321-2261-4726-a764-3870ac9340a5";
             string uploadVideo3Guid = "e0acc743-0c49-4dd7-ba4a-093b6686e43b";
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _, out ribbonViewModels);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
             JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
@@ -483,12 +488,12 @@ namespace Drexel.VidUp.Test
                 templateUploadsCount.Add((string)((JValue)template["guid"]).Value, uploadsJArray.Count);
             }
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel) mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[2];
-            uploadListViewModel.DeleteSelectedTemplate =
-                uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template234FilterGuid);
-            uploadListViewModel.DeleteUploadsCommand.Execute(true);
-            uploadListViewModel = null;
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[2];
+            uploadRibbonViewModel.DeleteSelectedTemplate =
+                uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template234FilterGuid);
+            uploadRibbonViewModel.DeleteUploadsCommand.Execute(true);
+            uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
@@ -575,7 +580,8 @@ namespace Drexel.VidUp.Test
             string template234video8Guid = "2f80c321-2261-4726-a764-3870ac9340a5";
             string template456video1Guid = "19f37916-68e6-4425-af12-23af87b513c7";
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _, out ribbonViewModels);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
             JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
@@ -585,11 +591,11 @@ namespace Drexel.VidUp.Test
                 templateUploadsCount.Add((string)((JValue)template["guid"]).Value, uploadsJArray.Count);
             }
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[1];
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[1];
 
-            uploadListViewModel.DeleteUploadsCommand.Execute(true);
-            uploadListViewModel = null;
+            uploadRibbonViewModel.DeleteUploadsCommand.Execute(true);
+            uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
@@ -827,7 +833,8 @@ namespace Drexel.VidUp.Test
             string uploadVideo1GuidReadyForUpload = "da2ede66-e9f9-415a-8fe0-007b8a168d36";
             string uploadVideo2GuidFinished = "4be32408-92c0-4d48-8a27-5d98305c79cd";
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _, out ribbonViewModels);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
             JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
@@ -837,12 +844,12 @@ namespace Drexel.VidUp.Test
                 templateUploadsCount.Add((string)((JValue)template["guid"]).Value, uploadsJArray.Count);
             }
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[0];
-            uploadListViewModel.DeleteSelectedTemplate =
-                uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template456Guid);
-            uploadListViewModel.DeleteUploadsCommand.Execute(true);
-            uploadListViewModel = null;
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[0];
+            uploadRibbonViewModel.DeleteSelectedTemplate =
+                uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template456Guid);
+            uploadRibbonViewModel.DeleteUploadsCommand.Execute(true);
+            uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
@@ -998,7 +1005,8 @@ namespace Drexel.VidUp.Test
             string template789GuidVideo6 = "e2188eed-589d-4233-862c-bc2380cbaf01";
             string template456GuidVideo2 = "19f37916-68e6-4425-af12-23af87b513c7";
 
-            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _);
+            List<object> ribbonViewModels;
+            MainWindowViewModel mainWindowViewModel = new MainWindowViewModel(BaseSettings.UserSuffix, BaseSettings.SubFolder, out _, out _, out _, out ribbonViewModels);
 
             Dictionary<string, int> templateUploadsCount = new Dictionary<string, int>();
             JArray jArray = (JArray)((JObject)JsonConvert.DeserializeObject(File.ReadAllText(Path.Combine(Settings.Instance.StorageFolder, "templatelist.json"))))["templates"];
@@ -1008,12 +1016,12 @@ namespace Drexel.VidUp.Test
                 templateUploadsCount.Add((string)((JValue)template["guid"]).Value, uploadsJArray.Count);
             }
 
-            UploadListViewModel uploadListViewModel = (UploadListViewModel)mainWindowViewModel.CurrentViewModel;
-            uploadListViewModel.DeleteSelectedUploadStatus = uploadListViewModel.StatusesInclAll[0];
-            uploadListViewModel.DeleteSelectedTemplate =
-                uploadListViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.IsDummy && vm.Template.Name == "All");
-            uploadListViewModel.DeleteUploadsCommand.Execute(true);
-            uploadListViewModel = null;
+            UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
+            uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[0];
+            uploadRibbonViewModel.DeleteSelectedTemplate =
+                uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.IsDummy && vm.Template.Name == "All");
+            uploadRibbonViewModel.DeleteUploadsCommand.Execute(true);
+            uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
 
