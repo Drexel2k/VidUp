@@ -9,11 +9,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
+using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.AuthenticationService;
 using Drexel.VidUp.Youtube.Http;
 using Drexel.VidUp.Youtube.VideoUploadService.Data;
 using HeyRed.Mime;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Youtube.VideoUploadService
@@ -191,7 +193,14 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                         upload.BytesSent = YoutubeVideoUploadService.stream.Position;
                                         resetEvent.WaitOne();
                                         upload.UploadStatus = UplStatus.Finished;
-                                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with resume position {lastResumePositionBeforeError}, video id {upload.VideoId}.");
+                                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload finished with resume position {lastResumePositionBeforeError}, package size {YoutubeVideoUploadService.stream.ReadBuffer}, video id {upload.VideoId}.");
+
+                                        if (YoutubeVideoUploadService.stream.ReadBuffer != Settings.Instance.UserSettings.NetworkPackageSizeInBytes)
+                                        {
+                                            Tracer.Write($"YoutubeVideoUploadService.Upload: Real network package size different from configured package size, saving NetworkPackageSizeInBytes, before: {Settings.Instance.UserSettings.NetworkPackageSizeInBytes}, after: {YoutubeVideoUploadService.stream.ReadBuffer}.");
+                                            Settings.Instance.UserSettings.NetworkPackageSizeInBytes = YoutubeVideoUploadService.stream.ReadBuffer;
+                                            JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                                        }
                                     }
                                 }
                             }

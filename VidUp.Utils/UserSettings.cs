@@ -47,6 +47,9 @@ namespace Drexel.VidUp.Utils
         [JsonProperty]
         private string clientSecret;
 
+        [JsonProperty]
+        private int networkPackageSizeInBytes;
+
         public bool Trace
         {
             get => this.trace;
@@ -123,6 +126,12 @@ namespace Drexel.VidUp.Utils
         {
             get => this.clientSecret;
             set => this.clientSecret = value;
+        }
+
+        public int NetworkPackageSizeInBytes
+        {
+            get => this.networkPackageSizeInBytes;
+            set => this.networkPackageSizeInBytes = value;
         }
 
         [JsonConstructor]

@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using Drexel.VidUp.Business;
+using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.AuthenticationService;
 
@@ -30,6 +31,11 @@ namespace Drexel.VidUp.Youtube.Http
 
             HttpHelper.uploadClient = new HttpClient();
             HttpHelper.uploadClient.Timeout = Timeout.InfiniteTimeSpan;
+
+            if (Settings.Instance.UserSettings.NetworkPackageSizeInBytes > HttpHelper.bufferSize)
+            {
+                HttpHelper.bufferSize = Settings.Instance.UserSettings.NetworkPackageSizeInBytes;
+            }
         }
 
         public static HttpClient StandardClient

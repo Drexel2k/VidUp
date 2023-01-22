@@ -116,6 +116,11 @@
 
                             <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Detailed logs also every serialization." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Network Package Size in Bytes " Width="171" />
+                            <TextBox Width="50"  Text="{Binding NetWorkPackageSizeInBytes, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Detailed logs also every serialization." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </GroupBox>

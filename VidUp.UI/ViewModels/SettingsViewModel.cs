@@ -140,6 +140,23 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public string NetWorkPackageSizeInBytes
+        {
+            get => Settings.Instance.UserSettings.NetworkPackageSizeInBytes.ToString("N0");
+            set
+            {
+                int packageSize;
+                var allowedStyles = (NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands);
+                if (int.TryParse(value, allowedStyles, CultureInfo.CurrentCulture, out packageSize))
+                {
+                    Settings.Instance.UserSettings.NetworkPackageSizeInBytes = packageSize;
+                    JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                }
+
+                this.raisePropertyChanged("NetWorkPackageSizeInBytes");
+            }
+        }
+
         public string SearchText
         {
             get => this.searchText;

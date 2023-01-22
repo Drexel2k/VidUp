@@ -19,6 +19,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
         private BlockingCollection<byte[]> memoryBuffer = new BlockingCollection<byte[]>(1);
         private int memoryBufferSize = 50 * 1024 * 1024;
 
+        private int readBuffer;
+
         private byte[] currentData;
         private int currentDataPosition;
 
@@ -34,6 +36,11 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             {
                 return DateTime.Now.Ticks;
             }
+        }
+
+        public int ReadBuffer
+        {
+            get => this.readBuffer;
         }
 
         public int CurrentSpeedInBytesPerSecond
@@ -121,6 +128,14 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             }
         }
 
+        public int LeReadBufferngth
+        {
+            get
+            {
+                return this.readBuffer;
+            }
+        }
+
         public override long Position
         {
             get
@@ -193,6 +208,11 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
             if (offset < 0)
             {
                 throw new ArgumentOutOfRangeException("offset", "Offset cannot be negative.");
+            }
+
+            if (readBuffer <= 0)
+            {
+                this.readBuffer = buffer.Length;
             }
 
             long currentTicks = this.currentTicks;

@@ -7,6 +7,8 @@ namespace Drexel.VidUp.Setup
     {
         static void Main(string[] args)
         {
+            bool obfuscate = false;
+
             string dotfuscatorExe = Path.GetFullPath($@"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\PreEmptiveSolutions\DotfuscatorCE\dotfuscator.exe");
             string config = string.Empty;
             string platform = string.Empty;
@@ -38,33 +40,39 @@ namespace Drexel.VidUp.Setup
                     throw new ApplicationException("Only x64 setup is supported.");
                 }
 
-                if (!File.Exists(dotfuscatorExe))
-                {
-                    throw new ApplicationException("Dotfuscator not found.");
-                }
+                innoIn = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\{config}\\x64\\net6.0-windows\\");
 
-                dotfuscatorOut = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\dotfuscated\\{config}\\x64\\");
-                innoIn = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\dotfuscated\\{config}\\x64\\net6.0-windows\\");
-                if (Directory.Exists(innoIn))
+                if (obfuscate)
                 {
-                    Directory.Delete(innoIn, true);
-                }
+                    if (!File.Exists(dotfuscatorExe))
+                    {
+                        throw new ApplicationException("Dotfuscator not found.");
+                    }
 
-                string dotfuscatorConfig = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\Dotfuscator{config}.xml");
-                string dotfuscatorFullParamter = $"{dotfuscatorConfig} -p=outdir={dotfuscatorOut}";
-                ProcessStartInfo dotfuscatorStartInfo = new ProcessStartInfo(dotfuscatorExe, dotfuscatorFullParamter);
-                dotfuscatorStartInfo.UseShellExecute = false;
+                    dotfuscatorOut = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\dotfuscated\\{config}\\x64\\");
+                    innoIn = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\..\\VidUp.UI\\bin\\dotfuscated\\{config}\\x64\\net6.0-windows\\");
 
-                int dotfuscatorExitCode;
-                using (Process p = Process.Start(dotfuscatorStartInfo))
-                {
-                    p.WaitForExit();
-                    dotfuscatorExitCode = p.ExitCode;
-                }
+                    if (Directory.Exists(innoIn))
+                    {
+                        Directory.Delete(innoIn, true);
+                    }
 
-                if (dotfuscatorExitCode > 0)
-                {
-                    throw new ApplicationException("Dotfuscator failed.");
+                    string dotfuscatorConfig = Path.GetFullPath($"{AppDomain.CurrentDomain.BaseDirectory}..\\..\\..\\Dotfuscator{config}.xml");
+                    string dotfuscatorFullParamter = $"{dotfuscatorConfig} -p=outdir={dotfuscatorOut}";
+                    ProcessStartInfo dotfuscatorStartInfo = new ProcessStartInfo(dotfuscatorExe, dotfuscatorFullParamter);
+                    dotfuscatorStartInfo.UseShellExecute = false;
+
+                    int dotfuscatorExitCode;
+                    using (Process p = Process.Start(dotfuscatorStartInfo))
+                    {
+                        p.WaitForExit();
+                        dotfuscatorExitCode = p.ExitCode;
+                    }
+
+                    if (dotfuscatorExitCode > 0)
+                    {
+                        throw new ApplicationException("Dotfuscator failed.");
+                    }
                 }
 
                 version = AssemblyName.GetAssemblyName(Path.Combine(innoIn, "VidUp.dll")).Version.ToString();
@@ -90,6 +98,7 @@ namespace Drexel.VidUp.Setup
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine();
+                Console.WriteLine($"Obfuscate: {obfuscate}");
                 Console.WriteLine($"Config: {config}");
                 Console.WriteLine($"Platform: {platform}");
                 Console.WriteLine($"Source path: {innoIn}");
@@ -101,6 +110,7 @@ namespace Drexel.VidUp.Setup
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine();
                 Console.WriteLine(e.Message);
+                Console.WriteLine($"Obfuscate: {obfuscate}");
                 Console.WriteLine($"Config: {config}");
                 Console.WriteLine($"Platform: {platform}");
                 Console.WriteLine($"Source path: {innoIn}");
