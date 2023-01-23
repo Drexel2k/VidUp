@@ -167,8 +167,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                         {
                             try
                             {
-                                using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(
-                                        upload.YoutubeAccount, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
+                                using (HttpRequestMessage requestMessage = await HttpHelper.GetAuthenticatedRequestMessageAsync(upload.YoutubeAccount, HttpMethod.Put, upload.ResumableSessionUri).ConfigureAwait(false))
                                 {
                                     
                                     requestMessage.Content = streamContent;
@@ -198,6 +197,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                         if (YoutubeVideoUploadService.stream.ReadBuffer != Settings.Instance.UserSettings.NetworkPackageSizeInBytes)
                                         {
                                             Tracer.Write($"YoutubeVideoUploadService.Upload: Real network package size different from configured package size, saving NetworkPackageSizeInBytes, before: {Settings.Instance.UserSettings.NetworkPackageSizeInBytes}, after: {YoutubeVideoUploadService.stream.ReadBuffer}.");
+                                            //todo: maybe check/reset max upload after change
                                             Settings.Instance.UserSettings.NetworkPackageSizeInBytes = YoutubeVideoUploadService.stream.ReadBuffer;
                                             JsonSerializationSettings.JsonSerializer.SerializeSettings();
                                         }

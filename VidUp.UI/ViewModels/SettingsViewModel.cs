@@ -140,20 +140,24 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string NetWorkPackageSizeInBytes
+        //todo: maybe check/reset max upload after change
+        public string NetWorkPackageSizeInKiloBytes
         {
-            get => Settings.Instance.UserSettings.NetworkPackageSizeInBytes.ToString("N0");
+            get
+            {
+                return (Settings.Instance.UserSettings.NetworkPackageSizeInBytes / 1024).ToString("N0"); ;
+            }
+
             set
             {
                 int packageSize;
-                var allowedStyles = (NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands);
-                if (int.TryParse(value, allowedStyles, CultureInfo.CurrentCulture, out packageSize))
+                if (int.TryParse(value, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out packageSize))
                 {
-                    Settings.Instance.UserSettings.NetworkPackageSizeInBytes = packageSize;
+                    Settings.Instance.UserSettings.NetworkPackageSizeInBytes = packageSize * 1024;
                     JsonSerializationSettings.JsonSerializer.SerializeSettings();
                 }
 
-                this.raisePropertyChanged("NetWorkPackageSizeInBytes");
+                this.raisePropertyChanged("NetWorkPackageSizeInKiloBytes");
             }
         }
 

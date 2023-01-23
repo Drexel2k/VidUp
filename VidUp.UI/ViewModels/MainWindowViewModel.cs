@@ -269,13 +269,14 @@ namespace Drexel.VidUp.UI.ViewModels
                 {
                     long newUploadInBytesPerSecond = kiloBytesPerSecond * 1024;
 
-                    // minimum 32 KiloBytes per second
-                    if (newUploadInBytesPerSecond < 32768)
+                    //Minimum 32 KiloBytes per second or half of package size, as at least every 2 seconds a package is sent.
+                    //Lower throttle than half of package size would increase upload speed again.
+                    if (newUploadInBytesPerSecond < 32768 || newUploadInBytesPerSecond < (Settings.Instance.UserSettings.NetworkPackageSizeInBytes / 2))
                     {
                         newUploadInBytesPerSecond = 0;
                     }
 
-                   ((UploadRibbonViewModel)this.ribbonViewModels[0]).MaxUploadInBytesPerSecond = newUploadInBytesPerSecond;
+                    ((UploadRibbonViewModel)this.ribbonViewModels[0]).MaxUploadInBytesPerSecond = newUploadInBytesPerSecond;
                 }
                 else
                 {

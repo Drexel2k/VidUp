@@ -338,7 +338,7 @@
                         <Label Content="  |  " />
                         <Label Content="Max Upload: " />
                         <TextBox Text="{Binding MaxUploadInKiloBytesPerSecond, UpdateSourceTrigger=PropertyChanged, Delay=500}" Width="70" />
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is 32, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="10 4 0 0" ToolTip="Set maximum upload bandwidth in kByte/s. Minimum value is half of network package size down to 32, everything below is set to 0 which means no upload bandwidth limit." ToolTipService.ShowDuration="60000" Background="Transparent" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="right" >
                         <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" Value="35" IsIndeterminate="True" Visibility="{Binding AutoSettingPlaylists, Mode=OneWay, Converter={converters:BoolTrueVisibilityConverter}}" />

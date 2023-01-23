@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.AuthenticationService;
 
@@ -23,7 +22,8 @@ namespace Drexel.VidUp.Youtube.Http
 
         //buffer is set to constant value like 1024, 4096, 16384 etc.
         //eg. if set to 10240 buffer will be 16384.
-        private static int bufferSize = 32 * 1024;
+        //default package requested by http client on Stream.Read ist 128kByte.
+        private static int minBufferSize = 32 * 1024;
 
         static HttpHelper()
         {
@@ -31,11 +31,6 @@ namespace Drexel.VidUp.Youtube.Http
 
             HttpHelper.uploadClient = new HttpClient();
             HttpHelper.uploadClient.Timeout = Timeout.InfiniteTimeSpan;
-
-            if (Settings.Instance.UserSettings.NetworkPackageSizeInBytes > HttpHelper.bufferSize)
-            {
-                HttpHelper.bufferSize = Settings.Instance.UserSettings.NetworkPackageSizeInBytes;
-            }
         }
 
         public static HttpClient StandardClient
@@ -118,9 +113,15 @@ namespace Drexel.VidUp.Youtube.Http
 
         public static StreamContent GetStreamContentResumableUpload(Stream data, long orirginalLength, long startByteIndex, string contentType)
         {
+            int bufferSize = HttpHelper.minBufferSize;
+            if (Settings.Instance.UserSettings.NetworkPackageSizeInBytes > bufferSize)
+            {
+                bufferSize = Settings.Instance.UserSettings.NetworkPackageSizeInBytes;
+            }
+
             Tracer.Write($"HttpHelper.GetStreamContentResumableUpload: Start.");
-            Tracer.Write($"HttpHelper.GetStreamContentResumableUpload: StreamContent buffer size: {HttpHelper.bufferSize}.");
-            StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
+            Tracer.Write($"HttpHelper.GetStreamContentResumableUpload: StreamContent buffer size: {bufferSize}.");
+            StreamContent content = new StreamContent(data, bufferSize);
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
             if (startByteIndex <= 0)
@@ -141,9 +142,15 @@ namespace Drexel.VidUp.Youtube.Http
 
         public static StreamContent GetStreamContentUpload(Stream data, string contentType)
         {
+            int bufferSize = HttpHelper.minBufferSize;
+            if (Settings.Instance.UserSettings.NetworkPackageSizeInBytes > bufferSize)
+            {
+                bufferSize = Settings.Instance.UserSettings.NetworkPackageSizeInBytes;
+            }
+
             Tracer.Write($"HttpHelper.GetStreamContentUpload: Start.");
-            Tracer.Write($"HttpHelper.GetStreamContentUpload: StreamContent buffer size: {HttpHelper.bufferSize}.");
-            StreamContent content = new StreamContent(data, HttpHelper.bufferSize);
+            Tracer.Write($"HttpHelper.GetStreamContentUpload: StreamContent buffer size: {bufferSize}.");
+            StreamContent content = new StreamContent(data, bufferSize);
             content.Headers.ContentLength = data.Length;
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
