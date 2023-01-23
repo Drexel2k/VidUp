@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
+using Drexel.VidUp.UI.Converters;
 using Drexel.VidUp.UI.EventAggregation;
+using Drexel.VidUp.Utils;
 using MaterialDesignThemes.Wpf;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -569,6 +572,9 @@ namespace Drexel.VidUp.UI.ViewModels
                 case "removecombocategory":
                     this.removeComboBoxValue("category");
                     break;
+                case "showfinisheduploads":
+                    this.showFinishedUploads();
+                    break;
                 default:
                     throw new InvalidOperationException("Invalid parameter for parameterlessCommandAction.");
                     break;
@@ -605,6 +611,24 @@ namespace Drexel.VidUp.UI.ViewModels
                     throw new InvalidOperationException("Invalid parameter for removeComboBoxValue.");
                     break;
             }
+        }
+
+        private async void showFinishedUploads()
+        {
+            StringBuilder dialogContent = new StringBuilder();
+            dialogContent.AppendLine("Video Id | Title | Exists on YouTube");
+            foreach (Upload upload in this.template.Uploads)
+            {
+                if (upload.UploadStatus == UplStatus.Finished)
+                {
+                    dialogContent.AppendLine($"{upload.VideoId} | {upload.Title} | {!upload.NotExistsOnYoutube}");
+                }
+            }
+
+            ConfirmControl control = new ConfirmControl("Finished Uploads", dialogContent.ToString(), false, 800);
+
+            await DialogHost.Show(control, "RootDialog");
+            
         }
 
         private void openFileDialog(string target)

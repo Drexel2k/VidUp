@@ -1,9 +1,5 @@
-﻿#region
-
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-
-#endregion
 
 namespace Drexel.VidUp.UI.Controls
 {
@@ -15,7 +11,22 @@ namespace Drexel.VidUp.UI.Controls
         public ConfirmControl(string confirmationText, bool showCancelButton)
         {
             InitializeComponent();
-            this.ConfirmationTextTextBlock.Text = confirmationText;
+            this.ConfirmationTextTitle.Text = "Confirmation";
+            this.ConfirmationTextContent.Text = confirmationText;
+            this.ContentGrid.Width = 300;
+
+            if (!showCancelButton)
+            {
+                this.CancelButton.Visibility = Visibility.Hidden;
+            }
+        }
+
+        public ConfirmControl(string title, string confirmationText, bool showCancelButton, int width)
+        {
+            InitializeComponent();
+            this.ConfirmationTextTitle.Text = title;
+            this.ConfirmationTextContent.Text = confirmationText;
+            this.ContentGrid.Width = width;
 
             if (!showCancelButton)
             {

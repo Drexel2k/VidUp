@@ -635,7 +635,6 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"UploadListViewModel.deleteUploads(object parameter): Start.");
             bool remove = true;
 
-            //skip dialog on testing
             if (this.deleteSelectedUploadStatus == "All" ||
                 (UplStatus) Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus) != UplStatus.Finished)
             {
@@ -663,8 +662,6 @@ namespace Drexel.VidUp.UI.ViewModels
         private async void resetUploadStatusAsync()
         {
             bool reset = true;
-
-            //skip dialog on testing
             ConfirmControl control = new ConfirmControl(
                 $"Do you really want to reset all uploads with template = '{this.resetWithSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.resetWithSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}' to status '{new UplStatusStringValuesConverter().Convert(this.resetToSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'? Ready for Upload will restart begun uploads.",
                 true);

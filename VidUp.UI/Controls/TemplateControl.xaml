@@ -51,6 +51,8 @@
                     <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="0,5,7,5" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PopupBox  StaysOpen="False" >
                             <StackPanel>
+                                <Button Content="Show Finished Uploads" Command="{Binding ParameterlessCommand}" CommandParameter="showfinisheduploads" />
+                                <Separator/>
                                 <Button Content="Copy Template" Command="{Binding ParameterlessCommand}" CommandParameter="copy" />
                                 <Separator/>
                                 <Button Content="Remove Playlist" Command="{Binding ParameterlessCommand}" CommandParameter="removecomboplaylist" />
