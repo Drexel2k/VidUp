@@ -110,6 +110,12 @@
                     <Fluent:RibbonGroupBox Header="Remove Uploads">
                         <!-- CommandParamter is to enable testing -->
                         <Fluent:Button Header="Delete Uploads with:" SizeDefinition="Middle,Middle,Small"  Icon="{materialDesign:PackIcon FileRemove}" Command="{Binding ParameterlessCommand}" CommandParameter="delete" />
+                        <StackPanel  Orientation="Horizontal">
+                            <Fluent:CheckBox Margin="3 0 3 0" IsChecked="{Binding KeepLastUploadPerTemplate}">
+                                <TextBlock Margin="0 4 0 0">Keep last upload</TextBlock>
+                            </Fluent:CheckBox>
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="0 5 10 5" ToolTip="Keep last upload per template for better overview of upload progress." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />

@@ -238,12 +238,23 @@ namespace Drexel.VidUp.Business
             return templateAutoAdded;
         }
 
-        public void DeleteUploads(Predicate<Upload> predicate)
+        public void DeleteUploads(Predicate<Upload> predicate, bool keepLastPerTemplate)
         {
-            Tracer.Write($"UploadList.DeleteUploads: Start.");
-            List<Upload> oldUploads = this.uploads.FindAll(predicate);
+            Tracer.Write($"UploadList.DeleteUploads: Start, keepLastPerTemplate {keepLastPerTemplate}.");
+            if (keepLastPerTemplate)
+            {
+                Dictionary<Template, Upload> templateLastUploadMap = new Dictionary<Template, Upload>();
+                foreach (Upload upload in this.uploads)
+                {
+                    templateLastUploadMap[upload.Template] = upload;
+                }
 
+                predicate = TinyHelpers.PredicateAnd(new Predicate<Upload>[] { predicate, upl => !templateLastUploadMap.ContainsValue(upl) });
+            }
+
+            List<Upload> oldUploads = this.uploads.FindAll(predicate);
             Tracer.Write($"UploadList.DeleteUploads: Delete {oldUploads.Count} uploads from upload list.");
+
             this.uploads.RemoveAll(predicate);
 
             foreach (Upload upload in oldUploads)
@@ -251,10 +262,14 @@ namespace Drexel.VidUp.Business
                 Tracer.Write($"UploadList.DeleteUploads: Delete upload '{upload.FilePath}'.");
                 if (upload.UploadStatus != UplStatus.Finished && upload.Template != null)
                 {
+                    //removes upload from template as it was not uploaded
                     upload.Template = null;
                 }
 
-                this.DeleteThumbnailFallbackIfPossible(upload.ThumbnailFilePath);
+                if (!keepLastPerTemplate)
+                {
+                    this.DeleteThumbnailFallbackIfPossible(upload.ThumbnailFilePath);
+                }
             }
 
             this.raiseNotifyPropertyChanged("TotalBytesToUpload");

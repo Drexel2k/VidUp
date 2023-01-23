@@ -8,6 +8,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
+using Drexel.VidUp.Json.Settings;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.Converters;
 using Drexel.VidUp.UI.Definitions;
@@ -35,6 +36,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private Uploader uploader;
         private bool resumeUploads = true;
         private long maxUploadInBytesPerSecond = 0;
+        private bool keepLastUploadPerTemplate;
 
         private TemplateComboboxViewModel deleteSelectedTemplate;
         private string deleteSelectedUploadStatus = "Finished";
@@ -99,6 +101,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 return this.resumeUploads;
             }
+
             set
             {
                 if (this.resumeUploads != value)
@@ -111,6 +114,26 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
 
                     this.raisePropertyChanged("ResumeUploads");
+                }
+            }
+        }
+
+        public bool KeepLastUploadPerTemplate
+        {
+            get
+            {
+                return this.keepLastUploadPerTemplate;
+            }
+
+            set
+            {
+                if (this.keepLastUploadPerTemplate != value)
+                {
+                    this.keepLastUploadPerTemplate = value;
+                    Settings.Instance.UserSettings.KeepLastUploadPerTemplate = value;
+                    JsonSerializationSettings.JsonSerializer.SerializeSettings();
+
+                    this.raisePropertyChanged("KeepLastUploadPerTemplate");
                 }
             }
         }
@@ -354,6 +377,7 @@ namespace Drexel.VidUp.UI.ViewModels
             EventAggregator.Instance.Subscribe<SelectedFilterYoutubeAccountChangedMessage>(this.selectedYoutubeAccountChanged);
 
             this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
+            this.keepLastUploadPerTemplate = Settings.Instance.UserSettings.KeepLastUploadPerTemplate;
 
             EventAggregator.Instance.Subscribe<UploadDeleteMessage>(this.DeleteUpload);
             EventAggregator.Instance.Subscribe<UploadListReorderMessage>(this.reorderUplods);
@@ -399,7 +423,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void beforeYoutubeAccountDelete(BeforeYoutubeAccountDeleteMessage beforeYoutubeAccountDeleteMessage)
         {
-            this.uploadList.DeleteUploads(upload => upload.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted);
+            this.uploadList.DeleteUploads(upload => upload.YoutubeAccount == beforeYoutubeAccountDeleteMessage.AccountToBeDeleted, false);
         }
 
         private void selectedYoutubeAccountChanged(SelectedFilterYoutubeAccountChangedMessage selectedYoutubeAccountChangedMessage)
@@ -950,7 +974,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 serializeTemplates = true;
             }
 
-            this.uploadList.DeleteUploads(predicate);
+            this.uploadList.DeleteUploads(predicate, this.keepLastUploadPerTemplate);
 
             if (serializeTemplates)
             {

@@ -50,6 +50,9 @@ namespace Drexel.VidUp.Utils
         [JsonProperty]
         private int networkPackageSizeInBytes;
 
+        [JsonProperty] 
+        private bool keepLastUploadPerTemplate;
+
         public bool Trace
         {
             get => this.trace;
@@ -132,6 +135,12 @@ namespace Drexel.VidUp.Utils
         {
             get => this.networkPackageSizeInBytes;
             set => this.networkPackageSizeInBytes = value;
+        }
+
+        public bool KeepLastUploadPerTemplate
+        {
+            get => this.keepLastUploadPerTemplate;
+            set => this.keepLastUploadPerTemplate = value;
         }
 
         [JsonConstructor]
