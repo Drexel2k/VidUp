@@ -256,7 +256,7 @@
 
             <StackPanel  Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Status: " Width="68"  />
-                <materialDesign:PackIcon Width="20" Height="20" Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="7 2 0 0" Background="Red" />
+                <materialDesign:PackIcon Width="20" Height="20" Kind="Warning" ToolTip="{Binding UploadErrorMessage}" ToolTipService.ShowDuration="60000" Visibility="{Binding UploadErrorMessage, Mode=OneWay, Converter={converters:StringEmptyCollapsedConverter}}" Margin="7 2 0 0" Background="{Binding WarningColor, Mode=OneWay}" />
             </StackPanel>
             <StackPanel Grid.Row="10" Grid.Column="2" Orientation="Horizontal">
 

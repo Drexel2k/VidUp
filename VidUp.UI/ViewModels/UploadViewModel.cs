@@ -137,6 +137,22 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        //only visible if an error message is set at all.
+        public SolidColorBrush WarningColor
+        {
+            get
+            {
+                Color color = Colors.Red;
+
+                if (this.upload.UploadStatus == UplStatus.Finished)
+                {
+                    color = Colors.Gold;
+                }
+
+                return new SolidColorBrush(color);
+            }
+        }
+
         public bool UploadStatusColorAnimation
         {
             get

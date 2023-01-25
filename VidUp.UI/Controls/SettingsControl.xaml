@@ -119,7 +119,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Network Package Size" Width="128" />
                             <TextBox Width="40"  Text="{Binding NetWorkPackageSizeInKiloBytes, Delay=500,UpdateSourceTrigger=PropertyChanged}"  />
-                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Network Package Size in kByte, minimum 32kBytes. Smaller values are better to throttle the upload but may decrease max upload speed. Max upload value can be minimum half of package size. Will be changed to real used value after first upload as only power of 2 values are used by the upload client." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                            <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="4 4 10 5" ToolTip="Network Package Size in kByte, minimum 32kBytes. Smaller values are better to throttle the upload but may decrease max upload speed and increase CPU usage.&#x0a;Vidup's default value is 32, upload client's default value is 128. Max upload value can be minimum half of package size.&#x0a;Will be changed to real used value after first upload as only power of 2 values are used by the upload client." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>

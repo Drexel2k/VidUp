@@ -157,10 +157,10 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                                 lastResumePositionBeforeError = upload.BytesSent;
                             }
 
-                            upload.AddStatusInformation(StatusInformationCreator.Create("INF0017", $"Resumed upload on position {upload.BytesSent} try {uploadTry}."));
+                            upload.AddStatusInformation(StatusInformationCreator.Create("INF0017", $"Resumed upload on position {upload.BytesSent.ToString("N0")} try {uploadTry}."));
                         }
 
-                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: resume position {upload.BytesSent} Try {uploadTry}.");
+                        Tracer.Write($"YoutubeVideoUploadService.Upload: Upload try: resume position {upload.BytesSent.ToString("N0")} Try {uploadTry}.");
                         Tracer.Write($"YoutubeVideoUploadService.Upload: Creating content.");
 
                         using (StreamContent streamContent = HttpHelper.GetStreamContentResumableUpload(YoutubeVideoUploadService.stream, YoutubeVideoUploadService.stream.Length, upload.BytesSent, MimeTypesMap.GetMimeType(upload.FilePath)))
@@ -255,8 +255,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             }
                             catch (Exception e)
                             {
-                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError} try {uploadTry}: {e.ToString()}.");
-                                upload.AddStatusInformation(StatusInformationCreator.Create("ERR0027", $"Upload failed with resume position {lastResumePositionBeforeError} try {uploadTry}, current position {upload.BytesSent}.", e));
+                                Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError.ToString("N0")} try {uploadTry}: {e.ToString()}.");
+                                upload.AddStatusInformation(StatusInformationCreator.Create("ERR0027", $"Upload failed with resume position {lastResumePositionBeforeError.ToString("N0")} try {uploadTry}, current position {upload.BytesSent}.", e));
                                 
                                 error = true;
                                 uploadTry++;
