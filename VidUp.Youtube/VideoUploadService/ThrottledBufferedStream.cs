@@ -12,7 +12,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
     {
         private const int tickDivider = 312500;
         private const int historyForUploadInSeconds = 3;
-        //32 slots per second to keep the slot stable and reduced independent from upload speeds
+        //32 slots per second to keep the slot count stable and reduced independent from upload speeds
         private const int timeSlotMultiplierForSeconds = 10000000 / ThrottledBufferedStream.tickDivider;
         private const int keepHistoryForInSeconds = 15;
         private const int historyForStatsInSeconds = 10;
@@ -36,9 +36,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
         {
             get
             {
-                long tickTemp = DateTime.Now.Ticks;
-                tickTemp = tickTemp / ThrottledBufferedStream.tickDivider; //divides second in 32 parts
-                return tickTemp;
+                return DateTime.Now.Ticks / ThrottledBufferedStream.tickDivider; //divides second in 32 parts
             }
         }
 
