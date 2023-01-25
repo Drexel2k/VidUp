@@ -246,7 +246,10 @@ namespace Drexel.VidUp.Business
                 Dictionary<Template, Upload> templateLastUploadMap = new Dictionary<Template, Upload>();
                 foreach (Upload upload in this.uploads)
                 {
-                    templateLastUploadMap[upload.Template] = upload;
+                    if (upload.Template != null)
+                    {
+                        templateLastUploadMap[upload.Template] = upload;
+                    }
                 }
 
                 predicate = TinyHelpers.PredicateAnd(new Predicate<Upload>[] { predicate, upl => !templateLastUploadMap.ContainsValue(upl) });
