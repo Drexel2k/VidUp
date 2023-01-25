@@ -75,8 +75,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fluent.Ribbon" Version="8.0.3" />
-    <PackageReference Include="MaterialDesignThemes" Version="3.2.0" />
+    <PackageReference Include="Fluent.Ribbon" Version="9.0.4" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.7.1" />
   </ItemGroup>
 
   <ItemGroup>
