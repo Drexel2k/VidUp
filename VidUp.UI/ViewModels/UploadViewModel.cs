@@ -860,6 +860,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("UploadEnd");
                 this.raisePropertyChanged("StateCommandsEnabled");
                 this.raisePropertyChanged("ResetStateCommandEnabled");
+                this.raisePropertyChanged("WarningColor");
                 this.raisePropertyChanged("UploadErrorMessage");
                 this.raisePropertyChanged("ControlsEnabled");
                 this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
@@ -871,6 +872,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             if (errorMessageChangedMessage.Upload == this.upload)
             {
+                this.raisePropertyChanged("WarningColor");
                 this.raisePropertyChanged("UploadErrorMessage");
             }
         }

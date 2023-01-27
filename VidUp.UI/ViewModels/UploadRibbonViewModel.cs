@@ -971,7 +971,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 serializeTemplates = true;
             }
 
-            this.uploadList.DeleteUploads(predicate, this.keepLastUploadPerTemplate, ignoreKeepLastPerTemplate);
+            this.uploadList.DeleteUploads(predicate, !ignoreKeepLastPerTemplate && this.keepLastUploadPerTemplate);
 
             if (serializeTemplates)
             {
