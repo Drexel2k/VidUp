@@ -892,7 +892,7 @@ namespace Drexel.VidUp.UI.ViewModels
         public void DeleteUpload(UploadDeleteMessage uploadDeleteMessage)
         {
             Tracer.Write($"UploadListViewModel.DeleteUpload: Start, Guid '{uploadDeleteMessage.UploadGuid}'.");
-            this.deleteUploads(upload => upload.Guid == uploadDeleteMessage.UploadGuid);
+            this.deleteUploads(upload => upload.Guid == uploadDeleteMessage.UploadGuid, true);
             Tracer.Write($"UploadListViewModel.DeleteUpload: End.");
         }
 
@@ -956,11 +956,11 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             Predicate<Upload> combinedPredicate = TinyHelpers.PredicateAnd(predicates);
-            this.deleteUploads(combinedPredicate);
+            this.deleteUploads(combinedPredicate, false);
             Tracer.Write($"UploadListViewModel.deleteUploads: End.");
         }
 
-        private void deleteUploads(Predicate<Upload> predicate)
+        private void deleteUploads(Predicate<Upload> predicate, bool ignoreKeepLastPerTemplate)
         {
             Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): Start.");
             bool serializeTemplates = false;
@@ -971,7 +971,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 serializeTemplates = true;
             }
 
-            this.uploadList.DeleteUploads(predicate, this.keepLastUploadPerTemplate);
+            this.uploadList.DeleteUploads(predicate, this.keepLastUploadPerTemplate, ignoreKeepLastPerTemplate);
 
             if (serializeTemplates)
             {

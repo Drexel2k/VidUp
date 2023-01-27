@@ -14,8 +14,8 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
         private const int historyForUploadInSeconds = 3;
         //32 slots per second to keep the slot count stable and reduced independent from upload speeds
         private const int timeSlotMultiplierForSeconds = 10000000 / ThrottledBufferedStream.tickDivider;
-        private const int keepHistoryForInSeconds = 15;
-        private const int historyForStatsInSeconds = 10;
+        private const int keepHistoryForInSeconds = 17;
+        private const int historyForStatsInSeconds = 15;
 
         private int readCapacity = 100 * 1024 * 1024;
         private BlockingCollection<byte[]> memoryBuffer = new BlockingCollection<byte[]>(1);
