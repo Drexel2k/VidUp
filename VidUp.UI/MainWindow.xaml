@@ -96,7 +96,7 @@
                             <Button Grid.Row="1" Grid.Column="1" Command="{Binding ResetRecalculatePublishAtStartDateCommand }"  Style="{StaticResource MaterialDesignRaisedLightButton}" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="10 5 2 0" Width="12" Height="12"  Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                                 <Image Source="../Images/minus.png" />
                             </Button>
-                            <DatePicker Grid.Row="1"  Grid.Column="1" Width="125" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding RecalculatePublishAtStartDate}" DisplayDateStart="{Binding RecalculatePublishAtFirstDate, Mode=OneWay}" HorizontalAlignment="Right" Padding="0 2 0 0 " >
+                            <DatePicker Grid.Row="1"  Grid.Column="1" Width="125" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding RecalculatePublishAtStartDate}" DisplayDateStart="{Binding RecalculatePublishAtFirstDate, Mode=OneWay}" HorizontalAlignment="Right" Padding="0 2 0 0 " > <!-- Padding and Text Setter as workaround for quirky behaviour -->
                                 <DatePicker.Resources>
                                     <Style x:Key="MaterialDesignDatePickerTextBox"
                                            TargetType="DatePickerTextBox"
