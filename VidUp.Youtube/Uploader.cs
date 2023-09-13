@@ -200,6 +200,7 @@ namespace Drexel.VidUp.Youtube
                     if (upload.YoutubeAccount.IsAuthenticated)
                     {
                         UploadResult videoResult = await YoutubeVideoUploadService.UploadAsync(upload, this.resumableSessionUriSet, this.tokenSource.Token, resetEvent).ConfigureAwait(false);
+                        JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
                         this.onUploadStatusChanged(upload);
 
@@ -216,8 +217,6 @@ namespace Drexel.VidUp.Youtube
                         {
                             dataSent = true;
                         }
-
-                        JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
                         if (videoResult == UploadResult.StoppedWithDataSent || videoResult == UploadResult.StoppedWithoutDataSent)
                         {
@@ -298,7 +297,13 @@ namespace Drexel.VidUp.Youtube
         {
             if ((DateTime.Now - this.lastSerialization).TotalSeconds >= Uploader.serializationInterval)
             {
-                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                UploadProgress progress = new UploadProgress
+                {
+                    UploadGuid = this.currentUpload.Guid,
+                    BytesSent = this.currentUpload.BytesSent
+                };
+
+                JsonSerializationContent.JsonSerializer.SerializeUploadProgress(progress);
                 this.lastSerialization = DateTime.Now;
             }
         }

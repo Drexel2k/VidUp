@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
@@ -14,6 +15,7 @@ namespace Drexel.VidUp.Json.Content
         private string templateListFilePath;
         private string allUploadsFilePath;
         private string youtubeAccountListFilePath;
+        private string uploadProgressFilePath;
 
         private UploadList uploadList;
         private TemplateList templateList;
@@ -31,6 +33,7 @@ namespace Drexel.VidUp.Json.Content
             this.templateListFilePath = Path.Combine(serializationFolder, "templatelist.json");
             this.allUploadsFilePath = Path.Combine(serializationFolder, "uploads.json");
             this.youtubeAccountListFilePath = Path.Combine(serializationFolder, "accountlist.json");
+            this.uploadProgressFilePath = Path.Combine(serializationFolder, "uploadprogress.json");
 
             this.uploadList = uploadList;
             this.templateList = templateList;
@@ -155,6 +158,22 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccountList: End.", TraceLevel.Detailed);
+        }
+
+        public void SerializeUploadProgress(UploadProgress progress)
+        {
+            Tracer.Write($"JsonSerializationContent.SerializeUploadProgress: Start.", TraceLevel.Detailed);
+            JsonSerializer serializer = new JsonSerializer();
+
+            serializer.Formatting = Formatting.Indented;
+
+            using (StreamWriter sw = new StreamWriter(this.uploadProgressFilePath))
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(writer, progress);
+            }
+
+            Tracer.Write($"JsonSerializationContent.SerializeUploadProgress: End.", TraceLevel.Detailed);
         }
     }
 }

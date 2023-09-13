@@ -20,6 +20,7 @@ namespace Drexel.VidUp.Json.Content
         private string templateListFilePath;
         private string allUploadsFilePath;
         private string youtubeAccountListFilePath;
+        private string uploadProgressFilePath;
         private string serializationFolder;
 
         private string thumbnailFallbackImageFolder;
@@ -36,6 +37,7 @@ namespace Drexel.VidUp.Json.Content
             this.templateListFilePath = Path.Combine(this.serializationFolder, "templatelist.json");
             this.allUploadsFilePath = Path.Combine(this.serializationFolder, "uploads.json");
             this.youtubeAccountListFilePath = Path.Combine(this.serializationFolder, "accountlist.json");
+            this.uploadProgressFilePath = Path.Combine(serializationFolder, "uploadprogress.json");
 
             this.thumbnailFallbackImageFolder = thumbnailFallbackImageFolder;
         }
@@ -53,8 +55,49 @@ namespace Drexel.VidUp.Json.Content
             this.createTemplateListToRepository();
             reSerialize.UploadList = this.createUploadListToRepository() || reSerialize.UploadList;
             this.checkConsistency();
+            reSerialize.AllUploads = this.deserializeUploadProgress() || reSerialize.UploadList;
 
             Tracer.Write($"JsonDeserializationContent.Deserialize: End.");
+        }
+
+        private bool deserializeUploadProgress()
+        {
+            bool reserialze = false;
+            Tracer.Write($"JsonDeserializationContent.deserializeUploadProgress: Start.");
+            if (!File.Exists(this.uploadProgressFilePath))
+            {
+                Tracer.Write($"JsonDeserializationContent.deserializeUploadProgress: End, no upload progress storage file found.");
+                return false;
+            }
+
+            JsonSerializer serializer = new JsonSerializer();
+            using (StreamReader sr = new StreamReader(this.uploadProgressFilePath))
+            using (JsonReader reader = new JsonTextReader(sr))
+            {
+                try
+                {
+                    UploadProgress progress = serializer.Deserialize<UploadProgress>(reader);
+                    Upload upload = JsonDeserializationContent.AllUploads.Find(upl => upl.Guid == progress.UploadGuid);
+
+                    if(upload != null)
+                    {
+                        if (upload.UploadStatusOnDeserialization == UplStatus.Uploading)
+                        {
+                            upload.BytesSent = progress.BytesSent;
+                            reserialze = true;
+                        }
+                    }
+                } 
+                catch (Exception ex)
+                {
+                    Tracer.Write($"JsonDeserializationContent.deserializeUploadProgress: End, upload progress storage file could not be deserialized.");
+                }
+            }
+
+            File.Delete(this.uploadProgressFilePath);
+
+            Tracer.Write($"JsonDeserializationContent.deserializeUploadProgress: End.");
+            return reserialze;
         }
 
         private bool deserializeYoutubeAccountList()
@@ -168,6 +211,11 @@ namespace Drexel.VidUp.Json.Content
                 }
             }
 
+            if (reserialize)
+            {
+                Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: Uploads from template uploads were missing in all uploads.");
+            }
+
             Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: End.");
 
             return reserialize;
@@ -263,6 +311,11 @@ namespace Drexel.VidUp.Json.Content
                         reserialize = true;
                     }
                 }
+            }
+
+            if(reserialize)
+            {
+                Tracer.Write($"JsonDeserializationContent.createUploadListToRepository: Uploads from upload list were missing in all uploads.");
             }
 
             DeserializationRepositoryContent.UploadList = new UploadList(uploads, DeserializationRepositoryContent.TemplateList, DeserializationRepositoryContent.PlaylistList, this.thumbnailFallbackImageFolder);

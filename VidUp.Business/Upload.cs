@@ -36,6 +36,7 @@ namespace Drexel.VidUp.Business
         private Template template;
         [JsonProperty]
         private UplStatus uploadStatus;
+        private UplStatus uploadStatusOnDeserialization;
         [JsonProperty]
         private DateTime? publishAt;
         [JsonProperty]
@@ -173,6 +174,11 @@ namespace Drexel.VidUp.Business
 
                 this.LastModified = DateTime.Now;
             }
+        }
+
+        public UplStatus UploadStatusOnDeserialization
+        {
+            get => this.uploadStatusOnDeserialization;
         }
 
         public DateTime? PublishAt
@@ -512,6 +518,7 @@ namespace Drexel.VidUp.Business
         [OnDeserialized()]
         private void OnDeserializingMethod(StreamingContext context)
         {
+            this.uploadStatusOnDeserialization = this.uploadStatus;
             if (this.uploadStatus == UplStatus.Uploading)
             {
                 this.uploadStatus = UplStatus.Stopped;
