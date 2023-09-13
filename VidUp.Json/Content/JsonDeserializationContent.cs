@@ -51,7 +51,7 @@ namespace Drexel.VidUp.Json.Content
             this.setTemplateOnUploads();
             reSerialize.UploadList = this.deserializeUploadListGuids();
             this.createTemplateListToRepository();
-            this.createUploadListToRepository();
+            reSerialize.UploadList = this.createUploadListToRepository() || reSerialize.UploadList;
             this.checkConsistency();
 
             Tracer.Write($"JsonDeserializationContent.Deserialize: End.");
@@ -241,21 +241,34 @@ namespace Drexel.VidUp.Json.Content
             return false;
         }
 
-        private void createUploadListToRepository()
+        private bool createUploadListToRepository()
         {
+            bool reserialize = false;
             Tracer.Write($"JsonDeserializationContent.createUploadListToRepository: Start.");
             List<Upload> uploads = new List<Upload>();
             if (this.uploadListGuids != null && this.uploadListGuids.Count > 0)
             {
+                Upload upload;
                 foreach (Guid guid in this.uploadListGuids)
                 {
-                    uploads.Add(JsonDeserializationContent.AllUploads.Find(upload => upload.Guid == guid));
+                    upload = null;
+                    upload = JsonDeserializationContent.AllUploads.Find(upload => upload.Guid == guid);
+
+                    if (upload != null)
+                    {
+                        uploads.Add(upload);
+                    }
+                    else
+                    {
+                        reserialize = true;
+                    }
                 }
             }
 
             DeserializationRepositoryContent.UploadList = new UploadList(uploads, DeserializationRepositoryContent.TemplateList, DeserializationRepositoryContent.PlaylistList, this.thumbnailFallbackImageFolder);
 
             Tracer.Write($"JsonDeserializationContent.createUploadListToRepository: End.");
+            return reserialize;
         }
 
         private void createTemplateListToRepository()
