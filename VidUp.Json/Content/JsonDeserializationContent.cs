@@ -134,11 +134,12 @@ namespace Drexel.VidUp.Json.Content
 
         private bool deserializeTemplateList()
         {
+            bool reserialize = false;
             Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: Start.");
             if (!File.Exists(this.templateListFilePath))
             {
                 Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: End, no template list storage file found.");
-                return false;
+                return reserialize;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -158,9 +159,18 @@ namespace Drexel.VidUp.Json.Content
                 this.templates = serializer.Deserialize<List<Template>>(reader);
             }
 
+            foreach (Template template in this.templates) 
+            {
+                if (template.Uploads.Contains(null))
+                {
+                    template.RemoveUpload(null);
+                    reserialize = true;
+                }
+            }
+
             Tracer.Write($"JsonDeserializationContent.deserializeTemplateList: End.");
 
-            return false;
+            return reserialize;
         }
 
         //setting templates on uploads by reading json again

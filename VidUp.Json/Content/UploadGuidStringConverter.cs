@@ -18,7 +18,7 @@ namespace Drexel.VidUp.Json.Content
             Upload upload = JsonDeserializationContent.AllUploads.Find(upload2 => upload2.Guid == Guid.Parse(guidString));
             if (upload == null)
             {
-                throw new InvalidOperationException("Upload not found in all uploads.");
+                return null;
             }
 
             return upload;

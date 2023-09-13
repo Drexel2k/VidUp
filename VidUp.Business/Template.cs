@@ -436,7 +436,14 @@ namespace Drexel.VidUp.Business
 
         public void RemoveUpload(Upload upload)
         {
-            this.uploads.Remove(upload);
+            if (upload == null)
+            {
+                this.uploads.RemoveAll(upl => upl == null);
+            }
+            else
+            {
+                this.uploads.Remove(upload);
+            }
         }
 
         private void onThumbnailFallbackChanged(string oldValue)

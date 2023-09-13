@@ -15,7 +15,6 @@ using Drexel.VidUp.Youtube.AuthenticationService;
 using Drexel.VidUp.Youtube.Http;
 using Drexel.VidUp.Youtube.VideoUploadService.Data;
 using HeyRed.Mime;
-using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 
 namespace Drexel.VidUp.Youtube.VideoUploadService
@@ -256,7 +255,7 @@ namespace Drexel.VidUp.Youtube.VideoUploadService
                             catch (Exception e)
                             {
                                 Tracer.Write($"YoutubeVideoUploadService.Upload: HttpClient.SendAsync Exception resume position {lastResumePositionBeforeError.ToString("N0")} try {uploadTry}: {e.ToString()}.");
-                                upload.AddStatusInformation(StatusInformationCreator.Create("ERR0027", $"Upload failed with resume position {lastResumePositionBeforeError.ToString("N0")} try {uploadTry}, current position {upload.BytesSent}.", e));
+                                upload.AddStatusInformation(StatusInformationCreator.Create("ERR0027", $"Upload failed with resume position {lastResumePositionBeforeError.ToString("N0")} try {uploadTry}, current position {upload.BytesSent.ToString("N0")}.", e));
                                 
                                 error = true;
                                 uploadTry++;
