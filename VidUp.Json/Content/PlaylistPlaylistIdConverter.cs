@@ -19,7 +19,7 @@ namespace Drexel.VidUp.Json.Content
             Playlist playlist = DeserializationRepositoryContent.PlaylistList.Find(playlist => playlist.PlaylistId == playlistId);
             if (playlist == null)
             {
-                throw new SerializationException("Playlist not found.");
+                JsonDeserializationContent.AllPlaylistsDeserialiozed = false;
             }
 
             return playlist;

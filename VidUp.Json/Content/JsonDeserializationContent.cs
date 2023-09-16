@@ -25,6 +25,33 @@ namespace Drexel.VidUp.Json.Content
 
         private string thumbnailFallbackImageFolder;
 
+        private static bool allPlaylistsDeserialiozed = true;
+        private static bool allYoutubeAccountsDeserialiozed = true;
+        private static YoutubeAccount youtubeAccountForNullReplacement;
+        public static bool AllPlaylistsDeserialiozed
+        {
+            set => JsonDeserializationContent.allPlaylistsDeserialiozed = value;
+        }
+
+        public static bool AllYoutubeAccountsDeserialiozed
+        {
+            set => JsonDeserializationContent.allYoutubeAccountsDeserialiozed = value;
+        }
+
+        public static YoutubeAccount YoutubeAccountForNullReplacement
+        {
+            get
+            {
+                if(JsonDeserializationContent.youtubeAccountForNullReplacement == null)
+                {
+                    JsonDeserializationContent.youtubeAccountForNullReplacement = new YoutubeAccount($"Missing account replacement {DateTime.Now.ToString("yyyyy-MM-dd_HH-mm-ss")}");
+                    DeserializationRepositoryContent.YoutubeAccountList.AddYoutubeAccount(JsonDeserializationContent.youtubeAccountForNullReplacement);
+                }
+
+                return JsonDeserializationContent.youtubeAccountForNullReplacement;
+            }
+        }
+
         public static List<Upload> AllUploads { get; set; }
         private List<Template> templates { get; set; }
         private List<Guid> uploadListGuids { get; set; }
@@ -48,14 +75,45 @@ namespace Drexel.VidUp.Json.Content
 
             reSerialize.YoutubeAccountList = this.deserializeYoutubeAccountList();
             reSerialize.PlaylistList = this.deserializePlaylistList();
-            reSerialize.AllUploads = this.deserializeAllUploads();
+            if (!JsonDeserializationContent.allYoutubeAccountsDeserialiozed)
+            {
+                reSerialize.PlaylistList = true;
+                reSerialize.YoutubeAccountList = true;
+            }
+
+            JsonDeserializationContent.allYoutubeAccountsDeserialiozed = true;
+            this.deserializeAllUploads();
+            if(!JsonDeserializationContent.allPlaylistsDeserialiozed)
+            {
+                reSerialize.AllUploads = true;
+            }
+
+            if (!JsonDeserializationContent.allYoutubeAccountsDeserialiozed)
+            {
+                reSerialize.AllUploads = true;
+                reSerialize.YoutubeAccountList = true;
+            }
+
+            JsonDeserializationContent.allPlaylistsDeserialiozed = true;
+            JsonDeserializationContent.allYoutubeAccountsDeserialiozed = true;
             reSerialize.TemplateList = this.deserializeTemplateList();
-            this.setTemplateOnUploads();
-            reSerialize.UploadList = this.deserializeUploadListGuids();
+            if (!JsonDeserializationContent.allPlaylistsDeserialiozed)
+            {
+                reSerialize.TemplateList = true;
+            }
+
+            if (!JsonDeserializationContent.allYoutubeAccountsDeserialiozed)
+            {
+                reSerialize.TemplateList = true;
+                reSerialize.YoutubeAccountList = true;
+            }
+
+            reSerialize.TemplateList = this.setTemplateOnUploads() || reSerialize.TemplateList;
+            this.deserializeUploadListGuids();
             this.createTemplateListToRepository();
-            reSerialize.UploadList = this.createUploadListToRepository() || reSerialize.UploadList;
+            reSerialize.UploadList = this.createUploadListToRepository();
             this.checkConsistency();
-            reSerialize.AllUploads = this.deserializeUploadProgress() || reSerialize.UploadList;
+            reSerialize.AllUploads = this.deserializeUploadProgress() || reSerialize.AllUploads;
 
             Tracer.Write($"JsonDeserializationContent.Deserialize: End.");
         }
@@ -145,13 +203,13 @@ namespace Drexel.VidUp.Json.Content
             return false;
         }
 
-        private bool deserializeAllUploads()
+        private void deserializeAllUploads()
         {
             Tracer.Write($"JsonDeserializationContent.deserializeAllUploads: Start.");
             if (!File.Exists(this.allUploadsFilePath))
             {
                 Tracer.Write($"JsonDeserializationContent.deserializeAllUploads: End, no all uploads storage file found.");
-                return false;
+                return;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -171,8 +229,6 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonDeserializationContent.deserializeAllUploads: End.");
-
-            return false;
         }
 
         private bool deserializeTemplateList()
@@ -222,8 +278,9 @@ namespace Drexel.VidUp.Json.Content
         }
 
         //setting templates on uploads by reading json again
-        private void setTemplateOnUploads()
+        private bool setTemplateOnUploads()
         {
+            bool reserialize = false;
             Tracer.Write($"JsonDeserializationContent.setTemplateOnUploads: Start.");
             if (JsonDeserializationContent.AllUploads != null && this.templates != null)
             {
@@ -251,26 +308,30 @@ namespace Drexel.VidUp.Json.Content
                         FieldInfo templateFieldInfo = uploadType.GetField("template", BindingFlags.NonPublic | BindingFlags.Instance);
                         Template template = this.templates.Find(template => template.Guid == uploadTemplateMap[upload.Guid]);
 
-                        if (template == null)
+                        if (template != null)
                         {
-                            throw new SerializationException("Template not found.");
+                            templateFieldInfo.SetValue(upload, template);
+                        }      
+                        else
+                        {
+                            Tracer.Write($"JsonDeserializationContent.setTemplateOnUploads: Template {uploadTemplateMap[upload.Guid]} not found.");
+                            reserialize = true;
                         }
-
-                        templateFieldInfo.SetValue(upload, template);
                     }
                 }
             }
 
             Tracer.Write($"JsonDeserializationContent.setTemplateOnUploads: End.");
+            return reserialize;
         }
 
-        private bool deserializeUploadListGuids()
+        private void deserializeUploadListGuids()
         {
             Tracer.Write($"JsonDeserializationContent.deserializeUploadListGuids: Start.");
             if (!File.Exists(this.uploadListFilePath))
             {
                 Tracer.Write($"JsonDeserializationContent.deserializeUploadListGuids: End, no upload list guid storage file found.");
-                return false;
+                return;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -285,8 +346,6 @@ namespace Drexel.VidUp.Json.Content
             this.uploadListGuids = guids.Guids;
 
             Tracer.Write($"JsonDeserializationContent.deserializeUploadListGuids: End.");
-
-            return false;
         }
 
         private bool createUploadListToRepository()
@@ -300,7 +359,11 @@ namespace Drexel.VidUp.Json.Content
                 foreach (Guid guid in this.uploadListGuids)
                 {
                     upload = null;
-                    upload = JsonDeserializationContent.AllUploads.Find(upload => upload.Guid == guid);
+
+                    if (JsonDeserializationContent.AllUploads != null)
+                    {
+                        upload = JsonDeserializationContent.AllUploads.Find(upload => upload.Guid == guid);
+                    }
 
                     if (upload != null)
                     {

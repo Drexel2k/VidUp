@@ -15,6 +15,11 @@ namespace Drexel.VidUp.Json.Content
                 return null;
             }
 
+            if(JsonDeserializationContent.AllUploads == null)
+            {
+                return null;
+            }
+            
             Upload upload = JsonDeserializationContent.AllUploads.Find(upload2 => upload2.Guid == Guid.Parse(guidString));
             if (upload == null)
             {
