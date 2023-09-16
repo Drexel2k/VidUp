@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Serialization;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
-using TraceLevel = System.Diagnostics.TraceLevel;
 
 namespace Drexel.VidUp.Json.Content
 {
@@ -77,6 +73,7 @@ namespace Drexel.VidUp.Json.Content
             reSerialize.PlaylistList = this.deserializePlaylistList();
             if (!JsonDeserializationContent.allYoutubeAccountsDeserialiozed)
             {
+                Tracer.Write($"JsonDeserializationContent.Deserialize: At least one youtube account on playlist list deserialization was missing and replaced.");
                 reSerialize.PlaylistList = true;
                 reSerialize.YoutubeAccountList = true;
             }
@@ -85,11 +82,13 @@ namespace Drexel.VidUp.Json.Content
             this.deserializeAllUploads();
             if(!JsonDeserializationContent.allPlaylistsDeserialiozed)
             {
+                Tracer.Write($"JsonDeserializationContent.Deserialize: At least one playlist on all uploads deserialization was missing.");
                 reSerialize.AllUploads = true;
             }
 
             if (!JsonDeserializationContent.allYoutubeAccountsDeserialiozed)
             {
+                Tracer.Write($"JsonDeserializationContent.Deserialize: At least one youtube account on all uploads deserialization was missing and replaced.");
                 reSerialize.AllUploads = true;
                 reSerialize.YoutubeAccountList = true;
             }
@@ -99,11 +98,13 @@ namespace Drexel.VidUp.Json.Content
             reSerialize.TemplateList = this.deserializeTemplateList();
             if (!JsonDeserializationContent.allPlaylistsDeserialiozed)
             {
+                Tracer.Write($"JsonDeserializationContent.Deserialize: At least one playlist on template list deserialization was missing.");
                 reSerialize.TemplateList = true;
             }
 
             if (!JsonDeserializationContent.allYoutubeAccountsDeserialiozed)
             {
+                Tracer.Write($"JsonDeserializationContent.Deserialize: At least one youtube account on template list deserialization was missing and replaced.");
                 reSerialize.TemplateList = true;
                 reSerialize.YoutubeAccountList = true;
             }
@@ -378,7 +379,7 @@ namespace Drexel.VidUp.Json.Content
 
             if(reserialize)
             {
-                Tracer.Write($"JsonDeserializationContent.createUploadListToRepository: Uploads from upload list were missing in all uploads.");
+                Tracer.Write($"JsonDeserializationContent.createUploadListToRepository: At least one upload from upload list were missing in all uploads.");
             }
 
             DeserializationRepositoryContent.UploadList = new UploadList(uploads, DeserializationRepositoryContent.TemplateList, DeserializationRepositoryContent.PlaylistList, this.thumbnailFallbackImageFolder);
