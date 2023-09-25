@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Windows.Forms;
-using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.ViewModels
 {

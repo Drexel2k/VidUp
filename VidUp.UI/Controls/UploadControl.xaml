@@ -53,7 +53,7 @@
             </CheckBox>-->
 
             <Button Grid.Row="0" Grid.Column="3" HorizontalAlignment="Right" Margin="0,5,7,5"  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
-                <materialDesign:PopupBox  StaysOpen="False" >
+                <materialDesign:PopupBox StaysOpen="False" >
                     <StackPanel>
                         <Button Content="Reset State" Command="{Binding ParameterlessCommand}" CommandParameter="resetstatus" IsEnabled="{Binding ResetStateCommandEnabled}" />
                         <Button Content="Pause" Command="{Binding ParameterlessCommand}" CommandParameter="pause" IsEnabled="{Binding StateCommandsEnabled}" />

@@ -7,7 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
@@ -73,6 +73,22 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.viewModels[this.tabNo];
+            }
+        }
+
+        public object CurrentRibbonViewModel
+        {
+            get
+            {
+                return this.ribbonViewModels[this.tabNo];
+            }
+        }
+
+        public object UploadRibbonViewModel
+        {
+            get
+            {
+                return this.ribbonViewModels[0];
             }
         }
 
@@ -300,6 +316,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.tabNo = value;
                     this.raisePropertyChanged("TabNo");
                     this.raisePropertyChanged("CurrentViewModel");
+                    this.raisePropertyChanged("CurrentRibbonViewModel");
                 }
             }
         }
@@ -681,12 +698,12 @@ namespace Drexel.VidUp.UI.ViewModels
                     {
                         case PostUploadAction.SleepMode:
                             Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Sleep.");
-                            Application.SetSuspendState(PowerState.Suspend, false, false);
+                            SuspendStateHelper.SetSuspendState(false, false, false);
                             Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Sleep ended.");
                             break;
                         case PostUploadAction.Hibernate:
                             Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Hibernate.");
-                            Application.SetSuspendState(PowerState.Hibernate, false, false);
+                            SuspendStateHelper.SetSuspendState(true, false, false);
                             Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Hibernate ended.");
                             break;
                         case PostUploadAction.Shutdown:

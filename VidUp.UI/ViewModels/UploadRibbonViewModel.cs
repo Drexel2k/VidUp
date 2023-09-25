@@ -37,6 +37,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private bool resumeUploads = true;
         private long maxUploadInBytesPerSecond = 0;
         private bool keepLastUploadPerTemplate;
+        private int expandedExpander = 0;
 
         private TemplateComboboxViewModel deleteSelectedTemplate;
         private string deleteSelectedUploadStatus = "Finished";
@@ -135,6 +136,15 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     this.raisePropertyChanged("KeepLastUploadPerTemplate");
                 }
+            }
+        }
+        public int ContextExpanderIsExpanded
+        {
+            get => this.expandedExpander;
+            set
+            {
+                this.expandedExpander = value;
+                this.raisePropertyChanged("ContextExpanderIsExpanded");
             }
         }
 
