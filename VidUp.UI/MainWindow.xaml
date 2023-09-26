@@ -28,7 +28,7 @@
     <materialDesign:DialogHost Identifier="RootDialog">
         <materialDesign:DrawerHost x:Name="DrawerHost">
             <materialDesign:DrawerHost.LeftDrawerContent>
-                <StackPanel DataContext="{Binding UploadRibbonViewModel}">
+                <StackPanel DataContext="{Binding RibbonViewModels[0]}">
                     <Button Width="50" Padding="0" Margin="0 0 0 2" HorizontalAlignment="Right" Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}" CommandParameter="{x:Static Dock.Left}" ToolTip="Close advanced menu." ToolTipService.ShowDuration="60000" Style="{StaticResource MaterialDesignRaisedLightButton}">
                         <materialDesign:PackIcon Width="24" Height="24" Kind="ArrowLeft"/>
                     </Button>
@@ -194,7 +194,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TabControl Grid.Row="0" HorizontalContentAlignment="Left" SelectedIndex="{Binding TabNo, Mode=TwoWay}" materialDesign:ColorZoneAssist.Mode="PrimaryMid" Style="{StaticResource MaterialDesignFilledTabControl}"  Drop="fileDrop" AllowDrop="True">
-                    <TabItem Header="UPLOAD" Width="100" DataContext="{Binding CurrentRibbonViewModel}">
+                    <TabItem Header="UPLOAD" Width="100" DataContext="{Binding RibbonViewModels[0]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
                                 <Button Command="{x:Static materialDesign:DrawerHost.OpenDrawerCommand}" CommandParameter="{x:Static Dock.Left}" Style="{StaticResource MaterialDesignRaisedLightButton}" Margin="0 0 0 3" Padding="5" ToolTip="Advanced Options." ToolTipService.ShowDuration="60000">
@@ -244,7 +244,7 @@
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>
-                    <TabItem Header="TEMPLATES" DataContext="{Binding CurrentRibbonViewModel}">
+                    <TabItem Header="TEMPLATES" DataContext="{Binding RibbonViewModels[1]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
                                 <StackPanel Orientation="Vertical">
@@ -285,7 +285,7 @@
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>
-                    <TabItem Header="PLAYLISTS" DataContext="{Binding CurrentRibbonViewModel}">
+                    <TabItem Header="PLAYLISTS" DataContext="{Binding RibbonViewModels[2]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
                                 <StackPanel Orientation="Vertical">
@@ -332,7 +332,7 @@
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>
-                    <TabItem Header="SETTINGS" DataContext="{Binding CurrentRibbonViewModel}">
+                    <TabItem Header="SETTINGS" DataContext="{Binding RibbonViewModels[3]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
                                 <StackPanel Orientation="Vertical">
@@ -350,7 +350,7 @@
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>
-                    <TabItem Header="VIDUP" DataContext="{Binding CurrentRibbonViewModel}">
+                    <TabItem Header="VIDUP" DataContext="{Binding RibbonViewModels[4]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2"  Height="73">
                                 <Button Width="48" Height="48" Command="{Binding DonateCommand}" Style="{StaticResource MaterialDesignRaisedLightButton}" Margin="0 0 0 3" Padding="5">

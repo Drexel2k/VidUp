@@ -7,7 +7,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
@@ -73,22 +72,6 @@ namespace Drexel.VidUp.UI.ViewModels
             get
             {
                 return this.viewModels[this.tabNo];
-            }
-        }
-
-        public object CurrentRibbonViewModel
-        {
-            get
-            {
-                return this.ribbonViewModels[this.tabNo];
-            }
-        }
-
-        public object UploadRibbonViewModel
-        {
-            get
-            {
-                return this.ribbonViewModels[0];
             }
         }
 

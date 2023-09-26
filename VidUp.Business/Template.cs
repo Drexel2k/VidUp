@@ -61,6 +61,10 @@ namespace Drexel.VidUp.Business
         private Category category;
         [JsonProperty]
         private YoutubeAccount youtubeAccount;
+        [JsonProperty]
+        private bool enableAutomation;
+        [JsonProperty]
+        private AutomationSettings automationSettings;
 
         private bool isDummy = false;
 
@@ -335,6 +339,34 @@ namespace Drexel.VidUp.Business
                 }
 
                 this.youtubeAccount = value;
+                this.LastModified = DateTime.Now;
+            }
+        }
+
+        public bool EnableAutomation
+        {
+            get => this.enableAutomation;
+            set
+            {
+                if (value)
+                {
+                    if (this.automationSettings == null)
+                    {
+                        this.AutomationSettings = new AutomationSettings();
+                    }
+                }
+
+                this.enableAutomation = value;
+                this.LastModified = DateTime.Now;
+            }
+        }
+
+        public AutomationSettings AutomationSettings
+        {
+            get => this.automationSettings;
+            set
+            {
+                this.automationSettings = value;
                 this.LastModified = DateTime.Now;
             }
         }

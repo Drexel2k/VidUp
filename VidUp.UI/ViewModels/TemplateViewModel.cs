@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
@@ -11,6 +12,7 @@ using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.UI.Controls;
 using Drexel.VidUp.UI.EventAggregation;
 using MaterialDesignThemes.Wpf;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -477,6 +479,152 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
+        public bool EnableAutomation
+        {
+            get => this.template != null ? this.template.EnableAutomation : false;
+            set
+            {
+                this.template.EnableAutomation = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("EnableAutomation");
+            }
+        }
+
+        public bool AddNewFilesAutomatically
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.AddNewFilesAutomatically : false;
+            set
+            {
+                this.template.AutomationSettings.AddNewFilesAutomatically = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("AddNewFilesAutomatically");
+            }
+        }
+
+        public string FileExtensions
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.FileExtensions : null;
+            set
+            {
+                this.template.AutomationSettings.FileExtensions = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("FileExtensions");
+            }
+        }
+
+        public string DeviatingFolderPath
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.DeviatingFolderPath : null;
+            set
+            {
+                this.template.AutomationSettings.DeviatingFolderPath = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("DeviatingFolderPath");
+            }
+        }
+
+        public string[] AddWithStatusUploadStatuses
+        {
+            get
+            {
+                List<UplStatus> filteredUplStatuses = Enum.GetValues(typeof(UplStatus)).Cast<UplStatus>().Where(
+                    act => act == UplStatus.ReadyForUpload ||
+                           act == UplStatus.Paused ||
+                           act == UplStatus.Stopped).ToList();
+
+                //conversion to string as the converter in xaml handles strings for entries like 'all'
+                List<string> filteredUplStatusesStrings = filteredUplStatuses.Select(v => Enum.GetName(typeof(UplStatus), v)).ToList();
+                return filteredUplStatusesStrings.ToArray();
+            }
+        }
+
+        public string AddWithStatusSelectedUploadStatus
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? Enum.GetName(typeof(UplStatus), this.template.AutomationSettings.AddWithStatus) : "Ready for Upload";
+            set
+            {
+                this.template.AutomationSettings.AddWithStatus = (UplStatus)Enum.Parse(typeof(UplStatus), value); ;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("AddWithStatusSelectedUploadStatus");
+            }
+        }
+
+        public bool StartUploadingAfterAdd
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.StartUploadingAfterAdd : false;
+            set
+            {
+                this.template.AutomationSettings.StartUploadingAfterAdd = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("StartUploadingAfterAdd");
+            }
+        }
+
+        public string ExecuteAfterEachPath
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.ExecuteAfterEachPath : null;
+            set
+            {
+                this.template.AutomationSettings.ExecuteAfterEachPath = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("ExecuteAfterEachPath");
+            }
+        }
+
+        public bool AddUploadInfoParameterAfterEach
+        {
+            get => this.template != null ? this.template.AutomationSettings.AddUploadInfoParameterAfterEach : false;
+            set
+            {
+                this.template.AutomationSettings.AddUploadInfoParameterAfterEach = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("AddUploadInfoParameterAfterEach");
+            }
+        }
+
+        public string ExecuteAfterTemplatePath
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.ExecuteAfterTemplatePath : null;
+            set
+            {
+                this.template.AutomationSettings.ExecuteAfterTemplatePath = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("ExecuteAfterTemplatePath");
+            }
+        }
+
+        public bool AddUploadInfoParameterAfterTemplate
+        {
+            get => this.template != null ? this.template.AutomationSettings.AddUploadInfoParameterAfterTemplate : false;
+            set
+            {
+                this.template.AutomationSettings.AddUploadInfoParameterAfterTemplate = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("AddUploadInfoParameterAfterTemplate");
+            }
+        }
+
+        public string ExecuteAfterAllPath
+        {
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.ExecuteAfterAllPath : null;
+            set
+            {
+                this.template.AutomationSettings.ExecuteAfterAllPath = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("ExecuteAfterAllPath");
+            }
+        }
+
+        public bool AddUploadInfoParameterAfterAll
+        {
+            get => this.template != null ? this.template.AutomationSettings.AddUploadInfoParameterAfterAll : false;
+            set
+            {
+                this.template.AutomationSettings.AddUploadInfoParameterAfterAll = value;
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+                this.raisePropertyChanged("AddUploadInfoParameterAfterAll");
+            }
+        }
         #endregion properties
 
         public TemplateViewModel(Template template, ObservablePlaylistViewModels observablePlaylistViewModels, ObservableYoutubeAccountViewModels observableYoutubeAccountViewModels, YoutubeAccount selectedYoutubeAccount)
@@ -572,6 +720,30 @@ namespace Drexel.VidUp.UI.ViewModels
                     break;
                 case "showfinisheduploads":
                     this.showFinishedUploads();
+                    break;
+                case "openfiledialogdeviating":
+                    this.openFileDialog("deviating");
+                    break;
+                case "resetdeviating":
+                    this.resetValue("deviating");
+                    break;
+                case "openfiledialogexecuteaftereach":
+                    this.openFileDialog("executeaftereach");
+                    break;
+                case "resetexecuteaftereach":
+                    this.resetValue("executeaftereach");
+                    break;
+                case "openfiledialogexecuteaftertemplate":
+                    this.openFileDialog("executeaftertemplate");
+                    break;
+                case "resetexecuteaftertemplate":
+                    this.resetValue("executeaftertemplate");
+                    break;
+                case "openfiledialogexecuteafterall":
+                    this.openFileDialog("executeafterall");
+                    break;
+                case "resetexecuteafterall":
+                    this.resetValue("executeafterall");
                     break;
                 default:
                     throw new InvalidOperationException("Invalid parameter for parameterlessCommandAction.");
@@ -696,6 +868,61 @@ namespace Drexel.VidUp.UI.ViewModels
                 return;
             }
 
+            if (target == "deviating")
+            {
+                FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+                DialogResult result = folderDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    this.DeviatingFolderPath = folderDialog.SelectedPath;
+                }
+
+                return;
+            }
+
+            if (target == "executeaftereach")
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Executables|*.exe;*.bat";
+                DialogResult result = openFileDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    this.ExecuteAfterEachPath = openFileDialog.FileName;
+                }
+
+                return;
+            }
+
+            if (target == "executeaftertemplate")
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Executables|*.exe;*.bat";
+                DialogResult result = openFileDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    this.ExecuteAfterTemplatePath = openFileDialog.FileName;
+                }
+
+                return;
+            }
+
+            if (target == "executeafterall")
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Executables|*.exe;*.bat";
+                DialogResult result = openFileDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    this.ExecuteAfterTemplatePath = openFileDialog.FileName;
+                }
+
+                return;
+            }
+
             throw new InvalidOperationException("Invalid parameter for openFileDialog.");
         }
 
@@ -717,6 +944,18 @@ namespace Drexel.VidUp.UI.ViewModels
                     break;
                 case "placeholder":
                     this.PlaceholderFolderPath = null;
+                    break;
+                case "deviating":
+                    this.DeviatingFolderPath = null;
+                    break;
+                case "executeaftereach":
+                    this.ExecuteAfterEachPath = null;
+                    break;
+                case "executeaftertemplate":
+                    this.ExecuteAfterTemplatePath = null;
+                    break;
+                case "executeafterall":
+                    this.ExecuteAfterAllPath = null;
                     break;
                 default:
                     throw new InvalidOperationException("Invalid parameter for resetValue.");

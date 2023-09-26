@@ -21,7 +21,7 @@
         <TextBlock Grid.Row="1" x:Name="ConfirmationTextContent" TextWrapping="Wrap" />
         <StackPanel Orientation="Horizontal" Grid.Row="2"
                     Margin="0 16 0 0">
-            <Button IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" IsEnabled="{Binding FormValid}" >
+            <Button IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
                 <Button.CommandParameter>
                     <system:Boolean>True</system:Boolean>
                 </Button.CommandParameter>

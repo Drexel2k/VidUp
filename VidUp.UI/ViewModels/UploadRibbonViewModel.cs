@@ -248,6 +248,8 @@ namespace Drexel.VidUp.UI.ViewModels
                     act => act == UplStatus.ReadyForUpload ||
                            act == UplStatus.Paused ||
                            act == UplStatus.Stopped).ToList();
+
+                //conversion to string as the converter in xaml handles strings for entries like 'all'
                 List<string> filteredUplStatusesStrings = filteredUplStatuses.Select(v => Enum.GetName(typeof(UplStatus), v)).ToList();
                 return filteredUplStatusesStrings.ToArray();
             }
