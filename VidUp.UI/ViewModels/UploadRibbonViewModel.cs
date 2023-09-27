@@ -36,6 +36,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private Uploader uploader;
         private bool resumeUploads = true;
         private long maxUploadInBytesPerSecond = 0;
+        private bool keepLastUploadPerTemplateSide;
         private bool keepLastUploadPerTemplate;
         private int expandedExpander = 0;
 
@@ -138,6 +139,27 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
         }
+
+        public bool KeepLastUploadPerTemplateSide
+        {
+            get
+            {
+                return this.keepLastUploadPerTemplateSide;
+            }
+
+            set
+            {
+                if (this.keepLastUploadPerTemplateSide != value)
+                {
+                    this.keepLastUploadPerTemplateSide = value;
+                    Settings.Instance.UserSettings.KeepLastUploadPerTemplateSide = value;
+                    JsonSerializationSettings.JsonSerializer.SerializeSettings();
+
+                    this.raisePropertyChanged("KeepLastUploadPerTemplateSide");
+                }
+            }
+        }
+
         public int ContextExpanderIsExpanded
         {
             get => this.expandedExpander;
@@ -412,7 +434,10 @@ namespace Drexel.VidUp.UI.ViewModels
                     this.recalculatePublishAt();
                     break;
                 case "delete":
-                    this.deleteUploadsAsync();
+                    this.deleteUploadsAsync(true);
+                    break;
+                case "deleteside":
+                    this.deleteUploadsAsync(false);
                     break;
                 case "resetstatus":
                     this.resetUploadStatusAsync();
@@ -642,32 +667,35 @@ namespace Drexel.VidUp.UI.ViewModels
         }
 
         //parameter skips dialog for testing
-        private async void deleteUploadsAsync()
+        private async void deleteUploadsAsync(bool quick)
         {
-            Tracer.Write($"UploadListViewModel.deleteUploads(object parameter): Start.");
+            Tracer.Write($"UploadListViewModel.deleteUploads(quick={quick}): Start.");
             bool remove = true;
 
-            if (this.deleteSelectedUploadStatus == "All" ||
+            if (quick || this.deleteSelectedUploadStatus == "All" ||
                 (UplStatus) Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus) != UplStatus.Finished)
             {
-                ConfirmControl control = new ConfirmControl(
-                    $"Do you really want to remove all uploads with template = '{this.deleteSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.deleteSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'?",
-                    true);
+                if (!quick)
+                {
+                    ConfirmControl control = new ConfirmControl(
+                        $"Do you really want to remove all uploads with template = '{this.deleteSelectedTemplate.Template.Name}' and status = '{new UplStatusStringValuesConverter().Convert(this.deleteSelectedUploadStatus, typeof(string), null, CultureInfo.CurrentCulture)}'?",
+                        true);
 
-                remove = (bool) await DialogHost.Show(control, "RootDialog");
+                    remove = (bool)await DialogHost.Show(control, "RootDialog");
+                }
             }
             
             if (remove)
             {
                 Tracer.Write($"UploadListViewModel.deleteUploads: DialogResult OK.");
-                this.DeleteUploads();
+                this.DeleteUploads(quick);
             }
             else
             {
                 Tracer.Write($"UploadListViewModel.deleteUploads: DialogResult not OK.");
             }
 
-            Tracer.Write($"UploadListViewModel.deleteUploads(object parameter): End.");
+            Tracer.Write($"UploadListViewModel.deleteUploads(quick={quick}): End.");
         }
 
         //parameter skips dialog for testing
@@ -904,75 +932,103 @@ namespace Drexel.VidUp.UI.ViewModels
         public void DeleteUpload(UploadDeleteMessage uploadDeleteMessage)
         {
             Tracer.Write($"UploadListViewModel.DeleteUpload: Start, Guid '{uploadDeleteMessage.UploadGuid}'.");
-            this.deleteUploads(upload => upload.Guid == uploadDeleteMessage.UploadGuid, true);
+            this.deleteUploads(upload => upload.Guid == uploadDeleteMessage.UploadGuid, true, false);
             Tracer.Write($"UploadListViewModel.DeleteUpload: End.");
         }
 
         //exposed for testing
-        public void DeleteUploads()
+        public void DeleteUploads(bool quick)
         {
-            Tracer.Write($"UploadListViewModel.deleteUploads: Start.");
+            Tracer.Write($"UploadListViewModel.deleteUploads(quick={quick}): Start.");
             Predicate<Upload>[] predicates = new Predicate<Upload>[2];
 
-            if (this.deleteSelectedUploadStatus == "All")
+            if (quick)
             {
-                Tracer.Write($"UploadListViewModel.deleteUploads: with status All.");
-                predicates[0] = upload => true;
+                Tracer.Write($"UploadListViewModel.deleteUploads status with quick=true.");
+                predicates[0] = upload => upload.UploadStatus == UplStatus.Finished;
             }
             else
             {
-                UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus);
-                Tracer.Write($"UploadListViewModel.deleteUploads: with status {this.deleteSelectedUploadStatus}.");
-                predicates[0] = upload => upload.UploadStatus == status;
+                if (this.deleteSelectedUploadStatus == "All")
+                {
+                    Tracer.Write($"UploadListViewModel.deleteUploads: with status All.");
+                    predicates[0] = upload => true;
+                }
+                else
+                {
+                    UplStatus status = (UplStatus)Enum.Parse(typeof(UplStatus), this.deleteSelectedUploadStatus);
+                    Tracer.Write($"UploadListViewModel.deleteUploads: with status {this.deleteSelectedUploadStatus}.");
+                    predicates[0] = upload => upload.UploadStatus == status;
+                }
             }
 
-            if (this.deleteSelectedTemplate.Template.IsDummy)
+            if (quick)
             {
-                if (this.deleteSelectedTemplate.Template.Name == "All")
+                Tracer.Write($"UploadListViewModel.deleteUploads template with quick=true.");
+                if (this.youtubeAccountForFiltering.IsDummy == true)
                 {
-                    if (this.youtubeAccountForFiltering.IsDummy == true)
+                    if (youtubeAccountForFiltering.Name == "All")
                     {
-                        if (youtubeAccountForFiltering.Name == "All")
-                        {
-                            Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All and dummy account all.");
-                            predicates[1] = upload => true;
-                        }
-                    }
-                    else
-                    {
-                        Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All and filtered account.");
-                        predicates[1] = upload => upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                        Tracer.Write($"UploadListViewModel.deleteUploads with quick=true and dummy account all.");
+                        predicates[1] = upload => true;
                     }
                 }
-                else if (this.deleteSelectedTemplate.Template.Name == "None")
+                else
                 {
-                    if (this.youtubeAccountForFiltering.IsDummy == true)
-                    {
-                        if (youtubeAccountForFiltering.Name == "All")
-                        {
-                            Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None and dummy account all.");
-                            predicates[1] = upload => upload.Template == null;
-                        }
-                    }
-                    else
-                    {
-                        Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None and filtered.");
-                        predicates[1] = upload => upload.Template == null && upload.YoutubeAccount == this.youtubeAccountForFiltering;
-                    }
+                    Tracer.Write($"UploadListViewModel.deleteUploads with quick=true and filtered account.");
+                    predicates[1] = upload => upload.YoutubeAccount == this.youtubeAccountForFiltering;
                 }
             }
             else
             {
-                Tracer.Write($"UploadListViewModel.deleteUploads: with template {this.deleteSelectedTemplate.Template.Name}.");
-                predicates[1] = upload => upload.Template == this.deleteSelectedTemplate.Template;
+                if (this.deleteSelectedTemplate.Template.IsDummy)
+                {
+                    if (this.deleteSelectedTemplate.Template.Name == "All")
+                    {
+                        if (this.youtubeAccountForFiltering.IsDummy == true)
+                        {
+                            if (youtubeAccountForFiltering.Name == "All")
+                            {
+                                Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All and dummy account all.");
+                                predicates[1] = upload => true;
+                            }
+                        }
+                        else
+                        {
+                            Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template All and filtered account.");
+                            predicates[1] = upload => upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                        }
+                    }
+                    else if (this.deleteSelectedTemplate.Template.Name == "None")
+                    {
+                        if (this.youtubeAccountForFiltering.IsDummy == true)
+                        {
+                            if (youtubeAccountForFiltering.Name == "All")
+                            {
+                                Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None and dummy account all.");
+                                predicates[1] = upload => upload.Template == null;
+                            }
+                        }
+                        else
+                        {
+                            Tracer.Write($"UploadListViewModel.deleteUploads: with dummy template None and filtered.");
+                            predicates[1] = upload => upload.Template == null && upload.YoutubeAccount == this.youtubeAccountForFiltering;
+                        }
+                    }
+                }
+                else
+                {
+                    Tracer.Write($"UploadListViewModel.deleteUploads: with template {this.deleteSelectedTemplate.Template.Name}.");
+                    predicates[1] = upload => upload.Template == this.deleteSelectedTemplate.Template;
+                }
             }
 
             Predicate<Upload> combinedPredicate = TinyHelpers.PredicateAnd(predicates);
-            this.deleteUploads(combinedPredicate, false);
-            Tracer.Write($"UploadListViewModel.deleteUploads: End.");
+            this.deleteUploads(combinedPredicate, false, quick);
+            Tracer.Write($"UploadListViewModel.deleteUploads(quick={quick}): End.");
         }
 
-        private void deleteUploads(Predicate<Upload> predicate, bool ignoreKeepLastPerTemplate)
+        private void deleteUploads(Predicate<Upload> predicate, bool ignoreKeepLastPerTemplate, bool quick)
         {
             Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): Start.");
             bool serializeTemplates = false;
@@ -983,7 +1039,8 @@ namespace Drexel.VidUp.UI.ViewModels
                 serializeTemplates = true;
             }
 
-            this.uploadList.DeleteUploads(predicate, !ignoreKeepLastPerTemplate && this.keepLastUploadPerTemplate);
+            bool keepLastUploadPerTemplateInternal = quick ? this.keepLastUploadPerTemplate : this.keepLastUploadPerTemplateSide;
+            this.uploadList.DeleteUploads(predicate, !ignoreKeepLastPerTemplate && keepLastUploadPerTemplateInternal);
 
             if (serializeTemplates)
             {

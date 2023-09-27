@@ -523,27 +523,23 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string[] AddWithStatusUploadStatuses
+        public UplStatus[] AddWithStatusUploadStatuses
         {
             get
             {
-                List<UplStatus> filteredUplStatuses = Enum.GetValues(typeof(UplStatus)).Cast<UplStatus>().Where(
+                return Enum.GetValues(typeof(UplStatus)).Cast<UplStatus>().Where(
                     act => act == UplStatus.ReadyForUpload ||
                            act == UplStatus.Paused ||
-                           act == UplStatus.Stopped).ToList();
-
-                //conversion to string as the converter in xaml handles strings for entries like 'all'
-                List<string> filteredUplStatusesStrings = filteredUplStatuses.Select(v => Enum.GetName(typeof(UplStatus), v)).ToList();
-                return filteredUplStatusesStrings.ToArray();
+                           act == UplStatus.Stopped).ToArray();
             }
         }
 
-        public string AddWithStatusSelectedUploadStatus
+        public UplStatus AddWithStatusSelectedUploadStatus
         {
-            get => this.template != null && this.template.AutomationSettings != null ? Enum.GetName(typeof(UplStatus), this.template.AutomationSettings.AddWithStatus) : "Ready for Upload";
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.AddWithStatus : UplStatus.ReadyForUpload;
             set
             {
-                this.template.AutomationSettings.AddWithStatus = (UplStatus)Enum.Parse(typeof(UplStatus), value); ;
+                this.template.AutomationSettings.AddWithStatus = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("AddWithStatusSelectedUploadStatus");
             }
@@ -571,17 +567,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public bool AddUploadInfoParameterAfterEach
-        {
-            get => this.template != null ? this.template.AutomationSettings.AddUploadInfoParameterAfterEach : false;
-            set
-            {
-                this.template.AutomationSettings.AddUploadInfoParameterAfterEach = value;
-                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                this.raisePropertyChanged("AddUploadInfoParameterAfterEach");
-            }
-        }
-
         public string ExecuteAfterTemplatePath
         {
             get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.ExecuteAfterTemplatePath : null;
@@ -593,17 +578,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public bool AddUploadInfoParameterAfterTemplate
-        {
-            get => this.template != null ? this.template.AutomationSettings.AddUploadInfoParameterAfterTemplate : false;
-            set
-            {
-                this.template.AutomationSettings.AddUploadInfoParameterAfterTemplate = value;
-                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                this.raisePropertyChanged("AddUploadInfoParameterAfterTemplate");
-            }
-        }
-
         public string ExecuteAfterAllPath
         {
             get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.ExecuteAfterAllPath : null;
@@ -612,17 +586,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.template.AutomationSettings.ExecuteAfterAllPath = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
                 this.raisePropertyChanged("ExecuteAfterAllPath");
-            }
-        }
-
-        public bool AddUploadInfoParameterAfterAll
-        {
-            get => this.template != null ? this.template.AutomationSettings.AddUploadInfoParameterAfterAll : false;
-            set
-            {
-                this.template.AutomationSettings.AddUploadInfoParameterAfterAll = value;
-                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                this.raisePropertyChanged("AddUploadInfoParameterAfterAll");
             }
         }
         #endregion properties

@@ -34,9 +34,9 @@
                     </Button>
                     <Expander Header="Recalculate Publish At Dates" IsExpanded="{Binding ContextExpanderIsExpanded, Mode=TwoWay, Converter={converters:ExpanderIndexToBooleanConverter}, ConverterParameter=0}">
                         <StackPanel Margin="5 0 0 0">
-                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="recalculatepublishat" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignPaperLightButton}">
-                                <StackPanel Orientation="Horizontal" Margin="0">
-                                    <materialDesign:PackIcon Width="24" Height="24" Kind="Calendar"/>
+                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="recalculatepublishat" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="0" HorizontalContentAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Margin="0" >
+                                    <materialDesign:PackIcon Width="24" Height="24" Kind="Calendar" />
                                     <TextBlock Text="Recalculate Uploads with:" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
@@ -59,7 +59,7 @@
                             </ComboBox>
                             <TextBlock>Start Date:</TextBlock>
                             <StackPanel Orientation="Horizontal">
-                                <Button Command="{Binding ResetRecalculatePublishAtStartDateCommand }" Style="{StaticResource MaterialDesignPaperLightButton}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 5 5 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000">
+                                <Button Command="{Binding ResetRecalculatePublishAtStartDateCommand }" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 5 5 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000">
                                     <Image Source="../Images/minus.png"/>
                                 </Button>
                                 <DatePicker Width="248" materialDesign:TextFieldAssist.UnderlineBrush="#67daff" materialDesign:HintAssist.Hint="Pick Date" Style="{StaticResource MaterialDesignDatePicker}" SelectedDate="{Binding RecalculatePublishAtStartDate}" DisplayDateStart="{Binding RecalculatePublishAtFirstDate, Mode=OneWay}" HorizontalAlignment="Right">
@@ -71,7 +71,7 @@
                     <Border Style="{StaticResource HorizontalDividerBorder}"/>
                     <Expander Header="Remove Uploads" IsExpanded="{Binding ContextExpanderIsExpanded, Mode=TwoWay, Converter={converters:ExpanderIndexToBooleanConverter}, ConverterParameter=1}">
                         <StackPanel Margin="5 0 0 0">
-                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="remove" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignPaperLightButton}">
+                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="remove" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Padding="0" HorizontalContentAlignment="Left">
                                 <StackPanel Orientation="Horizontal" Margin="0">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove"/>
                                     <TextBlock Text="Remove Uploads with:" VerticalAlignment="Center"/>
@@ -102,16 +102,17 @@
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
-                            <StackPanel Orientation="Horizontal">
-                                <ToggleButton IsChecked="{Binding KeepLastUploadPerTemplate}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="8 8 0 8"/>
-                                <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="5 8 0 8" ToolTip="Keep last upload per template for better overview of upload progress." ToolTipService.ShowDuration="60000" Background="Transparent"/>
+                            <StackPanel Orientation="Horizontal" Margin="0 4 0 4">
+                                <ToggleButton IsChecked="{Binding KeepLastUploadPerTemplateSide}" Style="{StaticResource MaterialDesignSwitchToggleButton}" Background="Black" materialDesign:ToggleButtonAssist.SwitchTrackOnBackground="Black" VerticalAlignment="Top" Margin="8 8 0 8"/>
+                                <Label Content="Keep last upload" Width="95" HorizontalAlignment="Left" Margin="0 3 0 0" />
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Bottom" Margin="5 0 0 10" ToolTip="Keep last upload per template for better overview of upload progress." ToolTipService.ShowDuration="60000" Background="Transparent"/>
                             </StackPanel>
                         </StackPanel>
                     </Expander>
                     <Border Style="{StaticResource HorizontalDividerBorder}"/>
                     <Expander Header="Reset Upload Status" IsExpanded="{Binding ContextExpanderIsExpanded, Mode=TwoWay, Converter={converters:ExpanderIndexToBooleanConverter}, ConverterParameter=2}">
                         <StackPanel Margin="5 0 0 0">
-                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="resetstatus" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignPaperLightButton}">
+                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="resetstatus" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Padding="0" HorizontalContentAlignment="Left">
                                 <StackPanel Orientation="Horizontal" Margin="0">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove"/>
                                     <TextBlock Text="Reset Uploads to:" VerticalAlignment="Center"/>
@@ -153,7 +154,7 @@
                     </Expander>
                     <Expander Header="Reset To Template Values" IsExpanded="{Binding ContextExpanderIsExpanded, Mode=TwoWay, Converter={converters:ExpanderIndexToBooleanConverter}, ConverterParameter=3}">
                         <StackPanel Margin="5 0 0 0">
-                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="resetattribute" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignPaperLightButton}">
+                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="resetattribute" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Padding="0" HorizontalContentAlignment="Left">
                                 <StackPanel Orientation="Horizontal" Margin="0">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="FileRestore"/>
                                     <TextBlock Text="Reset Attribute:" VerticalAlignment="Center"/>
@@ -202,150 +203,176 @@
                                 </Button>
                                 <Separator />
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                                    <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="addfiles" Style="{StaticResource MaterialDesignPaperLightButton}" Margin="0 0 0 3" Padding="5">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="FilePlus"/>
-                                            <TextBlock Text="Add Files"/>
+                                    <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="addfiles" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                        <StackPanel Orientation="Vertical" MinWidth="50">
+                                            <materialDesign:PackIcon Width="24" Height="24" Kind="FilePlus" HorizontalAlignment="Center"/>
+                                            <TextBlock TextAlignment="Center">
+                                            Add<LineBreak />Files
+                                            </TextBlock>
                                         </StackPanel>
                                     </Button>
                                     <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="5 4 0 0"  ToolTip="You can also drop files anywhere on the menu to add them to the uploads." ToolTipService.ShowDuration="60000" Background="Transparent"/>
                                 </StackPanel>
                                 <Separator/>
-                                <StackPanel Orientation="Vertical">
-                                    <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="startupload" Style="{StaticResource MaterialDesignPaperLightButton}" Margin="0 0 0 3" Padding="5">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="UploadMultiple"/>
-                                            <TextBlock Text="Start Upload"/>
-                                        </StackPanel>
-                                    </Button>
-                                    <Button Command="{Binding ParameterlessCommand}" CommandParameter="stopupload" Style="{StaticResource MaterialDesignPaperLightButton}" Padding="5">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="Stop"/>
-                                            <TextBlock Text="Stop Upload"/>
-                                        </StackPanel>
-                                    </Button>
+                                <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="startupload" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="UploadMultiple" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                            Start<LineBreak />Upload
+                                        </TextBlock> 
+                                    </StackPanel>
+                                </Button>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                                    <ToggleButton IsChecked="{Binding ResumeUploads}" Style="{StaticResource MaterialDesignSwitchToggleButton}" Background="Black" materialDesign:ToggleButtonAssist.SwitchTrackOnBackground="Black" Margin="0 6 0 0" HorizontalAlignment="Left"/>
+                                    <Label Width="50" HorizontalAlignment="Left" Margin="0 2 0 0">
+                                        <TextBlock>
+                                            Resume<LineBreak />Upload
+                                        </TextBlock>
+                                    </Label>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                                    <ToggleButton IsChecked="{Binding ResumeUploads}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="6 6 3 0"/>
-                                    <Label Content="Resume Uploads" Width="116" HorizontalAlignment="Left" Margin="0 2 0 0"/>
-                                </StackPanel>
+                                <Button Command="{Binding ParameterlessCommand}" CommandParameter="stopupload" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="10 0 5 0" Padding="5 0 5 0" Height="67">
+                                    <StackPanel  Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="Stop" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                            Stop<LineBreak />Upload
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
                                 <Separator/>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                                    <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="delete" Style="{StaticResource MaterialDesignPaperLightButton}" Margin="0" Padding="5">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove"/>
-                                            <TextBlock Text="Remove Finished Uploads"/>
-                                        </StackPanel>
-                                    </Button>
-                                    <ToggleButton IsChecked="{Binding KeepLastUploadPerTemplate}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="6 6 3 0"/>
-                                    <Label Content="Keep last upload" Width="100" HorizontalAlignment="Left" Margin="0 2 0 0"/>
-                                    <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="0 4 0 0"  ToolTip="Keep last upload per template for better overview of upload progress." ToolTipService.ShowDuration="60000" Background="Transparent"/>
+
+                                <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="deleteside" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="0" Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="5">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                        Remove<LineBreak />Uploads
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                                    <ToggleButton IsChecked="{Binding KeepLastUploadPerTemplate}" Style="{StaticResource MaterialDesignSwitchToggleButton}" Background="Black" materialDesign:ToggleButtonAssist.SwitchTrackOnBackground="Black" Margin="0 6 0 0" HorizontalAlignment="Left"/>
+                                    <Label Width="70" HorizontalAlignment="Left" Margin="0 2 0 0">
+                                        <TextBlock>
+                                            Keep<LineBreak />last upload
+                                        </TextBlock>
+                                    </Label>
                                 </StackPanel>
+
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="0 4 0 0"  ToolTip="Remove finished uploads and keep last upload per template for better overview of upload progress if enabled." ToolTipService.ShowDuration="60000" Background="Transparent"/>
+                                    
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>
                     <TabItem Header="TEMPLATES" DataContext="{Binding RibbonViewModels[1]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal" Margin="0 3 0 8">
-                                        <materialDesign:PackIcon Width="24" Height="24" Kind="FileDocumentEdit"/>
-                                        <ComboBox materialDesign:TextFieldAssist.UnderlineBrush="#67daff" IsEditable="False" VerticalAlignment="Bottom" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" Width="250" HorizontalAlignment="Left" Margin="5 0 0 0">
-                                            <ComboBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding NameWithYoutubeAccountName}"/>
-                                                </DataTemplate>
-                                            </ComboBox.ItemTemplate>
-                                            <ComboBox.ItemContainerStyle>
-                                                <Style TargetType="ComboBoxItem">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Visible}" Value="false">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </ComboBox.ItemContainerStyle>
-                                        </ComboBox>
-                                    </StackPanel>
-                                    <Button Command="{Binding ParameterlessCommand}" CommandParameter="newtemplate" Style="{StaticResource MaterialDesignPaperLightButton}" Padding="5" HorizontalAlignment="Left">
-                                        <StackPanel Orientation="Horizontal" >
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="TextBoxPlus" />
-                                            <TextBlock Text="New Template"/>
-                                        </StackPanel>
-                                    </Button>
-                                </StackPanel>
-                                <Separator />
-                                <Button Command="{Binding ParameterlessCommand}" CommandParameter="scheduleoverview" Style="{StaticResource MaterialDesignPaperLightButton}" Padding="5" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                    <StackPanel Orientation="Horizontal" >
-                                        <materialDesign:PackIcon Width="24" Height="24" Kind="TextBoxSearch" />
-                                        <TextBlock Text="Show Schedule Overview"/>
+                                <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="newtemplate" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="TextBoxPlus" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                        New<LineBreak />Template
+                                        </TextBlock>
                                     </StackPanel>
                                 </Button>
-                               
+
+                                <StackPanel Orientation="Vertical" Margin="5 3 0 8">
+                                    <materialDesign:PackIcon Width="24" Height="24" Kind="FileDocumentEdit" HorizontalAlignment="Center"/>
+                                    <ComboBox materialDesign:TextFieldAssist.UnderlineBrush="#67daff" IsEditable="False" VerticalAlignment="Bottom" ItemsSource="{Binding ObservableTemplateViewModels}" SelectedItem="{Binding SelectedTemplate}" Width="250" Margin="0 5 0 0">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding NameWithYoutubeAccountName}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="ComboBoxItem">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Visible}" Value="false">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
+                                    </ComboBox>
+                                </StackPanel>
+                                <Separator />
+                                <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="scheduleoverview" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="TextBoxSearch" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                        Schedule<LineBreak />Overview
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>
                     <TabItem Header="PLAYLISTS" DataContext="{Binding RibbonViewModels[2]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal" Margin="0 3 0 8">
-                                        <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistEdit"/>
-                                        <ComboBox materialDesign:TextFieldAssist.UnderlineBrush="#67daff" IsEditable="False" VerticalAlignment="Bottom" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" Width="250" HorizontalAlignment="Left" Margin="5 0 0 0">
-                                            <ComboBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding TitleWithYoutubeAccountName}"/>
-                                                </DataTemplate>
-                                            </ComboBox.ItemTemplate>
-                                            <ComboBox.ItemContainerStyle>
-                                                <Style TargetType="ComboBoxItem">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Visible}" Value="false">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </ComboBox.ItemContainerStyle>
-                                        </ComboBox>
+                                <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="newplaylist" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistPlus" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                            New<LineBreak />Playlist
+                                        </TextBlock>
                                     </StackPanel>
-                                    <Button Command="{Binding ParameterlessCommand}" CommandParameter="newplaylist" Style="{StaticResource MaterialDesignPaperLightButton}" Padding="5" HorizontalAlignment="Left">
-                                        <StackPanel Orientation="Horizontal" >
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistPlus" />
-                                            <TextBlock Text="New Playlist"/>
-                                        </StackPanel>
-                                    </Button>
+                                </Button>
+
+                                <StackPanel Orientation="Vertical" Margin="5 3 0 8">
+                                    <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistEdit" HorizontalAlignment="Center"/>
+                                    <ComboBox materialDesign:TextFieldAssist.UnderlineBrush="#67daff" IsEditable="False" VerticalAlignment="Bottom" ItemsSource="{Binding ObservablePlaylistViewModels}" SelectedItem="{Binding SelectedPlaylist}" Width="250" Margin="0 5 0 0">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TitleWithYoutubeAccountName}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="ComboBoxItem">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Visible}" Value="false">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
+                                    </ComboBox>
                                 </StackPanel>
                                 <Separator />
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
-                                    <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="autosetplaylists" Style="{StaticResource MaterialDesignPaperLightButton}" Margin="0" Padding="5">
-                                        <StackPanel Orientation="Horizontal" >
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistCheck"/>
-                                            <TextBlock Text="Set Playlists"/>
-                                        </StackPanel>
-                                    </Button>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="0 5 0 0">
-                                        <ToggleButton IsChecked="{Binding AutoSetPlaylists}" Style="{StaticResource MaterialDesignSwitchToggleButton}" VerticalAlignment="Top" Margin="6 6 3 0"/>
-                                        <Label Content="Auto Set Playlists" Width="98" HorizontalAlignment="Left" Margin="0 2 0 0"/>
-                                        <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="0 4 0 0"  ToolTip="Keep last upload per template for better overview of upload progress." ToolTipService.ShowDuration="60000" Background="Transparent"/>
+                                <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="deleteside" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="0" Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistCheck" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                            Set<LineBreak />Playlists
+                                        </TextBlock>
                                     </StackPanel>
+                                </Button>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                                    <ToggleButton IsChecked="{Binding AutoSetPlaylists}" Style="{StaticResource MaterialDesignSwitchToggleButton}" Background="Black" materialDesign:ToggleButtonAssist.SwitchTrackOnBackground="Black" Margin="0 6 0 0" HorizontalAlignment="Left"/>
+                                    <Label Width="56" HorizontalAlignment="Left" Margin="0 2 0 0">
+                                        <TextBlock>
+                                            Auto Set<LineBreak />Playlists
+                                        </TextBlock>
+                                    </Label>
                                 </StackPanel>
+
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="0 4 0 0"  ToolTip="Set playlists to published video, if the playlist was configured to be set after publication in template. If auto set is toggled, playlists will be set to published videos every 12 hours automatically, while VidUp is running." ToolTipService.ShowDuration="60000" Background="Transparent"/>
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>
                     <TabItem Header="SETTINGS" DataContext="{Binding RibbonViewModels[3]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal" Margin="0 3 0 8">
-                                        <materialDesign:PackIcon Width="24" Height="24" Kind="AccountEdit"/>
-                                        <ComboBox materialDesign:TextFieldAssist.UnderlineBrush="#67daff" IsEditable="False" VerticalAlignment="Bottom" ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="150" HorizontalAlignment="Left" Margin="5 0 0 0"/>
+                                <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding NewYoutubeAccountCommand}" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="AccountPlus" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                        New YT<LineBreak />Account
+                                        </TextBlock>
                                     </StackPanel>
-                                    <Button Command="{Binding NewYoutubeAccountCommand}" Style="{StaticResource MaterialDesignPaperLightButton}" Padding="5" HorizontalAlignment="Left">
-                                        <StackPanel Orientation="Horizontal" >
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="AccountPlus" />
-                                            <TextBlock Text="New Youtube Account"/>
-                                        </StackPanel>
-                                    </Button>
+                                </Button>
+
+                                <StackPanel Orientation="Vertical" Margin="5 3 0 8">
+                                    <materialDesign:PackIcon Width="24" Height="24" Kind="AccountEdit" HorizontalAlignment="Center"/>
+                                    <ComboBox materialDesign:TextFieldAssist.UnderlineBrush="#67daff" IsEditable="False" VerticalAlignment="Bottom" ItemsSource="{Binding ObservableYoutubeAccountViewModels}" SelectedItem="{Binding SelectedYoutubeAccount}" DisplayMemberPath="YoutubeAccountName" Width="150" Margin="0 5 0 0" />
                                 </StackPanel>
                             </ToolBar>
                         </ToolBarTray>
@@ -353,13 +380,25 @@
                     <TabItem Header="VIDUP" DataContext="{Binding RibbonViewModels[4]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2"  Height="73">
-                                <Button Width="48" Height="48" Command="{Binding DonateCommand}" Style="{StaticResource MaterialDesignRaisedLightButton}" Margin="0 0 0 3" Padding="5">
-                                    <materialDesign:PackIcon Width="36" Height="36" Kind="Handshake"/>
+                                <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding DonateCommand}" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="Handshake" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                        Donate
+                                        </TextBlock>
+                                    </StackPanel>
                                 </Button>
+
                                 <Separator />
-                                <Button Command="{Binding AboutCommand}" Style="{StaticResource MaterialDesignRaisedLightButton}" Margin="0 0 0 3" Padding="5">
-                                    <materialDesign:PackIcon Width="24" Height="24" Kind="InformationOutline"/>
+                                <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding AboutCommand}" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="InformationOutline" HorizontalAlignment="Center"/>
+                                        <TextBlock TextAlignment="Center">
+                                             About
+                                        </TextBlock>
+                                    </StackPanel>
                                 </Button>
+
                             </ToolBar>
                         </ToolBarTray>
                     </TabItem>

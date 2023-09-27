@@ -19,7 +19,7 @@
         <ItemsControl Grid.Row="1" ItemsSource="{Binding DisplayScheduleColorQuarterHourViewModels}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Vertical" />
+                    <WrapPanel Orientation="Vertical"  />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>

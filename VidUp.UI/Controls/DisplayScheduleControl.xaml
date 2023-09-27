@@ -21,7 +21,7 @@
     <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition />
-            <RowDefinition />
+            <RowDefinition Height="500" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -32,33 +32,35 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding MonthInfo}"  FontWeight="Bold" Margin="0 0 0 5" />
         
         <!-- how to render DisplayScheduleControlWeekViewModel defined in Control.Resources-->
-        <ItemsControl Grid.Row="1" Grid.Column="0" ItemsSource="{Binding DisplayScheduleControlWeekViewModels}" >
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Vertical" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <!--<ItemsControl.ItemTemplate>
-                <DataTemplate DataType="models:DisplayScheduleControlWeekViewModel" />
-            </ItemsControl.ItemTemplate>-->
-        </ItemsControl>
+        <ScrollViewer Grid.Row="1" Grid.Column="0"><ItemsControl ItemsSource="{Binding DisplayScheduleControlWeekViewModels}" >
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Vertical" Background="{Binding RColor}" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <!--<ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="models:DisplayScheduleControlWeekViewModel" />
+                </ItemsControl.ItemTemplate>-->
+            </ItemsControl>
+        </ScrollViewer>
 
         <TextBlock Grid.Row="0" Grid.Column="1" Margin="20 0 0 0" Text="Templates"  FontWeight="Bold" />
-        <ItemsControl Grid.Row="1" Grid.Column="1" Margin="20 0 0 0" ItemsSource="{Binding DisplayScheduleColorTemplateNameViewModels}" >
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Vertical" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border BorderThickness="1" BorderBrush="Black"  Margin="0 3 3 3" Padding="2 0 2 0" Background="{Binding BackgroundSolidColorBrush}">
-                        <TextBlock Text="{Binding TemplateName}" />
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
+        <ScrollViewer  Grid.Row="1" Grid.Column="1">
+            <ItemsControl Margin="20 0 0 0" ItemsSource="{Binding DisplayScheduleColorTemplateNameViewModels}" >
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" BorderBrush="Black"  Margin="0 3 3 3" Padding="2 0 2 0" Background="{Binding BackgroundSolidColorBrush}">
+                            <TextBlock Text="{Binding TemplateName}" />
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
         <Button Grid.Row="2" Grid.Column="0" IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}" Command="{x:Static wpf:DialogHost.CloseDialogCommand}" HorizontalAlignment="Left">
             CLOSE
         </Button>

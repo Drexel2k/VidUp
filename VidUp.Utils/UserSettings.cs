@@ -52,6 +52,8 @@ namespace Drexel.VidUp.Utils
 
         [JsonProperty] 
         private bool keepLastUploadPerTemplate;
+        [JsonProperty]
+        private bool keepLastUploadPerTemplateSide;
 
         public bool Trace
         {
@@ -141,6 +143,12 @@ namespace Drexel.VidUp.Utils
         {
             get => this.keepLastUploadPerTemplate;
             set => this.keepLastUploadPerTemplate = value;
+        }
+
+        public bool KeepLastUploadPerTemplateSide
+        {
+            get => this.keepLastUploadPerTemplateSide;
+            set => this.keepLastUploadPerTemplateSide = value;
         }
 
         [JsonConstructor]

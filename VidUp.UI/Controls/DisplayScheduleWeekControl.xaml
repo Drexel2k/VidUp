@@ -19,7 +19,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- how to render DisplayScheduleControlDayViewModel defined in Control.Resources-->
