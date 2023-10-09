@@ -186,23 +186,31 @@ namespace Drexel.VidUp.Business
             this.DeleteThumbnailFallbackIfPossible(args.OldValue);
         }
 
-        public bool AddFiles(string[] files, YoutubeAccount fallbackYoutubeAccount)
+        public AddFilesResult AddFiles(string[] files, YoutubeAccount fallbackYoutubeAccount, bool considerAutomationDirectoy)
         {
+            AddFilesResult result = new AddFilesResult();
+
             Tracer.Write($"UploadList.AddFiles: Start, add {files.Length} files to uploads.");
-            bool templateAutoAdded = false;
 
             List<Upload> newUploads = new List<Upload>();
             foreach (string file in files)
             {
                 Tracer.Write($"UploadList.AddFiles: Add '{file}'.");
-                Template template = this.templateList.GetTemplateForFilePath(file);
+                Template template = this.templateList.GetTemplateForFilePath(file, considerAutomationDirectoy);
                 Upload upload = null;
+                UplStatus uploadStatus = UplStatus.ReadyForUpload;
                 if (template != null)
                 {
                     Tracer.Write($"UploadList.AddFiles: Template '{template.Name}' found for file.");
-                    upload = new Upload(file, template);
+
+                    if(considerAutomationDirectoy)
+                    {
+                        uploadStatus = template.AutomationSettings.AddWithStatus;
+                    }
+
+                    upload = new Upload(file, uploadStatus, template);
                     newUploads.Add(upload);
-                    templateAutoAdded = true;
+                    result.TemplateAutoAdded = true;
                 }
                 else
                 {
@@ -211,9 +219,15 @@ namespace Drexel.VidUp.Business
                     if (template != null)
                     {
                         Tracer.Write($"UploadList.AddFiles: Default template '{template.Name}' found.");
-                        upload = new Upload(file, template);
+
+                        if (considerAutomationDirectoy)
+                        {
+                            uploadStatus = template.AutomationSettings.AddWithStatus;
+                        }
+
+                        upload = new Upload(file, uploadStatus, template);
                         newUploads.Add(upload);
-                        templateAutoAdded = true;
+                        result.TemplateAutoAdded = true;
                     }
                     else
                     {
@@ -233,9 +247,15 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumable");
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newUploads));
+
+            if(newUploads.Any<Upload>(upload => upload.Template != null && upload.Template.EnableAutomation && upload.Template.AutomationSettings.StartUploadingAfterAdd))
+            {
+                result.StartAutoUpload = true;
+            }
+
             Tracer.Write($"UploadList.AddFiles: End.");
 
-            return templateAutoAdded;
+            return result;
         }
 
         public void DeleteUploads(Predicate<Upload> predicate, bool keepLastPerTemplate)

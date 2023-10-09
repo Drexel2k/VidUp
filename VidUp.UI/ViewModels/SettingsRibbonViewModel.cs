@@ -113,7 +113,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     $"WARNING! If you delete an account, all content (uploads, templates, playlists) belonging to this account will be deleted!", true);
 
                 //a collection is change later, so we must return to the Gui thread.
-                bool result = (bool) await DialogHost.Show(control, "RootDialog").ConfigureAwait(true);
+                bool result = (bool) await DialogHost.Show(control, "RootDialog");
                 if (result)
                 {
                     if (this.observableYoutubeAccountViewModels[0].YoutubeAccount.Name == this.selectedYoutubeAccount.YoutubeAccount.Name)

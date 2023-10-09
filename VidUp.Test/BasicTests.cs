@@ -499,7 +499,7 @@ namespace Drexel.VidUp.Test
             List<string> files = new List<string>();
             files.Add(BasicTests.video2TargetFilePath);
             files.Add(BasicTests.video1TargetFilePath);
-            uploadRibbonViewModell.AddFiles(files.ToArray());
+            uploadRibbonViewModell.AddFiles(files.ToArray(), false);
 
             //files are sorted by name on adding, there fore the sequence is different now.
             Upload uploadWithoutTemplateMatch = uploadList.Uploads[1];

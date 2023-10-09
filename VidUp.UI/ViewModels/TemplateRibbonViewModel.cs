@@ -103,10 +103,7 @@ namespace Drexel.VidUp.UI.ViewModels
             TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => vm.Template != templateDeleteMessage.Template && vm.Visible == true);
             this.SelectedTemplate = viewModel;
 
-            this.templateList.Delete(templateDeleteMessage.Template);
-
-            JsonSerializationContent.JsonSerializer.SerializeAllUploads();
-            JsonSerializationContent.JsonSerializer.SerializeTemplateList();
+            this.deleteTemplate(templateDeleteMessage.Template, true);
         }
 
         private async void copyTemplate(TemplateCopyMessage templateCopyMessage)
@@ -131,12 +128,25 @@ namespace Drexel.VidUp.UI.ViewModels
 
             //Needs to set before deleting the ViewModel in ObservableTemplateViewModels, otherwise the RaiseNotifyCollectionChanged
             //will set the SelectedTemplate to null which causes problems if there are templates left
+            //seirialization takes place in SettingsRibbonViewModel
             TemplateComboboxViewModel viewModel = this.observableTemplateViewModels.GetFirstViewModel(vm => !templatesToRemove.Contains(vm.Template) && vm.Visible == true);
             this.SelectedTemplate = viewModel;
 
             foreach (Template template in templatesToRemove)
             {
-                this.templateList.Delete(template);
+                this.deleteTemplate(template, false);
+            }
+        }
+
+        //one central gui entry for deleting templates
+        private void deleteTemplate(Template template, bool serialize)
+        {
+            this.templateList.Delete(template);
+
+            if(serialize)
+            {
+                JsonSerializationContent.JsonSerializer.SerializeAllUploads();
+                JsonSerializationContent.JsonSerializer.SerializeTemplateList();
             }
         }
 
@@ -231,7 +241,7 @@ namespace Drexel.VidUp.UI.ViewModels
         //exposed for testing
         public void AddTemplate(Template template)
         {
-            this.templateList.AddTemplate(template);
+            this.templateList.AddTemplates(new[] { template });
 
             JsonSerializationContent.JsonSerializer.SerializeTemplateList();
 

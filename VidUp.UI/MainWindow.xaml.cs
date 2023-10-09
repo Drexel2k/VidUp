@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using Drexel.VidUp.UI.ViewModels;
 using Drexel.VidUp.Utils;
@@ -33,7 +34,7 @@ namespace Drexel.VidUp.UI
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 
             Tracer.Write($"MainWindow.fileDrop: Dropped {files.Length} files.");
-            minWindowViewModel.AddFiles(files);
+            minWindowViewModel.AddFiles(files, false);
             Tracer.Write($"MainWindow.fileDrop: End.");
         }
 

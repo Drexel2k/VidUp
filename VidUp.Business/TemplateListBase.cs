@@ -25,9 +25,7 @@ namespace Drexel.VidUp.Business
             get { return this.templates[index]; }
         }
 
-        public abstract void AddTemplate(Template template);
-
-        public abstract void AddTemplates(List<Template> templates);
+        public abstract void AddTemplates(Template[] templates);
 
 
         public int FindIndex(Predicate<Template> predicate)

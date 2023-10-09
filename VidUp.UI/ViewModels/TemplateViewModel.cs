@@ -146,7 +146,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 true);
 
             //a collection is change later, so we must return to the Gui thread.
-            bool result = (bool) await DialogHost.Show(control, "RootDialog").ConfigureAwait(true);
+            bool result = (bool) await DialogHost.Show(control, "RootDialog");
 
             if (result)
             {
@@ -501,14 +501,14 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public string FileExtensions
+        public string FileFilter
         {
-            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.FileExtensions : null;
+            get => this.template != null && this.template.AutomationSettings != null ? this.template.AutomationSettings.FileFilter : null;
             set
             {
-                this.template.AutomationSettings.FileExtensions = value;
+                this.template.AutomationSettings.FileFilter = value;
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
-                this.raisePropertyChanged("FileExtensions");
+                this.raisePropertyChanged("FileFilter");
             }
         }
 

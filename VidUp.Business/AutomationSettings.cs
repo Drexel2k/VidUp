@@ -8,7 +8,7 @@ namespace Drexel.VidUp.Business
         [JsonProperty]
         private bool addNewFilesAutomatically;
         [JsonProperty]
-        private string fileExtensions;
+        private string fileFilter;
         [JsonProperty]
         private string deviatingFolderPath;
         [JsonProperty]
@@ -33,10 +33,10 @@ namespace Drexel.VidUp.Business
         
         }
 
-        public string FileExtensions 
+        public string FileFilter
         { 
-            get => fileExtensions;
-            set => fileExtensions = value; 
+            get => fileFilter;
+            set => fileFilter = value; 
         }
 
         public string DeviatingFolderPath 

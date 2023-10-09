@@ -79,7 +79,7 @@ namespace Drexel.VidUp.Test
             }
 
             UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
-            uploadRibbonViewModel.DeleteUploads();
+            uploadRibbonViewModel.DeleteUploads(false);
             uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
@@ -287,7 +287,7 @@ namespace Drexel.VidUp.Test
             UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
             uploadRibbonViewModel.DeleteSelectedTemplate =
                 uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template789FilterGuid);
-            uploadRibbonViewModel.DeleteUploads();
+            uploadRibbonViewModel.DeleteUploads(false);
             uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
@@ -403,7 +403,7 @@ namespace Drexel.VidUp.Test
             UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
             uploadRibbonViewModel.DeleteSelectedTemplate =
                 uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.Name == "None");
-            uploadRibbonViewModel.DeleteUploads();
+            uploadRibbonViewModel.DeleteUploads(false);
             uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
@@ -492,7 +492,7 @@ namespace Drexel.VidUp.Test
             uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[2];
             uploadRibbonViewModel.DeleteSelectedTemplate =
                 uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template234FilterGuid);
-            uploadRibbonViewModel.DeleteUploads();
+            uploadRibbonViewModel.DeleteUploads(false);
             uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
@@ -594,7 +594,7 @@ namespace Drexel.VidUp.Test
             UploadRibbonViewModel uploadRibbonViewModel = (UploadRibbonViewModel)ribbonViewModels[0];
             uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[1];
 
-            uploadRibbonViewModel.DeleteUploads();
+            uploadRibbonViewModel.DeleteUploads(false);
             uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
@@ -848,7 +848,7 @@ namespace Drexel.VidUp.Test
             uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[0];
             uploadRibbonViewModel.DeleteSelectedTemplate =
                 uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Guid == template456Guid);
-            uploadRibbonViewModel.DeleteUploads();
+            uploadRibbonViewModel.DeleteUploads(false);
             uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;
@@ -1020,7 +1020,7 @@ namespace Drexel.VidUp.Test
             uploadRibbonViewModel.DeleteSelectedUploadStatus = uploadRibbonViewModel.StatusesInclAll[0];
             uploadRibbonViewModel.DeleteSelectedTemplate =
                 uploadRibbonViewModel.ObservableTemplateViewModelsInclAllNone.First(vm => vm.Template.IsDummy && vm.Template.Name == "All");
-            uploadRibbonViewModel.DeleteUploads();
+            uploadRibbonViewModel.DeleteUploads(false);
             uploadRibbonViewModel = null;
             mainWindowViewModel.Close();
             mainWindowViewModel = null;

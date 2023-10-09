@@ -457,7 +457,7 @@ namespace Drexel.VidUp.Business
             this.statusInformation = new List<StatusInformation>();
         }
 
-        public Upload(string filePath, Template template)
+        public Upload(string filePath, UplStatus withUploadStatus, Template template)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -469,7 +469,7 @@ namespace Drexel.VidUp.Business
                 throw new ArgumentException("Template must not be null.");
             }
 
-            this.initialize(filePath);
+            this.initialize(filePath, withUploadStatus);
 
             this.youtubeAccount = template.YoutubeAccount;
             this.Template = template;
@@ -487,19 +487,19 @@ namespace Drexel.VidUp.Business
                 throw new ArgumentException("youtubeAccount must not be null.");
             }
 
-            this.initialize(filePath);
+            this.initialize(filePath, UplStatus.ReadyForUpload);
 
             this.youtubeAccount = youtubeAccount;
         }
 
-        private void initialize(string filePath)
+        private void initialize(string filePath, UplStatus withUploadStatus)
         {
             this.guid = Guid.NewGuid();
             this.filePath = filePath;
 
             this.created = DateTime.Now;
             this.lastModified = this.created;
-            this.uploadStatus = UplStatus.ReadyForUpload;
+            this.uploadStatus = withUploadStatus;
             this.tags = new List<string>();
             this.statusInformation = new List<StatusInformation>();
             this.visibility = Visibility.Private;

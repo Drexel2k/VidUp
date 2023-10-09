@@ -110,7 +110,7 @@ namespace Drexel.VidUp.Test
         {
             List<string> files = new List<string>();
             files.Add(ThumbnailFileHandlingTests.t1RootVideo1FilePath);
-            ThumbnailFileHandlingTests.uploadRibbonViewModel.AddFiles(files.ToArray());
+            ThumbnailFileHandlingTests.uploadRibbonViewModel.AddFiles(files.ToArray(), false);
 
             ThumbnailFileHandlingTests.u1 = ThumbnailFileHandlingTests.uploadRibbonViewModel.ObservableUploadViewModels[0].Upload;
 
@@ -241,7 +241,7 @@ namespace Drexel.VidUp.Test
 
             List<string> files = new List<string>();
             files.Add(ThumbnailFileHandlingTests.t1RootVideo1FilePath);
-            ThumbnailFileHandlingTests.uploadRibbonViewModel.AddFiles(files.ToArray());
+            ThumbnailFileHandlingTests.uploadRibbonViewModel.AddFiles(files.ToArray(), false);
 
             ThumbnailFileHandlingTests.u1 = ThumbnailFileHandlingTests.uploadRibbonViewModel.ObservableUploadViewModels[0].Upload;
 

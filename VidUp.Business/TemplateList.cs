@@ -93,39 +93,53 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public Template GetTemplateForFilePath(string fullFilePath)
+        public Template GetTemplateForFilePath(string fullFilePath, bool considerAutomationDirectory)
         {
             if (string.IsNullOrWhiteSpace(fullFilePath))
             {
                 throw new ArgumentException("FullFilePath must not be null or empty.");
             }
 
+            DirectoryInfo templateDirectory;
+            DirectoryInfo uploadDirectory;
             foreach (Template template in this.templates)
             {
-                if (template.TemplateMode == TemplateMode.FolderBased)
+                if (considerAutomationDirectory && template.EnableAutomation && !string.IsNullOrWhiteSpace(template.AutomationSettings.DeviatingFolderPath))
                 {
-                    if (!string.IsNullOrWhiteSpace(template.RootFolderPath))
+                    templateDirectory = new DirectoryInfo(template.AutomationSettings.DeviatingFolderPath);
+                    uploadDirectory = new DirectoryInfo(fullFilePath);
+                    if (uploadDirectory.Parent.FullName == templateDirectory.FullName)
                     {
-                        DirectoryInfo templateRootDirectory = new DirectoryInfo(template.RootFolderPath);
-                        DirectoryInfo uploadDirectory = new DirectoryInfo(fullFilePath);
-
-                        while (uploadDirectory.Parent != null)
-                        {
-                            if (uploadDirectory.Parent.FullName == templateRootDirectory.FullName)
-                            {
-                                return template;
-                            }
-                            else uploadDirectory = uploadDirectory.Parent;
-                        }
+                        return template;
                     }
                 }
                 else
                 {
-                    if (!string.IsNullOrWhiteSpace(template.PartOfFileName))
+                    if (template.TemplateMode == TemplateMode.FolderBased)
                     {
-                        if (Path.GetFileName(fullFilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
+                        if (!string.IsNullOrWhiteSpace(template.RootFolderPath))
                         {
-                            return template;
+                            templateDirectory = new DirectoryInfo(template.RootFolderPath);
+                            uploadDirectory = new DirectoryInfo(fullFilePath);
+
+                            while (uploadDirectory.Parent != null)
+                            {
+                                if (uploadDirectory.Parent.FullName == templateDirectory.FullName)
+                                {
+                                    return template;
+                                }
+                                else uploadDirectory = uploadDirectory.Parent;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrWhiteSpace(template.PartOfFileName))
+                        {
+                            if (Path.GetFileName(fullFilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
+                            {
+                                return template;
+                            }
                         }
                     }
                 }
@@ -139,16 +153,7 @@ namespace Drexel.VidUp.Business
             return this.templates.Find(template => template.IsDefault);
         }
 
-        public override void AddTemplate(Template template)
-        {
-            this.setupTemplate(template);
-            this.templates.Add(template);
-
-            this.raiseNotifyPropertyChanged("TemplateCount");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, template));
-        }
-
-        public override void AddTemplates(List<Template> templates)
+        public override void AddTemplates(Template[] templates)
         {
             foreach (Template template in templates)
             {

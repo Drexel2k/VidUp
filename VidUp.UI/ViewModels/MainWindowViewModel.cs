@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shell;
 using Drexel.VidUp.Business;
@@ -53,6 +55,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private YoutubeAccountList youtubeAccountList;
 
         private YoutubeAccountComboboxViewModel selectedYoutubeAccount;
+
+        private List<FileSystemWatcher> filesSystemWatchers = new List<FileSystemWatcher>();
+        private BlockingCollection<string> filesCreatedCollection = new BlockingCollection<string>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -429,6 +434,7 @@ namespace Drexel.VidUp.UI.ViewModels
             myFieldInfo.SetValue(null, null);
 
             this.initialize(user, subFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
+            this.setFileSystemWatchersForAutomation();
         }
 
         private void initialize(string folderSuffix, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList, out List<object> ribbonViewModels)
@@ -492,9 +498,92 @@ namespace Drexel.VidUp.UI.ViewModels
             ((UploadRibbonViewModel)this.ribbonViewModels[0]).UploadFinished += this.uploadListViewModelOnUploadFinished;
         }
 
-        public void AddFiles(string[] files)
+        private void setFileSystemWatchersForAutomation()
         {
-            ((UploadRibbonViewModel)this.ribbonViewModels[0]).AddFiles(files);
+            foreach(Template template in this.templateList)
+            {
+                if(template.EnableAutomation && template.AutomationSettings.AddNewFilesAutomatically)
+                {
+                    List<string> fileFilters = new List<string>();
+                    if(!string.IsNullOrWhiteSpace(template.AutomationSettings.FileFilter))
+                    {
+                        foreach (string filter in template.AutomationSettings.FileFilter.Split(','))
+                        {
+                            fileFilters.Add(filter.ToLower().Trim());
+                        }
+                    }
+                    else
+                    {
+                        fileFilters.Add(string.Empty);
+                    }
+
+                    foreach (string fileFilter in fileFilters)
+                    {
+                        FileSystemWatcher watcher = new FileSystemWatcher();
+                        if (template.AutomationSettings.DeviatingFolderPath == null)
+                        {
+                            if (Directory.Exists(template.RootFolderPath))
+                            {
+                                watcher.Path = template.RootFolderPath;
+                                watcher.IncludeSubdirectories = true;
+                            }
+                        }
+                        else
+                        {
+                            if (Directory.Exists(template.AutomationSettings.DeviatingFolderPath))
+                            {
+                                watcher.Path = template.AutomationSettings.DeviatingFolderPath;
+                            }
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(watcher.Path))
+                        {
+                            watcher.Created += this.onFileCreated;
+                            watcher.EnableRaisingEvents = true;
+                            watcher.Filter = fileFilter;
+                            this.filesSystemWatchers.Add(watcher);
+                        }
+                    }
+                }
+            }
+
+            Task.Run(() => this.observeFileCreationCollection());              
+        }
+
+        private async void observeFileCreationCollection()
+        {
+            while (true)
+            {
+                string path = this.filesCreatedCollection.Take();
+                bool canOpen = false;
+                while (!canOpen)
+                {
+                    try
+                    {
+                        File.OpenWrite(path).Close();
+                        canOpen = true;
+                    }
+                    catch
+                    {
+                        await Task.Delay(5000);
+                        Tracer.Write($"MainWindowViewModel.setFileSystemWatchersForAutomation: Could not open file {path}.");
+                    }
+                }
+
+                this.AddFiles(new[] { path }, true);
+            }
+        }
+
+        //writes file info to a collection to prevent internal buffer overflow of FileSystemWatcher
+        private void onFileCreated(object sender, FileSystemEventArgs e)
+        {
+            this.filesCreatedCollection.Add(e.FullPath);
+        }
+
+        public void AddFiles(string[] files, bool considerAutomationDirectoy)
+        {
+            //back to UI thread, so it is also ensured, that there are no concurrent upload/template adding and deletions
+            Application.Current.Dispatcher.Invoke(() => ((UploadRibbonViewModel)this.ribbonViewModels[0]).AddFiles(files, considerAutomationDirectoy));
         }
 
         private string getYoutubeAccountName()

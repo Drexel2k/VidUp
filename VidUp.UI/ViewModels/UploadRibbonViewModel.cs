@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -53,6 +54,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private TemplateComboboxViewModel recalculatePublishAtSelectedTemplate;
         private DateTime? recalculatePublishAtStartDate;
 
+        //if the filter account is a dummy account like all, a real account must be taken for upload creation.
         private YoutubeAccount youtubeAccountForCreatingUploads;
         private YoutubeAccount youtubeAccountForFiltering;
         private object uploadingLock = new object();
@@ -580,7 +582,7 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 Tracer.Write($"UploadListViewModel.openUploadDialog: DialogResult OK.");
 
-                this.AddFiles(fileDialog.FileNames);
+                this.AddFiles(fileDialog.FileNames, false);
 
                 Tracer.Write($"UploadListViewModel.openUploadDialog: Selected {fileDialog.FileNames.Length} files.");
             }
@@ -592,13 +594,13 @@ namespace Drexel.VidUp.UI.ViewModels
             Tracer.Write($"UploadListViewModel.openUploadDialog: End.");
         }
 
-        public void AddFiles(string[] files)
+        public void AddFiles(string[] files, bool considerAutomationDirectoy)
         {
             Tracer.Write($"UploadListViewModel.AddFiles: Start, add {files.Length} uploads.");
             Array.Sort(files, StringComparer.InvariantCulture);
             
-            bool templateAutoAdded = this.uploadList.AddFiles(files, this.youtubeAccountForCreatingUploads);
-            if (templateAutoAdded)
+            AddFilesResult addFilesResult = this.uploadList.AddFiles(files, this.youtubeAccountForCreatingUploads, considerAutomationDirectoy);
+            if (addFilesResult.TemplateAutoAdded)
             {
                 Tracer.Write($"UploadListViewModel.AddUploads: At least one template was auto added.");
                 JsonSerializationContent.JsonSerializer.SerializeTemplateList();
@@ -606,6 +608,13 @@ namespace Drexel.VidUp.UI.ViewModels
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();
+
+            if (addFilesResult.StartAutoUpload)
+            {
+                Tracer.Write($"UploadListViewModel.AddUploads: Starting auto upload.");
+                this.startUploadingAsync();
+            }
+
             Tracer.Write($"UploadListViewModel.AddUploads: End.");
         }
 
@@ -1031,6 +1040,7 @@ namespace Drexel.VidUp.UI.ViewModels
         private void deleteUploads(Predicate<Upload> predicate, bool ignoreKeepLastPerTemplate, bool quick)
         {
             Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): Start.");
+
             bool serializeTemplates = false;
             List<Upload> uploadsToDelete = this.uploadList.GetUploads(predicate);
             if (uploadsToDelete.Any(upl => upl.Template != null))
@@ -1049,6 +1059,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             JsonSerializationContent.JsonSerializer.SerializeAllUploads();
             JsonSerializationContent.JsonSerializer.SerializeUploadList();
+
             Tracer.Write($"UploadListViewModel.deleteUploads(Predicate<Upload> predicate): End.");
         }
 

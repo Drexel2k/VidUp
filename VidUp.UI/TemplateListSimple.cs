@@ -4,8 +4,11 @@ using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI
 {
-    //Only for visualization purposes
-    
+    //Only for visualization purposes in combobox controls e.g.
+    //Must only be used for cases whith own instances of template lists (currently only for templates by account)
+    //where now additional checks like deleting of images is necessary or wanted on adding or deleting templates,
+    //adding or deleting templates in general must be done in the main TemplateList
+
     public class TemplateListSimple : TemplateListBase
     {
         public TemplateListSimple(List<Template> templates)
@@ -13,15 +16,7 @@ namespace Drexel.VidUp.UI
             this.templates = templates;
         }
 
-        public override void AddTemplate(Template template)
-        {
-            this.templates.Add(template);
-
-            this.raiseNotifyPropertyChanged("TemplateCount");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, template));
-        }
-
-        public override void AddTemplates(List<Template> templates)
+        public override void AddTemplates(Template[] templates)
         {
             this.templates.AddRange(templates);
 
@@ -29,6 +24,7 @@ namespace Drexel.VidUp.UI
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, templates));
         }
 
+        //this removes only the templates from the template list copy, e.g. for the templates by account
         public override void Delete(Template template)
         {
             this.templates.Remove(template);

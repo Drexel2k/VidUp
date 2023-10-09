@@ -71,7 +71,7 @@
                     <Border Style="{StaticResource HorizontalDividerBorder}"/>
                     <Expander Header="Remove Uploads" IsExpanded="{Binding ContextExpanderIsExpanded, Mode=TwoWay, Converter={converters:ExpanderIndexToBooleanConverter}, ConverterParameter=1}">
                         <StackPanel Margin="5 0 0 0">
-                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="remove" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Padding="0" HorizontalContentAlignment="Left">
+                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="deleteside" Width="265" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Padding="0" HorizontalContentAlignment="Left">
                                 <StackPanel Orientation="Horizontal" Margin="0">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove"/>
                                     <TextBlock Text="Remove Uploads with:" VerticalAlignment="Center"/>
@@ -194,7 +194,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TabControl Grid.Row="0" HorizontalContentAlignment="Left" SelectedIndex="{Binding TabNo, Mode=TwoWay}" materialDesign:ColorZoneAssist.Mode="PrimaryMid" Style="{StaticResource MaterialDesignFilledTabControl}"  Drop="fileDrop" AllowDrop="True">
+                <TabControl Grid.Row="0" HorizontalContentAlignment="Left" SelectedIndex="{Binding TabNo}" materialDesign:ColorZoneAssist.Mode="PrimaryMid" Style="{StaticResource MaterialDesignFilledTabControl}"  Drop="fileDrop" AllowDrop="True">
                     <TabItem Header="UPLOAD" Width="100" DataContext="{Binding RibbonViewModels[0]}">
                         <ToolBarTray>
                             <ToolBar Style="{StaticResource MaterialDesignToolBar}" Padding="2">
@@ -240,7 +240,7 @@
                                 </Button>
                                 <Separator/>
 
-                                <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="deleteside" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="0" Padding="5 0 5 0" Height="67">
+                                <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="delete" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="0" Padding="5 0 5 0" Height="67">
                                     <StackPanel Orientation="Vertical" MinWidth="5">
                                         <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove" HorizontalAlignment="Center"/>
                                         <TextBlock TextAlignment="Center">
@@ -337,7 +337,7 @@
                                     </ComboBox>
                                 </StackPanel>
                                 <Separator />
-                                <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="deleteside" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="0" Padding="5 0 5 0" Height="67">
+                                <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="autosetplaylists" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="0" Padding="5 0 5 0" Height="67">
                                     <StackPanel Orientation="Vertical" MinWidth="50">
                                         <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistCheck" HorizontalAlignment="Center"/>
                                         <TextBlock TextAlignment="Center">

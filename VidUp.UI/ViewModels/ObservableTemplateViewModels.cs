@@ -151,7 +151,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
             else
             {
-                this.templateListsByAccount[template.YoutubeAccount].AddTemplate(template);
+                this.templateListsByAccount[template.YoutubeAccount].AddTemplates(new[] { template });
             }
         }
 
