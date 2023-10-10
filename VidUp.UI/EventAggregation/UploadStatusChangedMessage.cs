@@ -2,7 +2,7 @@
 
 namespace Drexel.VidUp.UI.EventAggregation
 {
-    internal class UploadStatusChangedMessage
+    public class UploadStatusChangedMessage
     {
         private Upload upload;
 

@@ -17,7 +17,7 @@
         <GroupBox.Header >
             <StackPanel Orientation="Horizontal" Margin="0">
                 <TextBlock Text="{Binding YtTitle, Mode=OneWay}" Margin="2" Width="599" TextWrapping="Wrap" MouseDown="CUpload_MouseMoved" />
-                <Button x:Name="Minimize" Padding="0" Width="17" Height="20"  ToolTip="Minimize." ToolTipService.ShowDuration="60000"  Content="_" Style="{StaticResource MaterialDesignOutlinedButtonEx}" BorderBrush="Transparent" Foreground="Black" Click="minimizeClick" Visibility="Collapsed" />
+                <Button x:Name="Minimize" Padding="0" Width="17" Height="20"  ToolTip="Minimize." ToolTipService.ShowDuration="60000" Content="_" Style="{StaticResource MaterialDesignOutlinedButtonEx}"  BorderBrush="Transparent" Foreground="Black" Click="minimizeClick" Visibility="Collapsed" />
             </StackPanel>
         </GroupBox.Header>
 

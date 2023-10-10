@@ -28,7 +28,7 @@ namespace Drexel.VidUp.UI.Controls
             }
 
             UploadControl uploadControl = (UploadControl)((GroupBox)((Grid)((StackPanel)control.Parent).Parent).Parent).Parent;
-            uploadControl.Minimize.Visibility = System.Windows.Visibility.Visible;
+            uploadControl.Minimize.Visibility = Visibility.Visible;
         }
 
         private void controlLostFocus(object sender, RoutedEventArgs e)
@@ -39,7 +39,7 @@ namespace Drexel.VidUp.UI.Controls
             UploadControl uploadControl = (UploadControl)((GroupBox)((Grid)((StackPanel)control.Parent).Parent).Parent).Parent;
             if(uploadControl.Description.MinHeight == 0 && uploadControl.Tags.MinHeight == 0)
             {
-                uploadControl.Minimize.Visibility = System.Windows.Visibility.Collapsed;
+                uploadControl.Minimize.Visibility = Visibility.Collapsed;
             }
 
         }
@@ -49,7 +49,7 @@ namespace Drexel.VidUp.UI.Controls
             UploadControl control = (UploadControl)((GroupBox)((StackPanel)((Button)sender).Parent).Parent).Parent;
             control.Description.MinHeight = 0;
             control.Tags.MinHeight = 0;
-            control.Minimize.Visibility = System.Windows.Visibility.Collapsed;
+            control.Minimize.Visibility = Visibility.Collapsed;
         }
 
         private void CUpload_MouseMoved(object sender, MouseEventArgs e)
