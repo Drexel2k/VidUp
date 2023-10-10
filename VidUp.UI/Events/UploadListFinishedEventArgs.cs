@@ -3,12 +3,12 @@ using Drexel.VidUp.Youtube;
 
 namespace Drexel.VidUp.UI.Events
 {
-    public class UploadFinishedEventArgs : EventArgs
+    public class UploadListFinishedEventArgs : EventArgs
     {
         private bool dataSent;
         private bool uploadStopped;
 
-        public UploadFinishedEventArgs(bool dataSent, bool uploadStopped)
+        public UploadListFinishedEventArgs(bool dataSent, bool uploadStopped)
         {
             this.dataSent = dataSent;
             this.uploadStopped = uploadStopped;

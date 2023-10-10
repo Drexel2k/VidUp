@@ -383,7 +383,7 @@
                         <Label Width="361" Margin="0 0 10 0">
                             <TextBlock Text="{Binding ExecuteAfterTemplatePath, Mode=OneWay}" TextWrapping="Wrap" />
                         </Label>
-                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="Set file to execute after all uploads of this template are uploaded. Info about uploads will be added as parameter." ToolTipService.ShowDuration="60000" Background="Transparent" />
+                        <materialDesign:PackIcon Kind="HelpCircleOutline" VerticalAlignment="Top" Margin="0 3 10 5" ToolTip="Set file to execute after all uploads with 'Ready for upload' of this template were processed, independant of upload result. Info about uploads will be added as parameter." ToolTipService.ShowDuration="60000" Background="Transparent" />
                         <Button Command="{Binding ParameterlessCommand }" CommandParameter="resetexecuteaftertemplate" Style="{StaticResource MaterialDesignRaisedLightButton}" IsEnabled="{Binding EnableAutomation}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 4 2 0" Width="12" Height="12" Padding="0" VerticalContentAlignment="Top" BorderThickness="0" ToolTip="Clear value." ToolTipService.ShowDuration="60000" >
                             <Image Source="../Images/minus.png" />
                         </Button>

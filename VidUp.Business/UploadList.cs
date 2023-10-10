@@ -190,7 +190,7 @@ namespace Drexel.VidUp.Business
         {
             AddFilesResult result = new AddFilesResult();
 
-            Tracer.Write($"UploadList.AddFiles: Start, add {files.Length} files to uploads.");
+            Tracer.Write($"UploadList.AddFiles: Start, add {files.Length} files to uploads, considerAutomationDirectoy {considerAutomationDirectoy}.");
 
             List<Upload> newUploads = new List<Upload>();
             foreach (string file in files)
@@ -248,7 +248,7 @@ namespace Drexel.VidUp.Business
             this.raiseNotifyPropertyChanged("TotalBytesToUploadIncludingResumableRemaining");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newUploads));
 
-            if(newUploads.Any<Upload>(upload => upload.Template != null && upload.Template.EnableAutomation && upload.Template.AutomationSettings.StartUploadingAfterAdd))
+            if(considerAutomationDirectoy && newUploads.Any<Upload>(upload => upload.Template != null && upload.Template.EnableAutomation && upload.Template.AutomationSettings.StartUploadingAfterAdd))
             {
                 result.StartAutoUpload = true;
             }

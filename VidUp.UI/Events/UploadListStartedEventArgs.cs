@@ -3,11 +3,11 @@ using Drexel.VidUp.Youtube;
 
 namespace Drexel.VidUp.UI.Events
 {
-    public class UploadStartedEventArgs : EventArgs
+    public class UploadListStartedEventArgs : EventArgs
     {
         private UploadStats uploadStats;
 
-        public UploadStartedEventArgs(UploadStats uploadStats)
+        public UploadListStartedEventArgs(UploadStats uploadStats)
         {
             this.uploadStats = uploadStats;
         }

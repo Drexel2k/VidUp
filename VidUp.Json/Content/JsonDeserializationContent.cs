@@ -136,14 +136,17 @@ namespace Drexel.VidUp.Json.Content
                 try
                 {
                     UploadProgress progress = serializer.Deserialize<UploadProgress>(reader);
-                    Upload upload = JsonDeserializationContent.AllUploads.Find(upl => upl.Guid == progress.UploadGuid);
-
-                    if(upload != null)
+                    if (progress != null)
                     {
-                        if (upload.UploadStatusOnDeserialization == UplStatus.Uploading)
+                        Upload upload = JsonDeserializationContent.AllUploads.Find(upl => upl.Guid == progress.UploadGuid);
+
+                        if (upload != null)
                         {
-                            upload.BytesSent = progress.BytesSent;
-                            reserialze = true;
+                            if (upload.UploadStatusOnDeserialization == UplStatus.Uploading)
+                            {
+                                upload.BytesSent = progress.BytesSent;
+                                reserialze = true;
+                            }
                         }
                     }
                 } 

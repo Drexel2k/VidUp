@@ -435,6 +435,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             this.initialize(user, subFolder, out uploadList, out templateList, out playlistList, out ribbonViewModels);
             this.setFileSystemWatchersForAutomation();
+            MainWindowViewModel.deleteAutomationInfoFiles();
         }
 
         private void initialize(string folderSuffix, string subfolder, out UploadList uploadList, out TemplateList templateList, out PlaylistList playlistList, out List<object> ribbonViewModels)
@@ -453,6 +454,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             JsonSerializationContent.JsonSerializer = new JsonSerializationContent(Settings.Instance.StorageFolder, this.uploadList, this.templateList, this.playlistList, this.youtubeAccountList);
             JsonSerializationSettings.JsonSerializer = new JsonSerializationSettings(Settings.Instance.StorageFolder, Settings.Instance.UserSettings);
+            JsonSerializationUploadResultAutomationInfo.JsonSerializer = new JsonSerializationUploadResultAutomationInfo(Settings.Instance.StorageFolder);
 
             this.reSerialize(reSerialize);
 
@@ -460,7 +462,8 @@ namespace Drexel.VidUp.UI.ViewModels
             templateList = this.templateList;
             playlistList = this.playlistList;
 
-            EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
+            EventAggregator.Instance.Subscribe<UploadStartingMessage>(this.uploadStatusChanged);
+            EventAggregator.Instance.Subscribe<UploadFinishedMessage>(this.uploadStatusChanged);
             EventAggregator.Instance.Subscribe<UploadStatsChangedMessage>(this.uploadStatsChanged);
             EventAggregator.Instance.Subscribe<AutoSettingPlaylistsStateChangedMessage>(this.autoSettingPlaylistsStateChanged);
             EventAggregator.Instance.Subscribe<YoutubeAccountStatusChangedMessage>(this.youtubeAccountStatusChangedChanged);
@@ -566,7 +569,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     catch
                     {
                         await Task.Delay(5000);
-                        Tracer.Write($"MainWindowViewModel.setFileSystemWatchersForAutomation: Could not open file {path}.");
+                        Tracer.Write($"MainWindowViewModel.setFileSystemWatchersForAutomation: Could not open file {path}.", TraceLevel.Detailed);
                     }
                 }
 
@@ -578,6 +581,15 @@ namespace Drexel.VidUp.UI.ViewModels
         private void onFileCreated(object sender, FileSystemEventArgs e)
         {
             this.filesCreatedCollection.Add(e.FullPath);
+        }
+
+        private static void deleteAutomationInfoFiles()
+        {
+            string[] files = Directory.GetFiles(Settings.Instance.StorageFolder, "automationinfo_uploadfinished_*.json");
+            foreach(string file in files)
+            {
+                File.Delete(file);
+            }            
         }
 
         public void AddFiles(string[] files, bool considerAutomationDirectoy)
@@ -666,7 +678,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void uploadListViewModelOnUploadStarted(object sender, UploadStartedEventArgs e)
+        private void uploadListViewModelOnUploadStarted(object sender, UploadListStartedEventArgs e)
         {
             this.appStatus = AppStatus.Uploading;
             this.uploadStats = e.UploadStats;
@@ -689,7 +701,7 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void uploadListViewModelOnUploadFinished(object sender, UploadFinishedEventArgs e)
+        private void uploadListViewModelOnUploadFinished(object sender, UploadListFinishedEventArgs e)
         {
             this.appStatus = AppStatus.Idle;
             this.uploadStats = null;
@@ -715,7 +727,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.doPostUploadTasks(e, cancellationToken);
         }
 
-        private async Task doPostUploadTasks(UploadFinishedEventArgs e, CancellationToken cancellationToken)
+        private async Task doPostUploadTasks(UploadListFinishedEventArgs e, CancellationToken cancellationToken)
         {
             Tracer.Write($"MainWindowViewModel.doPostUploadTasks: Start.");
 
@@ -969,7 +981,12 @@ namespace Drexel.VidUp.UI.ViewModels
             this.updateStats();
         }
 
-        private void uploadStatusChanged(UploadStatusChangedMessage uploadStatusChangedMessage)
+        private void uploadStatusChanged(UploadStartingMessage úploadStartingMessage)
+        {
+            this.updateStats();
+        }
+
+        private void uploadStatusChanged(UploadFinishedMessage uploadFinishedMessage)
         {
             this.updateStats();
         }

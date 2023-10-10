@@ -880,7 +880,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 if (result == DialogResult.OK)
                 {
-                    this.ExecuteAfterTemplatePath = openFileDialog.FileName;
+                    this.ExecuteAfterAllPath = openFileDialog.FileName;
                 }
 
                 return;

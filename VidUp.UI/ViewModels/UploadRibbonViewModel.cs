@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -59,9 +61,11 @@ namespace Drexel.VidUp.UI.ViewModels
         private YoutubeAccount youtubeAccountForFiltering;
         private object uploadingLock = new object();
 
+        private List<Upload> finishedUploads = new List<Upload>();
+
         //todo: add to event aggregator maybe
-        public event EventHandler<UploadStartedEventArgs> UploadStarted;
-        public event EventHandler<UploadFinishedEventArgs> UploadFinished;
+        public event EventHandler<UploadListStartedEventArgs> UploadStarted;
+        public event EventHandler<UploadListFinishedEventArgs> UploadFinished;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ObservableUploadViewModels ObservableUploadViewModels
@@ -524,9 +528,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void onUploadStarted(UploadStartedEventArgs e)
+        private void onUploadStarted(UploadListStartedEventArgs e)
         {
-            EventHandler<UploadStartedEventArgs> handler = this.UploadStarted;
+            EventHandler<UploadListStartedEventArgs> handler = this.UploadStarted;
 
             if (handler != null)
             {
@@ -534,9 +538,9 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void onUploadFinished(UploadFinishedEventArgs e)
+        private void onUploadFinished(UploadListFinishedEventArgs e)
         {
-            EventHandler<UploadFinishedEventArgs> handler = this.UploadFinished;
+            EventHandler<UploadListFinishedEventArgs> handler = this.UploadFinished;
 
             if (handler != null)
             {
@@ -544,27 +548,65 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void onUploadBytesSent(Upload upload)
+        private void uploadBytesSent(Upload upload)
         {
             EventAggregator.Instance.Publish(new BytesSentMessage(upload));
         }
 
-        private void onUploadStatusChanged(Upload upload)
-        {
-            EventAggregator.Instance.Publish(new UploadStatusChangedMessage(upload));
-        }
-
-        private void onErrorMessageChanged(Upload upload)
-        {
-            EventAggregator.Instance.Publish(new ErrorMessageChangedMessage(upload));
-        }
-
-        private void onResumableSessionUriSet(Upload upload)
+        private void resumableSessionUriSet(Upload upload)
         {
             EventAggregator.Instance.Publish(new ResumableSessionUriChangedMessage(upload));
         }
 
-        private void onUploadStatsUpdated()
+        private void uploadStarting(Upload upload)
+        {
+            EventAggregator.Instance.Publish(new UploadStartingMessage(upload));
+        }
+
+        private void uploadFinished(Upload upload)
+        {
+            this.finishedUploads.Add(upload);
+            EventAggregator.Instance.Publish(new UploadFinishedMessage(upload));
+
+            if (upload.Template != null && upload.Template.EnableAutomation && !string.IsNullOrWhiteSpace(upload.Template.AutomationSettings.ExecuteAfterEachPath))
+            {
+                UploadResultAutomationInfo uploadResultAutomationInfo = new UploadResultAutomationInfo();
+                uploadResultAutomationInfo.UploadedFiles.Add(new FileInfo(upload.FilePath).FullName, upload.UploadStatus.ToString());
+                UploadRibbonViewModel.serializeandExecute(upload.Template.AutomationSettings.ExecuteAfterEachPath, "each", uploadResultAutomationInfo);
+            }
+
+            if (upload.Template != null && upload.Template.EnableAutomation && !string.IsNullOrWhiteSpace(upload.Template.AutomationSettings.ExecuteAfterTemplatePath))
+            {              
+                if (upload.Template.Uploads.All(upl => upl.UploadStatus != UplStatus.ReadyForUpload))
+                {
+                    List<Upload> templateUploads = new List<Upload>();
+                    templateUploads.AddRange(this.finishedUploads.Where(upl => upl.Template == upload.Template));
+
+                    UploadResultAutomationInfo uploadResultAutomationInfo = new UploadResultAutomationInfo();
+                    uploadResultAutomationInfo.TemplateName = upload.Template.Name;
+
+                    foreach (Upload templateUpload in templateUploads)
+                    {
+                        uploadResultAutomationInfo.UploadedFiles.Add(new FileInfo(templateUpload.FilePath).FullName, templateUpload.UploadStatus.ToString());
+                    }
+
+                    UploadRibbonViewModel.serializeandExecute(upload.Template.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfo);
+                }
+            }
+        }
+
+        private static void serializeandExecute(string executeFile, string midText, UploadResultAutomationInfo uploadResultAutomationInfo)
+        {
+            string fileName = $"automationinfo_uploadfinished_{midText}_{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")}.json";
+            JsonSerializationUploadResultAutomationInfo.JsonSerializer.SerializeUploadResultAutomationInfo(fileName, uploadResultAutomationInfo);
+            Process proc = new Process();
+            proc.StartInfo.FileName = new FileInfo(executeFile).FullName;
+            proc.StartInfo.WorkingDirectory = new DirectoryInfo(executeFile).Parent.FullName;
+            proc.StartInfo.Arguments = Path.Combine(JsonSerializationUploadResultAutomationInfo.JsonSerializer.SerializationFolder, fileName);
+            proc.Start();
+        }
+
+        private void uploadStatsUpdated()
         { 
             EventAggregator.Instance.Publish(new UploadStatsChangedMessage());
         }
@@ -596,7 +638,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public void AddFiles(string[] files, bool considerAutomationDirectoy)
         {
-            Tracer.Write($"UploadListViewModel.AddFiles: Start, add {files.Length} uploads.");
+            Tracer.Write($"UploadListViewModel.AddFiles: Start, add {files.Length} uploads, considerAutomationDirectoy {considerAutomationDirectoy}.");
             Array.Sort(files, StringComparer.InvariantCulture);
             
             AddFilesResult addFilesResult = this.uploadList.AddFiles(files, this.youtubeAccountForCreatingUploads, considerAutomationDirectoy);
@@ -633,6 +675,8 @@ namespace Drexel.VidUp.UI.ViewModels
             //prevent sleep mode
             PowerSavingHelper.DisablePowerSaving();
 
+            this.finishedUploads.Clear();
+
             this.uploadStatus = UploadStatus.Uploading;
             bool resume = this.resumeUploads;
 
@@ -642,25 +686,97 @@ namespace Drexel.VidUp.UI.ViewModels
             //as this can lead to unwanted behaviour in the UploadStats...
             AutoResetEvent resetEvent = new AutoResetEvent(true);
             UploadStats uploadStats = new UploadStats(resetEvent);
-            this.onUploadStarted(new UploadStartedEventArgs(uploadStats));
+            this.onUploadStarted(new UploadListStartedEventArgs(uploadStats));
 
             this.uploader = new Uploader(this.uploadList, this.maxUploadInBytesPerSecond);
-            this.uploader.UploadBytesSent += (sender, upload) => this.onUploadBytesSent(upload);
-            this.uploader.UploadStatusChanged += (sender, upload) => this.onUploadStatusChanged(upload);
-            this.uploader.ResumableSessionUriSet += (sender, upload) => this.onResumableSessionUriSet(upload);
-            this.uploader.UploadStatsUpdated += (sender) => this.onUploadStatsUpdated();
-            this.uploader.ErrorMessageChanged += (sender, upload) => this.onErrorMessageChanged(upload);
+            this.uploader.UploadBytesSent += (sender, upload) => this.uploadBytesSent(upload);
+            this.uploader.ResumableSessionUriSet += (sender, upload) => this.resumableSessionUriSet(upload);
+            this.uploader.UploadStatsUpdated += (sender) => this.uploadStatsUpdated();
+            this.uploader.UploadStarting += (sender, upload) => this.uploadStarting(upload);
+            this.uploader.UploadFinished += (sender, upload) => this.uploadFinished(upload);
             UploaderResult uploadResult = await uploader.UploadAsync(uploadStats, resume, resetEvent).ConfigureAwait(false);
             bool uploadStopped = uploader.UploadStopped;
             this.uploader = null;
 
             this.uploadStatus = UploadStatus.NotUploading;
 
-            PowerSavingHelper.EnablePowerSaving();
-
             //needs to be after PowerSavingHelper.EnablePowerSaving(); so that StandBy is not prevented.
-            this.onUploadFinished(new UploadFinishedEventArgs(uploadResult == UploaderResult.DataSent, uploadStopped));
+            this.onUploadFinished(new UploadListFinishedEventArgs(uploadResult == UploaderResult.DataSent, uploadStopped));
             this.uploadStatus = UploadStatus.NotUploading;
+
+            if(uploadResult != UploaderResult.NothingDone && !uploadStopped)
+            {
+                this.executelFinalAutomationExecutions();
+            }
+
+            this.finishedUploads.Clear();
+
+            PowerSavingHelper.EnablePowerSaving();
+        }
+
+        private void executelFinalAutomationExecutions()
+        {
+            //all templates with uploads
+            List<Template> templates = this.finishedUploads.Select(upl => upl.Template).Distinct().ToList();
+
+            //check if aborted && laste template execution needs be don for automation
+            if (this.uploadList.Any(upl => upl.UploadStatus == UplStatus.ReadyForUpload)) //aborted
+            {
+                foreach(Template template in templates)
+                {
+                    if (template.Uploads.Any(upl => upl.UploadStatus == UplStatus.ReadyForUpload))
+                    {
+                        List<Upload> templateUploads = new List<Upload>();
+                        templateUploads.AddRange(this.finishedUploads.Where(upl => upl.Template == template));
+
+                        UploadResultAutomationInfo uploadResultAutomationInfoTemplate = new UploadResultAutomationInfo();
+                        uploadResultAutomationInfoTemplate.TemplateName = template.Name;
+
+                        foreach (Upload templateUpload in templateUploads)
+                        {
+                            uploadResultAutomationInfoTemplate.UploadedFiles.Add(new FileInfo(templateUpload.FilePath).FullName, templateUpload.UploadStatus.ToString());
+                        }
+
+                        UploadRibbonViewModel.serializeandExecute(template.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfoTemplate);
+                    }
+                }
+            }
+
+            //prevent double execution of files.
+            List<FileInfo> filesToExecute = new List<FileInfo>();
+            foreach (Template template in templates)
+            {
+                if (template.EnableAutomation && !string.IsNullOrWhiteSpace(template.AutomationSettings.ExecuteAfterAllPath))
+                {
+                    UploadRibbonViewModel.addFileIfNotContained(filesToExecute, template.AutomationSettings.ExecuteAfterAllPath);
+                }
+            }
+
+            Dictionary<string, string> uploadsStatus = new Dictionary<string, string>();
+            foreach (Upload upload in this.finishedUploads)
+            {
+                uploadsStatus.Add(new FileInfo(upload.FilePath).FullName, upload.UploadStatus.ToString());
+            }
+
+            UploadResultAutomationInfo uploadResultAutomationInfo = new UploadResultAutomationInfo();
+            foreach (Upload uploadFinished in this.finishedUploads)
+            {
+                uploadResultAutomationInfo.UploadedFiles.Add(new FileInfo(uploadFinished.FilePath).FullName, uploadFinished.UploadStatus.ToString());
+            }
+
+            foreach (FileInfo file in filesToExecute)
+            {
+                UploadRibbonViewModel.serializeandExecute(file.FullName, "all", uploadResultAutomationInfo);
+            }
+        }
+
+        private static void addFileIfNotContained(List<FileInfo> files, string filePath)
+        {
+            FileInfo file = new FileInfo(filePath);
+            if(!files.Contains(file))
+            {
+                files.Add(file);
+            }
         }
 
         private void stopUploading()

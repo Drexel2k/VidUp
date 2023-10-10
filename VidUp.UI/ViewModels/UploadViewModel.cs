@@ -34,6 +34,8 @@ namespace Drexel.VidUp.UI.ViewModels
         private Subscription attributeResetSubscription;
         private Subscription bytesSentSubscription;
         private Subscription uploadStatusChangedSubscription;
+        private Subscription uploadStartingSubscription;
+        private Subscription uploadFinishedSubscription;
         private Subscription resumableSessionUriChangedSubscription;
         private Subscription publishAtChangedSubscription;
         private Subscription errorMessageChangedSubscription;
@@ -749,8 +751,9 @@ namespace Drexel.VidUp.UI.ViewModels
             this.attributeResetSubscription = EventAggregator.Instance.Subscribe<AttributeResetMessage>(this.attributeReset);
             this.bytesSentSubscription = EventAggregator.Instance.Subscribe<BytesSentMessage>(this.bytesSent);
             this.uploadStatusChangedSubscription = EventAggregator.Instance.Subscribe<UploadStatusChangedMessage>(this.uploadStatusChanged);
+            this.uploadStartingSubscription = EventAggregator.Instance.Subscribe<UploadStartingMessage>(this.uploadStatusChanged);
+            this.uploadFinishedSubscription = EventAggregator.Instance.Subscribe<UploadFinishedMessage>(this.uploadStatusChanged);
             this.resumableSessionUriChangedSubscription = EventAggregator.Instance.Subscribe<ResumableSessionUriChangedMessage>(this.resumableSessionUriChanged);
-            this.errorMessageChangedSubscription = EventAggregator.Instance.Subscribe<ErrorMessageChangedMessage>(this.errorMessageChanged);
             this.publishAtChangedSubscription = EventAggregator.Instance.Subscribe<PublishAtChangedMessage>(this.publishAtChanged);
         }
 
@@ -850,9 +853,24 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        private void uploadStatusChanged(UploadStatusChangedMessage uploadStatusChangedMessage)
+        private void uploadStatusChanged(UploadStartingMessage uploadStartingMessage)
         {
-            if (uploadStatusChangedMessage.Upload == this.upload)
+            this.updateUploadProperties(uploadStartingMessage.Upload);
+        }
+
+        private void uploadStatusChanged(UploadFinishedMessage uploadFinishedMessage)
+        {
+            this.updateUploadProperties(uploadFinishedMessage.Upload);
+        }
+
+        private void uploadStatusChanged(UploadStatusChangedMessage newUploadStatusChangedMessage)
+        {
+            this.updateUploadProperties(newUploadStatusChangedMessage.Upload);
+        }
+
+        private void updateUploadProperties(Upload upload)
+        {
+            if (upload == this.upload)
             {
                 this.raiseUploadStatusProperties();
                 this.raisePropertyChanged("UploadStatusColorAnimation");
@@ -865,15 +883,6 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.raisePropertyChanged("ControlsEnabled");
                 this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
                 this.raisePropertyChanged("UploadedTotalInfo");
-            }
-        }
-
-        private void errorMessageChanged(ErrorMessageChangedMessage errorMessageChangedMessage)
-        {
-            if (errorMessageChangedMessage.Upload == this.upload)
-            {
-                this.raisePropertyChanged("WarningColor");
-                this.raisePropertyChanged("UploadErrorMessage");
             }
         }
 
@@ -1004,8 +1013,6 @@ namespace Drexel.VidUp.UI.ViewModels
             this.raisePropertyChanged("ResetStateCommandEnabled");
             this.raisePropertyChanged("ControlsEnabled");
             this.raisePropertyChanged("PublishAtDateTimeControlsEnabled");
-
-            EventAggregator.Instance.Publish(new UploadStatusChangedMessage(this.upload));
 
             return true;
         }
@@ -1140,6 +1147,16 @@ namespace Drexel.VidUp.UI.ViewModels
             if (this.bytesSentSubscription != null)
             {
                 this.bytesSentSubscription.Dispose();
+            }
+
+            if (this.uploadStartingSubscription != null)
+            {
+                this.uploadStartingSubscription.Dispose();
+            }
+
+            if (this.uploadFinishedSubscription != null)
+            {
+                this.uploadFinishedSubscription.Dispose();
             }
 
             if (this.uploadStatusChangedSubscription != null)

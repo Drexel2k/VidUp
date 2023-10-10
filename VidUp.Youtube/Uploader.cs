@@ -16,13 +16,11 @@ namespace Drexel.VidUp.Youtube
 {
     public delegate void ResumableSessionUriSetHandler(object sender, Upload upload);
 
-    public delegate void UploadChangedHandler(object sender, Upload upload);
+    public delegate void UploadStartingHandler(object sender, Upload upload);
+
+    public delegate void UploadFinishedHandler(object sender, Upload upload);
 
     public delegate void UploadStatsUpdatedHandler(object sender);
-
-    public delegate void UploadStatusChangedHandler(object sender, Upload upload);
-
-    public delegate void ErrorMessageChangedHandler(object sender, Upload upload);
 
     public delegate void UploadBytesSentHandler(object sender, Upload upload);
 
@@ -40,11 +38,10 @@ namespace Drexel.VidUp.Youtube
         private Upload currentUpload;
 
         public event UploadStatsUpdatedHandler UploadStatsUpdated;
-        public event UploadStatusChangedHandler UploadStatusChanged;
-        public event UploadChangedHandler UploadChanged;
+        public event UploadStartingHandler UploadStarting;
+        public event UploadFinishedHandler UploadFinished;
         public event ResumableSessionUriSetHandler ResumableSessionUriSet;
         public event UploadBytesSentHandler UploadBytesSent;
-        public event ErrorMessageChangedHandler ErrorMessageChanged;
 
         public long MaxUploadInBytesPerSecond
         {
@@ -98,9 +95,9 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        private void onUploadStatusChanged(Upload upload)
+        private void onUploadStarting(Upload upload)
         {
-            UploadStatusChangedHandler handler = this.UploadStatusChanged;
+            UploadStartingHandler handler = this.UploadStarting;
 
             if (handler != null)
             {
@@ -108,9 +105,9 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        private void onUploadChanged(Upload upload)
+        private void onUploadFinished(Upload upload)
         {
-            UploadChangedHandler handler = this.UploadChanged;
+            UploadFinishedHandler handler = this.UploadFinished;
 
             if (handler != null)
             {
@@ -143,16 +140,6 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        private void onErrorMessageChanged(Upload upload)
-        {
-            ErrorMessageChangedHandler handler = this.ErrorMessageChanged;
-
-            if (handler != null)
-            {
-                handler(this, upload);
-            }
-        }
-
         public async Task<UploaderResult> UploadAsync(UploadStats uploadStats, bool resumeUploads, AutoResetEvent resetEvent)
         {
             Tracer.Write($"Uploader.Upload: Start with resumeUploads: {resumeUploads}.");
@@ -177,7 +164,7 @@ namespace Drexel.VidUp.Youtube
 
             List<Upload> uploadsOfSession = new List<Upload>();
 
-            //todo: move timer to uplaod stats and creat tick event on upload stats
+            //todo: move timer to upload stats and create tick event on upload stats
             using (System.Timers.Timer timer = new System.Timers.Timer(2000))
             {
                 timer.Elapsed += (sender, args) => this.onTimerElapsed();
@@ -186,14 +173,13 @@ namespace Drexel.VidUp.Youtube
                 while (upload != null)
                 {
                     this.currentUpload = upload;
-                    this.onUploadChanged(upload);
                     uploadsOfSession.Add(upload);
 
                     upload.UploadStatus = UplStatus.Uploading;
                     this.uploadStats.NewUpload(upload);
                     resetEvent.Set();
 
-                    this.onUploadStatusChanged(upload);
+                    this.onUploadStarting(upload);
 
                     this.lastSerialization = DateTime.Now;
 
@@ -202,7 +188,7 @@ namespace Drexel.VidUp.Youtube
                         UploadResult videoResult = await YoutubeVideoUploadService.UploadAsync(upload, this.resumableSessionUriSet, this.tokenSource.Token, resetEvent).ConfigureAwait(false);
                         JsonSerializationContent.JsonSerializer.SerializeAllUploads();
 
-                        this.onUploadStatusChanged(upload);
+                        this.onUploadFinished(upload);
 
                         if (videoResult == UploadResult.Finished)
                         {
@@ -210,8 +196,6 @@ namespace Drexel.VidUp.Youtube
                             await YoutubeThumbnailService.AddThumbnailAsync(upload).ConfigureAwait(false);
                             await YoutubePlaylistItemService.AddToPlaylistAsync(upload).ConfigureAwait(false);
                         }
-
-                        this.onErrorMessageChanged(upload);
 
                         if (videoResult == UploadResult.FailedWithDataSent || videoResult == UploadResult.StoppedWithDataSent)
                         {
@@ -228,8 +212,7 @@ namespace Drexel.VidUp.Youtube
                     {
                         upload.AddStatusInformation(StatusInformationCreator.Create("ERR0017", "Account is not signed in. Sign in at Settings->YouTube Account->Kebab Menu.", StatusInformationType.AuthenticationError));
                         upload.UploadStatus = UplStatus.Failed;
-                        this.onUploadStatusChanged(upload);
-                        this.onErrorMessageChanged(upload);
+                        this.onUploadFinished(upload);
                     }
 
                     if (!upload.UploadErrors.Any(error => error.IsQuotaError == true))
