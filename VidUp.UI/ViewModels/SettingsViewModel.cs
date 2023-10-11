@@ -21,6 +21,7 @@ namespace Drexel.VidUp.UI.ViewModels
     {
         private ObservableCollection<CultureViewModel> observableCultureInfoViewModels;
         private string searchText = string.Empty;
+        private int automationExecutionDelay;
 
         private YoutubeAccount youtubeAccount;
 
@@ -168,6 +169,18 @@ namespace Drexel.VidUp.UI.ViewModels
             {
                 this.searchText = value;
                 this.refreshObservableCultureInfoViewmodels();
+                this.raisePropertyChanged("SearchText");
+            }
+        }
+
+        public int AutomationExecutionDelay
+        {
+            get { return Settings.Instance.UserSettings.AutomationExecutionDelayInSeconds; }
+            set
+            {
+                Settings.Instance.UserSettings.AutomationExecutionDelayInSeconds = value;
+                JsonSerializationSettings.JsonSerializer.SerializeSettings();
+                this.raisePropertyChanged("AutomationExecutionDelay");
             }
         }
 

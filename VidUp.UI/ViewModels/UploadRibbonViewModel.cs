@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
@@ -20,7 +21,6 @@ using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using MaterialDesignThemes.Wpf;
-using static System.Net.WebRequestMethods;
 using EnumConverter = Drexel.VidUp.UI.Converters.EnumConverter;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -62,6 +62,9 @@ namespace Drexel.VidUp.UI.ViewModels
         private object uploadingLock = new object();
 
         private List<Upload> finishedUploads = new List<Upload>();
+
+        private DateTime lastExecution = DateTime.MinValue;
+        AutoResetEvent autoReset = new AutoResetEvent(true);
 
         //todo: add to event aggregator maybe
         public event EventHandler<UploadListStartedEventArgs> UploadStarted;
@@ -568,11 +571,13 @@ namespace Drexel.VidUp.UI.ViewModels
             this.finishedUploads.Add(upload);
             EventAggregator.Instance.Publish(new UploadFinishedMessage(upload));
 
+            bool executed = false;
             if (upload.Template != null && upload.Template.EnableAutomation && !string.IsNullOrWhiteSpace(upload.Template.AutomationSettings.ExecuteAfterEachPath))
             {
                 UploadResultAutomationInfo uploadResultAutomationInfo = new UploadResultAutomationInfo();
                 uploadResultAutomationInfo.UploadedFiles.Add(new FileInfo(upload.FilePath).FullName, upload.UploadStatus.ToString());
-                UploadRibbonViewModel.serializeandExecute(upload.Template.AutomationSettings.ExecuteAfterEachPath, "each", uploadResultAutomationInfo);
+                this.serializeandExecute(upload.Template.AutomationSettings.ExecuteAfterEachPath, "each", uploadResultAutomationInfo);
+                executed = true;
             }
 
             if (upload.Template != null && upload.Template.EnableAutomation && !string.IsNullOrWhiteSpace(upload.Template.AutomationSettings.ExecuteAfterTemplatePath))
@@ -590,20 +595,34 @@ namespace Drexel.VidUp.UI.ViewModels
                         uploadResultAutomationInfo.UploadedFiles.Add(new FileInfo(templateUpload.FilePath).FullName, templateUpload.UploadStatus.ToString());
                     }
 
-                    UploadRibbonViewModel.serializeandExecute(upload.Template.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfo);
+                    this.serializeandExecute(upload.Template.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfo);
                 }
             }
         }
 
-        private static void serializeandExecute(string executeFile, string midText, UploadResultAutomationInfo uploadResultAutomationInfo)
+        private async void serializeandExecute(string executeFile, string midText, UploadResultAutomationInfo uploadResultAutomationInfo)
         {
+            await Task.Run(async () =>
+                {
+                    this.autoReset.WaitOne();
+                    double delay = (DateTime.Now - this.lastExecution).TotalMilliseconds;
+                    if (delay < Settings.Instance.UserSettings.AutomationExecutionDelayInSeconds * 1000)
+                    {
+                        delay = Settings.Instance.UserSettings.AutomationExecutionDelayInSeconds * 1000 - delay;
+                        await Task.Delay((int)delay).ConfigureAwait(false);
+                    }
+                }
+            );            
+
             string fileName = $"automationinfo_uploadfinished_{midText}_{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")}.json";
             JsonSerializationUploadResultAutomationInfo.JsonSerializer.SerializeUploadResultAutomationInfo(fileName, uploadResultAutomationInfo);
             Process proc = new Process();
             proc.StartInfo.FileName = new FileInfo(executeFile).FullName;
             proc.StartInfo.WorkingDirectory = new DirectoryInfo(executeFile).Parent.FullName;
             proc.StartInfo.Arguments = Path.Combine(JsonSerializationUploadResultAutomationInfo.JsonSerializer.SerializationFolder, fileName);
+            this.lastExecution = DateTime.Now;
             proc.Start();
+            this.autoReset.Set();
         }
 
         private void uploadStatsUpdated()
@@ -737,7 +756,7 @@ namespace Drexel.VidUp.UI.ViewModels
                             uploadResultAutomationInfoTemplate.UploadedFiles.Add(new FileInfo(templateUpload.FilePath).FullName, templateUpload.UploadStatus.ToString());
                         }
 
-                        UploadRibbonViewModel.serializeandExecute(templateWithUpload.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfoTemplate);
+                        this.serializeandExecute(templateWithUpload.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfoTemplate);
                     }
                 }
             }
@@ -764,7 +783,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
             foreach (FileInfo file in filesToExecute)
             {
-                UploadRibbonViewModel.serializeandExecute(file.FullName, "all", uploadResultAutomationInfo);
+                this.serializeandExecute(file.FullName, "all", uploadResultAutomationInfo);
             }
         }
 

@@ -51,8 +51,12 @@ namespace Drexel.VidUp.Utils
 
         [JsonProperty] 
         private bool keepLastUploadPerTemplate;
+
         [JsonProperty]
         private bool keepLastUploadPerTemplateSide;
+
+        [JsonProperty]
+        private int automationDelayInSeconds;
 
         public bool Trace
         {
@@ -148,6 +152,11 @@ namespace Drexel.VidUp.Utils
         {
             get => this.keepLastUploadPerTemplateSide;
             set => this.keepLastUploadPerTemplateSide = value;
+        }
+        public int AutomationExecutionDelayInSeconds
+        {
+            get => this.automationDelayInSeconds;
+            set => this.automationDelayInSeconds = value;
         }
 
         [JsonConstructor]
