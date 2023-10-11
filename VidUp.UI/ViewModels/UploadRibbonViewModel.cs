@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -21,6 +20,7 @@ using Drexel.VidUp.UI.Events;
 using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube;
 using MaterialDesignThemes.Wpf;
+using static System.Net.WebRequestMethods;
 using EnumConverter = Drexel.VidUp.UI.Converters.EnumConverter;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -717,45 +717,43 @@ namespace Drexel.VidUp.UI.ViewModels
         private void executelFinalAutomationExecutions()
         {
             //all templates with uploads
-            List<Template> templates = this.finishedUploads.Select(upl => upl.Template).Distinct().ToList();
+            List<Template> templatesWithUploads = this.finishedUploads.Select(upl => upl.Template).Distinct().ToList();
 
-            //check if aborted && laste template execution needs be don for automation
+            //check if aborted and if last template execution needs be done for automation
             if (this.uploadList.Any(upl => upl.UploadStatus == UplStatus.ReadyForUpload)) //aborted
             {
-                foreach(Template template in templates)
+                foreach(Template templateWithUpload in templatesWithUploads)
                 {
-                    if (template.Uploads.Any(upl => upl.UploadStatus == UplStatus.ReadyForUpload))
+                    if (templateWithUpload.Uploads.Any(upl => upl.UploadStatus == UplStatus.ReadyForUpload))
                     {
                         List<Upload> templateUploads = new List<Upload>();
-                        templateUploads.AddRange(this.finishedUploads.Where(upl => upl.Template == template));
+                        templateUploads.AddRange(this.finishedUploads.Where(upl => upl.Template == templateWithUpload));
 
                         UploadResultAutomationInfo uploadResultAutomationInfoTemplate = new UploadResultAutomationInfo();
-                        uploadResultAutomationInfoTemplate.TemplateName = template.Name;
+                        uploadResultAutomationInfoTemplate.TemplateName = templateWithUpload.Name;
 
                         foreach (Upload templateUpload in templateUploads)
                         {
                             uploadResultAutomationInfoTemplate.UploadedFiles.Add(new FileInfo(templateUpload.FilePath).FullName, templateUpload.UploadStatus.ToString());
                         }
 
-                        UploadRibbonViewModel.serializeandExecute(template.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfoTemplate);
+                        UploadRibbonViewModel.serializeandExecute(templateWithUpload.AutomationSettings.ExecuteAfterTemplatePath, "template", uploadResultAutomationInfoTemplate);
                     }
                 }
             }
 
-            //prevent double execution of files.
+            //prevent double execution of execute after all file, if the same file is configured on multiple templates
             List<FileInfo> filesToExecute = new List<FileInfo>();
-            foreach (Template template in templates)
+            foreach (Template templateWithUpload in templatesWithUploads)
             {
-                if (template.EnableAutomation && !string.IsNullOrWhiteSpace(template.AutomationSettings.ExecuteAfterAllPath))
+                if (templateWithUpload.EnableAutomation && !string.IsNullOrWhiteSpace(templateWithUpload.AutomationSettings.ExecuteAfterAllPath))
                 {
-                    UploadRibbonViewModel.addFileIfNotContained(filesToExecute, template.AutomationSettings.ExecuteAfterAllPath);
+                    FileInfo file = new FileInfo(templateWithUpload.AutomationSettings.ExecuteAfterAllPath);
+                    if (!filesToExecute.Any(fileInternal => fileInternal.FullName == file.FullName))
+                    {
+                        filesToExecute.Add(file);
+                    }
                 }
-            }
-
-            Dictionary<string, string> uploadsStatus = new Dictionary<string, string>();
-            foreach (Upload upload in this.finishedUploads)
-            {
-                uploadsStatus.Add(new FileInfo(upload.FilePath).FullName, upload.UploadStatus.ToString());
             }
 
             UploadResultAutomationInfo uploadResultAutomationInfo = new UploadResultAutomationInfo();
@@ -767,15 +765,6 @@ namespace Drexel.VidUp.UI.ViewModels
             foreach (FileInfo file in filesToExecute)
             {
                 UploadRibbonViewModel.serializeandExecute(file.FullName, "all", uploadResultAutomationInfo);
-            }
-        }
-
-        private static void addFileIfNotContained(List<FileInfo> files, string filePath)
-        {
-            FileInfo file = new FileInfo(filePath);
-            if(!files.Contains(file))
-            {
-                files.Add(file);
             }
         }
 
