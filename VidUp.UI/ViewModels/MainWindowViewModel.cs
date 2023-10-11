@@ -523,9 +523,9 @@ namespace Drexel.VidUp.UI.ViewModels
                     foreach (string fileFilter in fileFilters)
                     {
                         FileSystemWatcher watcher = new FileSystemWatcher();
-                        if (template.AutomationSettings.DeviatingFolderPath == null)
+                        if (string.IsNullOrWhiteSpace(template.AutomationSettings.DeviatingFolderPath))
                         {
-                            if (Directory.Exists(template.RootFolderPath))
+                            if (template.TemplateMode == TemplateMode.FolderBased && Directory.Exists(template.RootFolderPath))
                             {
                                 watcher.Path = template.RootFolderPath;
                                 watcher.IncludeSubdirectories = true;

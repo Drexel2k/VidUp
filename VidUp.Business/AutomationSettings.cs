@@ -26,6 +26,18 @@ namespace Drexel.VidUp.Business
         {
         }
 
+        public AutomationSettings(AutomationSettings automationSettings)
+        {
+            this.AddNewFilesAutomatically = automationSettings.AddNewFilesAutomatically;
+            this.fileFilter = automationSettings.FileFilter;
+            this.deviatingFolderPath = automationSettings.DeviatingFolderPath;
+            this.addWithStatus = automationSettings.AddWithStatus;
+            this.startUploadingAfterAdd = automationSettings.StartUploadingAfterAdd;
+            this.executeAfterEachPath = automationSettings.ExecuteAfterEachPath;
+            this.executeAfterTemplatePath = automationSettings.ExecuteAfterTemplatePath;
+            this.executeAfterAllPath = automationSettings.ExecuteAfterAllPath;
+        }
+
         public bool AddNewFilesAutomatically 
         { 
             get => addNewFilesAutomatically;

@@ -439,6 +439,12 @@ namespace Drexel.VidUp.Business
             this.descriptionLanguage = template.DescriptionLanguage;
             this.playlist = template.Playlist;
             this.setPlaylistAfterPublication = template.SetPlaylistAfterPublication;
+
+            this.enableAutomation = template.EnableAutomation;
+            if(template.AutomationSettings != null)
+            {
+                this.automationSettings = new AutomationSettings(template.AutomationSettings);
+            }
         }
 
         private void setName(string name)
