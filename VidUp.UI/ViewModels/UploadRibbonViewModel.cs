@@ -737,6 +737,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             //all templates with uploads
             List<Template> templatesWithUploads = this.finishedUploads.Select(upl => upl.Template).Distinct().ToList();
+            templatesWithUploads.RemoveAll(template => template == null);
 
             //check if aborted and if last template execution needs be done for automation
             if (this.uploadList.Any(upl => upl.UploadStatus == UplStatus.ReadyForUpload)) //aborted
