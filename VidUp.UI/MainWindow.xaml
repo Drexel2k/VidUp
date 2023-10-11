@@ -197,60 +197,61 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TabControl Grid.Row="0" HorizontalContentAlignment="Left" SelectedIndex="{Binding TabNo}" materialDesign:ColorZoneAssist.Mode="PrimaryMid" Style="{StaticResource MaterialDesignFilledTabControl}"  Drop="fileDrop" AllowDrop="True">
-                    <TabItem Header="UPLOAD" Width="100" DataContext="{Binding RibbonViewModels[0]}">
-                        <StackPanel Orientation="Horizontal" Margin="7 3 0 0">
-                                <Button Command="{x:Static materialDesign:DrawerHost.OpenDrawerCommand}" CommandParameter="{x:Static Dock.Left}" Style="{StaticResource MaterialDesignRaisedLightButton}" Margin="5 0 10 3" Padding="5" ToolTip="Advanced Options." ToolTipService.ShowDuration="60000">
-                                    <materialDesign:PackIcon Width="24" Height="24" Kind="Menu"/>
-                                </Button>
-                            
-                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" Margin="5 10 10 10" />
-                            
+                    <TabItem Header="UPLOAD" Width="100" DataContext="{Binding RibbonViewModels[0]}" >
+                        <!-- Transparent background is needed as target of drag & drop operation. -->
+                        <StackPanel Orientation="Horizontal" Margin="7 3 7 0" Background="Transparent">
+                            <Button Command="{x:Static materialDesign:DrawerHost.OpenDrawerCommand}" CommandParameter="{x:Static Dock.Left}" Style="{StaticResource MaterialDesignRaisedLightButton}" Margin="5 0 10 3" Padding="5" ToolTip="Advanced Options." ToolTipService.ShowDuration="60000">
+                                <materialDesign:PackIcon Width="24" Height="24" Kind="Menu"/>
+                            </Button>
+
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" Margin="5 10 10 10" />
+
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                                    <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="addfiles" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
-                                        <StackPanel Orientation="Vertical" MinWidth="50">
-                                            <materialDesign:PackIcon Width="24" Height="24" Kind="FilePlus" HorizontalAlignment="Center" Padding="0"/>
-                                            <TextBlock TextAlignment="Center">
+                                <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="addfiles" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
+                                    <StackPanel Orientation="Vertical" MinWidth="50">
+                                        <materialDesign:PackIcon Width="24" Height="24" Kind="FilePlus" HorizontalAlignment="Center" Padding="0"/>
+                                        <TextBlock TextAlignment="Center">
                                             Add<LineBreak />Files
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </Button>
-                                    <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="0 4 0 0"  ToolTip="You can also drop files anywhere on the menu to add them to the uploads." ToolTipService.ShowDuration="60000" Background="Transparent"/>
-                                </StackPanel>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Button>
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="0 4 0 0"  ToolTip="You can also drop files anywhere on the menu to add them to the uploads." ToolTipService.ShowDuration="60000" Background="Transparent"/>
+                            </StackPanel>
                             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" Margin="10" />
                             <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="startupload" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Padding="5 0 5 0" Height="67">
-                                    <StackPanel Orientation="Vertical" MinWidth="50">
-                                        <materialDesign:PackIcon Width="24" Height="24" Kind="UploadMultiple" HorizontalAlignment="Center"/>
-                                        <TextBlock TextAlignment="Center">
+                                <StackPanel Orientation="Vertical" MinWidth="50">
+                                    <materialDesign:PackIcon Width="24" Height="24" Kind="UploadMultiple" HorizontalAlignment="Center"/>
+                                    <TextBlock TextAlignment="Center">
                                             Start<LineBreak />Upload
-                                        </TextBlock> 
-                                    </StackPanel>
-                                </Button>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
-                                    <ToggleButton IsChecked="{Binding ResumeUploads}" Style="{StaticResource MaterialDesignSwitchToggleButton}" Background="Black" materialDesign:ToggleButtonAssist.SwitchTrackOnBackground="Black" Margin="0 6 0 0" HorizontalAlignment="Left"/>
-                                    <Label Width="50" HorizontalAlignment="Left" Margin="0 2 0 0">
-                                        <TextBlock>
-                                            Resume<LineBreak />Upload
-                                        </TextBlock>
-                                    </Label>
+                                    </TextBlock>
                                 </StackPanel>
-                                <Button Command="{Binding ParameterlessCommand}" CommandParameter="stopupload" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="10 0 5 0" Padding="5 0 5 0" Height="67">
-                                    <StackPanel  Orientation="Vertical" MinWidth="50">
-                                        <materialDesign:PackIcon Width="24" Height="24" Kind="Stop" HorizontalAlignment="Center"/>
-                                        <TextBlock TextAlignment="Center">
+                            </Button>
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                                <ToggleButton IsChecked="{Binding ResumeUploads}" Style="{StaticResource MaterialDesignSwitchToggleButton}" Background="Black" materialDesign:ToggleButtonAssist.SwitchTrackOnBackground="Black" Margin="0 6 0 0" HorizontalAlignment="Left"/>
+                                <Label Width="50" HorizontalAlignment="Left" Margin="0 2 0 0">
+                                    <TextBlock>
+                                            Resume<LineBreak />Upload
+                                    </TextBlock>
+                                </Label>
+                            </StackPanel>
+                            <Button Command="{Binding ParameterlessCommand}" CommandParameter="stopupload" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="10 0 5 0" Padding="5 0 5 0" Height="67">
+                                <StackPanel  Orientation="Vertical" MinWidth="50">
+                                    <materialDesign:PackIcon Width="24" Height="24" Kind="Stop" HorizontalAlignment="Center"/>
+                                    <TextBlock TextAlignment="Center">
                                             Stop<LineBreak />Upload
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
                             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="2" Margin="10" />
 
                             <Button HorizontalContentAlignment="Left" Command="{Binding ParameterlessCommand}" CommandParameter="delete" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black" Margin="0" Padding="5 0 5 0" Height="67">
-                                    <StackPanel Orientation="Vertical" MinWidth="5">
-                                        <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove" HorizontalAlignment="Center"/>
-                                        <TextBlock TextAlignment="Center">
+                                <StackPanel Orientation="Vertical" MinWidth="5">
+                                    <materialDesign:PackIcon Width="24" Height="24" Kind="FileRemove" HorizontalAlignment="Center"/>
+                                    <TextBlock TextAlignment="Center">
                                         Remove<LineBreak />Uploads
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Button>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Button>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Top">
                                 <ToggleButton IsChecked="{Binding KeepLastUploadPerTemplate}" Style="{StaticResource MaterialDesignSwitchToggleButton}" Background="Black" materialDesign:ToggleButtonAssist.SwitchTrackOnBackground="Black" Margin="0 6 0 0" HorizontalAlignment="Left"/>
                                 <Label Width="70" HorizontalAlignment="Left" Margin="0 2 0 0">
@@ -263,7 +264,7 @@
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="TEMPLATES" DataContext="{Binding RibbonViewModels[1]}">
-                        <StackPanel Orientation="Horizontal" Margin="7 3 0 0">
+                        <StackPanel Orientation="Horizontal" Margin="7 3 7 0" Background="Transparent">
                             <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="newtemplate" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
                                 <StackPanel Orientation="Vertical" MinWidth="50">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="TextBoxPlus" HorizontalAlignment="Center"/>
@@ -304,7 +305,7 @@
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="PLAYLISTS" DataContext="{Binding RibbonViewModels[2]}">
-                        <StackPanel Orientation="Horizontal" Margin="7 3 0 0">
+                        <StackPanel Orientation="Horizontal" Margin="7 3 7 0" Background="Transparent">
                             <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding ParameterlessCommand}" CommandParameter="newplaylist" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
                                 <StackPanel Orientation="Vertical" MinWidth="50">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistPlus" HorizontalAlignment="Center"/>
@@ -355,7 +356,7 @@
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="SETTINGS" DataContext="{Binding RibbonViewModels[3]}">
-                        <StackPanel Orientation="Horizontal" Margin="7 3 0 0">
+                        <StackPanel Orientation="Horizontal" Margin="7 3 7 0" Background="Transparent">
                             <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding NewYoutubeAccountCommand}" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
                                 <StackPanel Orientation="Vertical" MinWidth="50">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="AccountPlus" HorizontalAlignment="Center"/>
@@ -372,7 +373,7 @@
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="VIDUP" DataContext="{Binding RibbonViewModels[4]}">
-                        <StackPanel Orientation="Horizontal" Margin="7 3 0 0">
+                        <StackPanel Orientation="Horizontal" Margin="7 3 7 0" Background="Transparent">
                             <Button HorizontalContentAlignment="Left" VerticalAlignment="Top" Command="{Binding DonateCommand}" Style="{StaticResource MaterialDesignFlatButton}" Foreground="Black"  Padding="5 0 5 0" Height="67">
                                 <StackPanel Orientation="Vertical" MinWidth="50">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="Handshake" HorizontalAlignment="Center"/>
