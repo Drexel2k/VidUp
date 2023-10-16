@@ -165,11 +165,8 @@ namespace Drexel.VidUp.Youtube
             List<Upload> uploadsOfSession = new List<Upload>();
 
             //todo: move timer to upload stats and create tick event on upload stats
-            using (System.Timers.Timer timer = new System.Timers.Timer(2000))
+            using (Timer timer = new Timer(this.timerElapsed, null, 0, 2000))
             {
-                timer.Elapsed += (sender, args) => this.timerElapsed();
-                timer.Start();
-
                 while (upload != null)
                 {
                     this.currentUpload = upload;
@@ -259,7 +256,7 @@ namespace Drexel.VidUp.Youtube
             }
         }
 
-        private void timerElapsed()
+        private void timerElapsed(object info)
         {
             //updates BytesSent, which are used for upload stats update
             //sequence is important for consistent GUI updates

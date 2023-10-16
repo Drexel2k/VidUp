@@ -568,7 +568,7 @@ namespace Drexel.VidUp.UI.ViewModels
                     }
                     catch
                     {
-                        await Task.Delay(5000);
+                        await Task.Delay(30000);
                         Tracer.Write($"MainWindowViewModel.setFileSystemWatchersForAutomation: Could not open file {path}.", TraceLevel.Detailed);
                     }
                 }
@@ -1015,6 +1015,16 @@ namespace Drexel.VidUp.UI.ViewModels
         public void Close()
         {
             Tracer.Close();
+        }
+
+        public CountdownEvent StopSerializationContent()
+        {
+            return JsonSerializationContent.JsonSerializer.StopSerialization();
+        }
+
+        public CountdownEvent StopSerializationSettings()
+        {
+            return JsonSerializationSettings.JsonSerializer.StopSerialization();
         }
     }
 }

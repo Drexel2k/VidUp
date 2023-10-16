@@ -29,7 +29,7 @@ namespace Drexel.VidUp.Json.Content
             set => JsonDeserializationContent.allPlaylistsDeserialiozed = value;
         }
 
-        public static bool AllYoutubeAccountsDeserialiozed
+        public static bool AllYoutubeAccountsDeserialized
         {
             set => JsonDeserializationContent.allYoutubeAccountsDeserialiozed = value;
         }

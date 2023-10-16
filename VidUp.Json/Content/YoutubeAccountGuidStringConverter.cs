@@ -18,7 +18,7 @@ namespace Drexel.VidUp.Json.Content
             YoutubeAccount account = DeserializationRepositoryContent.YoutubeAccountList.Find(acc => acc.Guid == Guid.Parse(guid));
             if (account == null)
             {
-                JsonDeserializationContent.AllYoutubeAccountsDeserialiozed = false;
+                JsonDeserializationContent.AllYoutubeAccountsDeserialized = false;
                 return JsonDeserializationContent.YoutubeAccountForNullReplacement;
             }
 

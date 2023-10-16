@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Drexel.VidUp.Business;
 using Drexel.VidUp.Json.Content;
 using Drexel.VidUp.Json.Settings;
@@ -14,7 +14,6 @@ using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.PlaylistItemService;
 using Drexel.VidUp.Youtube.VideoService;
 using MaterialDesignThemes.Wpf;
-using Timer = System.Timers.Timer;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -141,9 +140,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.parameterlessCommand = new GenericCommand(this.parameterlessCommandAction);
             EventAggregator.Instance.Subscribe<PlaylistDeleteMessage>(this.deletePlaylist);
 
-            this.autoSetPlaylistTimer = new Timer();
-            this.autoSetPlaylistTimer.AutoReset = false;
-            this.autoSetPlaylistTimer.Elapsed += autoSetPlaylistTimerElapsed;
+            this.autoSetPlaylistTimer = new Timer(autoSetPlaylistTimerElapsed, null, Timeout.Infinite, Timeout.Infinite);
 
             if (Settings.Instance.UserSettings.AutoSetPlaylists)
             {
@@ -271,12 +268,6 @@ namespace Drexel.VidUp.UI.ViewModels
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
         }
 
-        private void raisePropertyChangedAndSerializePlaylistList(string propertyName)
-        {
-            JsonSerializationContent.JsonSerializer.SerializePlaylistList();
-            this.raisePropertyChanged(propertyName);
-        }
-
         //exposed for testing
         public void AddPlaylist(Playlist playlist)
         {
@@ -286,7 +277,7 @@ namespace Drexel.VidUp.UI.ViewModels
             this.SelectedPlaylist = this.observablePlaylistViewModels.GetViewModel(playlist);
         }
 
-        private void autoSetPlaylistTimerElapsed(object sender, ElapsedEventArgs e)
+        private void autoSetPlaylistTimerElapsed(object info)
         {
             Tracer.Write($"PlaylistViewModel.autoSetPlaylistTimerElapsed: Start autosetting playlists.");
             this.autoSetPlaylistsAsync();
@@ -306,6 +297,7 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
 
                 this.autoSettingPlaylists = true;
+                this.autoSetPlaylistTimer.Change(Timeout.Infinite, Timeout.Infinite);
                 EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(true, "Auto setting playlists is running..."));
                 this.raisePropertyChanged("AutoSettingPlaylists");
             }
@@ -528,12 +520,10 @@ namespace Drexel.VidUp.UI.ViewModels
             if (Settings.Instance.UserSettings.AutoSetPlaylists)
             {
                 Tracer.Write($"PlaylistViewModel.autoSetPlaylists: Autosetting playlists is enabled, setting timer to {this.interval.Days * 24 + this.interval.Hours}:{this.interval.Minutes}:{this.interval.Seconds} hours:minutes:seconds.");
-                //stop timer if triggered manually and restart
-                this.autoSetPlaylistTimer.Stop();
                 //first call after constructor the timer can be less than interval.
-                this.autoSetPlaylistTimer.Interval = this.intervalInSeconds * 1000;
-                messages.Add(StatusInformationCreator.Create("INF0018", $"Next auto set playlists: {DateTime.Now.AddMilliseconds(this.autoSetPlaylistTimer.Interval)}."));
-                this.autoSetPlaylistTimer.Start();
+                int nextAutoSetPlaylistsInMilliSconds = this.intervalInSeconds * 1000;
+                messages.Add(StatusInformationCreator.Create("INF0018", $"Next auto set playlists: {DateTime.Now.AddMilliseconds(nextAutoSetPlaylistsInMilliSconds)}."));
+                this.autoSetPlaylistTimer.Change(0, nextAutoSetPlaylistsInMilliSconds);
             }
             else
             {
@@ -794,7 +784,7 @@ namespace Drexel.VidUp.UI.ViewModels
             else
             {
                 Tracer.Write($"PlaylistViewModel.setAutoSetPlaylistsTimer: Autosetting playlists disabled by user, stopping timer.");
-                this.autoSetPlaylistTimer.Stop();
+                this.autoSetPlaylistTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
         }
 
@@ -810,13 +800,12 @@ namespace Drexel.VidUp.UI.ViewModels
             }
             else
             {
-                double nextAutoSetPlaylists = ((this.intervalInSeconds - span.TotalSeconds) * 1000);
-                span = TimeSpan.FromMilliseconds(nextAutoSetPlaylists);
+                int nextAutoSetPlaylistsInMilliSconds = (int)((this.intervalInSeconds - span.TotalSeconds) * 1000);
+                span = TimeSpan.FromMilliseconds(nextAutoSetPlaylistsInMilliSconds);
                 Tracer.Write($"PlaylistViewModel.calculateTimeAndSetAutoSetPlaylistsTimer: Scheduling autosetting playlists in {span.Days * 24 + span.Hours}:{span.Minutes}:{span.Seconds} hours:minutes:seconds.");
 
-                this.autoSetPlaylistTimer.Interval = nextAutoSetPlaylists;
-                EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(true, $"Next auto setting playlists: {DateTime.Now.AddMilliseconds(this.autoSetPlaylistTimer.Interval)}."));
-                this.autoSetPlaylistTimer.Start();
+                EventAggregator.Instance.Publish(new AutoSettingPlaylistsStateChangedMessage(true, $"Next auto setting playlists: {DateTime.Now.AddMilliseconds(nextAutoSetPlaylistsInMilliSconds)}."));
+                this.autoSetPlaylistTimer.Change(0, nextAutoSetPlaylistsInMilliSconds);
             }
         }
     }

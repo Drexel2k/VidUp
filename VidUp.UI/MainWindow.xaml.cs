@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 using Drexel.VidUp.UI.ViewModels;
 using Drexel.VidUp.Utils;
@@ -40,6 +41,10 @@ namespace Drexel.VidUp.UI
 
         private void closed(object sender, EventArgs e)
         {
+            CountdownEvent serializationContentProcessesCount = ((MainWindowViewModel)this.DataContext).StopSerializationContent();
+            serializationContentProcessesCount.Wait();
+            CountdownEvent serializationSettingsProcessesCount = ((MainWindowViewModel)this.DataContext).StopSerializationSettings();
+            serializationSettingsProcessesCount.Wait();
             ((MainWindowViewModel) this.DataContext).Close();
         }
     }
