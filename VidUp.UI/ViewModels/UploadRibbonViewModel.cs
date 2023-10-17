@@ -972,7 +972,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         private void recalculatePublishAt()
         {
-            if (this.recalculatePublishAtSelectedTemplate.IsDummy)
+            if (this.recalculatePublishAtSelectedTemplate.Template.IsDummy)
             {
                 if(this.recalculatePublishAtSelectedTemplate.Name == "All")
                 {

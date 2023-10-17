@@ -44,20 +44,13 @@ namespace Drexel.VidUp.Business
             }
         }
 
-        public void AddPlaylists(List<Playlist> playlists)
+        //don't change to IEnumerable, this will mess up NotifyCollectionChangedEventArgs to return object, collections in collections etc.
+        public void AddPlaylists(Playlist[] playlists)
         {
             this.playlists.AddRange(playlists);
 
             this.raiseNotifyPropertyChanged("PlaylistCount");
             this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, playlists));
-        }
-
-        public void AddPlaylist(Playlist playlist)
-        {
-            this.playlists.Add(playlist);
-
-            this.raiseNotifyPropertyChanged("PlaylistCount");
-            this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, playlist));
         }
 
         public int FindIndex(Predicate<Playlist> predicate)

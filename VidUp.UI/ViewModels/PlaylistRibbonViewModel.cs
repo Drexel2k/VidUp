@@ -271,7 +271,7 @@ namespace Drexel.VidUp.UI.ViewModels
         //exposed for testing
         public void AddPlaylist(Playlist playlist)
         {
-            this.playlistList.AddPlaylist(playlist);
+            this.playlistList.AddPlaylists(new[] { playlist });
             JsonSerializationContent.JsonSerializer.SerializePlaylistList();
 
             this.SelectedPlaylist = this.observablePlaylistViewModels.GetViewModel(playlist);

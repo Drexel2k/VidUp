@@ -56,6 +56,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
+            //sort alphabeticallly
+            //todo: maybe add more sorting options later
+            this.playlistComboboxViewModels.Sort((pl1, pl2) => pl1.Title.CompareTo(pl2.Title));
+
             this.playlistList.CollectionChanged += this.playlistListCollectionChanged;
         }
 
@@ -81,14 +85,20 @@ namespace Drexel.VidUp.UI.ViewModels
                         }
                         else
                         {
-                            this.playlistListsByAccount[playlist.YoutubeAccount].AddPlaylist(playlist);
+                            this.playlistListsByAccount[playlist.YoutubeAccount].AddPlaylists(new[] { playlist });
                         }
                     }
                 }
 
                 this.playlistComboboxViewModels.AddRange(newViewModels);
 
-                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newViewModels));
+                //sort alphabeticallly
+                //todo: maybe add more sorting options later
+                this.playlistComboboxViewModels.Sort((pl1, pl2) => pl1.Title.CompareTo(pl2.Title));
+
+                //NotifyCollectionChangedAction.Reset to force the combobox shows the reordered collection, with .Add
+                //the Combobox would not reorder
+                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                 return;
             }
 

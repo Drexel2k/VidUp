@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Drexel.VidUp.Business;
-using Drexel.VidUp.UI.EventAggregation;
 
 namespace Drexel.VidUp.UI.ViewModels
 {
@@ -35,6 +34,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 this.youtubeAccountComboboxViewModels.Add(youtubeAccountComboboxViewModel);
             }
 
+            //sort alphabeticallly
+            //todo: maybe add more sorting options later
+            this.youtubeAccountComboboxViewModels.Sort((ya1, ya2) => this.sortYoutubeAccountViewModels(ya1, ya2));
+
             this.youtubeAccountList.CollectionChanged += youtubeAccountListCollectionChanged;
         }
 
@@ -50,7 +53,13 @@ namespace Drexel.VidUp.UI.ViewModels
 
                 this.youtubeAccountComboboxViewModels.AddRange(newViewModels);
 
-                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newViewModels));
+                //sort alphabeticallly
+                //todo: maybe add more sorting options later
+                this.youtubeAccountComboboxViewModels.Sort((ya1, ya2) => this.sortYoutubeAccountViewModels(ya1, ya2));
+
+                //NotifyCollectionChangedAction.Reset to force the combobox shows the reordered collection, with .Add
+                //the Combobox would not reorder
+                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                 return;
             }
 
@@ -94,7 +103,19 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get => this.youtubeAccountComboboxViewModels[index];
         }
+        private int sortYoutubeAccountViewModels(YoutubeAccountComboboxViewModel ya1, YoutubeAccountComboboxViewModel ya2)
+        {
+            if (ya1.YoutubeAccount.IsDummy)
+            {
+                return -1;
+            }
+            else if (ya2.YoutubeAccount.IsDummy)
+            {
+                return 1;
+            }
 
+            return ya1.YoutubeAccountName.CompareTo(ya2.YoutubeAccountName);
+        }
 
         private void raiseNotifyCollectionChanged(NotifyCollectionChangedEventArgs args)
         {

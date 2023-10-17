@@ -109,19 +109,6 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
 
-        public bool IsDummy
-        {
-            get
-            {
-                if (this.template != null)
-                {
-                    return this.template.IsDummy;
-                }
-
-                return false;
-            }
-        }
-
         public TemplateComboboxViewModel(Template template)
         {
             this.template = template;

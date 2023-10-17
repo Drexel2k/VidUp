@@ -310,7 +310,7 @@
                                 <StackPanel Orientation="Vertical" MinWidth="50">
                                     <materialDesign:PackIcon Width="24" Height="24" Kind="PlaylistPlus" HorizontalAlignment="Center"/>
                                     <TextBlock TextAlignment="Center">
-                                            New<LineBreak />Playlist
+                                            Import<LineBreak />Playlist
                                     </TextBlock>
                                 </StackPanel>
                             </Button>

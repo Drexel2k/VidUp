@@ -76,6 +76,10 @@ namespace Drexel.VidUp.UI.ViewModels
                 }
             }
 
+            //sort alphabeticallly
+            //todo: maybe add more sorting options later
+            this.templateComboboxViewModels.Sort((t1, t2) => this.sortTemplateViewModels(t1, t2));
+
             this.templateList.CollectionChanged += this.templateListCollectionChanged;
 
             if (createByAccount)
@@ -103,13 +107,19 @@ namespace Drexel.VidUp.UI.ViewModels
 
                     if (this.templateListsByAccount != null)
                     {
-                        this.addToAccountTemplates(template);
+                       this.addToAccountTemplates(template);
                     }
                 }
 
                 this.templateComboboxViewModels.AddRange(newViewModels);
 
-                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newViewModels));
+                //sort alphabeticallly
+                //todo: maybe add more sorting options later
+                this.templateComboboxViewModels.Sort((t1, t2) => this.sortTemplateViewModels(t1, t2));
+
+                //NotifyCollectionChangedAction.Reset to force the combobox shows the reordered collection, with .Add
+                //the Combobox would not reorder
+                this.raiseNotifyCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                 return;
             }
 
@@ -136,6 +146,31 @@ namespace Drexel.VidUp.UI.ViewModels
             }
 
             throw new InvalidOperationException("ObservableTemplateViewModels supports only adding and removing.");
+        }
+
+        private int sortTemplateViewModels(TemplateComboboxViewModel t1, TemplateComboboxViewModel t2)
+        {
+            if(t1.Template.IsDummy && t2.Template.IsDummy)
+            {
+                if(t1.Name == "All")
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            else if (t1.Template.IsDummy)
+            {
+                return -1;
+            }
+            else if (t2.Template.IsDummy)
+            {
+                return 1;
+            }
+
+            return t1.Name.CompareTo(t2.Name);
         }
 
         private void addToAccountTemplates(Template template)

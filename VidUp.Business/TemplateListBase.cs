@@ -25,8 +25,8 @@ namespace Drexel.VidUp.Business
             get { return this.templates[index]; }
         }
 
+        //don't change to IEnumerable, this will mess up NotifyCollectionChangedEventArgs to return object, collections in collections etc.
         public abstract void AddTemplates(Template[] templates);
-
 
         public int FindIndex(Predicate<Template> predicate)
         {
