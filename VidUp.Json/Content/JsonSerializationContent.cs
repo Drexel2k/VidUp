@@ -28,11 +28,11 @@ namespace Drexel.VidUp.Json.Content
         private object uploadListLock = new object();
         private object templateListLock = new object();
         private object playlistListLock = new object();
-        private object youtubeAccountListLock = new object();
 
         private bool serializationEnabled = true;
         private object serializationEnabledLock = new object();
-        private CountdownEvent serializationProcessesCount = new CountdownEvent(0);
+        private int openWritesCount = 0;
+        private CountdownEvent openWritesCountDown;
 
         public static JsonSerializationContent JsonSerializer;
 
@@ -65,14 +65,7 @@ namespace Drexel.VidUp.Json.Content
                     return;
                 }
 
-                if (this.serializationProcessesCount.CurrentCount <= 0)
-                {
-                    this.serializationProcessesCount.Reset(1);
-                }
-                else
-                {
-                    this.serializationProcessesCount.AddCount();
-                }
+                this.openWritesCount++;
             }
 
             List<Upload> allUploads = new List<Upload>();
@@ -112,7 +105,15 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializeAllUploads: End.");
-            this.serializationProcessesCount.Signal();
+
+            lock (this.serializationEnabledLock)
+            {
+                this.openWritesCount--;
+                if (this.openWritesCountDown != null)
+                {
+                    this.openWritesCountDown.Signal();
+                }
+            }
         }
 
         //on UploadList [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -131,14 +132,7 @@ namespace Drexel.VidUp.Json.Content
                     return;
                 }
 
-                if (this.serializationProcessesCount.CurrentCount <= 0)
-                {
-                    this.serializationProcessesCount.Reset(1);
-                }
-                else
-                {
-                    this.serializationProcessesCount.AddCount();
-                }
+                this.openWritesCount++;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -154,7 +148,15 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializeUploadList: End.");
-            this.serializationProcessesCount.Signal();
+
+            lock (this.serializationEnabledLock)
+            {
+                this.openWritesCount--;
+                if(this.openWritesCountDown != null)
+                {
+                    this.openWritesCountDown.Signal();
+                }
+            }
         }
 
         //on TemplateList [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -171,14 +173,7 @@ namespace Drexel.VidUp.Json.Content
                     return;
                 }
 
-                if (this.serializationProcessesCount.CurrentCount <= 0)
-                {
-                    this.serializationProcessesCount.Reset(1);
-                }
-                else
-                {
-                    this.serializationProcessesCount.AddCount();
-                }
+                this.openWritesCount++;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -201,7 +196,15 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializeTemplateList: End.");
-            this.serializationProcessesCount.Signal();
+
+            lock (this.serializationEnabledLock)
+            {
+                this.openWritesCount--;
+                if (this.openWritesCountDown != null)
+                {
+                    this.openWritesCountDown.Signal();
+                }
+            }
         }
 
         public void SerializePlaylistList()
@@ -216,14 +219,7 @@ namespace Drexel.VidUp.Json.Content
                     return;
                 }
 
-                if (this.serializationProcessesCount.CurrentCount <= 0)
-                {
-                    this.serializationProcessesCount.Reset(1);
-                }
-                else
-                {
-                    this.serializationProcessesCount.AddCount();
-                }
+                this.openWritesCount++;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -241,7 +237,15 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializePlaylistList: End.");
-            this.serializationProcessesCount.Signal();
+
+            lock (this.serializationEnabledLock)
+            {
+                this.openWritesCount--;
+                if (this.openWritesCountDown != null)
+                {
+                    this.openWritesCountDown.Signal();
+                }
+            }
         }
 
         public void SerializeYoutubeAccountList()
@@ -256,14 +260,7 @@ namespace Drexel.VidUp.Json.Content
                     return;
                 }
 
-                if (this.serializationProcessesCount.CurrentCount <= 0)
-                {
-                    this.serializationProcessesCount.Reset(1);
-                }
-                else
-                {
-                    this.serializationProcessesCount.AddCount();
-                }
+                this.openWritesCount++;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -280,7 +277,15 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializeYoutubeAccountList: End.");
-            this.serializationProcessesCount.Signal();
+
+            lock (this.serializationEnabledLock)
+            {
+                this.openWritesCount--;
+                if (this.openWritesCountDown != null)
+                {
+                    this.openWritesCountDown.Signal();
+                }
+            }
         }
 
         public void SerializeUploadProgress(UploadProgress progress)
@@ -295,14 +300,7 @@ namespace Drexel.VidUp.Json.Content
                     return;
                 }
 
-                if (this.serializationProcessesCount.CurrentCount <= 0)
-                {
-                    this.serializationProcessesCount.Reset(1);
-                }
-                else
-                {
-                    this.serializationProcessesCount.AddCount();
-                }
+                this.openWritesCount++;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -316,7 +314,15 @@ namespace Drexel.VidUp.Json.Content
             }
 
             Tracer.Write($"JsonSerializationContent.SerializeUploadProgress: End.", TraceLevel.Detailed);
-            this.serializationProcessesCount.Signal();
+
+            lock (this.serializationEnabledLock)
+            {
+                this.openWritesCount--;
+                if (this.openWritesCountDown != null)
+                {
+                    this.openWritesCountDown.Signal();
+                }
+            }
         }
 
         public CountdownEvent StopSerialization()
@@ -324,9 +330,10 @@ namespace Drexel.VidUp.Json.Content
             lock (this.serializationEnabledLock)
             {
                 this.serializationEnabled = false;
+                this.openWritesCountDown = new CountdownEvent(this.openWritesCount);
             }
 
-            return this.serializationProcessesCount;
+            return this.openWritesCountDown;
         }
     }
 }

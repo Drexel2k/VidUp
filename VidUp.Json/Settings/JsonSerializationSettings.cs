@@ -17,7 +17,8 @@ namespace Drexel.VidUp.Json.Settings
 
         private bool serializationEnabled = true;
         private object serializationEnabledLock = new object();
-        private CountdownEvent serializationProcessesCount = new CountdownEvent(0);
+        private int openWritesCount = 0;
+        private CountdownEvent openWritesCountDown;
 
         public static JsonSerializationSettings JsonSerializer;
 
@@ -38,14 +39,7 @@ namespace Drexel.VidUp.Json.Settings
                     return;
                 }
 
-                if (this.serializationProcessesCount.CurrentCount <= 0)
-                {
-                    this.serializationProcessesCount.Reset(1);
-                }
-                else
-                {
-                    this.serializationProcessesCount.AddCount();
-                }
+                this.openWritesCount++;
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -62,7 +56,15 @@ namespace Drexel.VidUp.Json.Settings
             }
 
             Tracer.Write($"JsonSerializationSettings.SerializeSettings: End.", TraceLevel.Detailed);
-            this.serializationProcessesCount.Signal();
+
+            lock (this.serializationEnabledLock)
+            {
+                this.openWritesCount--;
+                if (this.openWritesCountDown != null)
+                {
+                    this.openWritesCountDown.Signal();
+                }
+            }
         }
 
         public CountdownEvent StopSerialization()
@@ -70,9 +72,10 @@ namespace Drexel.VidUp.Json.Settings
             lock (this.serializationEnabledLock)
             {
                 this.serializationEnabled = false;
+                this.openWritesCountDown = new CountdownEvent(this.openWritesCount);
             }
 
-            return this.serializationProcessesCount;
+            return this.openWritesCountDown;
         }
     }
 }
