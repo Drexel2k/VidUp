@@ -103,6 +103,8 @@ namespace Drexel.VidUp.Business
 
             DirectoryInfo templateDirectory;
             DirectoryInfo uploadDirectory;
+            List<TemplateDistance> distances = new List<TemplateDistance>();
+            int distance;
             foreach (Template template in this.templates)
             {
                 if (considerAutomationDirectory && template.EnableAutomation && !string.IsNullOrWhiteSpace(template.AutomationSettings.DeviatingFolderPath))
@@ -114,36 +116,48 @@ namespace Drexel.VidUp.Business
                         return template;
                     }
                 }
-                else
-                {
-                    if (template.TemplateMode == TemplateMode.FolderBased)
-                    {
-                        if (!string.IsNullOrWhiteSpace(template.RootFolderPath))
-                        {
-                            templateDirectory = new DirectoryInfo(template.RootFolderPath);
-                            uploadDirectory = new DirectoryInfo(fullFilePath);
 
-                            while (uploadDirectory.Parent != null)
-                            {
-                                if (uploadDirectory.Parent.FullName == templateDirectory.FullName)
-                                {
-                                    return template;
-                                }
-                                else uploadDirectory = uploadDirectory.Parent;
-                            }
-                        }
-                    }
-                    else
+                if (template.TemplateMode == TemplateMode.FileNameBased)
+                {
+                    if (!string.IsNullOrWhiteSpace(template.PartOfFileName))
                     {
-                        if (!string.IsNullOrWhiteSpace(template.PartOfFileName))
+                        if (Path.GetFileName(fullFilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
                         {
-                            if (Path.GetFileName(fullFilePath).ToLower().Contains(template.PartOfFileName.ToLower()))
-                            {
-                                return template;
-                            }
+                            return template;
                         }
                     }
                 }
+
+                if (template.TemplateMode == TemplateMode.FolderBased)
+                {
+                    if (!string.IsNullOrWhiteSpace(template.RootFolderPath))
+                    {
+                        templateDirectory = new DirectoryInfo(template.RootFolderPath);
+                        uploadDirectory = new DirectoryInfo(fullFilePath);
+
+                        distance = 0;
+                        bool found = false;
+                        while (uploadDirectory.Parent != null && !found)
+                        {
+                            if (uploadDirectory.Parent.FullName == templateDirectory.FullName)
+                            {
+                                distances.Add(new TemplateDistance(distance, template));
+                                found = true;
+                            }
+                            else
+                            {
+                                uploadDirectory = uploadDirectory.Parent;
+                            }
+
+                            distance++;
+                        }
+                    }
+                }
+            }
+
+            if(distances.Count > 0)
+            {
+                return distances.MinBy(dis => dis.Distance).Template;
             }
 
             return null;
