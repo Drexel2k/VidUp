@@ -147,7 +147,7 @@ namespace Drexel.VidUp.Json.Content
             if (!File.Exists(this.uploadProgressFilePath))
             {
                 Tracer.Write($"JsonDeserializationContent.deserializeUploadProgress: End, no upload progress storage file found.");
-                return false;
+                return true;
             }
 
             JsonSerializer serializer = new JsonSerializer();

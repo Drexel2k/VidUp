@@ -1,4 +1,18 @@
-﻿<Window x:Class="Drexel.VidUp.UI.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Fluent="urn:fluent-ribbon" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" Title="{Binding AppTitle}" Top="{Binding WindowTop, Mode=TwoWay, Delay=500}" Left="{Binding WindowLeft, Mode=TwoWay, Delay=500}" Width="{Binding WindowWidth, Mode=TwoWay, Delay=500}" Height="{Binding WindowHeight, Mode=TwoWay, Delay=500}" xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels" xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls" xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters" xmlns:local="clr-namespace:Drexel.VidUp.UI" xmlns:system="clr-namespace:System;assembly=mscorlib" x:Name="CMainWindow" Icon="images/vidup.ico" Closed="closed">
+﻿<Window 
+    x:Class="Drexel.VidUp.UI.MainWindow" 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+    Title="{Binding AppTitle}" 
+    Top="{Binding WindowTop, Mode=TwoWay, Delay=500}" Left="{Binding WindowLeft, Mode=TwoWay, Delay=500}" 
+    Width="{Binding WindowWidth, Mode=TwoWay, Delay=500}" 
+    Height="{Binding WindowHeight, Mode=TwoWay, Delay=500}" 
+    xmlns:vm="clr-namespace:Drexel.VidUp.UI.ViewModels" 
+    xmlns:controls="clr-namespace:Drexel.VidUp.UI.Controls" 
+    xmlns:converters="clr-namespace:Drexel.VidUp.UI.Converters" 
+    x:Name="CMainWindow" 
+    Icon="images/vidup.ico" 
+    Closed="closed">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo ProgressValue="{Binding Mode=OneWay, Path=TotalProgressPercentage}" ProgressState="{Binding Mode=OneWay, Path=TaskbarItemProgressState}"/>
     </Window.TaskbarItemInfo>

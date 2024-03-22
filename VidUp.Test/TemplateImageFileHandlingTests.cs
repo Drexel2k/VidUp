@@ -4,6 +4,13 @@ using Drexel.VidUp.UI.ViewModels;
 using NUnit.Framework;
 using System.Collections.Generic;
 
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
+/* until overwork to
+ * Assert.That(e.Text == "Forgot your password?", "Verified forgotten password link text.");
+Assert.That(e.Text == "Forgot your password?", Is.True,"Verified forgotten password link text."
+Assert.That(e.Text,Is.EqualTo("Forgot your password?"), "Verified forgotten password link text.");
+*/
+
 namespace Drexel.VidUp.Test
 {
     public class TemplateImageFileHandlingTests

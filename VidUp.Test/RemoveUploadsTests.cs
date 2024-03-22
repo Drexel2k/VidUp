@@ -7,6 +7,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
+/* until overwork to
+ * Assert.That(e.Text == "Forgot your password?", "Verified forgotten password link text.");
+Assert.That(e.Text == "Forgot your password?", Is.True,"Verified forgotten password link text."
+Assert.That(e.Text,Is.EqualTo("Forgot your password?"), "Verified forgotten password link text.");
+*/
+
 namespace Drexel.VidUp.Test
 {
     [TestFixture]

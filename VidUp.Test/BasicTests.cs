@@ -9,6 +9,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
+using Assert = NUnit.Framework.Legacy.ClassicAssert;
+/* until overwork to
+ * Assert.That(e.Text == "Forgot your password?", "Verified forgotten password link text.");
+Assert.That(e.Text == "Forgot your password?", Is.True,"Verified forgotten password link text."
+Assert.That(e.Text,Is.EqualTo("Forgot your password?"), "Verified forgotten password link text.");
+*/
+
 namespace Drexel.VidUp.Test
 {
     public class BasicTests
@@ -121,7 +128,7 @@ namespace Drexel.VidUp.Test
             
             List<string> files = new List<string>();
             files.Add(BasicTests.video1TargetFilePath);
-            mainWindowViewModel.AddFiles(files.ToArray());
+            mainWindowViewModel.AddFiles(files.ToArray(), false);
 
             Assert.IsTrue(uploadList.UploadCount == 1);
             Assert.IsTrue(uploadList.GetUpload(0).FilePath == BasicTests.video1TargetFilePath);
@@ -309,7 +316,7 @@ namespace Drexel.VidUp.Test
 
             List<string> files = new List<string>();
             files.Add(BasicTests.video2TargetFilePath);
-            mainWindowViewModel.AddFiles(files.ToArray());
+            mainWindowViewModel.AddFiles(files.ToArray(), false);
 
             Upload upload = uploadList.Uploads[0];
 
@@ -400,7 +407,7 @@ namespace Drexel.VidUp.Test
 
             List<string> files = new List<string>();
             files.Add(BasicTests.video1TargetFilePath);
-            mainWindowViewModel.AddFiles(files.ToArray());
+            mainWindowViewModel.AddFiles(files.ToArray(), false);
             
             Upload upload = uploadList.Uploads[0];
 

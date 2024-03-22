@@ -594,8 +594,7 @@ namespace Drexel.VidUp.UI.ViewModels
 
         public void AddFiles(string[] files, bool considerAutomationDirectoy)
         {
-            //back to UI thread, so it is also ensured, that there are no concurrent upload/template adding and deletions
-            Application.Current.Dispatcher.Invoke(() => ((UploadRibbonViewModel)this.ribbonViewModels[0]).AddFiles(files, considerAutomationDirectoy));
+            ((UploadRibbonViewModel)this.ribbonViewModels[0]).AddFiles(files, considerAutomationDirectoy);
         }
 
         private string getYoutubeAccountName()
