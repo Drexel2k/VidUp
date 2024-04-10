@@ -10,6 +10,7 @@ using Drexel.VidUp.Utils;
 using Drexel.VidUp.Youtube.PlaylistItemService;
 using Drexel.VidUp.Youtube.ThumbnailService;
 using Drexel.VidUp.Youtube.VideoUploadService;
+using System.Diagnostics;
 
 
 namespace Drexel.VidUp.Youtube
@@ -35,6 +36,8 @@ namespace Drexel.VidUp.Youtube
 
         private static double serializationInterval = 30d;
         private DateTime lastSerialization;
+
+        //todo: check access for null
         private Upload currentUpload;
 
         public event UploadStatsUpdatedHandler UploadStatsUpdated;
@@ -263,6 +266,7 @@ namespace Drexel.VidUp.Youtube
             this.onUploadBytesSent(this.currentUpload);
             this.updateUploadProgress();
             this.onUploadStatsUpdated();
+            Debug.WriteLine("Hello, world.");
             this.serializeOnUpload();
         }
 

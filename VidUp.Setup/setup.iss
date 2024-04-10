@@ -32,7 +32,7 @@ begin
   Result := UninstallString;
 end;
 
-function IsNet6Installed(): Boolean;
+function IsNet8Installed(): Boolean;
 var
   FindRec: TFindRec;
   Net6FirstChar: String;
@@ -43,7 +43,7 @@ begin
         if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
         begin
           Net6FirstChar := Copy(FindRec.Name, 1, 1)
-          if Net6FirstChar = '6' then
+          if Net6FirstChar = '8' then
           begin
             Result:= true;
           end;
@@ -185,9 +185,9 @@ end;
 function InitializeSetup(): Boolean;
 begin
     Result := true;
-    if not IsNet6Installed() then
+    if not IsNet8Installed() then
     begin
-        MsgBox('.NET 6 ist required to run this app, please download .NET Desktop Runtime from https://dotnet.microsoft.com/en-us/download/dotnet/6.0 and install it.', mbInformation, MB_OK);
+        MsgBox('.NET 8 ist required to run this app, please download .NET Desktop Runtime from https://dotnet.microsoft.com/en-us/download/dotnet/8.0 and install it.', mbInformation, MB_OK);
         Result := false;
     end;
 end;
