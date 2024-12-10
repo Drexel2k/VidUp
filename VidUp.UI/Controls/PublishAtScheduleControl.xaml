@@ -194,7 +194,7 @@
                         <ComboBox SelectedItem="{Binding WeeklyDefaultTime}" IsEnabled="{Binding WeeklyDefaultTimeEnabled}" ItemsSource="{Binding QuarterHourViewModels}" DisplayMemberPath="QuarterHourAs24hString" Width="60" Margin="0" VerticalAlignment="Top" Padding="6 4 6 6" />
                     </StackPanel>
 
-                    <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyMondayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">M</ToggleButton>
+                    <CheckBox Grid.Row="1" Grid.Column="1" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyMondayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">M</CheckBox>
                     <ToggleButton Grid.Row="1" Grid.Column="2" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyTuesdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">T</ToggleButton>
                     <ToggleButton Grid.Row="1" Grid.Column="3" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyWednesdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">W</ToggleButton>
                     <ToggleButton Grid.Row="1" Grid.Column="4" Style="{StaticResource MaterialDesignSwitchToggleButton}" IsChecked="{Binding WeeklyThursdayActive, ValidatesOnDataErrors=True}" HorizontalAlignment="Left" Margin="4">T</ToggleButton>

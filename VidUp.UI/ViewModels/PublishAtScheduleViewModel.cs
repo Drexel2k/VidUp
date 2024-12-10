@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using Drexel.VidUp.Business;
 
 namespace Drexel.VidUp.UI.ViewModels
@@ -1940,7 +1942,8 @@ namespace Drexel.VidUp.UI.ViewModels
             }
         }
         #endregion
-
+        public PublishAtScheduleViewModel()
+        { }
         public PublishAtScheduleViewModel(Schedule schedule)
         {
             this.resetCommand = new GenericCommand(this.resetAllSchedules);
@@ -2236,6 +2239,7 @@ namespace Drexel.VidUp.UI.ViewModels
         {
             get
             {
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-us");
                 if (!this.validate)
                 {
                     return string.Empty;
@@ -2272,7 +2276,8 @@ namespace Drexel.VidUp.UI.ViewModels
                     case "WeeklyFridayActive":
                     case "WeeklySaturdayActive":
                     case "WeeklySundayActive":
-                        return this.validateWeeklyActive(propertyName);
+                        var a = this.validateWeeklyActive(propertyName);
+                        return a;
                     case "WeeklyMondayTime1":
                     case "WeeklyMondayTime2":
                     case "WeeklyMondayTime3":
